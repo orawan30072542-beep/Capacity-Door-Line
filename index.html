@@ -291,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) เลือกชิ้นส่วนประกอบ (Part) และกำหนด Cycle Time ใหม่</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group (เลือกได้หลายรายการ), เลือกรุ่นสินค้า (Model), เลือกชิ้นส่วนประกอบ (Part) และกำหนด Cycle Time</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -299,19 +299,20 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group, Model และ Part -->
+                    <!-- ฟอร์มเลือก Product Group แบบปุ่มสลับเลือกได้หลายรายการ (Multi-select Toggle) -->
                     <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
-                                <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
-                                    <!-- โหลดอัตโนมัติ -->
-                                </select>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือก Product Group (เลือกได้หลายรายการ):</label>
+                            <div id="groupCheckboxContainer" class="flex flex-wrap gap-2">
+                                <!-- โหลดปุ่ม Group อัตโนมัติ -->
                             </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
                                 <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onSelectionChange()">
-                                    <!-- โหลดอัตโนมัติ -->
+                                    <!-- โหลดอัตโนมัติจาก Group ที่เลือก -->
                                 </select>
                             </div>
                         </div>
@@ -417,7 +418,7 @@
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
-                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Group: - | Model: - | Part: Back Plate</span>
+                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
@@ -434,6 +435,7 @@
         Chart.defaults.borderColor = '#1e293b';
 
         let selectedPartValue = 'Back Plate'; 
+        let selectedProductGroups = new Set(); // เก็บรายการ Group ที่เลือกไว้หลายรายการ
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
@@ -480,7 +482,6 @@
             console.error(err);
         }
 
-        // ระบบจัดเก็บ Process แยกตาม Model และ Part (ล้างข้อมูลเก่าอัตโนมัติหากโครงสร้างไม่ตรง)
         let processDatabase = {};
         try {
             let savedDB = localStorage.getItem('haier_process_db_v3');
@@ -767,7 +768,7 @@
 
             currentDailyData = tempImportedData;
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            initGroupAndModelDropdowns(currentDailyData);
+            initGroupCheckboxes(currentDailyData);
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
@@ -912,43 +913,79 @@
             alert(`บันทึกข้อมูลสำหรับ Model: ${currentModel} (${selectedPartValue}) สำเร็จ!`);
         }
 
-        function initGroupAndModelDropdowns(data) {
-            const selectGroup = document.getElementById('selectGroup');
-            if (!selectGroup) return;
+        function initGroupCheckboxes(data) {
+            const container = document.getElementById('groupCheckboxContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            selectedProductGroups.clear();
 
-            selectGroup.innerHTML = '';
-            if (data && data.groups) {
-                data.groups.forEach(g => {
-                    let opt = document.createElement('option');
-                    opt.value = g.productGroup;
-                    opt.textContent = `Group ${g.productGroup}`;
-                    selectGroup.appendChild(opt);
+            if (data && data.groups && data.groups.length > 0) {
+                data.groups.forEach((g, idx) => {
+                    selectedProductGroups.add(g.productGroup);
+
+                    let btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.setAttribute('data-group', g.productGroup);
+                    btn.className = 'group-toggle-btn px-3.5 py-1.5 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                    btn.textContent = `Group ${g.productGroup}`;
+                    btn.onclick = function() {
+                        toggleGroupSelection(g.productGroup, btn);
+                    };
+                    container.appendChild(btn);
                 });
             }
-            onGroupChange();
+            updateModelDropdownByGroups();
         }
 
-        function onGroupChange() {
-            const selectGroup = document.getElementById('selectGroup');
-            const selectModel = document.getElementById('selectModel');
-            if (!selectGroup || !selectModel) return;
+        function toggleGroupSelection(groupName, btnElement) {
+            if (selectedProductGroups.has(groupName)) {
+                // ป้องกันไม่ให้เอาออกทั้งหมดจนเป็น 0 กลุ่ม
+                if (selectedProductGroups.size === 1) {
+                    alert('ต้องเลือก Product Group อย่างน้อย 1 กลุ่ม');
+                    return;
+                }
+                selectedProductGroups.delete(groupName);
+                btnElement.className = 'group-toggle-btn px-3.5 py-1.5 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+            } else {
+                selectedProductGroups.add(groupName);
+                btnElement.className = 'group-toggle-btn px-3.5 py-1.5 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+            }
+            updateModelDropdownByGroups();
+        }
 
-            let selectedGroupVal = selectGroup.value;
+        function updateModelDropdownByGroups() {
+            const selectModel = document.getElementById('selectModel');
+            if (!selectModel) return;
             selectModel.innerHTML = '';
 
-            let targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedGroupVal);
-            if (targetGroup && targetGroup.models) {
-                targetGroup.models.forEach(m => {
+            let availableModels = [];
+            if (currentDailyData && currentDailyData.groups) {
+                currentDailyData.groups.forEach(g => {
+                    if (selectedProductGroups.has(g.productGroup) && g.models) {
+                        g.models.forEach(m => {
+                            availableModels.push(m.name);
+                        });
+                    }
+                });
+            }
+
+            if (availableModels.length === 0) {
+                let opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = '— ไม่พบ Model ในกลุ่มที่เลือก —';
+                selectModel.appendChild(opt);
+            } else {
+                availableModels.forEach(modelName => {
                     let opt = document.createElement('option');
-                    opt.value = m.name;
-                    opt.textContent = m.name;
+                    opt.value = modelName;
+                    opt.textContent = modelName;
                     selectModel.appendChild(opt);
                 });
             }
             loadProcessDataForCurrentSelection();
         }
 
-        initGroupAndModelDropdowns(currentDailyData);
+        initGroupCheckboxes(currentDailyData);
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
@@ -976,9 +1013,8 @@
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
-            let selectedGroup = document.getElementById('selectGroup').value;
             let selectedModel = document.getElementById('selectModel').value;
-            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPartValue}`;
+            document.getElementById('ctInfoLabel').textContent = `Model: ${selectedModel || '-'} | Part: ${selectedPartValue}`;
 
             let labels = [];
             let ctData = [];
