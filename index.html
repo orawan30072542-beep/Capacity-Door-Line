@@ -349,19 +349,23 @@
             alert(`บันทึกเวลาทำงานเป็น: ${start} ถึง ${end} เรียบร้อยแล้ว`);
         }
 
-        // คำนวณยอดรวมรายวันทุกรุ่น สำหรับแสดงในกราฟและแถว Total
+        // ฟังก์ชันคำนวณผลรวม Total Output และ UPH แยกตามวันจากโครงสร้าง groups
         function calculateTotalOrdersAndUph(groupsData, days) {
             let totalOutputs = new Array(days.length).fill(0);
             let totalUphs = new Array(days.length).fill(0);
 
-            groupsData.forEach(g => {
-                g.models.forEach(m => {
-                    for (let i = 0; i < days.length; i++) {
-                        totalOutputs[i] += Number(m.orders[i]) || 0;
-                        totalUphs[i] += Number(m.uph[i]) || 0;
+            if (groupsData && Array.isArray(groupsData)) {
+                groupsData.forEach(g => {
+                    if (g.models && Array.isArray(g.models)) {
+                        g.models.forEach(m => {
+                            for (let i = 0; i < days.length; i++) {
+                                totalOutputs[i] += Number(m.orders[i]) || 0;
+                                totalUphs[i] += Number(m.uph[i]) || 0;
+                            }
+                        });
                     }
                 });
-            });
+            }
             return { totalOutputs, totalUphs };
         }
 
@@ -444,6 +448,8 @@
             }
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
+
+            if (!groups || groups.length === 0) return;
 
             // วนลูปสร้างแถวตาม Product Group และ Model
             groups.forEach(g => {
@@ -541,19 +547,22 @@
                     if (days.length === 0) days = ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9', '7/9', '8/9'];
 
                     let groupMap = {};
+                    let lastGroup = 'Other';
                     for (let i = 1; i < excelJson.length; i += 2) {
                         let rowOrder = excelJson[i];
                         let rowUph = excelJson[i+1] || [];
-                        if (rowOrder && rowOrder[1] !== undefined) {
-                            let prodGroup = String(rowOrder[0] || 'Other').trim();
+                        if (rowOrder && (rowOrder[0] !== undefined || rowOrder[1] !== undefined)) {
+                            if (rowOrder[0] !== undefined && String(rowOrder[0]).trim() !== '') {
+                                lastGroup = String(rowOrder[0]).trim();
+                            }
                             let modelName = String(rowOrder[1] || '').trim();
                             let orders = rowOrder.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
                             let uph = rowUph.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
 
-                            if (!groupMap[prodGroup]) {
-                                groupMap[prodGroup] = [];
+                            if (!groupMap[lastGroup]) {
+                                groupMap[lastGroup] = [];
                             }
-                            groupMap[prodGroup].push({ name: modelName, orders: orders, uph: uph });
+                            groupMap[lastGroup].push({ name: modelName, orders: orders, uph: uph });
                         }
                     }
 
@@ -571,7 +580,7 @@
                         planChart.data.datasets[0].data = newCalc.totalOutputs;
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากด "บันทึกข้อมูล"');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กราฟอัปเดตเรียบร้อย กรุณากด "บันทึกข้อมูล"');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
