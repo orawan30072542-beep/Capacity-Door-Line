@@ -286,7 +286,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต และบันทึก Cycle Time (วินาที)</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -324,44 +324,52 @@
                         </div>
                     </div>
 
-                    <!-- ตารางกรอกชื่อกระบวนการและ Cycle Time -->
+                    <!-- ตารางกรอกชื่อกระบวนการและ Work Station -->
                     <div class="space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-300">ตารางกำหนดชื่อกระบวนการทำงานและบันทึก Cycle Time (วินาที/ชิ้น)</h3>
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-slate-300">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (วินาที/ชิ้น)</h3>
+                            <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>บันทึกข้อมูลและแสดงผล</span>
+                            </button>
+                        </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
                                         <th class="p-3 w-16 text-center">ลำดับ</th>
                                         <th class="p-3">ชื่อกระบวนการผลิต (Work Process Name)</th>
+                                        <th class="p-3 w-40">Work Station</th>
                                         <th class="p-3">รายละเอียดขั้นตอนการทำงาน (Task Description)</th>
-                                        <th class="p-3 text-center">Cycle Time (วินาที)</th>
+                                        <th class="p-3 text-center w-28">Cycle Time (วิ)</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
-                                    <tr>
-                                        <td class="p-3 text-center font-bold text-cyan-400">1</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Press / Stamping"></td>
-                                        <td class="text-slate-400 px-3">ปั๊มขึ้นรูปชิ้นส่วนเหล็กแผ่นประตูตู้เย็น</td>
-                                        <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="45"></td>
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                    <!-- Dynamic rows loaded by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนแสดงผลข้อมูลที่บันทึกแล้ว (แสดง Work Station และรายละเอียด) -->
+                    <div class="bg-slate-900/80 p-5 rounded-xl border border-bordercolor space-y-3">
+                        <h3 class="text-sm font-semibold text-cyan-400 flex items-center justify-between">
+                            <span>รายการที่บันทึกและแสดงผลปัจจุบัน (Active Work Stations)</span>
+                            <span id="savedDisplayStatus" class="text-xs text-emerald-400 font-normal">สถานะ: อัปเดตล่าสุดเรียบร้อย</span>
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-950">
+                                        <th class="p-2.5 text-center w-16">ลำดับ</th>
+                                        <th class="p-2.5">กระบวนการผลิต</th>
+                                        <th class="p-2.5 text-cyan-300">Work Station</th>
+                                        <th class="p-2.5">รายละเอียด</th>
+                                        <th class="p-2.5 text-center">Cycle Time (วิ)</th>
                                     </tr>
-                                    <tr>
-                                        <td class="p-3 text-center font-bold text-cyan-400">2</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Welding Assembly"></td>
-                                        <td class="text-slate-400 px-3">เชื่อมประกอบโครงสร้างและจุดยึดโครงประตู</td>
-                                        <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="60"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-3 text-center font-bold text-cyan-400">3</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Painting & Coating"></td>
-                                        <td class="text-slate-400 px-3">พ่นสีเคลือบกันสนิมและอบความร้อนผิวชิ้นงาน</td>
-                                        <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="50"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-3 text-center font-bold text-cyan-400">4</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Final Gasket Assembly"></td>
-                                        <td class="text-slate-400 px-3">ประกอบขอบยางแม่เหล็กและตรวจสอบคุณภาพขั้นสุดท้าย</td>
-                                        <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="75"></td>
-                                    </tr>
+                                </thead>
+                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                    <!-- Rendered saved records -->
                                 </tbody>
                             </table>
                         </div>
@@ -370,7 +378,7 @@
                     <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตามชื่อกระบวนการ (วินาที/ชิ้น)</h3>
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
                             <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Group: - | Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
@@ -420,6 +428,86 @@
             console.error("Local storage load error, using default.", err);
         }
 
+        // ค่าเริ่มต้นข้อมูลกระบวนการและ Work Station
+        let defaultProcessData = [
+            { id: 1, name: 'Press / Stamping', station: 'Station A1', desc: 'ปั๊มขึ้นรูปชิ้นส่วนเหล็กแผ่นประตูตู้เย็น', ct: 45 },
+            { id: 2, name: 'Welding Assembly', station: 'Station A2', desc: 'เชื่อมประกอบโครงสร้างและจุดยึดโครงประตู', ct: 60 },
+            { id: 3, name: 'Painting & Coating', station: 'Station B1', desc: 'พ่นสีเคลือบกันสนิมและอบความร้อนผิวชิ้นงาน', ct: 50 },
+            { id: 4, name: 'Final Gasket Assembly', station: 'Station C1', desc: 'ประกอบขอบยางแม่เหล็กและตรวจสอบคุณภาพขั้นสุดท้าย', ct: 75 }
+        ];
+
+        let currentProcessData = defaultProcessData;
+        try {
+            let savedProc = localStorage.getItem('haier_process_station_data');
+            if (savedProc) {
+                currentProcessData = JSON.parse(savedProc);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        function renderProcessTableInputs() {
+            const tbody = document.getElementById('processTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            currentProcessData.forEach((item, idx) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-cyan-400">${idx + 1}</td>
+                    <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="${item.name}"></td>
+                    <td><input type="text" class="w-full bg-slate-800 text-cyan-300 font-semibold px-3 py-1.5 rounded border border-bordercolor station-input" value="${item.station}"></td>
+                    <td class="text-slate-400 px-3"><input type="text" class="w-full bg-slate-800 text-slate-300 px-3 py-1.5 rounded border border-bordercolor desc-input" value="${item.desc}"></td>
+                    <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="${item.ct}"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderSavedDisplayTable() {
+            const displayBody = document.getElementById('displaySavedTableBody');
+            if (!displayBody) return;
+            displayBody.innerHTML = '';
+
+            currentProcessData.forEach((item, idx) => {
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/30 transition';
+                tr.innerHTML = `
+                    <td class="p-2.5 text-center font-bold text-cyan-400">${idx + 1}</td>
+                    <td class="p-2.5 font-medium text-white">${item.name}</td>
+                    <td class="p-2.5"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-semibold">${item.station || '-'}</span></td>
+                    <td class="p-2.5 text-slate-400">${item.desc}</td>
+                    <td class="p-2.5 text-center font-bold text-cyan-400">${item.ct} วินาที</td>
+                `;
+                displayBody.appendChild(tr);
+            });
+        }
+
+        function saveProcessAndStationData() {
+            let processInputs = document.querySelectorAll('.process-input');
+            let stationInputs = document.querySelectorAll('.station-input');
+            let descInputs = document.querySelectorAll('.desc-input');
+            let ctInputs = document.querySelectorAll('.cycletime-input');
+
+            let updatedList = [];
+            for (let i = 0; i < processInputs.length; i++) {
+                updatedList.push({
+                    id: i + 1,
+                    name: processInputs[i].value.trim(),
+                    station: stationInputs[i].value.trim(),
+                    desc: descInputs[i].value.trim(),
+                    ct: parseFloat(ctInputs[i].value) || 0
+                });
+            }
+
+            currentProcessData = updatedList;
+            localStorage.setItem('haier_process_station_data', JSON.stringify(currentProcessData));
+
+            renderSavedDisplayTable();
+            generateCycleTimeChart();
+            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
+        }
+
         // ฟังก์ชันตั้งค่า Dropdown Group และ Model แบบเชื่อมโยงกัน (Cascading Dropdown)
         function initGroupAndModelDropdowns(data) {
             const selectGroup = document.getElementById('selectGroup');
@@ -457,6 +545,8 @@
         }
 
         initGroupAndModelDropdowns(currentDailyData);
+        renderProcessTableInputs();
+        renderSavedDisplayTable();
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
@@ -655,20 +745,13 @@
             let selectedPart = document.getElementById('selectPart').value;
             document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
 
-            let processInputs = document.querySelectorAll('.process-input');
-            let ctInputs = document.querySelectorAll('.cycletime-input');
-
             let labels = [];
             let ctData = [];
             let backgroundColors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
-            processInputs.forEach((procInput, idx) => {
-                let procName = procInput.value.trim() || `กระบวนการที่ ${idx + 1}`;
-                labels.push(procName);
-            });
-
-            ctInputs.forEach((inp) => {
-                ctData.push(parseFloat(inp.value) || 0);
+            currentProcessData.forEach((item) => {
+                labels.push(`${item.name} (${item.station})`);
+                ctData.push(item.ct);
             });
 
             const ctxCT = document.getElementById('cycleTimeChart').getContext('2d');
@@ -708,7 +791,7 @@
                         },
                         x: { 
                             grid: { display: false },
-                            ticks: { font: { size: 11 } }
+                            ticks: { font: { size: 10 } }
                         }
                     }
                 }
