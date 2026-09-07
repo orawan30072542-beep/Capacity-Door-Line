@@ -1105,15 +1105,14 @@
                 workProcessTab.classList.add('hidden');
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-            } else {
+              } else {
                 dashboardTab.classList.add('hidden');
                 workProcessTab.classList.remove('hidden');
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                // สั่งเรนเดอร์และปรับขนาดกราฟใหม่หลังจากสลับแท็บแสดงผลแล้ว
+                // เพิ่มส่วนนี้เพื่อให้เบราว์เซอร์เรนเดอร์ขนาดกล่องให้เสร็จก่อนสร้างกราฟ
                 setTimeout(() => {
                     generateCycleTimeChart();
                     if (cycleTimeChartInstance) {
