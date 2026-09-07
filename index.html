@@ -1106,34 +1106,35 @@
         initGroupRadioButtons(currentDailyData);
 
         function switchTab(tabName) {
-            const dashboardTab = document.getElementById('tab-content-dashboard');
-            const workProcessTab = document.getElementById('tab-content-workprocess');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navWorkProcess = document.getElementById('nav-workprocess');
-            const headerTitle = document.getElementById('headerTitle');
+    const dashboardTab = document.getElementById('tab-content-dashboard');
+    const workProcessTab = document.getElementById('tab-content-workprocess');
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navWorkProcess = document.getElementById('nav-workprocess');
+    const headerTitle = document.getElementById('headerTitle');
 
-            if (tabName === 'dashboard') {
-                dashboardTab.classList.remove('hidden');
-                workProcessTab.classList.add('hidden');
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-            } else {
-                dashboardTab.classList.add('hidden');
-                workProcessTab.classList.remove('hidden');
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-                
-                setTimeout(() => {
-                    generateCycleTimeChart();
-                    if (cycleTimeChartInstance) {
-                        cycleTimeChartInstance.resize();
-                        cycleTimeChartInstance.update();
-                    }
-                }, 50);
+    if (tabName === 'dashboard') {
+        dashboardTab.classList.remove('hidden');
+        workProcessTab.classList.add('hidden');
+        navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+        navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+        headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
+    } else {
+        dashboardTab.classList.add('hidden');
+        workProcessTab.classList.remove('hidden');
+        navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+        navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+        headerTitle.textContent = 'Work Process & Cycle Time Analysis';
+        
+        // แก้ไขโดยการสั่งวาดกราฟและรีเซ็ตขนาดใหม่หลังจากแสดงผลแท็บแล้ว
+        setTimeout(() => {
+            generateCycleTimeChart();
+            if (cycleTimeChartInstance) {
+                cycleTimeChartInstance.resize();
+                cycleTimeChartInstance.update();
             }
-        }
+        }, 100);
+    }
+}
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
