@@ -324,10 +324,10 @@
                         </div>
                     </div>
 
-                    <!-- ตารางกรอกชื่อกระบวนการและ Work Station -->
+                    <!-- ตารางกรอกชื่อกระบวนการและ Work Station (ปรับฟอร์มตามรูปที่ 3) -->
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-slate-300">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (วินาที/ชิ้น)</h3>
+                            <h3 class="text-sm font-semibold text-slate-300">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time</h3>
                             <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 <span>บันทึกข้อมูลและแสดงผล</span>
@@ -337,11 +337,16 @@
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
-                                        <th class="p-3 w-16 text-center">ลำดับ</th>
-                                        <th class="p-3">ชื่อกระบวนการผลิต (Work Process Name)</th>
-                                        <th class="p-3 w-40">Work Station</th>
-                                        <th class="p-3">รายละเอียดขั้นตอนการทำงาน (Task Description)</th>
-                                        <th class="p-3 text-center w-28">Cycle Time (วิ)</th>
+                                        <th class="p-3 w-28 text-center">Station</th>
+                                        <th class="p-3">Process 1</th>
+                                        <th class="p-3">Process 2</th>
+                                        <th class="p-3">Process 3</th>
+                                        <th class="p-3 text-center w-20">WT 1</th>
+                                        <th class="p-3 text-center w-20">WT 2</th>
+                                        <th class="p-3 text-center w-20">WT 3</th>
+                                        <th class="p-3 text-center w-20">WT Total</th>
+                                        <th class="p-3 text-center w-20">Loss</th>
+                                        <th class="p-3 text-center w-24">Cycle Time</th>
                                     </tr>
                                 </thead>
                                 <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
@@ -351,7 +356,7 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงผลข้อมูลที่บันทึกแล้ว (แสดง Work Station และรายละเอียด) -->
+                    <!-- ส่วนแสดงผลข้อมูลที่บันทึกแล้ว -->
                     <div class="bg-slate-900/80 p-5 rounded-xl border border-bordercolor space-y-3">
                         <h3 class="text-sm font-semibold text-cyan-400 flex items-center justify-between">
                             <span>รายการที่บันทึกและแสดงผลปัจจุบัน (Active Work Stations)</span>
@@ -361,11 +366,16 @@
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-950">
-                                        <th class="p-2.5 text-center w-16">ลำดับ</th>
-                                        <th class="p-2.5">กระบวนการผลิต</th>
-                                        <th class="p-2.5 text-cyan-300">Work Station</th>
-                                        <th class="p-2.5">รายละเอียด</th>
-                                        <th class="p-2.5 text-center">Cycle Time (วิ)</th>
+                                        <th class="p-2.5 text-center w-28">Station</th>
+                                        <th class="p-2.5">Process 1</th>
+                                        <th class="p-2.5">Process 2</th>
+                                        <th class="p-2.5">Process 3</th>
+                                        <th class="p-2.5 text-center">WT 1</th>
+                                        <th class="p-2.5 text-center">WT 2</th>
+                                        <th class="p-2.5 text-center">WT 3</th>
+                                        <th class="p-2.5 text-center">WT Total</th>
+                                        <th class="p-2.5 text-center">Loss</th>
+                                        <th class="p-2.5 text-center text-cyan-300">Cycle Time</th>
                                     </tr>
                                 </thead>
                                 <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
@@ -428,22 +438,37 @@
             console.error("Local storage load error, using default.", err);
         }
 
-        // ค่าเริ่มต้นข้อมูลกระบวนการและ Work Station
+        // โครงสร้างข้อมูลตาราง Station ตามรูปแบบรูปที่ 3
         let defaultProcessData = [
-            { id: 1, name: 'Press / Stamping', station: 'Station A1', desc: 'ปั๊มขึ้นรูปชิ้นส่วนเหล็กแผ่นประตูตู้เย็น', ct: 45 },
-            { id: 2, name: 'Welding Assembly', station: 'Station A2', desc: 'เชื่อมประกอบโครงสร้างและจุดยึดโครงประตู', ct: 60 },
-            { id: 3, name: 'Painting & Coating', station: 'Station B1', desc: 'พ่นสีเคลือบกันสนิมและอบความร้อนผิวชิ้นงาน', ct: 50 },
-            { id: 4, name: 'Final Gasket Assembly', station: 'Station C1', desc: 'ประกอบขอบยางแม่เหล็กและตรวจสอบคุณภาพขั้นสุดท้าย', ct: 75 }
+            { station: 'BTA01', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 13.90, wt2: 11.30, wt3: null, loss: 3.21 },
+            { station: 'BTA02', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 8.80, wt2: 10.20, wt3: null, loss: 2.54 },
+            { station: 'BTA03', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', wt1: 5.90, wt2: 6.50, wt3: 3.80, loss: null },
+            { station: 'BTA04', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', wt1: 7.68, wt2: 4.25, wt3: 8.62, loss: null },
+            { station: 'BTA05', p1: 'ติดเทปด้านข้าง', p2: '—', p3: '—', wt1: 12.15, wt2: null, wt3: null, loss: null },
+            { station: 'BTA06', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปปิดรู Suction', wt1: 9.60, wt2: 8.60, wt3: 18.40, loss: null },
+            { station: 'BTA07', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปปิดรู Suction', wt1: 5.80, wt2: 10.10, wt3: 6.90, loss: null },
+            { station: 'BTA08', p1: 'ติด Seal 2 pcs.', p2: '—', p3: '—', wt1: 15.80, wt2: null, wt3: null, loss: null },
+            { station: 'BTA09', p1: '—', p2: '—', p3: '—', wt1: 16.10, wt2: null, wt3: null, loss: 5.77 }
         ];
 
         let currentProcessData = defaultProcessData;
         try {
-            let savedProc = localStorage.getItem('haier_process_station_data');
+            let savedProc = localStorage.getItem('haier_process_station_data_v2');
             if (savedProc) {
                 currentProcessData = JSON.parse(savedProc);
             }
         } catch (e) {
             console.error(e);
+        }
+
+        function calculateRowTotals(item) {
+            let w1 = parseFloat(item.wt1) || 0;
+            let w2 = parseFloat(item.wt2) || 0;
+            let w3 = parseFloat(item.wt3) || 0;
+            let l = parseFloat(item.loss) || 0;
+            let wtTotal = Number((w1 + w2 + w3).toFixed(2));
+            let cycleTime = Number((wtTotal + l).toFixed(2));
+            return { wtTotal, cycleTime };
         }
 
         function renderProcessTableInputs() {
@@ -454,61 +479,96 @@
             currentProcessData.forEach((item, idx) => {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-3 text-center font-bold text-cyan-400">${idx + 1}</td>
-                    <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="${item.name}"></td>
-                    <td><input type="text" class="w-full bg-slate-800 text-cyan-300 font-semibold px-3 py-1.5 rounded border border-bordercolor station-input" value="${item.station}"></td>
-                    <td class="text-slate-400 px-3"><input type="text" class="w-full bg-slate-800 text-slate-300 px-3 py-1.5 rounded border border-bordercolor desc-input" value="${item.desc}"></td>
-                    <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="${item.ct}"></td>
+                    <td class="p-2 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-2 py-1.5 rounded border border-bordercolor station-input" value="${item.station}"></td>
+                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p1-input" value="${item.p1}"></td>
+                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p2-input" value="${item.p2}"></td>
+                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p3-input" value="${item.p3}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt1-input" value="${item.wt1 !== null ? item.wt1 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt2-input" value="${item.wt2 !== null ? item.wt2 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt3-input" value="${item.wt3 !== null ? item.wt3 : ''}"></td>
+                    <td class="p-2 text-center font-bold text-slate-200 wt-total-cell">—</td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null ? item.loss : ''}"></td>
+                    <td class="p-2 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
                 `;
                 tbody.appendChild(tr);
             });
+            updateInputRowCalculations();
         }
+
+        function updateInputRowCalculations() {
+            const rows = document.querySelectorAll('#processTableBody tr');
+            rows.forEach((row) => {
+                let w1 = parseFloat(row.querySelector('.wt1-input').value) || 0;
+                let w2 = parseFloat(row.querySelector('.wt2-input').value) || 0;
+                let w3 = parseFloat(row.querySelector('.wt3-input').value) || 0;
+                let l = parseFloat(row.querySelector('.loss-input').value) || 0;
+                let wtTotal = w1 + w2 + w3;
+                let ct = wtTotal + l;
+                row.querySelector('.wt-total-cell').textContent = wtTotal > 0 ? wtTotal.toFixed(2) : '—';
+                row.querySelector('.cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
+            });
+        }
+
+        document.getElementById('processTableBody')?.addEventListener('input', updateInputRowCalculations);
 
         function renderSavedDisplayTable() {
             const displayBody = document.getElementById('displaySavedTableBody');
             if (!displayBody) return;
             displayBody.innerHTML = '';
 
-            currentProcessData.forEach((item, idx) => {
+            currentProcessData.forEach((item) => {
+                let { wtTotal, cycleTime } = calculateRowTotals(item);
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
                 tr.innerHTML = `
-                    <td class="p-2.5 text-center font-bold text-cyan-400">${idx + 1}</td>
-                    <td class="p-2.5 font-medium text-white">${item.name}</td>
-                    <td class="p-2.5"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-semibold">${item.station || '-'}</span></td>
-                    <td class="p-2.5 text-slate-400">${item.desc}</td>
-                    <td class="p-2.5 text-center font-bold text-cyan-400">${item.ct} วินาที</td>
+                    <td class="p-2.5 text-center"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-semibold">${item.station || '-'}</span></td>
+                    <td class="p-2.5 font-medium text-white">${item.p1 || '—'}</td>
+                    <td class="p-2.5 text-slate-300">${item.p2 || '—'}</td>
+                    <td class="p-2.5 text-slate-300">${item.p3 || '—'}</td>
+                    <td class="p-2.5 text-center text-slate-300">${item.wt1 !== null && item.wt1 !== '' ? Number(item.wt1).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-slate-300">${item.wt2 !== null && item.wt2 !== '' ? Number(item.wt2).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-slate-300">${item.wt3 !== null && item.wt3 !== '' ? Number(item.wt3).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center font-bold text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
                 `;
                 displayBody.appendChild(tr);
             });
         }
 
         function saveProcessAndStationData() {
-            let processInputs = document.querySelectorAll('.process-input');
-            let stationInputs = document.querySelectorAll('.station-input');
-            let descInputs = document.querySelectorAll('.desc-input');
-            let ctInputs = document.querySelectorAll('.cycletime-input');
-
+            let rows = document.querySelectorAll('#processTableBody tr');
             let updatedList = [];
-            for (let i = 0; i < processInputs.length; i++) {
+            rows.forEach((row) => {
+                let station = row.querySelector('.station-input').value.trim();
+                let p1 = row.querySelector('.p1-input').value.trim();
+                let p2 = row.querySelector('.p2-input').value.trim();
+                let p3 = row.querySelector('.p3-input').value.trim();
+                let wt1 = row.querySelector('.wt1-input').value;
+                let wt2 = row.querySelector('.wt2-input').value;
+                let wt3 = row.querySelector('.wt3-input').value;
+                let loss = row.querySelector('.loss-input').value;
+
                 updatedList.push({
-                    id: i + 1,
-                    name: processInputs[i].value.trim(),
-                    station: stationInputs[i].value.trim(),
-                    desc: descInputs[i].value.trim(),
-                    ct: parseFloat(ctInputs[i].value) || 0
+                    station: station,
+                    p1: p1,
+                    p2: p2,
+                    p3: p3,
+                    wt1: wt1 !== '' ? parseFloat(wt1) : null,
+                    wt2: wt2 !== '' ? parseFloat(wt2) : null,
+                    wt3: wt3 !== '' ? parseFloat(wt3) : null,
+                    loss: loss !== '' ? parseFloat(loss) : null
                 });
-            }
+            });
 
             currentProcessData = updatedList;
-            localStorage.setItem('haier_process_station_data', JSON.stringify(currentProcessData));
+            localStorage.setItem('haier_process_station_data_v2', JSON.stringify(currentProcessData));
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
             alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
         }
 
-        // ฟังก์ชันตั้งค่า Dropdown Group และ Model แบบเชื่อมโยงกัน (Cascading Dropdown)
         function initGroupAndModelDropdowns(data) {
             const selectGroup = document.getElementById('selectGroup');
             if (!selectGroup) return;
@@ -747,11 +807,12 @@
 
             let labels = [];
             let ctData = [];
-            let backgroundColors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            let backgroundColors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#3b82f6', '#06b6d4', '#10b981'];
 
             currentProcessData.forEach((item) => {
-                labels.push(`${item.name} (${item.station})`);
-                ctData.push(item.ct);
+                let { cycleTime } = calculateRowTotals(item);
+                labels.push(item.station);
+                ctData.push(cycleTime);
             });
 
             const ctxCT = document.getElementById('cycleTimeChart').getContext('2d');
