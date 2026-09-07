@@ -291,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group (เลือกได้ 1 กลุ่ม), เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ), และเลือกชิ้นส่วนประกอบ (Part)</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -299,68 +299,52 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group และ Model และ Part -->
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
+                    <!-- ฟอร์มเลือก Product Group, Model และ Parts -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือก Product Group (เลือกได้ 1 กลุ่ม):</label>
-                            <div id="groupRadioContainer" class="flex flex-wrap gap-2"></div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
+                            <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
+                                <!-- รายชื่อ Group จะถูกโหลดอัตโนมัติ -->
+                            </select>
                         </div>
-
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ): <span class="text-[10px] text-amber-400 font-normal">(แต่ละ Model มีขั้นตอนและเวลาต่างกัน)</span></label>
-                            <div id="modelCheckboxContainer" class="flex flex-wrap gap-2 bg-slate-800/50 p-3 rounded-lg border border-bordercolor/60"></div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
+                            </select>
                         </div>
-
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือกชิ้นส่วนประกอบ (Part):</label>
-                            <div id="partTabContainer" class="flex flex-wrap gap-2">
-                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500">1. Back Plate</button>
-                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">2. Bottom Plate</button>
-                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">3. Door</button>
-                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">4. Gasket</button>
-                            </div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกชิ้นส่วนประกอบ (Part):</label>
+                            <select id="selectPart" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <option value="Back Plate">1. Back Plate</option>
+                                <option value="Bottom Plate">2. Bottom Plate</option>
+                                <option value="Door">3. Door</option>
+                                <option value="Gasket">4. Gasket</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateCycleTimeChart()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow transition">
+                                อัปเดตกราฟ Cycle Time
+                            </button>
                         </div>
                     </div>
 
-                    <!-- แถบเครื่องมือจัดการตาราง (เพิ่ม Station, ดาวน์โหลดเทมเพลต, อัปโหลด Excel เข้าตาราง, เปิด/ปิดตารางแก้ไข) -->
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                    <!-- ส่วนปุ่มกดเปิด/ปิดหน้าต่างแก้ไขตารางข้อมูลกระบวนการทำงาน, Work Station และ Cycle Time -->
+                    <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
+                            <p class="text-xs text-slate-400 mt-0.5">คลิกปุ่มด้านข้างเพื่อเปิดหน้าต่างแก้ไขข้อมูล Station, Process และ Cycle Time</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <!-- ปุ่มดาวน์โหลด Template -->
-                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span>ดาวน์โหลดเทมเพลต Excel</span>
-                            </button>
-
-                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
-                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span>อัปโหลดเข้าตาราง</span>
-                                <input type="file" id="importProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importProcessExcelData(event)">
-                            </label>
-
-                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                <span>เพิ่ม Station</span>
-                            </button>
-
-                            <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                <span id="editModalBtnText">เปิดตารางแก้ไขข้อมูล Work Station</span>
-                            </button>
-                        </div>
+                        <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            <span id="editModalBtnText">เปิดตารางแก้ไขข้อมูล Work Station</span>
+                        </button>
                     </div>
 
-                    <!-- ตารางกรอกข้อมูล (โหมดแก้ไข) -->
+                    <!-- ตารางกรอกข้อมูล (ซ่อนไว้ด้านนอกตามเงื่อนไข และจะแสดงเมื่อกดปุ่มแก้ไข) -->
                     <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/80 p-4 rounded-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-3">
-                            <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
-                                <p class="text-xs text-slate-300 mt-0.5">กำลังแก้ไขข้อมูลของ Model ที่เลือก: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
-                            </div>
+                            <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -385,21 +369,20 @@
                                         <th class="p-3 text-center w-20">WT Total</th>
                                         <th class="p-3 text-center w-20">Loss</th>
                                         <th class="p-3 text-center w-24">Cycle Time</th>
-                                        <th class="p-3 text-center w-16">ลบ</th>
                                     </tr>
                                 </thead>
                                 <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
-                                    <!-- Dynamic rows -->
+                                    <!-- Dynamic rows loaded by JS -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงผลข้อมูลที่บันทึกแล้ว -->
+                    <!-- ส่วนแสดงผลข้อมูลที่บันทึกแล้ว (Active Work Stations) -->
                     <div class="bg-slate-900/80 p-5 rounded-xl border border-bordercolor space-y-3">
                         <h3 class="text-sm font-semibold text-cyan-400 flex items-center justify-between">
                             <span>รายการที่บันทึกและแสดงผลปัจจุบัน (Active Work Stations)</span>
-                            <span id="savedDisplayStatus" class="text-xs text-emerald-400 font-normal">สถานะ: โหลดข้อมูลตรงตามรุ่นและพาร์ทเรียบร้อย</span>
+                            <span id="savedDisplayStatus" class="text-xs text-emerald-400 font-normal">สถานะ: อัปเดตล่าสุดเรียบร้อย</span>
                         </h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
@@ -424,11 +407,11 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟ Cycle Time -->
+                    <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
-                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
+                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Group: - | Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
@@ -443,22 +426,6 @@
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
-
-        let selectedPartValue = 'Back Plate'; 
-        let selectedProductGroup = ''; 
-        let selectedModels = new Set(); 
-
-        function selectPartTab(partName) {
-            selectedPartValue = partName;
-            document.querySelectorAll('.part-tab-btn').forEach(btn => {
-                if (btn.getAttribute('data-part') === partName) {
-                    btn.className = 'part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
-                } else {
-                    btn.className = 'part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                }
-            });
-            loadProcessDataForCurrentSelection();
-        }
 
         let defaultDailyPlanData = {
             days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
@@ -490,46 +457,29 @@
                 }
             }
         } catch (err) {
-            console.error(err);
+            console.error("Local storage load error, using default.", err);
         }
 
-        let processDatabase = {};
+        let defaultProcessData = [
+            { station: 'BTA01', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 13.90, wt2: 11.30, wt3: null, loss: 3.21 },
+            { station: 'BTA02', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 8.80, wt2: 10.20, wt3: null, loss: 2.54 },
+            { station: 'BTA03', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', wt1: 5.90, wt2: 6.50, wt3: 3.80, loss: null },
+            { station: 'BTA04', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', wt1: 7.68, wt2: 4.25, wt3: 8.62, loss: null },
+            { station: 'BTA05', p1: 'ติดเทปด้านข้าง', p2: '—', p3: '—', wt1: 12.15, wt2: null, wt3: null, loss: null },
+            { station: 'BTA06', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปปิดรู Suction', wt1: 9.60, wt2: 8.60, wt3: 18.40, loss: null },
+            { station: 'BTA07', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปปิดรู Suction', wt1: 5.80, wt2: 10.10, wt3: 6.90, loss: null },
+            { station: 'BTA08', p1: 'ติด Seal 2 pcs.', p2: '—', p3: '—', wt1: 15.80, wt2: null, wt3: null, loss: null },
+            { station: 'BTA09', p1: '—', p2: '—', p3: '—', wt1: 16.10, wt2: null, wt3: null, loss: 5.77 }
+        ];
+
+        let currentProcessData = defaultProcessData;
         try {
-            let savedDB = localStorage.getItem('haier_process_db_v4');
-            if (savedDB) {
-                processDatabase = JSON.parse(savedDB);
+            let savedProc = localStorage.getItem('haier_process_station_data_v2');
+            if (savedProc) {
+                currentProcessData = JSON.parse(savedProc);
             }
         } catch (e) {
             console.error(e);
-        }
-
-        let currentProcessData = [];
-
-        function getEmptyDefaultStations() {
-            return [
-                { station: 'STA01', p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null }
-            ];
-        }
-
-        function loadProcessDataForCurrentSelection() {
-            let modelsArray = Array.from(selectedModels);
-            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${selectedPartValue}` : 'default';
-
-            const editModelTag = document.getElementById('editModelNameTag');
-            const editPartTag = document.getElementById('editPartNameTag');
-            if (editModelTag) editModelTag.textContent = modelKey;
-            if (editPartTag) editPartTag.textContent = selectedPartValue;
-
-            if (processDatabase[storageKey] && Array.isArray(processDatabase[storageKey])) {
-                currentProcessData = JSON.parse(JSON.stringify(processDatabase[storageKey]));
-            } else {
-                currentProcessData = getEmptyDefaultStations();
-            }
-
-            renderProcessTableInputs();
-            renderSavedDisplayTable();
-            generateCycleTimeChart();
         }
 
         let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
@@ -558,6 +508,7 @@
             return { totalOutputs };
         }
 
+        // สร้างกราฟแผนการผลิต
         const ctxPlan = document.getElementById('planChart').getContext('2d');
         let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
 
@@ -593,6 +544,7 @@
             return String(val).trim();
         }
 
+        // ฟังก์ชันเรนเดอร์ตาราง พร้อมตรึงหัวตารางและแถว TOTAL
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -664,6 +616,7 @@
 
         renderUnifiedTable(currentDailyData);
 
+        // กราฟ Door Line
         const ctxDoor = document.getElementById('doorChart').getContext('2d');
         new Chart(ctxDoor, {
             type: 'line',
@@ -779,76 +732,10 @@
 
             currentDailyData = tempImportedData;
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            initGroupRadioButtons(currentDailyData);
-            alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
         }
 
-        function downloadProcessTemplate() {
-            let templateData = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA01", "Feeding", "Pressing", "", 12.5, 8.0, "", 2.0],
-                ["STA02", "Welding", "Inspection", "", 15.0, 5.0, "", 1.5]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(templateData);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
-            XLSX.writeFile(wb, "Work_Process_Template.xlsx");
-        }
-
-        function importProcessExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                    if (excelJson.length > 1) {
-                        let importedStations = [];
-                        for (let i = 1; i < excelJson.length; i++) {
-                            let row = excelJson[i];
-                            if (!row || row.length === 0) continue;
-
-                            let station = String(row[0] || '').trim();
-                            if (!station) continue;
-
-                            importedStations.push({
-                                station: station,
-                                p1: String(row[1] || '').trim(),
-                                p2: String(row[2] || '').trim(),
-                                p3: String(row[3] || '').trim(),
-                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
-                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
-                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
-                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
-                            });
-                        }
-
-                        if (importedStations.length > 0) {
-                            currentProcessData = importedStations;
-                            renderProcessTableInputs();
-                            
-                            const editSection = document.getElementById('editProcessSection');
-                            if (editSection.classList.contains('hidden')) {
-                                toggleEditModal();
-                            }
-                            alert('นำเข้าข้อมูล Work Station จาก Excel สำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกข้อมูลและแสดงผล" ได้ทันที');
-                        } else {
-                            alert('ไม่พบข้อมูล Station ในไฟล์ Excel ที่อัปโหลด');
-                        }
-                    }
-                } catch (err) {
-                    alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์: ' + err.message);
-                }
-                event.target.value = '';
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
+        // Functions for Work Process & Cycle Time tab
         function toggleEditModal() {
             const editSection = document.getElementById('editProcessSection');
             const btnText = document.getElementById('editModalBtnText');
@@ -859,16 +746,6 @@
                 editSection.classList.add('hidden');
                 btnText.textContent = 'เปิดตารางแก้ไขข้อมูล Work Station';
             }
-        }
-
-        function addNewStationRow() {
-            currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
-            renderProcessTableInputs();
-        }
-
-        function removeStationRow(index) {
-            currentProcessData.splice(index, 1);
-            renderProcessTableInputs();
         }
 
         function calculateRowTotals(item) {
@@ -886,20 +763,19 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            currentProcessData.forEach((item, index) => {
+            currentProcessData.forEach((item) => {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-2 py-1.5 rounded border border-bordercolor station-input" value="${item.station || ''}"></td>
-                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p1-input" value="${item.p1 || ''}"></td>
-                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p2-input" value="${item.p2 || ''}"></td>
-                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p3-input" value="${item.p3 || ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt1-input" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt2-input" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt3-input" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
+                    <td class="p-2 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-2 py-1.5 rounded border border-bordercolor station-input" value="${item.station}"></td>
+                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p1-input" value="${item.p1}"></td>
+                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p2-input" value="${item.p2}"></td>
+                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p3-input" value="${item.p3}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt1-input" value="${item.wt1 !== null ? item.wt1 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt2-input" value="${item.wt2 !== null ? item.wt2 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt3-input" value="${item.wt3 !== null ? item.wt3 : ''}"></td>
                     <td class="p-2 text-center font-bold text-slate-200 wt-total-cell">—</td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null ? item.loss : ''}"></td>
                     <td class="p-2 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
-                    <td class="p-2 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 p-1">✕</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -926,11 +802,6 @@
             const displayBody = document.getElementById('displaySavedTableBody');
             if (!displayBody) return;
             displayBody.innerHTML = '';
-
-            if (!currentProcessData || currentProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูล Work Station สำหรับรุ่นและพาร์ทนี้</td></tr>`;
-                return;
-            }
 
             currentProcessData.forEach((item) => {
                 let { wtTotal, cycleTime } = calculateRowTotals(item);
@@ -977,114 +848,53 @@
                 });
             });
 
-            let modelsArray = Array.from(selectedModels);
-            if (modelsArray.length === 0) {
-                alert('กรุณาเลือก Model อย่างน้อย 1 รายการ');
-                return;
-            }
-
-            let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
-            processDatabase[storageKey] = updatedList;
             currentProcessData = updatedList;
-
-            localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
+            localStorage.setItem('haier_process_station_data_v2', JSON.stringify(currentProcessData));
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
             toggleEditModal();
-            alert(`บันทึกข้อมูลสำหรับ Model: ${modelsArray.join(', ')} (${selectedPartValue}) สำเร็จ!`);
+            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
         }
 
-        function initGroupRadioButtons(data) {
-            const container = document.getElementById('groupRadioContainer');
-            if (!container) return;
-            container.innerHTML = '';
+        function initGroupAndModelDropdowns(data) {
+            const selectGroup = document.getElementById('selectGroup');
+            if (!selectGroup) return;
 
-            if (data && data.groups && data.groups.length > 0) {
-                data.groups.forEach((g, idx) => {
-                    let btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.setAttribute('data-group', g.productGroup);
-                    btn.textContent = `Group ${g.productGroup}`;
-                    
-                    if (idx === 0) {
-                        selectedProductGroup = g.productGroup;
-                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
-                    } else {
-                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                    }
-
-                    btn.onclick = function() {
-                        selectProductGroup(g.productGroup);
-                    };
-                    container.appendChild(btn);
+            selectGroup.innerHTML = '';
+            if (data && data.groups) {
+                data.groups.forEach(g => {
+                    let opt = document.createElement('option');
+                    opt.value = g.productGroup;
+                    opt.textContent = `Group ${g.productGroup}`;
+                    selectGroup.appendChild(opt);
                 });
             }
-            updateModelCheckboxesByGroup();
+            onGroupChange();
         }
 
-        function selectProductGroup(groupName) {
-            selectedProductGroup = groupName;
-            document.querySelectorAll('.group-radio-btn').forEach(btn => {
-                if (btn.getAttribute('data-group') === groupName) {
-                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
-                } else {
-                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                }
-            });
-            updateModelCheckboxesByGroup();
-        }
+        function onGroupChange() {
+            const selectGroup = document.getElementById('selectGroup');
+            const selectModel = document.getElementById('selectModel');
+            if (!selectGroup || !selectModel) return;
 
-        function updateModelCheckboxesByGroup() {
-            const container = document.getElementById('modelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedModels.clear();
+            let selectedGroupVal = selectGroup.value;
+            selectModel.innerHTML = '';
 
-            let targetGroup = null;
-            if (currentDailyData && currentDailyData.groups) {
-                targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedProductGroup);
+            let targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedGroupVal);
+            if (targetGroup && targetGroup.models) {
+                targetGroup.models.forEach(m => {
+                    let opt = document.createElement('option');
+                    opt.value = m.name;
+                    opt.textContent = m.name;
+                    selectModel.appendChild(opt);
+                });
             }
-
-            if (!targetGroup || !targetGroup.models || targetGroup.models.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-500">ไม่พบ Model ในกลุ่มนี้</span>`;
-                loadProcessDataForCurrentSelection();
-                return;
-            }
-
-            targetGroup.models.forEach((m) => {
-                selectedModels.add(m.name);
-
-                let label = document.createElement('label');
-                label.className = 'flex items-center space-x-2 bg-slate-900/60 px-3 py-2 rounded-lg border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
-                
-                let checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = true;
-                checkbox.value = m.name;
-                checkbox.className = 'rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0';
-                checkbox.onchange = function() {
-                    if (checkbox.checked) {
-                        selectedModels.add(m.name);
-                    } else {
-                        selectedModels.delete(m.name);
-                    }
-                    loadProcessDataForCurrentSelection();
-                };
-
-                let span = document.createElement('span');
-                span.className = 'text-xs font-medium text-slate-200';
-                span.textContent = m.name;
-
-                label.appendChild(checkbox);
-                label.appendChild(span);
-                container.appendChild(label);
-            });
-
-            loadProcessDataForCurrentSelection();
         }
 
-        initGroupRadioButtons(currentDailyData);
+        initGroupAndModelDropdowns(currentDailyData);
+        renderProcessTableInputs();
+        renderSavedDisplayTable();
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
@@ -1106,25 +916,16 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        generateCycleTimeChart();
-                        if (cycleTimeChartInstance) {
-                            cycleTimeChartInstance.resize();
-                        }
-                    }, 100);
-                });
+                setTimeout(() => { generateCycleTimeChart(); }, 200);
             }
         }
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
-            let modelsArray = Array.from(selectedModels);
-            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            const infoLabel = document.getElementById('ctInfoLabel');
-            if (infoLabel) {
-                infoLabel.textContent = `Model: ${modelKey} | Part: ${selectedPartValue}`;
-            }
+            let selectedGroup = document.getElementById('selectGroup').value;
+            let selectedModel = document.getElementById('selectModel').value;
+            let selectedPart = document.getElementById('selectPart').value;
+            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
 
             let labels = [];
             let ctData = [];
@@ -1132,17 +933,13 @@
 
             currentProcessData.forEach((item) => {
                 let { cycleTime } = calculateRowTotals(item);
-                labels.push(item.station || 'STA');
+                labels.push(item.station);
                 ctData.push(cycleTime);
             });
 
-            const canvasEl = document.getElementById('cycleTimeChart');
-            if (!canvasEl) return;
-            const ctxCT = canvasEl.getContext('2d');
-
+            const ctxCT = document.getElementById('cycleTimeChart').getContext('2d');
             if (cycleTimeChartInstance) {
                 cycleTimeChartInstance.destroy();
-                cycleTimeChartInstance = null;
             }
 
             cycleTimeChartInstance = new Chart(ctxCT, {
