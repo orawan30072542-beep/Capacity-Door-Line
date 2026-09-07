@@ -501,14 +501,14 @@
         }
 
         let processDatabase = {};
-        try {
-            let savedDB = localStorage.getItem('haier_process_db_v4');
-            if (savedDB) {
-                processDatabase = JSON.parse(savedDB);
-            }
-        } catch (e) {
-            console.error(e);
-        }
+try {
+    let savedDB = localStorage.getItem('haier_process_db_v4');
+    if (savedDB) {
+        processDatabase = JSON.parse(savedDB);
+    }
+} catch (e) {
+    console.error(e);
+}
 
         let currentProcessData = [];
 
