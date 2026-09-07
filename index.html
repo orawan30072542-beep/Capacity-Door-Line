@@ -291,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) เลือกชิ้นส่วนประกอบ (Part) ด้านบน และกำหนด Cycle Time</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -299,33 +299,32 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group, Model และ Parts -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
-                            <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
-                                <!-- รายชื่อ Group จะถูกโหลดอัตโนมัติ -->
-                            </select>
+                    <!-- ฟอร์มเลือก Product Group, Model และปรับ Part เป็นแบบปุ่ม Tab สลับไปมา -->
+                    <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
+                                <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
+                                    <!-- รายชื่อ Group จะถูกโหลดอัตโนมัติ -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                                <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                    <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
+                                </select>
+                            </div>
                         </div>
+
+                        <!-- ส่วนเลือกชิ้นส่วนประกอบ (Part) แบบปุ่ม Tab สลับไปมา -->
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
-                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกชิ้นส่วนประกอบ (Part):</label>
-                            <select id="selectPart" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <option value="Back Plate">1. Back Plate</option>
-                                <option value="Bottom Plate">2. Bottom Plate</option>
-                                <option value="Door">3. Door</option>
-                                <option value="Gasket">4. Gasket</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button onclick="generateCycleTimeChart()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow transition">
-                                อัปเดตกราฟ Cycle Time
-                            </button>
+                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือกชิ้นส่วนประกอบ (Part):</label>
+                            <div id="partTabContainer" class="flex flex-wrap gap-2">
+                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500">1. Back Plate</button>
+                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">2. Bottom Plate</button>
+                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">3. Door</button>
+                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">4. Gasket</button>
+                            </div>
                         </div>
                     </div>
 
@@ -426,6 +425,20 @@
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
+
+        let selectedPartValue = 'Back Plate'; // ค่าเริ่มต้นของ Part ที่เลือก
+
+        function selectPartTab(partName) {
+            selectedPartValue = partName;
+            document.querySelectorAll('.part-tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-part') === partName) {
+                    btn.className = 'part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                } else {
+                    btn.className = 'part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                }
+            });
+            generateCycleTimeChart();
+        }
 
         let defaultDailyPlanData = {
             days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
@@ -924,8 +937,7 @@
         function generateCycleTimeChart() {
             let selectedGroup = document.getElementById('selectGroup').value;
             let selectedModel = document.getElementById('selectModel').value;
-            let selectedPart = document.getElementById('selectPart').value;
-            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
+            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPartValue}`;
 
             let labels = [];
             let ctData = [];
