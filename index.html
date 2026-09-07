@@ -200,22 +200,6 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนข้อมูลสรุปด้านบน (Total Leadtime, Max CT, UPH รายชั่วโมง) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-1">
-                            <p class="text-xs text-slate-400 font-medium">Total Leadtime (CT รวมทุกกระบวนการ)</p>
-                            <h4 id="summaryTotalLeadtime" class="text-xl font-bold text-white">0.00 วินาที</h4>
-                        </div>
-                        <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-1">
-                            <p class="text-xs text-slate-400 font-medium">Max CT (Bottleneck Station)</p>
-                            <h4 id="summaryMaxCT" class="text-xl font-bold text-rose-400">0.00 วินาที</h4>
-                        </div>
-                        <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-1">
-                            <p class="text-xs text-slate-400 font-medium">UPH รายชั่วโมง (Units Per Hour)</p>
-                            <h4 id="summaryHourlyUPH" class="text-xl font-bold text-cyan-400">0 ชิ้น/ชม.</h4>
-                        </div>
-                    </div>
-
                     <!-- ส่วนปุ่มกดเปิด/ปิดหน้าต่างแก้ไขตารางข้อมูลกระบวนการทำงาน -->
                     <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
@@ -294,10 +278,10 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง (LOB / Cycle Time Analysis) -->
+                    <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time / LOB แยกตาม Work Station (วินาที/ชิ้น)</h3>
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
                             <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Group: - | Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
@@ -379,28 +363,7 @@
 
             renderProcessTableInputs();
             renderSavedDisplayTable();
-            updateTopSummaryMetrics();
             generateCycleTimeChart();
-        }
-
-        // ฟังก์ชันคำนวณสรุป Leadtime, Max CT และ UPH รายชั่วโมง
-        function updateTopSummaryMetrics() {
-            let totalLeadtime = 0;
-            let maxCycleTime = 0;
-
-            currentProcessData.forEach((item) => {
-                let { cycleTime } = calculateRowTotals(item);
-                totalLeadtime += cycleTime;
-                if (cycleTime > maxCycleTime) {
-                    maxCycleTime = cycleTime;
-                }
-            });
-
-            let hourlyUPH = maxCycleTime > 0 ? Math.round(3600 / maxCycleTime) : 0;
-
-            document.getElementById('summaryTotalLeadtime').textContent = `${totalLeadtime.toFixed(2)} วินาที`;
-            document.getElementById('summaryMaxCT').textContent = `${maxCycleTime.toFixed(2)} วินาที`;
-            document.getElementById('summaryHourlyUPH').textContent = `${hourlyUPH.toLocaleString()} ชิ้น/ชม.`;
         }
 
         // ฟังก์ชันรองรับการอัปโหลดไฟล์ Excel / CSV เข้าสู่ระบบ
@@ -418,6 +381,7 @@
                     const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                     if (json && json.length > 1) {
+                        // ตัวอย่างการอ่านหัวตารางและข้อมูลแถวแรกๆ มาอัปเดตแผนผลิต
                         alert(`อ่านไฟล์สำเร็จ: ${file.name} (โหลดข้อมูล ${json.length} แถว)`);
                         renderOverviewDashboard();
                     } else {
@@ -558,7 +522,6 @@
             }
 
             renderSavedDisplayTable();
-            updateTopSummaryMetrics();
             generateCycleTimeChart();
             toggleEditModal();
             alert(`บันทึกข้อมูล Work Station ของรุ่น ${modelName} สำเร็จ!`);
