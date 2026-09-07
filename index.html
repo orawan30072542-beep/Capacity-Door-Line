@@ -38,7 +38,7 @@
         .lob-chart-wrapper {
             position: relative;
             width: 100%;
-            height: 400px;
+            height: 420px;
         }
     </style>
 </head>
@@ -424,11 +424,18 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟ Cycle Time -->
+                    <!-- ส่วนแสดงกราฟ Cycle Time และช่องกรอก Takt Time -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
-                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div>
+                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แบบแท่งเปรียบเทียบกับเส้น Takt Time</h3>
+                                <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
+                                <span class="text-xs text-slate-300 font-medium">เป้าหมาย Takt Time (วินาที):</span>
+                                <input type="number" id="taktTimeInput" value="60" min="1" step="0.5" oninput="generateCycleTimeChart()" class="bg-slate-900 text-amber-400 font-bold text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none">
+                                <span class="text-xs text-slate-400">วิ/ชิ้น</span>
+                            </div>
                         </div>
                         <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
@@ -1136,6 +1143,10 @@
                 ctData.push(cycleTime);
             });
 
+            // ดึงค่า Takt Time จากช่องกรอกข้อมูล
+            let taktVal = parseFloat(document.getElementById('taktTimeInput').value) || 0;
+            let taktLineData = new Array(labels.length).fill(taktVal);
+
             const canvasEl = document.getElementById('cycleTimeChart');
             if (!canvasEl) return;
             const ctxCT = canvasEl.getContext('2d');
@@ -1149,22 +1160,37 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Cycle Time (วินาที / ชิ้น)',
-                        data: ctData,
-                        backgroundColor: backgroundColors.slice(0, labels.length),
-                        borderRadius: 6
-                    }]
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Cycle Time (วินาที / ชิ้น)',
+                            data: ctData,
+                            backgroundColor: backgroundColors.slice(0, labels.length),
+                            borderRadius: 6,
+                            order: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Takt Time (เป้าหมาย)',
+                            data: taktLineData,
+                            borderColor: '#f43f5e',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            pointRadius: 0,
+                            fill: false,
+                            order: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ` Cycle Time: ${context.raw} วินาที`;
+                                    return ` ${context.dataset.label}: ${context.raw} วินาที`;
                                 }
                             }
                         }
