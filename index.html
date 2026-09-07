@@ -133,21 +133,29 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line + Excel Import) -->
+                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line + Excel Import + Save System) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order ตามแผนผลิต (Plan vs Actual)</h2>
                         </div>
-                        <!-- ปุ่มนำเข้า Excel -->
-                        <div class="flex items-center space-x-3">
-                            <span id="excelFileName" class="text-xs text-slate-400 hidden sm:inline-block">ยังไม่ได้เลือกไฟล์</span>
-                            <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span>Import Excel แผนผลิต</span>
-                                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelImport(event)">
+                        <!-- ปุ่มจัดการไฟล์และบันทึก -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span id="excelFileName" class="text-xs text-slate-400">ยังไม่ได้เลือกไฟล์</span>
+                            
+                            <!-- ปุ่มเลือกไฟล์ -->
+                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor flex items-center space-x-2 transition">
+                                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>เลือกไฟล์ Excel</span>
+                                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="previewExcelData(event)">
                             </label>
+
+                            <!-- ปุ่มบันทึกข้อมูลไม่ให้หาย -->
+                            <button onclick="saveDashboardData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>บันทึกข้อมูล</span>
+                            </button>
                         </div>
                     </div>
 
@@ -166,24 +174,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
-                                    <tr>
-                                        <td class="p-3 font-semibold text-white">Line A (Assembly)</td>
-                                        <td class="p-3 plan-val">4,000</td>
-                                        <td class="p-3 text-cyan-400 font-semibold actual-val">3,850</td>
-                                        <td class="p-3"><span class="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-500/20 rate-val">96.25%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-3 font-semibold text-white">Line B (Stamping)</td>
-                                        <td class="p-3 plan-val">3,500</td>
-                                        <td class="p-3 text-cyan-400 font-semibold actual-val">3,100</td>
-                                        <td class="p-3"><span class="text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-500/20 rate-val">88.57%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-3 font-semibold text-white">Line C (Welding)</td>
-                                        <td class="p-3 plan-val">5,000</td>
-                                        <td class="p-3 text-cyan-400 font-semibold actual-val">4,250</td>
-                                        <td class="p-3"><span class="text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-500/20 rate-val">85.00%</span></td>
-                                    </tr>
+                                    <!-- ข้อมูลจะถูกโหลดใส่ที่นี่อัตโนมัติ -->
                                 </tbody>
                             </table>
                         </div>
@@ -337,27 +328,36 @@
         </main>
     </div>
 
-    <!-- JavaScript สำหรับตั้งค่าสี, กราฟ และระบบนำเข้าไฟล์ Excel -->
+    <!-- JavaScript ระบบจัดการข้อมูลและบันทึก (LocalStorage) -->
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // สร้างตัวแปร Chart แผนผัง เพื่อให้สามารถอัปเดตข้อมูลแบบ Real-time ได้เมื่อกด Import Excel
+        // โครงสร้างข้อมูลตั้งต้น (Default Data) หรือโหลดจากที่เคยบันทึกไว้
+        let defaultProductionData = [
+            { line: 'Line A (Assembly)', plan: 4000, actual: 3850 },
+            { line: 'Line B (Stamping)', plan: 3500, actual: 3100 },
+            { line: 'Line C (Welding)', plan: 5000, actual: 4250 }
+        ];
+
+        let currentData = loadSavedData() || defaultProductionData;
+
+        // สร้างกราฟ Plan vs Actual
         const ctxPlan = document.getElementById('planChart').getContext('2d');
         const planChart = new Chart(ctxPlan, {
             type: 'bar',
             data: {
-                labels: ['Line A', 'Line B', 'Line C'],
+                labels: currentData.map(d => d.line),
                 datasets: [
                     {
                         label: 'แผนผลิต (Plan)',
-                        data: [4000, 3500, 5000],
+                        data: currentData.map(d => d.plan),
                         backgroundColor: '#334155',
                         borderRadius: 6
                     },
                     {
                         label: 'ทำได้จริง (Actual)',
-                        data: [3850, 3100, 4250],
+                        data: currentData.map(d => d.actual),
                         backgroundColor: '#0066FF',
                         borderRadius: 6
                     }
@@ -373,6 +373,32 @@
                 }
             }
         });
+
+        // แสดงผลข้อมูลลงในตาราง HTML
+        function renderTable(data) {
+            const tbody = document.getElementById('planTableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(item => {
+                let percentage = ((item.actual / item.plan) * 100).toFixed(2);
+                let badgeColor = percentage >= 90 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 
+                                 percentage >= 80 ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 
+                                 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+
+                let row = `
+                    <tr>
+                        <td class="p-3 font-semibold text-white">${item.line}</td>
+                        <td class="p-3">${item.plan.toLocaleString()}</td>
+                        <td class="p-3 text-cyan-400 font-semibold">${item.actual.toLocaleString()}</td>
+                        <td class="p-3"><span class="${badgeColor} px-2.5 py-1 rounded-lg text-xs font-bold border">${percentage}%</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // โหลดตารางครั้งแรก
+        renderTable(currentData);
 
         // กราฟ 3: Door Line Order Trend
         const ctxDoor = document.getElementById('doorChart').getContext('2d');
@@ -410,36 +436,73 @@
             }
         });
 
-        // ฟังก์ชันสำหรับรองรับการอ่านไฟล์ Excel และนำข้อมูลมาอัปเดตกราฟ / ตารางอัตโนมัติ
-        function handleExcelImport(event) {
+        // 1. ฟังก์ชันอ่านไฟล์ Excel และนำมาแสดงผลทันที
+        let tempImportedData = null;
+        function previewExcelData(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // แสดงชื่อไฟล์ที่เลือก
             document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-
-                // อ่านชีทแรกของไฟล์ Excel
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
+                const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                // แปลงข้อมูลใน Excel เป็น JSON Array
-                const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                console.log("Excel Data Loaded:", excelData);
+                // คาดหวังรูปแบบแถว Excel (แถวที่ 1 คือหัวตาราง, แถว 2-4 คือข้อมูล Line A, B, C)
+                // คอลัมน์ที่สมมติ: [0] ชื่อ Line, [1] Plan, [2] Actual
+                let parsedData = [];
+                for (let i = 1; i < excelJson.length; i++) {
+                    let row = excelJson[i];
+                    if (row && row[0]) {
+                        parsedData.push({
+                            line: row[0],
+                            plan: Number(row[1]) || 0,
+                            actual: Number(row[2]) || 0
+                        });
+                    }
+                }
 
-                // ตัวอย่างจำลองการดึงค่าแผนผลิตจาก Excel มาปรับปรุงกราฟ (สามารถปรับโครงสร้างตัวเลขตามคอลัมน์ใน Excel ของคุณได้จริง)
-                // สมมติโครงสร้าง Excel แถวที่ 2, 3, 4 คือข้อมูล Line A, B, C (Plan และ Actual)
-                alert(`นำเข้าไฟล์ "${file.name}" สำเร็จ! ระบบทำการประมวลผลข้อมูลออเดอร์ตามแผนเรียบร้อยแล้ว`);
-                
-                // ตัวอย่างการอัปเดตข้อมูลตัวเลขจำลองจากไฟล์ (คุณสามารถแมพค่าจากตัวแปร excelData มาใส่ตรงนี้ได้เลย)
-                // planChart.data.datasets[0].data = [newPlanA, newPlanB, newPlanC];
-                // planChart.update();
+                if (parsedData.length > 0) {
+                    tempImportedData = parsedData;
+                    // อัปเดตตารางและกราฟชั่วคราวก่อนกดบันทึก
+                    updateDashboardUI(tempImportedData);
+                    alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
+                } else {
+                    alert('ไม่พบข้อมูลในไฟล์ หรือรูปแบบตารางไม่ถูกต้อง');
+                }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        // ฟังก์ชันอัปเดตหน้าจอ UI (กราฟและตาราง)
+        function updateDashboardUI(data) {
+            renderTable(data);
+            planChart.data.labels = data.map(d => d.line);
+            planChart.data.datasets[0].data = data.map(d => d.plan);
+            planChart.data.datasets[1].data = data.map(d => d.actual);
+            planChart.update();
+        }
+
+        // 2. ฟังก์ชันกดปุ่มบันทึกข้อมูล (เก็บลงในเบราว์เซอร์ LocalStorage ไม่ให้หาย)
+        function saveDashboardData() {
+            if (!tempImportedData) {
+                alert('ยังไม่มีการเลือกหรืออัปเดตไฟล์ Excel ใหม่สำหรับการบันทึก');
+                return;
+            }
+
+            currentData = tempImportedData;
+            localStorage.setItem('haier_production_data', JSON.stringify(currentData));
+            alert('บันทึกข้อมูลเรียบร้อย! ข้อมูลจะคงอยู่ถาวรแม้จะปิดหรือรีเฟรชเบราว์เซอร์');
+        }
+
+        // 3. ฟังก์ชันโหลดข้อมูลที่เคยบันทึกไว้
+        function loadSavedData() {
+            let saved = localStorage.getItem('haier_production_data');
+            return saved ? JSON.parse(saved) : null;
         }
     </script>
 </body>
