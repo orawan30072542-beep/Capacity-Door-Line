@@ -1113,14 +1113,14 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        generateCycleTimeChart();
-                        if (cycleTimeChartInstance) {
-                            cycleTimeChartInstance.resize();
-                        }
-                    }, 100);
-                });
+                // สั่งเรนเดอร์และปรับขนาดกราฟใหม่หลังจากสลับแท็บแสดงผลแล้ว
+                setTimeout(() => {
+                    generateCycleTimeChart();
+                    if (cycleTimeChartInstance) {
+                        cycleTimeChartInstance.resize();
+                        cycleTimeChartInstance.update();
+                    }
+                }, 50);
             }
         }
 
