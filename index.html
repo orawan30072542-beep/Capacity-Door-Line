@@ -299,23 +299,18 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group (เลือกได้ 1 รายการ) และ Model (เลือกได้หลายรายการ) -->
+                    <!-- ฟอร์มเลือก Product Group และ Model และ Part -->
                     <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-2">เลือก Product Group (เลือกได้ 1 กลุ่ม):</label>
-                            <div id="groupRadioContainer" class="flex flex-wrap gap-2">
-                                <!-- โหลดปุ่ม Group แบบเลือกได้ทีละ 1 อัตโนมัติ -->
-                            </div>
+                            <div id="groupRadioContainer" class="flex flex-wrap gap-2"></div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-2">เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ): <span class="text-[10px] text-amber-400 font-normal">(แต่ละ Model มีขั้นตอนและเวลาต่างกัน)</span></label>
-                            <div id="modelCheckboxContainer" class="flex flex-wrap gap-2 bg-slate-800/50 p-3 rounded-lg border border-bordercolor/60">
-                                <!-- โหลด Checkbox Model อัตโนมัติ -->
-                            </div>
+                            <div id="modelCheckboxContainer" class="flex flex-wrap gap-2 bg-slate-800/50 p-3 rounded-lg border border-bordercolor/60"></div>
                         </div>
 
-                        <!-- ส่วนเลือกชิ้นส่วนประกอบ (Part) แบบปุ่ม Tab -->
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-2">เลือกชิ้นส่วนประกอบ (Part):</label>
                             <div id="partTabContainer" class="flex flex-wrap gap-2">
@@ -327,17 +322,31 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนปุ่มเปิด/ปิดหน้าต่างแก้ไขตาราง -->
-                    <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                    <!-- แถบเครื่องมือจัดการตาราง (เพิ่ม Station, ดาวน์โหลดเทมเพลต, อัปโหลด Excel เข้าตาราง, เปิด/ปิดตารางแก้ไข) -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">คลิกปุ่มด้านข้างเพื่อเปิดหน้าต่างกรอกข้อมูล Station, Process และ Cycle Time ของรุ่น/พาร์ทที่เลือก</p>
+                            <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- ปุ่มดาวน์โหลด Template -->
+                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>ดาวน์โหลดเทมเพลต Excel</span>
+                            </button>
+
+                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
+                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>อัปโหลดเข้าตาราง</span>
+                                <input type="file" id="importProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importProcessExcelData(event)">
+                            </label>
+
+                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 <span>เพิ่ม Station</span>
                             </button>
+
                             <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 <span id="editModalBtnText">เปิดตารางแก้ไขข้อมูล Work Station</span>
@@ -436,8 +445,8 @@
         Chart.defaults.borderColor = '#1e293b';
 
         let selectedPartValue = 'Back Plate'; 
-        let selectedProductGroup = ''; // เลือก Product Group ได้เพียง 1 รายการ
-        let selectedModels = new Set(); // เก็บ Model ที่ถูกเลือกหลายรายการ
+        let selectedProductGroup = ''; 
+        let selectedModels = new Set(); 
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
@@ -774,6 +783,76 @@
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
+        // ฟังก์ชันดาวน์โหลดเทมเพลต Excel สำหรับกรอกข้อมูล Work Station
+        function downloadProcessTemplate() {
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["STA01", "Feeding", "Pressing", "", 12.5, 8.0, "", 2.0],
+                ["STA02", "Welding", "Inspection", "", 15.0, 5.0, "", 1.5]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
+            XLSX.writeFile(wb, "Work_Process_Template.xlsx");
+        }
+
+        // ฟังก์ชันอัปโหลด Excel เข้าตารางโหมดแก้ไข
+        function importProcessExcelData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (excelJson.length > 1) {
+                        let importedStations = [];
+                        for (let i = 1; i < excelJson.length; i++) {
+                            let row = excelJson[i];
+                            if (!row || row.length === 0) continue;
+
+                            let station = String(row[0] || '').trim();
+                            if (!station) continue;
+
+                            importedStations.push({
+                                station: station,
+                                p1: String(row[1] || '').trim(),
+                                p2: String(row[2] || '').trim(),
+                                p3: String(row[3] || '').trim(),
+                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
+                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6] !== '' ? row[6] : null) : null,
+                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
+                            });
+                        }
+
+                        if (importedStations.length > 0) {
+                            currentProcessData = importedStations;
+                            renderProcessTableInputs();
+                            
+                            // เปิดตารางแก้ไขให้อัตโนมัติเพื่อให้ผู้ใช้ตรวจสอบข้อมูล
+                            const editSection = document.getElementById('editProcessSection');
+                            if (editSection.classList.contains('hidden')) {
+                                toggleEditModal();
+                            }
+                            alert('นำเข้าข้อมูล Work Station จาก Excel สำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกข้อมูลและแสดงผล" ได้ทันที');
+                        } else {
+                            alert('ไม่พบข้อมูล Station ในไฟล์ Excel ที่อัปโหลด');
+                        }
+                    }
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์: ' + err.message);
+                }
+                // ล้างค่าเพื่อให้สามารถเลือกไฟล์เดิมซ้ำได้
+                event.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
         function toggleEditModal() {
             const editSection = document.getElementById('editProcessSection');
             const btnText = document.getElementById('editModalBtnText');
@@ -977,8 +1056,8 @@
                 return;
             }
 
-            targetGroup.models.forEach((m, idx) => {
-                selectedModels.add(m.name); // ค่าเริ่มต้นเลือกทุกรุ่นในกลุ่ม
+            targetGroup.models.forEach((m) => {
+                selectedModels.add(m.name);
 
                 let label = document.createElement('label');
                 label.className = 'flex items-center space-x-2 bg-slate-900/60 px-3 py-2 rounded-lg border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
