@@ -181,7 +181,7 @@
                         <div class="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                             <div class="max-h-[420px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                                 <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
-                                    <thead class="sticky top-0 z-10 bg-slate-900 shadow-md">
+                                    <thead>
                                         <tr class="border-b border-bordercolor text-slate-400"></tr>
                                     </thead>
                                     <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
@@ -331,7 +331,7 @@
         document.getElementById('shiftHoursInput').value = savedShiftHours;
 
         function saveShiftHours() {
-            let hours = document.getElementById('shiftHoursInput').value;
+            let hours = document.getElementById('shiftHoursInput'].value;
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
@@ -398,7 +398,7 @@
             return String(val).trim();
         }
 
-        // ฟังก์ชันเรนเดอร์ตาราง (แสดงเฉพาะตัวเลข UPH เป็นจำนวนเต็ม ตัวหนังสือสีขาวเล็ก)
+        // ฟังก์ชันเรนเดอร์ตาราง (ตรึงแถวหัวตารางและแถว TOTAL ไว้ด้านบนสุดเวลาเลื่อน)
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -411,25 +411,25 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            // สร้างหัวตาราง (Product Group, Model, วันที่ต่างๆ)
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300">Product Group</th><th class="p-3 font-medium w-32 text-slate-300">Model</th>`;
+            // สร้างหัวตารางพร้อมกำหนดให้ sticky และกำหนด background + z-index ไม่ให้ทับซ้อนเวลาเลื่อน
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30 shadow-sm">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30 shadow-sm">Model</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300">${day}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 shadow-sm">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
             // คำนวณภาพรวม TOTAL
             let calc = calculateTotalOrders(groups, days);
 
-            // แถว TOTAL ด้านบนสุด
+            // แถว TOTAL ด้านบนสุด (ตรึงไว้ใต้หัวตารางด้วย top-[41px] และ z-20)
             let totalTr = document.createElement('tr');
-            totalTr.className = 'bg-blue-950/60 border-b-2 border-bordercolor font-bold text-cyan-300';
-            let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Total Output</td>`;
+            totalTr.className = 'bg-blue-950/90 backdrop-blur-sm border-b-2 border-bordercolor font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md';
+            let totalHtml = `<td class="p-3 bg-blue-950/90">TOTAL</td><td class="p-3 bg-blue-950/90">Total Output</td>`;
             for (let i = 0; i < days.length; i++) {
                 let dayTotal = calc.totalOutputs[i];
                 let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
                 totalHtml += `
-                    <td class="p-2 text-center border-l border-bordercolor/40">
+                    <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/90">
                         <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
                         <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
                     </td>
