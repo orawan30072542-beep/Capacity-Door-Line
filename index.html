@@ -286,7 +286,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือกรุ่นสินค้าตามออเดอร์, กำหนดชื่อกระบวนการผลิต (Work Process Name) และบันทึก Cycle Time (วินาที)</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต และบันทึก Cycle Time (วินาที)</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -294,16 +294,22 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Model (อิงตามออเดอร์) และ Parts -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
+                    <!-- ฟอร์มเลือก Product Group, Model และ Parts -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้าตามออเดอร์ (Model):</label>
-                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <!-- รายชื่อ Model จะถูกโหลดอัตโนมัติตามออเดอร์ -->
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
+                            <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
+                                <!-- รายชื่อ Group จะถูกโหลดอัตโนมัติ -->
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกชิ้นส่วนในการประกอบ (Part):</label>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกชิ้นส่วนประกอบ (Part):</label>
                             <select id="selectPart" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
                                 <option value="Back Plate">1. Back Plate</option>
                                 <option value="Bottom Plate">2. Bottom Plate</option>
@@ -365,7 +371,7 @@
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตามชื่อกระบวนการ (วินาที/ชิ้น)</h3>
-                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
+                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Group: - | Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
@@ -414,27 +420,43 @@
             console.error("Local storage load error, using default.", err);
         }
 
-        // ฟังก์ชันอัปเดตตัวเลือก Model ในหน้า Work Process ตามออเดอร์จริง
-        function updateModelDropdownOptions(data) {
-            const selectModel = document.getElementById('selectModel');
-            if (!selectModel) return;
-            
-            selectModel.innerHTML = '';
+        // ฟังก์ชันตั้งค่า Dropdown Group และ Model แบบเชื่อมโยงกัน (Cascading Dropdown)
+        function initGroupAndModelDropdowns(data) {
+            const selectGroup = document.getElementById('selectGroup');
+            if (!selectGroup) return;
+
+            selectGroup.innerHTML = '';
             if (data && data.groups) {
                 data.groups.forEach(g => {
-                    if (g.models) {
-                        g.models.forEach(m => {
-                            let opt = document.createElement('option');
-                            opt.value = m.name;
-                            opt.textContent = `${m.name} (Group ${g.productGroup})`;
-                            selectModel.appendChild(opt);
-                        });
-                    }
+                    let opt = document.createElement('option');
+                    opt.value = g.productGroup;
+                    opt.textContent = `Group ${g.productGroup}`;
+                    selectGroup.appendChild(opt);
+                });
+            }
+            onGroupChange();
+        }
+
+        function onGroupChange() {
+            const selectGroup = document.getElementById('selectGroup');
+            const selectModel = document.getElementById('selectModel');
+            if (!selectGroup || !selectModel) return;
+
+            let selectedGroupVal = selectGroup.value;
+            selectModel.innerHTML = '';
+
+            let targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedGroupVal);
+            if (targetGroup && targetGroup.models) {
+                targetGroup.models.forEach(m => {
+                    let opt = document.createElement('option');
+                    opt.value = m.name;
+                    opt.textContent = m.name;
+                    selectModel.appendChild(opt);
                 });
             }
         }
 
-        updateModelDropdownOptions(currentDailyData);
+        initGroupAndModelDropdowns(currentDailyData);
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
@@ -626,12 +648,12 @@
             }
         });
 
-        // ระบบสร้างกราฟแท่ง Cycle Time ของชื่อกระบวนการผลิต
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
+            let selectedGroup = document.getElementById('selectGroup').value;
             let selectedModel = document.getElementById('selectModel').value;
             let selectedPart = document.getElementById('selectPart').value;
-            document.getElementById('ctInfoLabel').textContent = `Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
+            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
 
             let processInputs = document.querySelectorAll('.process-input');
             let ctInputs = document.querySelectorAll('.cycletime-input');
@@ -774,8 +796,8 @@
 
             currentDailyData = tempImportedData;
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            updateModelDropdownOptions(currentDailyData);
-            alert('บันทึกข้อมูลและอัปเดตรุ่นสินค้าเรียบร้อยแล้ว!');
+            initGroupAndModelDropdowns(currentDailyData);
+            alert('บันทึกข้อมูลและอัปเดตตัวเลือก Group/Model เรียบร้อยแล้ว!');
         }
     </script>
 </body>
