@@ -91,70 +91,199 @@
                     <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
                 </div>
 
-                <!-- ส่วนอัปโหลดไฟล์และชั่วโมงทำงาน -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
-                        <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-xs px-3 py-1.5 rounded-lg border border-bordercolor font-medium transition flex items-center space-x-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            <span>อัปโหลดไฟล์แผนผลิต (Excel)</span>
-                            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
-                        </label>
-                    </div>
-
-                    <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
-                        <span class="text-xs text-slate-400 font-medium pl-1">ชม. ทำงาน:</span>
-                        <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
-                        <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
-                            บันทึก
-                        </button>
-                    </div>
+                <!-- ส่วนกรอกชั่วโมงการทำงาน -->
+                <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
+                    <span class="text-xs text-slate-400 font-medium pl-1">ชั่วโมงทำงาน:</span>
+                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
+                    <span class="text-xs text-slate-400">ชม.</span>
+                    <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
+                        บันทึกชั่วโมง
+                    </button>
                 </div>
             </header>
 
-            <!-- Dashboard Body Content (Overview) -->
+            <!-- Dashboard Body Content -->
             <div id="tab-content-dashboard" class="p-6 space-y-6">
-                <!-- Top Summary Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-2">
-                        <p class="text-xs text-slate-400 font-medium">แผนผลิตรวม (Total Plan)</p>
-                        <h3 id="cardTotalPlan" class="text-2xl font-bold text-white">0 ชิ้น</h3>
-                        <p class="text-xs text-cyan-400">อัปเดตจากไฟล์หรือระบบ</p>
-                    </div>
-                    <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-2">
-                        <p class="text-xs text-slate-400 font-medium">ผลิตจริง (Actual Output)</p>
-                        <h3 id="cardTotalActual" class="text-2xl font-bold text-emerald-400">0 ชิ้น</h3>
-                        <p class="text-xs text-slate-400">ประสิทธิภาพการผลิตรวม</p>
-                    </div>
-                    <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-2">
-                        <p class="text-xs text-slate-400 font-medium">Line Efficiency</p>
-                        <h3 id="cardLineEfficiency" class="text-2xl font-bold text-cyan-400">0%</h3>
-                        <p class="text-xs text-emerald-400">เทียบกับเป้าหมายสายการผลิต</p>
-                    </div>
-                    <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-2">
-                        <p class="text-xs text-slate-400 font-medium">สถานะสายการผลิต</p>
-                        <h3 class="text-2xl font-bold text-emerald-400">Normal</h3>
-                        <p class="text-xs text-slate-400">ระบบเดินเครื่องปกติ</p>
-                    </div>
-                </div>
 
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
-                        <h3 class="text-sm font-semibold text-white">กราฟแสดงแผนการผลิตรายวัน (Daily Production Plan)</h3>
-                        <div class="chart-container-wrapper">
-                            <canvas id="overviewPlanChart"></canvas>
+                <!-- 1. OVERVIEW SECTION -->
+                <section id="overview" class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                        <h2 class="text-lg font-bold text-white">1. ภาพรวมการผลิต (Overview)</h2>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)</p>
+                            <h3 class="text-3xl font-bold text-white mt-2">12,500 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
+                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน</span>
+                        </div>
+                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)</p>
+                            <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
+                            <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%</span>
+                        </div>
+                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)</p>
+                            <h3 class="text-3xl font-bold text-amber-400 mt-2">1,300 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
+                            <span class="text-xs text-amber-400 font-medium mt-2 inline-block">ต้องเร่งดำเนินการตามรอบกะ</span>
+                        </div>
+                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">อัตราของเสีย (Defect Rate)</p>
+                            <h3 class="text-3xl font-bold text-rose-400 mt-2">1.4%</h3>
+                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">อยู่ในเกณฑ์ควบคุม (&lt; 2%)</span>
                         </div>
                     </div>
-                    <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
-                        <h3 class="text-sm font-semibold text-white">สัดส่วนการผลิตแยกตามรุ่นสินค้า (Model Distribution)</h3>
-                        <div class="chart-container-wrapper">
-                            <canvas id="overviewModelChart"></canvas>
+                </section>
+
+                <!-- 2. ORDER รายวันและ UPH -->
+                <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและยอดรายวัน</h2>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span id="excelFileName" class="text-xs text-slate-400">ยังไม่ได้เลือกไฟล์</span>
+                            
+                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor flex items-center space-x-2 transition">
+                                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>เลือกไฟล์ Excel</span>
+                                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="previewExcelData(event)">
+                            </label>
+
+                            <button onclick="saveDashboardData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>บันทึกข้อมูล</span>
+                            </button>
                         </div>
                     </div>
-                </div>
+
+                    <!-- Layout: กราฟซ้าย / ตารางขวา -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        <!-- ฝั่งซ้าย: กราฟ -->
+                        <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
+                            <div class="text-[11px] text-cyan-400 mb-2 flex items-center space-x-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                                <span>กราฟแสดงยอด Order รวมรายวัน</span>
+                            </div>
+                            <div class="chart-container-wrapper">
+                                <canvas id="planChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- ฝั่งขวา: ตาราง (ตรึง TOTAL แถวบนสุด) -->
+                        <div class="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                            <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                                <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="border-b border-bordercolor text-slate-400"></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 3. ORDER ของ DOOR LINE -->
+                <section id="door-line" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                        <h2 class="text-lg font-bold text-white">3. สถานะออเดอร์ของ Haier Door Line</h2>
+                    </div>
+                    <div class="h-48">
+                        <canvas id="doorChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- 4. WORK PROCESS -->
+                <section id="work-process" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงาน (Work Process Progress)</h2>
+                        </div>
+                        <button onclick="switchTab('workprocess')" class="text-xs text-cyan-400 hover:underline flex items-center space-x-1">
+                            <span>จัดการ Work Process & Cycle Time ละเอียด &rarr;</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
+                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
+                                <span>1. Press / Stamping</span>
+                                <span class="text-cyan-400">100%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
+                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
+                                <span>2. Welding Process</span>
+                                <span class="text-cyan-400">85%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
+                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
+                                <span>3. Painting / Coating</span>
+                                <span class="text-cyan-400">70%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
+                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
+                                <span>4. Final Assembly</span>
+                                <span class="text-amber-400">45%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-2 rounded-full" style="width: 45%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. MODEL SUMMARY -->
+                <section id="model-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                        <h2 class="text-lg font-bold text-white">5. สรุปยอดผลิตแยกตาม Model ผลิตภัณฑ์</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-bordercolor text-slate-400 text-xs">
+                                    <th class="p-3 font-medium">Model Code</th>
+                                    <th class="p-3 font-medium">Product Name</th>
+                                    <th class="p-3 font-medium">Order</th>
+                                    <th class="p-3 font-medium">Produced</th>
+                                    <th class="p-3 font-medium">Balance</th>
+                                    <th class="p-3 font-medium">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-bordercolor/50 text-slate-300">
+                                <tr>
+                                    <td class="p-3 font-semibold text-cyan-400">MD-X01</td>
+                                    <td class="p-3 text-white">Standard Door Type A</td>
+                                    <td class="p-3">1,500</td>
+                                    <td class="p-3">1,500</td>
+                                    <td class="p-3 text-slate-500">0</td>
+                                    <td class="p-3"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-semibold">Completed</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
             </div>
 
-            <!-- Work Process & Cycle Time Tab Content -->
+            <!-- Work Process & Cycle Time Tab Content (Hidden by default) -->
             <div id="tab-content-workprocess" class="p-6 space-y-6 hidden">
                 <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
@@ -162,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time แยกอิสระ</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -180,7 +309,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
-                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onModelChange()">
+                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
                                 <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
                             </select>
                         </div>
@@ -200,7 +329,7 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนปุ่มกดเปิด/ปิดหน้าต่างแก้ไขตารางข้อมูลกระบวนการทำงาน -->
+                    <!-- ส่วนปุ่มกดเปิด/ปิดหน้าต่างแก้ไขตารางข้อมูลกระบวนการทำงาน, Work Station และ Cycle Time -->
                     <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
@@ -212,7 +341,7 @@
                         </button>
                     </div>
 
-                    <!-- ตารางกรอกข้อมูล (ซ่อนไว้และจะแสดงเมื่อกดปุ่มแก้ไข) -->
+                    <!-- ตารางกรอกข้อมูล (ซ่อนไว้ด้านนอกตามเงื่อนไข และจะแสดงเมื่อกดปุ่มแก้ไข) -->
                     <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/80 p-4 rounded-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-3">
                             <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
@@ -331,7 +460,7 @@
             console.error("Local storage load error, using default.", err);
         }
 
-        let defaultModelProcessData = [
+        let defaultProcessData = [
             { station: 'BTA01', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 13.90, wt2: 11.30, wt3: null, loss: 3.21 },
             { station: 'BTA02', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 8.80, wt2: 10.20, wt3: null, loss: 2.54 },
             { station: 'BTA03', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', wt1: 5.90, wt2: 6.50, wt3: 3.80, loss: null },
@@ -343,58 +472,270 @@
             { station: 'BTA09', p1: '—', p2: '—', p3: '—', wt1: 16.10, wt2: null, wt3: null, loss: 5.77 }
         ];
 
-        let currentProcessData = [];
-
-        function loadProcessDataForCurrentModel() {
-            const selectModel = document.getElementById('selectModel');
-            if (!selectModel || !selectModel.value) return;
-            let modelName = selectModel.value;
-
-            try {
-                let allModelsData = JSON.parse(localStorage.getItem('haier_all_models_process_data') || '{}');
-                if (allModelsData[modelName]) {
-                    currentProcessData = allModelsData[modelName];
-                } else {
-                    currentProcessData = JSON.parse(JSON.stringify(defaultModelProcessData));
-                }
-            } catch (e) {
-                currentProcessData = JSON.parse(JSON.stringify(defaultModelProcessData));
+        let currentProcessData = defaultProcessData;
+        try {
+            let savedProc = localStorage.getItem('haier_process_station_data_v2');
+            if (savedProc) {
+                currentProcessData = JSON.parse(savedProc);
             }
-
-            renderProcessTableInputs();
-            renderSavedDisplayTable();
-            generateCycleTimeChart();
+        } catch (e) {
+            console.error(e);
         }
 
-        // ฟังก์ชันรองรับการอัปโหลดไฟล์ Excel / CSV เข้าสู่ระบบ
-        function handleExcelUpload(event) {
+        let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
+        document.getElementById('shiftHoursInput').value = savedShiftHours;
+
+        function saveShiftHours() {
+            let hours = document.getElementById('shiftHoursInput').value;
+            localStorage.setItem('haier_shift_hours', hours);
+            alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
+            renderUnifiedTable(currentDailyData);
+        }
+
+        function calculateTotalOrders(groupsData, days) {
+            let totalOutputs = new Array(days.length).fill(0);
+            if (groupsData && Array.isArray(groupsData)) {
+                groupsData.forEach(g => {
+                    if (g.models && Array.isArray(g.models)) {
+                        g.models.forEach(m => {
+                            for (let i = 0; i < days.length; i++) {
+                                totalOutputs[i] += Number(m.orders[i]) || 0;
+                            }
+                        });
+                    }
+                });
+            }
+            return { totalOutputs };
+        }
+
+        // สร้างกราฟแผนการผลิต
+        const ctxPlan = document.getElementById('planChart').getContext('2d');
+        let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
+
+        let planChart = new Chart(ctxPlan, {
+            type: 'bar',
+            data: {
+                labels: currentDailyData.days,
+                datasets: [{
+                    label: 'Total Order (ยอดสั่งผลิตรวม)',
+                    data: initialCalc.totalOutputs,
+                    backgroundColor: '#00F0FF',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        function formatExcelDate(val) {
+            let num = Number(val);
+            if (!isNaN(num) && num > 30000) {
+                let utc_days = Math.floor(num - 25569);
+                let dateInfo = new Date(utc_days * 86400 * 1000);
+                return `${dateInfo.getUTCMonth() + 1}/${dateInfo.getUTCDate()}`;
+            }
+            return String(val).trim();
+        }
+
+        // ฟังก์ชันเรนเดอร์ตาราง พร้อมตรึงหัวตารางและแถว TOTAL
+        function renderUnifiedTable(data) {
+            const tableElement = document.getElementById('tablePlanOrder');
+            const headerRow = tableElement.querySelector('thead tr');
+            const tbody = tableElement.querySelector('tbody');
+
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            let days = data.days;
+            let groups = data.groups;
+            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            days.forEach(day => {
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
+            });
+            headerRow.innerHTML = headerHtml;
+
+            let calc = calculateTotalOrders(groups, days);
+
+            let totalTr = document.createElement('tr');
+            totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
+            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
+            for (let i = 0; i < days.length; i++) {
+                let dayTotal = calc.totalOutputs[i];
+                let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
+                totalHtml += `
+                    <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
+                        <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
+                        <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
+                    </td>
+                `;
+            }
+            totalTr.innerHTML = totalHtml;
+            tbody.appendChild(totalTr);
+
+            if (!groups || groups.length === 0) return;
+
+            groups.forEach(g => {
+                let models = g.models;
+                models.forEach((m, mIndex) => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                    
+                    let html = '';
+                    if (mIndex === 0) {
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${models.length}">${g.productGroup}</td>`;
+                    }
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+
+                    for (let i = 0; i < days.length; i++) {
+                        let orderVal = Number(m.orders[i]) || 0;
+                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
+                        let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
+
+                        html += `
+                            <td class="p-2 text-center border-l border-bordercolor/30">
+                                <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
+                                <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
+                            </td>
+                        `;
+                    }
+
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        renderUnifiedTable(currentDailyData);
+
+        // กราฟ Door Line
+        const ctxDoor = document.getElementById('doorChart').getContext('2d');
+        new Chart(ctxDoor, {
+            type: 'line',
+            data: {
+                labels: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6'],
+                datasets: [
+                    {
+                        label: 'Order (เป้าหมาย Door Line)',
+                        data: [500, 500, 450, 450, 450, 450],
+                        borderColor: '#64748b',
+                        borderDash: [5, 5],
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Actual (ยอดผลิตจริง)',
+                        data: [480, 510, 420, 460, 380, 300],
+                        borderColor: '#00F0FF',
+                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        let tempImportedData = null;
+        function previewExcelData(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                    if (json && json.length > 1) {
-                        // ตัวอย่างการอ่านหัวตารางและข้อมูลแถวแรกๆ มาอัปเดตแผนผลิต
-                        alert(`อ่านไฟล์สำเร็จ: ${file.name} (โหลดข้อมูล ${json.length} แถว)`);
-                        renderOverviewDashboard();
-                    } else {
-                        alert("รูปแบบข้อมูลในไฟล์ไม่ถูกต้องหรือไม่พบข้อมูล");
+                    if (excelJson.length > 1) {
+                        let headerRow = excelJson[0];
+                        let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
+                        let days = rawDays.map(d => formatExcelDate(d));
+
+                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
+
+                        let groupMap = {};
+                        let groupOrderList = [];
+                        let currentProductGroup = 'Other';
+
+                        for (let i = 1; i < excelJson.length; i++) {
+                            let row = excelJson[i];
+                            if (!row || row.length === 0) continue;
+
+                            let prodCell = row[0];
+                            if (prodCell !== undefined && String(prodCell).trim() !== '') {
+                                currentProductGroup = String(prodCell).trim();
+                            }
+
+                            let modelName = String(row[1] || '').trim();
+                            if (modelName !== '') {
+                                let orders = row.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+
+                                if (!groupMap[currentProductGroup]) {
+                                    groupMap[currentProductGroup] = [];
+                                    groupOrderList.push(currentProductGroup);
+                                }
+                                groupMap[currentProductGroup].push({ name: modelName, orders: orders });
+                            }
+                        }
+
+                        let groups = [];
+                        groupOrderList.forEach(gName => {
+                            groups.push({ productGroup: gName, models: groupMap[gName] });
+                        });
+
+                        if (groups.length > 0) {
+                            tempImportedData = { days: days, groups: groups };
+                            renderUnifiedTable(tempImportedData);
+                            
+                            let newCalc = calculateTotalOrders(tempImportedData.groups, tempImportedData.days);
+                            planChart.data.labels = tempImportedData.days;
+                            planChart.data.datasets[0].data = newCalc.totalOutputs;
+                            planChart.update();
+
+                            alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล"');
+                        } else {
+                            alert('ไม่พบข้อมูลรุ่นสินค้าในไฟล์ Excel');
+                        }
                     }
                 } catch (err) {
-                    console.error("Excel parse error:", err);
-                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาตรวจสอบรูปแบบไฟล์ Excel อีกครั้ง");
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel: ' + err.message);
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
+        function saveDashboardData() {
+            if (!tempImportedData) {
+                alert('กรุณาเลือกไฟล์ Excel ใหม่ก่อนบันทึกข้อมูล');
+                return;
+            }
+
+            currentDailyData = tempImportedData;
+            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
+            alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+        }
+
+        // Functions for Work Process & Cycle Time tab
         function toggleEditModal() {
             const editSection = document.getElementById('editProcessSection');
             const btnText = document.getElementById('editModalBtnText');
@@ -483,10 +824,6 @@
         }
 
         function saveProcessAndStationData() {
-            const selectModel = document.getElementById('selectModel');
-            if (!selectModel || !selectModel.value) return;
-            let modelName = selectModel.value;
-
             let rows = document.querySelectorAll('#processTableBody tr');
             let updatedList = [];
             rows.forEach((row) => {
@@ -512,19 +849,12 @@
             });
 
             currentProcessData = updatedList;
-
-            try {
-                let allModelsData = JSON.parse(localStorage.getItem('haier_all_models_process_data') || '{}');
-                allModelsData[modelName] = currentProcessData;
-                localStorage.setItem('haier_all_models_process_data', JSON.stringify(allModelsData));
-            } catch (err) {
-                console.error("Save error", err);
-            }
+            localStorage.setItem('haier_process_station_data_v2', JSON.stringify(currentProcessData));
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
             toggleEditModal();
-            alert(`บันทึกข้อมูล Work Station ของรุ่น ${modelName} สำเร็จ!`);
+            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
         }
 
         function initGroupAndModelDropdowns(data) {
@@ -560,14 +890,11 @@
                     selectModel.appendChild(opt);
                 });
             }
-            onModelChange();
-        }
-
-        function onModelChange() {
-            loadProcessDataForCurrentModel();
         }
 
         initGroupAndModelDropdowns(currentDailyData);
+        renderProcessTableInputs();
+        renderSavedDisplayTable();
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
@@ -582,7 +909,6 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-                renderOverviewDashboard();
             } else {
                 dashboardTab.classList.add('hidden');
                 workProcessTab.classList.remove('hidden');
@@ -592,93 +918,6 @@
                 
                 setTimeout(() => { generateCycleTimeChart(); }, 200);
             }
-        }
-
-        let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
-        document.getElementById('shiftHoursInput').value = savedShiftHours;
-
-        function saveShiftHours() {
-            let hours = document.getElementById('shiftHoursInput').value;
-            localStorage.setItem('haier_shift_hours', hours);
-            alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
-            renderOverviewDashboard();
-        }
-
-        let overviewPlanChartInstance = null;
-        let overviewModelChartInstance = null;
-
-        function renderOverviewDashboard() {
-            let totalPlan = 0;
-            let modelSums = {};
-
-            currentDailyData.groups.forEach(g => {
-                g.models.forEach(m => {
-                    let sumModel = m.orders.reduce((a, b) => a + b, 0);
-                    totalPlan += sumModel;
-                    modelSums[m.name] = (modelSums[m.name] || 0) + sumModel;
-                });
-            });
-
-            document.getElementById('cardTotalPlan').textContent = `${totalPlan.toLocaleString()} ชิ้น`;
-            let actualOutput = Math.round(totalPlan * 0.95);
-            document.getElementById('cardTotalActual').textContent = `${actualOutput.toLocaleString()} ชิ้น`;
-            let efficiency = totalPlan > 0 ? ((actualOutput / totalPlan) * 100).toFixed(1) : 0;
-            document.getElementById('cardLineEfficiency').textContent = `${efficiency}%`;
-
-            const ctxPlan = document.getElementById('overviewPlanChart').getContext('2d');
-            if (overviewPlanChartInstance) overviewPlanChartInstance.destroy();
-
-            let datasets = [];
-            let colors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
-            let colorIdx = 0;
-
-            currentDailyData.groups.forEach(g => {
-                g.models.forEach(m => {
-                    datasets.push({
-                        label: m.name,
-                        data: m.orders,
-                        backgroundColor: colors[colorIdx % colors.length],
-                        borderRadius: 4
-                    });
-                    colorIdx++;
-                });
-            });
-
-            overviewPlanChartInstance = new Chart(ctxPlan, {
-                type: 'bar',
-                data: {
-                    labels: currentDailyData.days,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true, grid: { display: false } },
-                        y: { stacked: true, grid: { color: '#1e293b' }, beginAtZero: true }
-                    },
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            const ctxModel = document.getElementById('overviewModelChart').getContext('2d');
-            if (overviewModelChartInstance) overviewModelChartInstance.destroy();
-
-            overviewModelChartInstance = new Chart(ctxModel, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(modelSums),
-                    datasets: [{
-                        data: Object.values(modelSums),
-                        backgroundColor: colors.slice(0, Object.keys(modelSums).length)
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
         }
 
         let cycleTimeChartInstance = null;
@@ -741,8 +980,6 @@
                 }
             });
         }
-
-        renderOverviewDashboard();
     </script>
 </body>
 </html>
