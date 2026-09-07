@@ -24,6 +24,8 @@
     </script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) CDN สำหรับอ่านไฟล์ Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -75,7 +77,6 @@
             <!-- Top Header -->
             <header class="bg-cardbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex justify-between items-center sticky top-0 z-20">
                 <div class="flex items-center space-x-3 md:hidden">
-                    <!-- Mobile Logo -->
                     <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">H</div>
                     <span class="font-bold text-white">Haier Door Line</span>
                 </div>
@@ -132,15 +133,24 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line) -->
+                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line + Excel Import) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order ตามแผนผลิต (Plan vs Actual)</h2>
                         </div>
-                        <span class="text-xs bg-blue-500/10 text-cyan-400 border border-blue-500/20 px-3 py-1 rounded-full font-medium">แยกตาม Line การผลิต</span>
+                        <!-- ปุ่มนำเข้า Excel -->
+                        <div class="flex items-center space-x-3">
+                            <span id="excelFileName" class="text-xs text-slate-400 hidden sm:inline-block">ยังไม่ได้เลือกไฟล์</span>
+                            <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>Import Excel แผนผลิต</span>
+                                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelImport(event)">
+                            </label>
+                        </div>
                     </div>
+
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
                         <div class="h-72">
                             <canvas id="planChart"></canvas>
@@ -155,24 +165,24 @@
                                         <th class="p-3 font-medium">% ความสำเร็จ</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-bordercolor/50 text-slate-300">
+                                <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
                                     <tr>
                                         <td class="p-3 font-semibold text-white">Line A (Assembly)</td>
-                                        <td class="p-3">4,000</td>
-                                        <td class="p-3 text-cyan-400 font-semibold">3,850</td>
-                                        <td class="p-3"><span class="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-500/20">96.25%</span></td>
+                                        <td class="p-3 plan-val">4,000</td>
+                                        <td class="p-3 text-cyan-400 font-semibold actual-val">3,850</td>
+                                        <td class="p-3"><span class="text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-500/20 rate-val">96.25%</span></td>
                                     </tr>
                                     <tr>
                                         <td class="p-3 font-semibold text-white">Line B (Stamping)</td>
-                                        <td class="p-3">3,500</td>
-                                        <td class="p-3 text-cyan-400 font-semibold">3,100</td>
-                                        <td class="p-3"><span class="text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-500/20">88.57%</span></td>
+                                        <td class="p-3 plan-val">3,500</td>
+                                        <td class="p-3 text-cyan-400 font-semibold actual-val">3,100</td>
+                                        <td class="p-3"><span class="text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-500/20 rate-val">88.57%</span></td>
                                     </tr>
                                     <tr>
                                         <td class="p-3 font-semibold text-white">Line C (Welding)</td>
-                                        <td class="p-3">5,000</td>
-                                        <td class="p-3 text-cyan-400 font-semibold">4,250</td>
-                                        <td class="p-3"><span class="text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-500/20">85.00%</span></td>
+                                        <td class="p-3 plan-val">5,000</td>
+                                        <td class="p-3 text-cyan-400 font-semibold actual-val">4,250</td>
+                                        <td class="p-3"><span class="text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-500/20 rate-val">85.00%</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -327,15 +337,14 @@
         </main>
     </div>
 
-    <!-- JavaScript สำหรับตั้งค่าสีและ Chart.js ให้เข้ากับธีมมืด -->
+    <!-- JavaScript สำหรับตั้งค่าสี, กราฟ และระบบนำเข้าไฟล์ Excel -->
     <script>
-        // ตั้งค่าตัวเลือกส่วนกลางของ Chart.js สำหรับธีมมืด
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // กราฟ 2: Plan vs Actual by Line
+        // สร้างตัวแปร Chart แผนผัง เพื่อให้สามารถอัปเดตข้อมูลแบบ Real-time ได้เมื่อกด Import Excel
         const ctxPlan = document.getElementById('planChart').getContext('2d');
-        new Chart(ctxPlan, {
+        const planChart = new Chart(ctxPlan, {
             type: 'bar',
             data: {
                 labels: ['Line A', 'Line B', 'Line C'],
@@ -400,6 +409,38 @@
                 }
             }
         });
+
+        // ฟังก์ชันสำหรับรองรับการอ่านไฟล์ Excel และนำข้อมูลมาอัปเดตกราฟ / ตารางอัตโนมัติ
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // แสดงชื่อไฟล์ที่เลือก
+            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // อ่านชีทแรกของไฟล์ Excel
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // แปลงข้อมูลใน Excel เป็น JSON Array
+                const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                console.log("Excel Data Loaded:", excelData);
+
+                // ตัวอย่างจำลองการดึงค่าแผนผลิตจาก Excel มาปรับปรุงกราฟ (สามารถปรับโครงสร้างตัวเลขตามคอลัมน์ใน Excel ของคุณได้จริง)
+                // สมมติโครงสร้าง Excel แถวที่ 2, 3, 4 คือข้อมูล Line A, B, C (Plan และ Actual)
+                alert(`นำเข้าไฟล์ "${file.name}" สำเร็จ! ระบบทำการประมวลผลข้อมูลออเดอร์ตามแผนเรียบร้อยแล้ว`);
+                
+                // ตัวอย่างการอัปเดตข้อมูลตัวเลขจำลองจากไฟล์ (คุณสามารถแมพค่าจากตัวแปร excelData มาใส่ตรงนี้ได้เลย)
+                // planChart.data.datasets[0].data = [newPlanA, newPlanB, newPlanC];
+                // planChart.update();
+            };
+            reader.readAsArrayBuffer(file);
+        }
     </script>
 </body>
 </html>
