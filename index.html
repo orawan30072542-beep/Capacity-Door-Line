@@ -38,7 +38,7 @@
         .lob-chart-wrapper {
             position: relative;
             width: 100%;
-            height: 380px;
+            height: 400px;
         }
     </style>
 </head>
@@ -322,18 +322,20 @@
                         </div>
                     </div>
 
-                    <!-- แถบเครื่องมือจัดการตาราง -->
+                    <!-- แถบเครื่องมือจัดการตาราง (เพิ่ม Station, ดาวน์โหลดเทมเพลต, อัปโหลด Excel เข้าตาราง, เปิด/ปิดตารางแก้ไข) -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
                             <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <!-- ปุ่มดาวน์โหลด Template -->
                             <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span>ดาวน์โหลดเทมเพลต Excel</span>
                             </button>
 
+                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 <span>อัปโหลดเข้าตาราง</span>
@@ -386,7 +388,9 @@
                                         <th class="p-3 text-center w-16">ลบ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30"></tbody>
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                    <!-- Dynamic rows -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -413,44 +417,21 @@
                                         <th class="p-2.5 text-center text-cyan-300">Cycle Time</th>
                                     </tr>
                                 </thead>
-                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
+                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                    <!-- Rendered saved records -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟแท่ง CT และตารางประกอบจุดงาน -->
-                    <div class="bg-slate-900/60 p-5 rounded-xl border border-bordercolor space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแท่งเปรียบเทียบ Cycle Time (CT) ในแต่ละจุดงานกับ Takt Time</h3>
-                                <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
-                                <span class="text-xs text-slate-300 font-medium">เป้าหมาย Takt Time (วินาที):</span>
-                                <input type="number" id="taktTimeInput" value="60" min="1" step="0.5" oninput="generateCycleTimeChart()" class="bg-slate-900 text-amber-400 font-bold text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none">
-                                <span class="text-xs text-slate-400">วิ/ชิ้น</span>
-                            </div>
+                    <!-- ส่วนแสดงกราฟ Cycle Time -->
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
+                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
                         </div>
-
-                        <!-- กราฟแท่ง CT -->
-                        <div class="lob-chart-wrapper bg-slate-950/40 p-3 rounded-xl border border-bordercolor/50">
+                        <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
-                        </div>
-
-                        <!-- ตารางสรุปค่า CT รายจุดงานประกอบใต้กราฟแท่ง -->
-                        <div class="overflow-x-auto rounded-lg border border-bordercolor/50 mt-4">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-950">
-                                        <th class="p-2.5 text-center">จุดงาน (Station)</th>
-                                        <th class="p-2.5 text-center">WT Total (วิ)</th>
-                                        <th class="p-2.5 text-center">Loss (วิ)</th>
-                                        <th class="p-2.5 text-center text-cyan-300">Cycle Time (CT) รวม</th>
-                                        <th class="p-2.5 text-center">สถานะเทียบ Takt Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ctSummaryTableBody" class="divide-y divide-bordercolor/40 text-slate-300 bg-slate-900/30"></tbody>
-                            </table>
                         </div>
                     </div>
                 </section>
@@ -1106,35 +1087,35 @@
         initGroupRadioButtons(currentDailyData);
 
         function switchTab(tabName) {
-    const dashboardTab = document.getElementById('tab-content-dashboard');
-    const workProcessTab = document.getElementById('tab-content-workprocess');
-    const navDashboard = document.getElementById('nav-dashboard');
-    const navWorkProcess = document.getElementById('nav-workprocess');
-    const headerTitle = document.getElementById('headerTitle');
+            const dashboardTab = document.getElementById('tab-content-dashboard');
+            const workProcessTab = document.getElementById('tab-content-workprocess');
+            const navDashboard = document.getElementById('nav-dashboard');
+            const navWorkProcess = document.getElementById('nav-workprocess');
+            const headerTitle = document.getElementById('headerTitle');
 
-    if (tabName === 'dashboard') {
-        dashboardTab.classList.remove('hidden');
-        workProcessTab.classList.add('hidden');
-        navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-        navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-        headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-    } else {
-        dashboardTab.classList.add('hidden');
-        workProcessTab.classList.remove('hidden');
-        navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-        navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-        headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-        
-        // แก้ไขโดยการสั่งวาดกราฟและรีเซ็ตขนาดใหม่หลังจากแสดงผลแท็บแล้ว
-        setTimeout(() => {
-            generateCycleTimeChart();
-            if (cycleTimeChartInstance) {
-                cycleTimeChartInstance.resize();
-                cycleTimeChartInstance.update();
+            if (tabName === 'dashboard') {
+                dashboardTab.classList.remove('hidden');
+                workProcessTab.classList.add('hidden');
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
+            } else {
+                dashboardTab.classList.add('hidden');
+                workProcessTab.classList.remove('hidden');
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
+                
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        generateCycleTimeChart();
+                        if (cycleTimeChartInstance) {
+                            cycleTimeChartInstance.resize();
+                        }
+                    }, 100);
+                });
             }
-        }, 100);
-    }
-}
+        }
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
@@ -1155,9 +1136,6 @@
                 ctData.push(cycleTime);
             });
 
-            let taktVal = parseFloat(document.getElementById('taktTimeInput').value) || 0;
-            let taktLineData = new Array(labels.length).fill(taktVal);
-
             const canvasEl = document.getElementById('cycleTimeChart');
             if (!canvasEl) return;
             const ctxCT = canvasEl.getContext('2d');
@@ -1171,37 +1149,22 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [
-                        {
-                            type: 'bar',
-                            label: 'Cycle Time (วินาที / ชิ้น)',
-                            data: ctData,
-                            backgroundColor: backgroundColors.slice(0, labels.length),
-                            borderRadius: 6,
-                            order: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Takt Time (เป้าหมาย)',
-                            data: taktLineData,
-                            borderColor: '#f43f5e',
-                            borderWidth: 2,
-                            borderDash: [6, 6],
-                            pointRadius: 0,
-                            fill: false,
-                            order: 1
-                        }
-                    ]
+                    datasets: [{
+                        label: 'Cycle Time (วินาที / ชิ้น)',
+                        data: ctData,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
+                        borderRadius: 6
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ` ${context.dataset.label}: ${context.raw} วินาที`;
+                                    return ` Cycle Time: ${context.raw} วินาที`;
                                 }
                             }
                         }
@@ -1219,34 +1182,6 @@
                     }
                 }
             });
-
-            // เรนเดอร์ตารางสรุป CT ใต้กราฟแท่ง
-            const summaryBody = document.getElementById('ctSummaryTableBody');
-            if (summaryBody) {
-                summaryBody.innerHTML = '';
-                if (!currentProcessData || currentProcessData.length === 0) {
-                    summaryBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลจุดงาน</td></tr>`;
-                } else {
-                    currentProcessData.forEach((item) => {
-                        let { wtTotal, cycleTime } = calculateRowTotals(item);
-                        let isOver = taktVal > 0 && cycleTime > taktVal;
-                        let statusBadge = isOver 
-                            ? `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[11px] font-semibold">Over Takt Time</span>`
-                            : `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[11px] font-semibold">In Target</span>`;
-
-                        let tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-800/30 transition';
-                        tr.innerHTML = `
-                            <td class="p-2.5 text-center font-semibold text-cyan-300">${item.station || '-'}</td>
-                            <td class="p-2.5 text-center text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
-                            <td class="p-2.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
-                            <td class="p-2.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
-                            <td class="p-2.5 text-center">${statusBadge}</td>
-                        `;
-                        summaryBody.appendChild(tr);
-                    });
-                }
-            }
         }
     </script>
 </body>
