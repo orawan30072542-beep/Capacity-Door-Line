@@ -95,12 +95,14 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <!-- กราฟแสดงผล -->
                         <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor">
                             <h3 class="text-xs font-semibold text-slate-400 mb-3">กราฟแสดงยอดผลิตรวมรายวัน</h3>
                             <div class="chart-container-wrapper">
                                 <canvas id="planChart"></canvas>
                             </div>
                         </div>
+                        <!-- ตารางแสดงผล -->
                         <div class="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                             <h3 class="text-xs font-semibold text-slate-400 mb-3">ตารางรายละเอียด (แสดง Output และ UPH ต่อชั่วโมง)</h3>
                             <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -116,7 +118,9 @@
         </main>
     </div>
 
+    <!-- Script สำหรับประมวลผลข้อมูลและไฟล์ Excel -->
     <script>
+        // ข้อมูลตัวอย่างเริ่มต้น (สามารถแทนที่ด้วยการอัปโหลดไฟล์ Excel ได้ทันที)
         let globalData = {
             days: ["01/08", "02/08", "03/08", "04/08", "05/08"],
             groups: [
@@ -138,6 +142,7 @@
 
         let planChart = null;
 
+        // ฟังก์ชันอ่านไฟล์ Excel และแปลงข้อมูลเข้าสู่ตารางอัตโนมัติ
         function handleExcelUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -151,10 +156,14 @@
                     const worksheet = workbook.Sheets[firstSheetName];
                     const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                    if (json.length < 2) return;
+                    if (json.length < 2) {
+                        alert("ไฟล์ Excel ไม่มีข้อมูลเพียงพอ");
+                        return;
+                    }
 
+                    // สมมติโครงสร้าง Excel: คอลัมน์ 0 = Product Group, คอลัมน์ 1 = Model, คอลัมน์ถัดไปเป็นวันที่
                     let headerRow = json[0];
-                    let days = headerRow.slice(2);
+                    let days = headerRow.slice(2); // วันที่เริ่มต้นตั้งแต่คอลัมน์ที่ 3 เป็นต้นไป
                     let groupMap = {};
 
                     for (let i = 1; i < json.length; i++) {
@@ -167,7 +176,8 @@
                         if (!groupMap[g][m]) groupMap[g][m] = new Array(days.length).fill(0);
 
                         for (let j = 0; j < days.length; j++) {
-                            groupMap[g][m][j] = Number(row[j + 2]) || 0;
+                            let val = Number(row[j + 2]) || 0;
+                            groupMap[g][m][j] = val;
                         }
                     }
 
@@ -180,11 +190,12 @@
                         groups.push({ productGroup: gName, models: models });
                     }
 
-                    globalData.days = days;
-                    globalData.groups = groups;
+                    globalData = { days, groups };
                     renderDashboard();
+                    alert("โหลดข้อมูลจาก Excel สำเร็จ!");
                 } catch (err) {
                     console.error(err);
+                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel");
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -215,12 +226,14 @@
             let groups = globalData.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
+            // สร้าง Header ตาราง
             let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             days.forEach(d => headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${d}</th>`);
             headerRow.innerHTML = headerHtml;
 
             let calc = calculateTotals(groups, days);
 
+            // แถวสรุปผล (TOTAL & UPH)
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 border-b-2 border-bordercolor';
             let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Output / UPH</td>`;
@@ -232,6 +245,7 @@
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
 
+            // แถวข้อมูลแต่ละ Model
             groups.forEach(g => {
                 g.models.forEach((m, idx) => {
                     let tr = document.createElement('tr');
@@ -249,18 +263,26 @@
                 });
             });
 
+            // สร้างหรืออัปเดตกราฟ Chart.js
             const ctx = document.getElementById('planChart').getContext('2d');
             if (planChart) planChart.destroy();
             planChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: days,
-                    datasets: [{ label: 'Total Output', data: calc.totalOutputs, backgroundColor: '#00F0FF', borderRadius: 4 }]
+                    datasets: [{
+                        label: 'Total Output',
+                        data: calc.totalOutputs,
+                        backgroundColor: '#00F0FF',
+                        borderRadius: 4
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { family: 'Prompt' } } } },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94A3B8', font: { family: 'Prompt' } } }
+                    },
                     scales: {
                         x: { ticks: { color: '#94A3B8' }, grid: { color: '#1E293B' } },
                         y: { ticks: { color: '#94A3B8' }, grid: { color: '#1E293B' } }
@@ -269,6 +291,7 @@
             });
         }
 
+        // โหลดแสดงผลเมื่อเปิดหน้าเว็บครั้งแรก
         window.onload = renderDashboard;
     </script>
 </body>
