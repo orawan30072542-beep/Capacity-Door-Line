@@ -162,7 +162,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) เลือกชิ้นส่วนและ Station ด้วยปุ่มกด และกำหนด Cycle Time แยกอิสระ</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time แยกอิสระ</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -170,61 +170,49 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group, Model และปุ่มกดเลือกชิ้นส่วน (Pill Buttons) -->
-                    <div class="space-y-3 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
-                                <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
-                                    <!-- รายชื่อ Group จะถูกโหลดอัตโนมัติ -->
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
-                                <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onModelChange()">
-                                    <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
-                                </select>
-                            </div>
-                            <div class="flex items-end">
-                                <button onclick="generateCycleTimeChart()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow transition">
-                                    อัปเดตกราฟ Cycle Time
-                                </button>
-                            </div>
+                    <!-- ฟอร์มเลือก Product Group, Model และ Parts -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือก Product Group:</label>
+                            <select id="selectGroup" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onGroupChange()">
+                                <!-- รายชื่อ Group จะถูกโหลดอัตโนมัติ -->
+                            </select>
                         </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onModelChange()">
+                                <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกชิ้นส่วนประกอบ (Part):</label>
+                            <select id="selectPart" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <option value="Back Plate">1. Back Plate</option>
+                                <option value="Bottom Plate">2. Bottom Plate</option>
+                                <option value="Door">3. Door</option>
+                                <option value="Gasket">4. Gasket</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateCycleTimeChart()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow transition">
+                                อัปเดตกราฟ Cycle Time
+                            </button>
+                        </div>
+                    </div>
 
-                        <!-- Button Pills สำหรับเลือกชิ้นส่วนประกอบ (Part) และ Station Categories -->
-                        <div class="space-y-2 pt-2 border-t border-bordercolor">
-                            <div class="flex flex-col sm:flex-row sm:items-center space-y-1.5 sm:space-y-0 sm:space-x-2">
-                                <span class="text-xs text-slate-400 font-medium w-28 flex-shrink-0">ชิ้นส่วน (Part):</span>
-                                <div id="partButtonGroup" class="flex flex-wrap gap-2">
-                                    <button onclick="selectPartTab('Back Plate', this)" class="part-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-blue-600 text-white shadow transition flex items-center space-x-1.5">
-                                        <span>Back Plate</span>
-                                        <span class="bg-blue-800 text-cyan-200 px-1.5 py-0.5 rounded-full text-[10px]">9</span>
-                                    </button>
-                                    <button onclick="selectPartTab('Bottom Plate', this)" class="part-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition flex items-center space-x-1.5">
-                                        <span>Bottom Plate</span>
-                                        <span class="bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full text-[10px]">8</span>
-                                    </button>
-                                    <button onclick="selectPartTab('Door', this)" class="part-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition flex items-center space-x-1.5">
-                                        <span>Door</span>
-                                        <span class="bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full text-[10px]">6</span>
-                                    </button>
-                                    <button onclick="selectPartTab('Gasket', this)" class="part-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition flex items-center space-x-1.5">
-                                        <span>Gasket</span>
-                                        <span class="bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full text-[10px]">4</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="flex flex-col sm:flex-row sm:items-center space-y-1.5 sm:space-y-0 sm:space-x-2 pt-1">
-                                <span class="text-xs text-slate-400 font-medium w-28 flex-shrink-0">STATION FILTER:</span>
-                                <div id="stationFilterGroup" class="flex flex-wrap gap-2">
-                                    <button onclick="selectStationFilter('All', this)" class="station-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-blue-600 text-white shadow transition">All stations (9)</button>
-                                    <button onclick="selectStationFilter('Welding', this)" class="station-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition">Welding (2)</button>
-                                    <button onclick="selectStationFilter('Assembly', this)" class="station-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition">Assembly (5)</button>
-                                    <button onclick="selectStationFilter('Inspection', this)" class="station-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition">Inspection (2)</button>
-                                </div>
-                            </div>
+                    <!-- ส่วนข้อมูลสรุปด้านบน (Total Leadtime, Max CT, UPH รายชั่วโมง) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-1">
+                            <p class="text-xs text-slate-400 font-medium">Total Leadtime (CT รวมทุกกระบวนการ)</p>
+                            <h4 id="summaryTotalLeadtime" class="text-xl font-bold text-white">0.00 วินาที</h4>
+                        </div>
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-1">
+                            <p class="text-xs text-slate-400 font-medium">Max CT (Bottleneck Station)</p>
+                            <h4 id="summaryMaxCT" class="text-xl font-bold text-rose-400">0.00 วินาที</h4>
+                        </div>
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-1">
+                            <p class="text-xs text-slate-400 font-medium">UPH รายชั่วโมง (Units Per Hour)</p>
+                            <h4 id="summaryHourlyUPH" class="text-xl font-bold text-cyan-400">0 ชิ้น/ชม.</h4>
                         </div>
                     </div>
 
@@ -306,10 +294,10 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง -->
+                    <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง (LOB / Cycle Time Analysis) -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time / LOB แยกตาม Work Station (วินาที/ชิ้น)</h3>
                             <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Group: - | Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
@@ -325,33 +313,6 @@
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
-
-        let currentSelectedPart = 'Back Plate';
-        let currentStationFilter = 'All';
-
-        function selectPartTab(partName, btn) {
-            currentSelectedPart = partName;
-            document.querySelectorAll('.part-btn').forEach(b => {
-                b.className = 'part-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition flex items-center space-x-1.5';
-                let badge = b.querySelector('span:last-child');
-                if(badge) badge.className = 'bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded-full text-[10px]';
-            });
-            btn.className = 'part-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-blue-600 text-white shadow transition flex items-center space-x-1.5';
-            let badge = btn.querySelector('span:last-child');
-            if(badge) badge.className = 'bg-blue-800 text-cyan-200 px-1.5 py-0.5 rounded-full text-[10px]';
-            
-            generateCycleTimeChart();
-        }
-
-        function selectStationFilter(filterName, btn) {
-            currentStationFilter = filterName;
-            document.querySelectorAll('.station-filter-btn').forEach(b => {
-                b.className = 'station-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor transition';
-            });
-            btn.className = 'station-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-blue-600 text-white shadow transition';
-            
-            generateCycleTimeChart();
-        }
 
         let defaultDailyPlanData = {
             days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
@@ -418,7 +379,28 @@
 
             renderProcessTableInputs();
             renderSavedDisplayTable();
+            updateTopSummaryMetrics();
             generateCycleTimeChart();
+        }
+
+        // ฟังก์ชันคำนวณสรุป Leadtime, Max CT และ UPH รายชั่วโมง
+        function updateTopSummaryMetrics() {
+            let totalLeadtime = 0;
+            let maxCycleTime = 0;
+
+            currentProcessData.forEach((item) => {
+                let { cycleTime } = calculateRowTotals(item);
+                totalLeadtime += cycleTime;
+                if (cycleTime > maxCycleTime) {
+                    maxCycleTime = cycleTime;
+                }
+            });
+
+            let hourlyUPH = maxCycleTime > 0 ? Math.round(3600 / maxCycleTime) : 0;
+
+            document.getElementById('summaryTotalLeadtime').textContent = `${totalLeadtime.toFixed(2)} วินาที`;
+            document.getElementById('summaryMaxCT').textContent = `${maxCycleTime.toFixed(2)} วินาที`;
+            document.getElementById('summaryHourlyUPH').textContent = `${hourlyUPH.toLocaleString()} ชิ้น/ชม.`;
         }
 
         // ฟังก์ชันรองรับการอัปโหลดไฟล์ Excel / CSV เข้าสู่ระบบ
@@ -576,6 +558,7 @@
             }
 
             renderSavedDisplayTable();
+            updateTopSummaryMetrics();
             generateCycleTimeChart();
             toggleEditModal();
             alert(`บันทึกข้อมูล Work Station ของรุ่น ${modelName} สำเร็จ!`);
@@ -739,7 +722,8 @@
         function generateCycleTimeChart() {
             let selectedGroup = document.getElementById('selectGroup').value;
             let selectedModel = document.getElementById('selectModel').value;
-            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${currentSelectedPart} | Station Filter: ${currentStationFilter}`;
+            let selectedPart = document.getElementById('selectPart').value;
+            document.getElementById('ctInfoLabel').textContent = `Group: ${selectedGroup || '-'} | Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
 
             let labels = [];
             let ctData = [];
