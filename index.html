@@ -38,7 +38,7 @@
         .lob-chart-wrapper {
             position: relative;
             width: 100%;
-            height: 420px;
+            height: 400px;
         }
     </style>
 </head>
@@ -193,7 +193,7 @@
                         <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                         <h2 class="text-lg font-bold text-white">3. สถานะออเดอร์ของ Haier Door Line</h2>
                     </div>
-                    <div class="chart-container-wrapper">
+                    <div class="h-48">
                         <canvas id="doorChart"></canvas>
                     </div>
                 </section>
@@ -322,18 +322,20 @@
                         </div>
                     </div>
 
-                    <!-- แถบเครื่องมือจัดการตาราง -->
+                    <!-- แถบเครื่องมือจัดการตาราง (เพิ่ม Station, ดาวน์โหลดเทมเพลต, อัปโหลด Excel เข้าตาราง, เปิด/ปิดตารางแก้ไข) -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
                             <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <!-- ปุ่มดาวน์โหลด Template -->
                             <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span>ดาวน์โหลดเทมเพลต Excel</span>
                             </button>
 
+                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 <span>อัปโหลดเข้าตาราง</span>
@@ -386,7 +388,9 @@
                                         <th class="p-3 text-center w-16">ลบ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30"></tbody>
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                    <!-- Dynamic rows -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -413,34 +417,21 @@
                                         <th class="p-2.5 text-center text-cyan-300">Cycle Time</th>
                                     </tr>
                                 </thead>
-                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
+                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                    <!-- Rendered saved records -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- กราฟ Cycle Time -->
+                    <!-- ส่วนแสดงกราฟ Cycle Time -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time ของแต่ละสถานี</h3>
-                                <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
-                            </div>
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตาม Work Station (วินาที/ชิ้น)</h3>
+                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- กราฟ Line of Balance (LOB) -->
-                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3 mt-6">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">กราฟ Line of Balance (LOB) แยกตามสถานี</h3>
-                                <span id="lobInfoLabel" class="text-xs text-slate-400 font-medium">เปรียบเทียบแผนสะสม (Planned) กับผลผลิตจริง (Actual) แต่ละจุดสถานี</span>
-                            </div>
-                        </div>
-                        <div class="lob-chart-wrapper">
-                            <canvas id="lobChart"></canvas>
                         </div>
                     </div>
                 </section>
@@ -539,7 +530,6 @@
             renderProcessTableInputs();
             renderSavedDisplayTable();
             generateCycleTimeChart();
-            generateLOBChart();
         }
 
         let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
@@ -581,40 +571,6 @@
                     backgroundColor: '#00F0FF',
                     borderRadius: 4
                 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-
-        const ctxDoor = document.getElementById('doorChart').getContext('2d');
-        let doorChart = new Chart(ctxDoor, {
-            type: 'line',
-            data: {
-                labels: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6'],
-                datasets: [
-                    {
-                        label: 'Order (เป้าหมาย Door Line)',
-                        data: [500, 500, 450, 450, 450, 450],
-                        borderColor: '#64748b',
-                        borderDash: [5, 5],
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Actual (ยอดผลิตจริง)',
-                        data: [480, 510, 420, 460, 380, 300],
-                        borderColor: '#00F0FF',
-                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }
-                ]
             },
             options: {
                 responsive: true,
@@ -707,6 +663,40 @@
         }
 
         renderUnifiedTable(currentDailyData);
+
+        const ctxDoor = document.getElementById('doorChart').getContext('2d');
+        new Chart(ctxDoor, {
+            type: 'line',
+            data: {
+                labels: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6'],
+                datasets: [
+                    {
+                        label: 'Order (เป้าหมาย Door Line)',
+                        data: [500, 500, 450, 450, 450, 450],
+                        borderColor: '#64748b',
+                        borderDash: [5, 5],
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Actual (ยอดผลิตจริง)',
+                        data: [480, 510, 420, 460, 380, 300],
+                        borderColor: '#00F0FF',
+                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
 
         let tempImportedData = null;
         function previewExcelData(event) {
@@ -846,7 +836,7 @@
                             if (editSection.classList.contains('hidden')) {
                                 toggleEditModal();
                             }
-                            alert('นำเข้าข้อมูล Work Station จาก Excel สำเร็จ!');
+                            alert('นำเข้าข้อมูล Work Station จาก Excel สำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกข้อมูลและแสดงผล" ได้ทันที');
                         } else {
                             alert('ไม่พบข้อมูล Station ในไฟล์ Excel ที่อัปโหลด');
                         }
@@ -1001,9 +991,8 @@
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
-            generateLOBChart();
             toggleEditModal();
-            alert(`บันทึกข้อมูลสำเร็จ!`);
+            alert(`บันทึกข้อมูลสำหรับ Model: ${modelsArray.join(', ')} (${selectedPartValue}) สำเร็จ!`);
         }
 
         function initGroupRadioButtons(data) {
@@ -1110,27 +1099,23 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-                
-                setTimeout(() => {
-                    if (planChart) { planChart.resize(); planChart.update(); }
-                    if (doorChart) { doorChart.resize(); doorChart.update(); }
-                }, 50);
-           } else {
+            } else {
                 dashboardTab.classList.add('hidden');
                 workProcessTab.classList.remove('hidden');
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                // เพิ่มคำสั่งนี้เพื่อบังคับวาดกราฟใหม่หลังจากเปิดแท็บ
-                setTimeout(() => {
-                    generateCycleTimeChart();
-                    if (cycleTimeChartInstance) {
-                        cycleTimeChartInstance.resize();
-                        cycleTimeChartInstance.update();
-                    }
-                }, 50);
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        generateCycleTimeChart();
+                        if (cycleTimeChartInstance) {
+                            cycleTimeChartInstance.resize();
+                        }
+                    }, 100);
+                });
             }
+        }
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
@@ -1175,11 +1160,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ` ${context.dataset.label}: ${context.raw} วินาที`;
+                                    return ` Cycle Time: ${context.raw} วินาที`;
                                 }
                             }
                         }
@@ -1189,83 +1174,6 @@
                             beginAtZero: true, 
                             grid: { color: '#1e293b' },
                             title: { display: true, text: 'วินาที (Seconds)' }
-                        },
-                        x: { 
-                            grid: { display: false },
-                            ticks: { font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        let lobChartInstance = null;
-        function generateLOBChart() {
-            let labels = [];
-            let plannedData = [];
-            let actualData = [];
-
-            currentProcessData.forEach((item, index) => {
-                labels.push(item.station || `STA0${index + 1}`);
-                let basePlan = 500 - (index * 30);
-                let baseActual = Math.round(basePlan * (0.85 + Math.random() * 0.15));
-                
-                plannedData.push(basePlan);
-                actualData.push(baseActual);
-            });
-
-            const canvasEl = document.getElementById('lobChart');
-            if (!canvasEl) return;
-            const ctxLOB = canvasEl.getContext('2d');
-
-            if (lobChartInstance) {
-                lobChartInstance.destroy();
-                lobChartInstance = null;
-            }
-
-            lobChartInstance = new Chart(ctxLOB, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Planned Cumulative (แผนสะสม)',
-                            data: plannedData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.1,
-                            fill: false
-                        },
-                        {
-                            label: 'Actual Cumulative (ผลผลิตจริงสะสม)',
-                            data: actualData,
-                            borderColor: '#00F0FF',
-                            backgroundColor: 'rgba(0, 240, 255, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.1,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` ${context.dataset.label}: ${context.raw} PCS`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            grid: { color: '#1e293b' },
-                            title: { display: true, text: 'จำนวนชิ้น (Units)' }
                         },
                         x: { 
                             grid: { display: false },
