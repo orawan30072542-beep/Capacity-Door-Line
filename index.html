@@ -141,7 +141,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. แผน Order รายวันและ UPH (รวมทุกรุ่น)</h2>
+                            <h2 class="text-lg font-bold text-white">2. แผน Order รายวันและ UPH (Product และ Model)</h2>
                         </div>
                         <!-- ปุ่มจัดการไฟล์และบันทึก -->
                         <div class="flex flex-wrap items-center gap-3">
@@ -175,12 +175,12 @@
                         </div>
                     </div>
 
-                    <!-- ตารางรวมทุกรุ่นในตารางเดียว (มีแถว Total รวมภาพรวมด้านบน) -->
+                    <!-- ตารางแสดง Product และ Model -->
                     <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex items-center justify-between border-b border-bordercolor pb-2">
                             <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
                                 <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                                <span>ตารางสรุปยอด Order และ UPH แยกตาม Model (รวมทุกรุ่น)</span>
+                                <span>ตารางสรุปยอด Order และ UPH (ช่องที่ 1: Product, ช่องที่ 2: Model)</span>
                             </h3>
                             <span class="text-[11px] text-slate-400">มี Total ภาพรวมรายวันด้านบนสุด</span>
                         </div>
@@ -307,14 +307,14 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้นแบบรวมทุกรุ่นในตารางเดียว
+        // โครงสร้างข้อมูลตั้งต้น (Product และ Model)
         let defaultDailyPlanData = {
             days: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
             models: [
-                { name: 'Model 159', orders: [159, 0, 610, 610, 592, 592], uph: [0, 0, 210, 163, 15, 225] },
-                { name: 'Model 199', orders: [0, 480, 480, 480, 480, 460], uph: [0, 0, 0, 0, 35, 260] },
-                { name: 'Model TM545', orders: [0, 610, 610, 610, 610, 293], uph: [0, 0, 0, 0, 0, 337] },
-                { name: 'Model G3 ECO', orders: [0, 0, 0, 0, 34, 238], uph: [0, 260, 260, 238, 204, 0] }
+                { product: 'Refrigerator Door', name: 'Model 159', orders: [159, 0, 610, 610, 592, 592], uph: [0, 0, 210, 163, 15, 225] },
+                { product: 'Refrigerator Door', name: 'Model 199', orders: [0, 480, 480, 480, 480, 460], uph: [0, 0, 0, 0, 35, 260] },
+                { product: 'Freezer Door', name: 'Model TM545', orders: [0, 610, 610, 610, 610, 293], uph: [0, 0, 0, 0, 0, 337] },
+                { product: 'Freezer Door', name: 'Model G3 ECO', orders: [0, 0, 0, 0, 34, 238], uph: [0, 260, 260, 238, 204, 0] }
             ]
         };
 
@@ -406,7 +406,7 @@
             return strVal;
         }
 
-        // ฟังก์ชันเรนเดอร์ตารางรวมทุกรุ่นในตารางเดียว (พร้อมแถว Total ด้านบน)
+        // ฟังก์ชันเรนเดอร์ตาราง (ช่องที่ 1: Product, ช่องที่ 2: Model)
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -418,8 +418,8 @@
             let days = data.days;
             let modelsList = data.models;
 
-            // สร้างหัวตาราง
-            let headerHtml = `<th class="p-2 font-medium w-36">Model</th>`;
+            // สร้างหัวตาราง (ช่องที่ 1 Product, ช่องที่ 2 Model)
+            let headerHtml = `<th class="p-2 font-medium w-36">Product</th><th class="p-2 font-medium w-32">Model</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-2 font-medium text-center">${day}</th>`;
             });
@@ -439,7 +439,7 @@
             // สร้างแถว Total ไว้ด้านบนสุดของตาราง
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/40 border-b-2 border-bordercolor font-bold';
-            let totalHtml = `<td class="p-2 text-cyan-300">Total (รวมทุกรุ่น)</td>`;
+            let totalHtml = `<td colspan="2" class="p-2 text-cyan-300">Total (รวมทุกรุ่น)</td>`;
             for (let i = 0; i < days.length; i++) {
                 totalHtml += `
                     <td class="p-1.5 text-center border-l border-bordercolor/30">
@@ -453,17 +453,20 @@
 
             if (modelsList.length === 0) {
                 let emptyTr = document.createElement('tr');
-                emptyTr.innerHTML = `<td colspan="${days.length + 1}" class="p-4 text-center text-slate-500">ไม่มีข้อมูล Model</td>`;
+                emptyTr.innerHTML = `<td colspan="${days.length + 2}" class="p-4 text-center text-slate-500">ไม่มีข้อมูล Product / Model</td>`;
                 tbody.appendChild(emptyTr);
                 return;
             }
 
-            // สร้างแถวข้อมูลแต่ละ Model
+            // สร้างแถวข้อมูลแต่ละ Model (ช่อง 1 Product, ช่อง 2 Model)
             modelsList.forEach(m => {
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
                 
-                let html = `<td class="p-2 font-semibold text-white bg-slate-900/40">${m.name}</td>`;
+                let html = `
+                    <td class="p-2 font-medium text-slate-300 bg-slate-900/40">${m.product || '-'}</td>
+                    <td class="p-2 font-semibold text-white bg-slate-900/40">${m.name}</td>
+                `;
                 
                 for (let i = 0; i < days.length; i++) {
                     let orderVal = Math.round(Number(m.orders[i]) || 0);
@@ -520,7 +523,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel รวมทุกรุ่นอัตโนมัติ
+        // ระบบอ่านไฟล์ Excel (ช่องที่ 1: Product, ช่องที่ 2: Model)
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -537,7 +540,8 @@
 
                 if (excelJson.length > 2) {
                     let headerRow = excelJson[0];
-                    let rawDays = headerRow.slice(1).filter(val => val !== undefined && val !== null && val !== '');
+                    // ข้ามหัวข้อคอลัมน์ 2 ช่องแรก (Product และ Model)
+                    let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && val !== '');
                     let days = rawDays.map(d => formatExcelDate(d));
 
                     if (days.length === 0) days = ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'];
@@ -546,11 +550,12 @@
                     for (let i = 1; i < excelJson.length; i += 2) {
                         let rowOrder = excelJson[i];
                         let rowUph = excelJson[i+1] || [];
-                        if (rowOrder && rowOrder[0] !== undefined) {
-                            let modelName = rowOrder[0];
-                            let orders = rowOrder.slice(1, 1 + days.length).map(val => Math.round(Number(val) || 0));
-                            let uph = rowUph.slice(1, 1 + days.length).map(val => Math.round(Number(val) || 0));
-                            models.push({ name: modelName, orders: orders, uph: uph });
+                        if (rowOrder && (rowOrder[0] !== undefined || rowOrder[1] !== undefined)) {
+                            let productName = rowOrder[0] || '-';
+                            let modelName = rowOrder[1] || '-';
+                            let orders = rowOrder.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+                            let uph = rowUph.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+                            models.push({ product: productName, name: modelName, orders: orders, uph: uph });
                         }
                     }
 
@@ -563,7 +568,7 @@
                         planChart.data.datasets[0].data = newTotals;
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! แสดงผลรวมทุกรุ่นเรียบร้อย กรุณากด "บันทึกข้อมูล"');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! แสดงคอลัมน์ Product และ Model เรียบร้อย กรุณากด "บันทึกข้อมูล"');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
