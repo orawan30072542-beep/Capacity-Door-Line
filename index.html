@@ -30,7 +30,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Prompt', sans-serif; }
-        /* สไตล์สำหรับกล่องกราฟที่ให้เลื่อนได้ */
         .chart-container-wrapper {
             position: relative;
             width: 100%;
@@ -137,12 +136,12 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER รายวันและ UPH (กราฟแสดงเฉพาะ Production A และ B / ตารางแสดง Line และ รุ่นครบถ้วน) -->
+                <!-- 2. ORDER รายวันและ UPH (กราฟรวมยอด A และ B แยกสี / ตารางแบ่งซ้าย Production A ขวา Production B) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order รายวัน และ UPH แยกตาม Line และรุ่น</h2>
+                            <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order รายวัน และ UPH แยกตาม Production A และ B</h2>
                         </div>
                         <!-- ปุ่มจัดการไฟล์และบันทึก -->
                         <div class="flex flex-wrap items-center gap-3">
@@ -161,12 +160,12 @@
                         </div>
                     </div>
 
-                    <!-- กราฟอยู่ด้านบน (แสดงเฉพาะ Production A และ Production B) -->
+                    <!-- กราฟอยู่ด้านบน (แสดงยอดรวมรายวันของ Production A และ B คนละสี) -->
                     <div class="bg-slate-900/40 p-4 rounded-xl border border-bordercolor">
                         <div class="text-[11px] text-cyan-400 mb-2 flex items-center justify-between">
                             <span class="flex items-center space-x-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                                <span>กราฟแสดงข้อมูลเฉพาะ Production A และ Production B (เลื่อนซ้าย-ขวาได้)</span>
+                                <span>กราฟแสดงออเดอร์รวมรายวันแยกตาม Production A และ Production B (เลื่อนซ้าย-ขวาได้)</span>
                             </span>
                         </div>
                         <div class="chart-container-wrapper">
@@ -176,18 +175,55 @@
                         </div>
                     </div>
 
-                    <!-- ตารางอยู่ด้านล่าง (แสดงครบถ้วนทั้ง Line และ Model พร้อมรวมช่อง UPH กระชับ) -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr id="tableHeaderRow" class="border-b border-bordercolor text-slate-400">
-                                    <!-- สร้างหัวตารางวันอัตโนมัติ -->
-                                </tr>
-                            </thead>
-                            <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
-                                <!-- ข้อมูล Line, Model และ UPH รวมในช่องเดียว -->
-                            </tbody>
-                        </table>
+                    <!-- ตารางแบ่งเป็น 2 ฝั่ง ซ้าย (Production A) และ ขวา (Production B) พร้อม Total ด้านบน -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- ตารางซ้าย: Production A -->
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-3">
+                            <div class="flex items-center justify-between border-b border-bordercolor pb-2">
+                                <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
+                                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                                    <span>Production A</span>
+                                </h3>
+                                <span class="text-[11px] text-slate-400">มี Total รวมรายวันด้านบน</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table id="tableProdA" class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="border-b border-bordercolor text-slate-400">
+                                            <!-- หัวตาราง A -->
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300">
+                                        <!-- ข้อมูล Production A -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ตารางขวา: Production B -->
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-3">
+                            <div class="flex items-center justify-between border-b border-bordercolor pb-2">
+                                <h3 class="font-bold text-blue-400 text-sm flex items-center space-x-2">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    <span>Production B</span>
+                                </h3>
+                                <span class="text-[11px] text-slate-400">มี Total รวมรายวันด้านบน</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table id="tableProdB" class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="border-b border-bordercolor text-slate-400">
+                                            <!-- หัวตาราง B -->
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300">
+                                        <!-- ข้อมูล Production B -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
 
@@ -303,7 +339,7 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้น รองรับ Line และ Model
+        // โครงสร้างข้อมูลตั้งต้น รองรับ Line A และ B
         let defaultDailyPlanData = {
             days: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
             models: [
@@ -329,31 +365,48 @@
             alert(`บันทึกเวลาทำงานเป็น: ${start} ถึง ${end} เรียบร้อยแล้ว`);
         }
 
-        // ฟังก์ชันสร้าง Dataset สำหรับกราฟ (เลือกเฉพาะ Production A และ Production B ตามต้องการ)
-        function getChartDatasets(modelsData) {
-            // กรองเฉพาะ Model ที่อยู่ใน Line "Production A" หรือ "Production B"
-            const targetLines = ['Production A', 'Production B'];
-            const filteredModels = modelsData.filter(m => targetLines.includes(m.line));
+        // คำนวณยอดรวมรายวันแยกตาม Line (Production A และ B) สำหรับกราฟ
+        function calculateLineTotals(modelsData, days) {
+            let totalsA = new Array(days.length).fill(0);
+            let totalsB = new Array(days.length).fill(0);
 
-            const colors = ['#0066FF', '#00F0FF', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'];
-            
-            return filteredModels.map((m, index) => {
-                return {
-                    label: `${m.line} - ${m.name}`,
-                    data: m.orders,
-                    backgroundColor: colors[index % colors.length],
-                    borderRadius: 4
-                };
+            modelsData.forEach(m => {
+                let lineStr = String(m.line || '').trim().toLowerCase();
+                for (let i = 0; i < days.length; i++) {
+                    let val = Number(m.orders[i]) || 0;
+                    if (lineStr.includes('a')) {
+                        totalsA[i] += val;
+                    } else if (lineStr.includes('b')) {
+                        totalsB[i] += val;
+                    }
+                }
             });
+
+            return { totalsA, totalsB };
         }
 
-        // สร้างกราฟ Plan (แสดงเฉพาะ Production A และ Production B)
+        // สร้างกราฟแท่ง แสดงออเดอร์รวมรายวัน แยก Production A (สีฟ้าไซยาณ) และ B (สีน้ำเงิน) คนละสี
         const ctxPlan = document.getElementById('planChart').getContext('2d');
+        let lineTotals = calculateLineTotals(currentDailyData.models, currentDailyData.days);
+
         let planChart = new Chart(ctxPlan, {
             type: 'bar',
             data: {
                 labels: currentDailyData.days,
-                datasets: getChartDatasets(currentDailyData.models)
+                datasets: [
+                    {
+                        label: 'Production A (Total Order)',
+                        data: lineTotals.totalsA,
+                        backgroundColor: '#00F0FF',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Production B (Total Order)',
+                        data: lineTotals.totalsB,
+                        backgroundColor: '#0066FF',
+                        borderRadius: 4
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -402,38 +455,71 @@
             return strVal;
         }
 
-        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง (แสดงทั้ง Line และ รุ่นครบถ้วน พร้อมรวมช่อง UPH)
-        function renderDailyPlanTable(data) {
-            const headerRow = document.getElementById('tableHeaderRow');
-            const tbody = document.getElementById('planTableBody');
-            
+        // ฟังก์ชันเรนเดอร์ตารางแยกฝั่ง (ซ้าย Production A, ขวา Production B) พร้อมแถว Total ด้านบน
+        function renderSplitTables(data) {
+            // กรองโมเดลตาม Line
+            const modelsA = data.models.filter(m => String(m.line || '').trim().toLowerCase().includes('a'));
+            const modelsB = data.models.filter(m => String(m.line || '').trim().toLowerCase().includes('b'));
+
+            renderSingleTable('tableProdA', modelsA, data.days, 'Production A');
+            renderSingleTable('tableProdB', modelsB, data.days, 'Production B');
+        }
+
+        function renderSingleTable(tableId, modelsList, days, lineTitle) {
+            const tableElement = document.getElementById(tableId);
+            const headerRow = tableElement.querySelector('thead tr');
+            const tbody = tableElement.querySelector('tbody');
+
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            let headerHtml = `<th class="p-2 font-medium w-44">Line / รุ่น</th>`;
-            data.days.forEach(day => {
+            // สร้างหัวตาราง
+            let headerHtml = `<th class="p-2 font-medium w-32">Model</th>`;
+            days.forEach(day => {
                 headerHtml += `<th class="p-2 font-medium text-center">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
-            data.models.forEach(m => {
+            // คำนวณ Total รายวันของ Line นี้
+            let totalOrders = new Array(days.length).fill(0);
+            let totalUph = new Array(days.length).fill(0);
+
+            modelsList.forEach(m => {
+                for (let i = 0; i < days.length; i++) {
+                    totalOrders[i] += Math.round(Number(m.orders[i]) || 0);
+                    totalUph[i] += Math.round(Number(m.uph[i]) || 0);
+                }
+            });
+
+            // สร้างแถว Total ไว้ด้านบนสุดของตาราง
+            let totalTr = document.createElement('tr');
+            totalTr.className = 'bg-blue-950/40 border-b-2 border-bordercolor font-bold';
+            let totalHtml = `<td class="p-2 text-cyan-300">Total</td>`;
+            for (let i = 0; i < days.length; i++) {
+                totalHtml += `
+                    <td class="p-1.5 text-center border-l border-bordercolor/30">
+                        <div class="text-cyan-300 text-xs">${totalOrders[i].toLocaleString()}</div>
+                        <div class="text-[10px] text-cyan-400/80 font-normal">UPH: ${totalUph[i].toLocaleString()}</div>
+                    </td>
+                `;
+            }
+            totalTr.innerHTML = totalHtml;
+            tbody.appendChild(totalTr);
+
+            // สร้างแถวข้อมูลแต่ละ Model
+            modelsList.forEach(m => {
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
                 
-                let html = `
-                    <td class="p-2 bg-slate-900/40">
-                        <div class="text-[10px] text-slate-400 font-medium">${m.line || 'Production Line'}</div>
-                        <div class="font-semibold text-cyan-400">${m.name}</div>
-                    </td>
-                `;
+                let html = `<td class="p-2 font-semibold text-white bg-slate-900/40">${m.name}</td>`;
                 
-                for (let i = 0; i < data.days.length; i++) {
+                for (let i = 0; i < days.length; i++) {
                     let orderVal = Math.round(Number(m.orders[i]) || 0);
                     let uphVal = Math.round(Number(m.uph[i]) || 0);
                     
                     html += `
                         <td class="p-1.5 text-center border-l border-bordercolor/30">
-                            <div class="text-white font-medium text-xs">${orderVal.toLocaleString()}</div>
+                            <div class="text-slate-200 font-medium text-xs">${orderVal.toLocaleString()}</div>
                             <div class="text-[10px] text-cyan-400 font-normal">UPH: ${uphVal.toLocaleString()}</div>
                         </td>
                     `;
@@ -444,7 +530,7 @@
             });
         }
 
-        renderDailyPlanTable(currentDailyData);
+        renderSplitTables(currentDailyData);
 
         // กราฟ 3: Door Line Order Trend
         const ctxDoor = document.getElementById('doorChart').getContext('2d');
@@ -482,7 +568,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel รองรับคอลัมน์ Line และ Model
+        // ระบบอ่านไฟล์ Excel แยก Line และ Model อัตโนมัติ
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -498,8 +584,6 @@
                 const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                 if (excelJson.length > 2) {
-                    // สมาสตรัปเจอร์ Excel: แถวแรกคือหัวตารางวันที่ (เริ่มตั้งแต่คอลัมน์ที่ 2 หรือ index 2 ถ้ามี Line และ Model แยกกัน)
-                    // รองรับทั้งแบบ [Line, Model, วัน1, วัน2...] หรือ [Model, วัน1, วัน2...]
                     let headerRow = excelJson[0];
                     let dateStartIndex = headerRow[0] && String(headerRow[0]).toLowerCase().includes('line') ? 2 : 1;
                     
@@ -509,7 +593,6 @@
                     if (days.length === 0) days = ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'];
 
                     let models = [];
-                    // วนลูปอ่านข้อมูลทีละคู่แถว (Order และ UPH)
                     for (let i = 1; i < excelJson.length; i += 2) {
                         let rowOrder = excelJson[i];
                         let rowUph = excelJson[i+1] || [];
@@ -527,13 +610,15 @@
 
                     if (models.length > 0) {
                         tempImportedData = { days: days, models: models };
-                        renderDailyPlanTable(tempImportedData);
+                        renderSplitTables(tempImportedData);
                         
+                        let newTotals = calculateLineTotals(tempImportedData.models, tempImportedData.days);
                         planChart.data.labels = tempImportedData.days;
-                        planChart.data.datasets = getChartDatasets(tempImportedData.models);
+                        planChart.data.datasets[0].data = newTotals.totalsA;
+                        planChart.data.datasets[1].data = newTotals.totalsB;
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กราฟอัปเดตเฉพาะ Production A และ B เรียบร้อย กรุณากด "บันทึกข้อมูล"');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! แยกตารางซ้าย-ขวาและกราฟเรียบร้อย กรุณากด "บันทึกข้อมูล"');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
