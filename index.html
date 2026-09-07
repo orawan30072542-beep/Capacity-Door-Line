@@ -141,7 +141,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและ UPH รายรุ่น</h2>
+                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและยอดรายวัน</h2>
                         </div>
                         <!-- ปุ่มจัดการไฟล์และบันทึก -->
                         <div class="flex flex-wrap items-center gap-3">
@@ -300,35 +300,22 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้นจัดกลุ่มตาม Product Group และ Model
+        // โครงสร้างข้อมูลตั้งต้นจัดกลุ่มตาม Product Group และ Model (1 บรรทัดต่อ 1 รุ่น)
         let defaultDailyPlanData = {
-            days: ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9', '7/9', '8/9'],
+            days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
             groups: [
                 {
                     productGroup: '159',
                     models: [
-                        { name: '159C', orders: [610, 610, 592, 592, 592, 0, 629, 585], uph: [55, 55, 54, 54, 54, 0, 57, 53] },
-                        { name: '159F', orders: [210, 163, 15, 225, 0, 0, 0, 0], uph: [19, 15, 1, 20, 0, 0, 0, 0] }
+                        { name: '159C', orders: [610, 610, 592, 592, 592, 0, 629, 585] },
+                        { name: '159F', orders: [210, 163, 15, 225, 0, 0, 0, 0] }
                     ]
                 },
                 {
                     productGroup: '199',
                     models: [
-                        { name: '199C', orders: [480, 480, 480, 480, 460, 0, 520, 455], uph: [44, 44, 44, 44, 42, 0, 47, 41] },
-                        { name: '199F', orders: [0, 0, 0, 35, 260, 0, 260, 260], uph: [0, 0, 0, 3, 24, 0, 24, 24] }
-                    ]
-                },
-                {
-                    productGroup: 'TM545',
-                    models: [
-                        { name: 'TM545#212', orders: [610, 610, 610, 610, 293, 0, 0, 160], uph: [55, 55, 55, 55, 27, 0, 0, 15] },
-                        { name: 'TM545#235', orders: [0, 0, 0, 0, 337, 0, 671, 490], uph: [0, 0, 0, 0, 31, 0, 61, 45] }
-                    ]
-                },
-                {
-                    productGroup: 'G3 ECO',
-                    models: [
-                        { name: 'G3 ECO 320', orders: [0, 0, 0, 34, 238, 0, 260, 246], uph: [0, 0, 0, 3, 22, 0, 24, 22] }
+                        { name: '199C', orders: [480, 480, 480, 480, 460, 0, 520, 455] },
+                        { name: '199F', orders: [0, 0, 0, 35, 260, 0, 260, 260] }
                     ]
                 }
             ]
@@ -349,10 +336,9 @@
             alert(`บันทึกเวลาทำงานเป็น: ${start} ถึง ${end} เรียบร้อยแล้ว`);
         }
 
-        // ฟังก์ชันคำนวณผลรวม Total Output และ UPH แยกตามวันจากโครงสร้าง groups
-        function calculateTotalOrdersAndUph(groupsData, days) {
+        // ฟังก์ชันคำนวณผลรวม Total Output แยกตามวันจากโครงสร้าง groups
+        function calculateTotalOrders(groupsData, days) {
             let totalOutputs = new Array(days.length).fill(0);
-            let totalUphs = new Array(days.length).fill(0);
 
             if (groupsData && Array.isArray(groupsData)) {
                 groupsData.forEach(g => {
@@ -360,18 +346,17 @@
                         g.models.forEach(m => {
                             for (let i = 0; i < days.length; i++) {
                                 totalOutputs[i] += Number(m.orders[i]) || 0;
-                                totalUphs[i] += Number(m.uph[i]) || 0;
                             }
                         });
                     }
                 });
             }
-            return { totalOutputs, totalUphs };
+            return { totalOutputs };
         }
 
         // สร้างกราฟแท่งรวมยอด Order รายวัน
         const ctxPlan = document.getElementById('planChart').getContext('2d');
-        let initialCalc = calculateTotalOrdersAndUph(currentDailyData.groups, currentDailyData.days);
+        let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
 
         let planChart = new Chart(ctxPlan, {
             type: 'bar',
@@ -404,15 +389,15 @@
                 let dateInfo = new Date(utc_value * 1000);
                 let day = dateInfo.getUTCDate();
                 let month = dateInfo.getUTCMonth() + 1;
-                return `${day}/${month}`;
+                return `${month}/${day}`;
             }
             if (val instanceof Date) {
-                return `${val.getDate()}/${val.getMonth() + 1}`;
+                return `${val.getMonth() + 1}/${val.getDate()}`;
             }
             return String(val).trim();
         }
 
-        // ฟังก์ชันเรนเดอร์ตารางสไตล์ตามภาพตัวอย่าง
+        // ฟังก์ชันเรนเดอร์ตารางสไตล์ตามภาพตัวอย่าง (1 บรรทัดต่อ 1 รุ่น)
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -432,7 +417,7 @@
             headerRow.innerHTML = headerHtml;
 
             // คำนวณภาพรวม TOTAL
-            let calc = calculateTotalOrdersAndUph(groups, days);
+            let calc = calculateTotalOrders(groups, days);
 
             // แถว TOTAL ด้านบนสุด
             let totalTr = document.createElement('tr');
@@ -442,7 +427,6 @@
                 totalHtml += `
                     <td class="p-2 text-center border-l border-bordercolor/40">
                         <div class="text-amber-400 text-sm font-bold">${calc.totalOutputs[i].toLocaleString()}</div>
-                        <div class="text-[10px] text-slate-300 font-normal">UPH Total: ${calc.totalUphs[i].toLocaleString()}</div>
                     </td>
                 `;
             }
@@ -467,15 +451,11 @@
 
                     for (let i = 0; i < days.length; i++) {
                         let orderVal = Number(m.orders[i]) || 0;
-                        let uphVal = Number(m.uph[i]) || 0;
-                        
-                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()} ชิ้น` : '-';
-                        let uphDisplay = `UPH: ${uphVal}`;
+                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
 
                         html += `
                             <td class="p-2 text-center border-l border-bordercolor/30">
                                 <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
-                                <div class="text-[10px] text-slate-400 font-normal mt-0.5">${uphDisplay}</div>
                             </td>
                         `;
                     }
@@ -493,7 +473,7 @@
         new Chart(ctxDoor, {
             type: 'line',
             data: {
-                labels: ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9'],
+                labels: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6'],
                 datasets: [
                     {
                         label: 'Order (เป้าหมาย Door Line)',
@@ -524,7 +504,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel รองรับโครงสร้าง Merge Cell Product Group
+        // ระบบอ่านไฟล์ Excel รองรับโครงสร้าง 1 แถวต่อ 1 รุ่น และ Merge Cell คอลัมน์ Product
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -544,34 +524,31 @@
                     let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
                     let days = rawDays.map(d => formatExcelDate(d));
 
-                    if (days.length === 0) days = ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9', '7/9', '8/9'];
+                    if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
 
                     let groupMap = {};
-                    let groupOrderList = []; // รักษาลำดับการแสดงผลกลุ่มผลิตภัณฑ์ตามไฟล์จริง
+                    let groupOrderList = [];
                     let currentProductGroup = 'Other';
 
-                    for (let i = 1; i < excelJson.length; i += 2) {
-                        let rowOrder = excelJson[i];
-                        let rowUph = excelJson[i+1] || [];
-                        
-                        if (rowOrder) {
-                            // ตรวจสอบคอลัมน์ Product (ช่องที่ 0) ถ้ามีค่าให้เปลี่ยนกลุ่ม หากไม่มีให้ใช้กลุ่มเดิม (รองรับ Merge Cell)
-                            let prodCell = rowOrder[0];
-                            if (prodCell !== undefined && String(prodCell).trim() !== '') {
-                                currentProductGroup = String(prodCell).trim();
-                            }
+                    // วนลูปอ่านทีละบรรทัด (1 แถว = 1 รุ่น) ตามโครงสร้างไฟล์จริง
+                    for (let i = 1; i < excelJson.length; i++) {
+                        let row = excelJson[i];
+                        if (!row || row.length === 0) continue;
 
-                            let modelName = String(rowOrder[1] || '').trim();
-                            if (modelName !== '') {
-                                let orders = rowOrder.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
-                                let uph = rowUph.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+                        let prodCell = row[0];
+                        if (prodCell !== undefined && String(prodCell).trim() !== '') {
+                            currentProductGroup = String(prodCell).trim();
+                        }
 
-                                if (!groupMap[currentProductGroup]) {
-                                    groupMap[currentProductGroup] = [];
-                                    groupOrderList.push(currentProductGroup);
-                                }
-                                groupMap[currentProductGroup].push({ name: modelName, orders: orders, uph: uph });
+                        let modelName = String(row[1] || '').trim();
+                        if (modelName !== '') {
+                            let orders = row.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+
+                            if (!groupMap[currentProductGroup]) {
+                                groupMap[currentProductGroup] = [];
+                                groupOrderList.push(currentProductGroup);
                             }
+                            groupMap[currentProductGroup].push({ name: modelName, orders: orders });
                         }
                     }
 
@@ -584,7 +561,7 @@
                         tempImportedData = { days: days, groups: groups };
                         renderUnifiedTable(tempImportedData);
                         
-                        let newCalc = calculateTotalOrdersAndUph(tempImportedData.groups, tempImportedData.days);
+                        let newCalc = calculateTotalOrders(tempImportedData.groups, tempImportedData.days);
                         planChart.data.labels = tempImportedData.days;
                         planChart.data.datasets[0].data = newCalc.totalOutputs;
                         planChart.update();
