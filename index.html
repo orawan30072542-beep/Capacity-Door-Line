@@ -37,8 +37,8 @@
             overflow-y: hidden;
         }
         .chart-inner-container {
-            min-width: 900px;
-            height: 320px;
+            min-width: 400px;
+            height: 380px;
         }
     </style>
 </head>
@@ -136,7 +136,7 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER รายวันและ UPH -->
+                <!-- 2. ORDER รายวันและ UPH (จัดรูปแบบ กราฟซ้าย / ตารางขวา) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
@@ -160,31 +160,36 @@
                         </div>
                     </div>
 
-                    <!-- กราฟอยู่ด้านบน -->
-                    <div class="bg-slate-900/40 p-4 rounded-xl border border-bordercolor">
-                        <div class="text-[11px] text-cyan-400 mb-2 flex items-center justify-between">
-                            <span class="flex items-center space-x-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                                <span>กราฟแสดงยอด Order รวมรายวัน (เลื่อนซ้าย-ขวาได้)</span>
-                            </span>
-                        </div>
-                        <div class="chart-container-wrapper">
-                            <div class="chart-inner-container">
-                                <canvas id="planChart"></canvas>
+                    <!-- Layout: กราฟอยู่ซ้าย (w-5/12) / ตารางอยู่ขวา (w-7/12) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        <!-- ฝั่งซ้าย: กราฟ -->
+                        <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor flex flex-col justify-between h-full">
+                            <div class="text-[11px] text-cyan-400 mb-2 flex items-center justify-between">
+                                <span class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                                    <span>กราฟแสดงยอด Order รวมรายวัน</span>
+                                </span>
+                            </div>
+                            <div class="chart-container-wrapper flex-1">
+                                <div class="chart-inner-container">
+                                    <canvas id="planChart"></canvas>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- ตารางสไตล์ตามภาพตัวอย่าง (เพิ่ม max-h-[500px] และ overflow-y-auto ให้เลื่อนขึ้นลงได้) -->
-                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                        <div class="max-h-[500px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
-                                <thead class="sticky top-0 z-10 bg-slate-900 shadow-md">
-                                    <tr class="border-b border-bordercolor text-slate-400"></tr>
-                                </thead>
-                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
-                            </table>
+                        <!-- ฝั่งขวา: ตารางเลื่อนขึ้น-ลงได้ -->
+                        <div class="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                            <div class="max-h-[420px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                                <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
+                                    <thead class="sticky top-0 z-10 bg-slate-900 shadow-md">
+                                        <tr class="border-b border-bordercolor text-slate-400"></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                                </table>
+                            </div>
                         </div>
+
                     </div>
                 </section>
 
