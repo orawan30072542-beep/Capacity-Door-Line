@@ -35,6 +35,11 @@
             width: 100%;
             height: 320px;
         }
+        .lob-chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 400px;
+        }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 antialiased">
@@ -57,14 +62,14 @@
                 </div>
                 <!-- Navigation -->
                 <nav class="p-4 space-y-2">
-                    <a href="#overview" class="block px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>1. Overview</span>
-                    </a>
-                    <a href="#plan-order" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">2. Order รายวันและ UPH</a>
-                    <a href="#door-line" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">3. Door Line Order</a>
-                    <a href="#work-process" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">4. Work Process</a>
-                    <a href="#model-section" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">5. Model Summary</a>
+                        <span>1. Dashboard ภาพรวม</span>
+                    </button>
+                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                        <span>2. Work Process & LOB</span>
+                    </button>
                 </nav>
             </div>
             <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-400 flex items-center justify-between">
@@ -83,7 +88,7 @@
             <header class="bg-cardbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white md:hidden">H</div>
-                    <h1 class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
+                    <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
                 </div>
 
                 <!-- ส่วนกรอกชั่วโมงการทำงาน -->
@@ -97,8 +102,8 @@
                 </div>
             </header>
 
-            <!-- Dashboard Body -->
-            <div class="p-6 space-y-6">
+            <!-- Dashboard Body Content -->
+            <div id="tab-content-dashboard" class="p-6 space-y-6">
 
                 <!-- 1. OVERVIEW SECTION -->
                 <section id="overview" class="space-y-4">
@@ -193,11 +198,16 @@
                     </div>
                 </section>
 
-                <!-- 4. WORK PROCESS -->
+                <!-- 4. WORK PROCESS SUMMARY (Overview Cards) -->
                 <section id="work-process" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงาน (Work Process Progress)</h2>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงานภาพรวม (Work Process Progress)</h2>
+                        </div>
+                        <button onclick="switchTab('workprocess')" class="text-xs bg-blue-600/20 hover:bg-blue-600/40 text-cyan-400 border border-cyan-500/30 px-3 py-1.5 rounded-lg transition">
+                            ไปหน้าบันทึกข้อมูลและ LOB &rarr;
+                        </button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
@@ -272,6 +282,120 @@
                 </section>
 
             </div>
+
+            <!-- Work Process & LOB Tab Content (ซ่อนไว้เริ่มต้น) -->
+            <div id="tab-content-workprocess" class="p-6 space-y-6 hidden">
+                <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <div>
+                                <h2 class="text-lg font-bold text-white">บันทึกข้อมูลกระบวนการผลิต (Work Process Input)</h2>
+                                <p class="text-xs text-slate-400">เลือกรุ่น (Model) และชิ้นส่วน (Part) เพื่อกรอกข้อมูลความคืบหน้าและแสดงกราฟ Line of Balance (LOB)</p>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
+                            &larr; กลับหน้า Dashboard หลัก
+                        </button>
+                    </div>
+
+                    <!-- ฟอร์มเลือกและกรอกข้อมูล -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                            <select id="selectModel" onchange="updatePartOptions()" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <option value="159C">159C (Group 159)</option>
+                                <option value="159F">159F (Group 159)</option>
+                                <option value="199C">199C (Group 199)</option>
+                                <option value="199F">199F (Group 199)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกชิ้นส่วนในการผลิต (Part):</label>
+                            <select id="selectPart" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <option value="Outer Panel">Outer Panel (แผ่นเปลือกนอก)</option>
+                                <option value="Inner Frame">Inner Frame (โครงภายใน)</option>
+                                <option value="Foam Insulation">Foam Insulation (โฟมฉนวน)</option>
+                                <option value="Final Assembly Unit">Final Assembly Unit (ชุดประกอบสำเร็จ)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateLOBChart()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold py-2.5 px-4 rounded-lg shadow transition">
+                                แสดงกราฟ Line of Balance (LOB)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ตารางกรอกข้อมูลผลผลิตจริงตามขั้นตอนกระบวนการ -->
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-semibold text-slate-300">กรอกจำนวนสะสมจริงแยกตามกระบวนการผลิต (Work Stations)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
+                                        <th class="p-3">กระบวนการ (Station)</th>
+                                        <th class="p-3 text-center">Day 1</th>
+                                        <th class="p-3 text-center">Day 2</th>
+                                        <th class="p-3 text-center">Day 3</th>
+                                        <th class="p-3 text-center">Day 4</th>
+                                        <th class="p-3 text-center">Day 5</th>
+                                        <th class="p-3 text-center">Day 6</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                    <tr>
+                                        <td class="p-3 font-medium text-white">1. Press / Stamping</td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="500"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="950"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1400"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1850"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="2300"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="2750"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium text-white">2. Welding Process</td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="450"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="880"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1300"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1720"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="2150"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="2580"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium text-white">3. Painting / Coating</td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="400"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="790"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1180"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1570"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1960"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="2350"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium text-white">4. Final Assembly</td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="350"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="700"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1050"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1400"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="1750"></td>
+                                        <td><input type="number" class="w-16 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor station-input" value="2100"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนแสดงกราฟ Line of Balance -->
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟ Line of Balance (LOB) - วิเคราะห์ความสมดุลการผลิต</h3>
+                            <span id="lobInfoLabel" class="text-xs text-slate-400 font-medium">Model: 159C | Part: Outer Panel</span>
+                        </div>
+                        <div class="lob-chart-wrapper">
+                            <canvas id="lobChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
 
@@ -279,6 +403,32 @@
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
+
+        // ฟังก์ชันสลับแท็บเมนู
+        function switchTab(tabName) {
+            const dashboardTab = document.getElementById('tab-content-dashboard');
+            const workProcessTab = document.getElementById('tab-content-workprocess');
+            const navDashboard = document.getElementById('nav-dashboard');
+            const navWorkProcess = document.getElementById('nav-workprocess');
+            const headerTitle = document.getElementById('headerTitle');
+
+            if (tabName === 'dashboard') {
+                dashboardTab.classList.remove('hidden');
+                workProcessTab.classList.add('hidden');
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
+            } else {
+                dashboardTab.classList.add('hidden');
+                workProcessTab.classList.remove('hidden');
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                headerTitle.textContent = 'Work Process & Line of Balance (LOB) Analysis';
+                
+                // วาดกราฟ LOB เริ่มต้นเมื่อเปิดหน้า
+                setTimeout(() => { generateLOBChart(); }, 200);
+            }
+        }
 
         let defaultDailyPlanData = {
             days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
@@ -300,7 +450,6 @@
             ]
         };
 
-        // โหลดข้อมูลอย่างปลอดภัย (ถ้าข้อมูลพัง ให้ใช้ค่าตั้งต้นทันที)
         let currentDailyData = defaultDailyPlanData;
         try {
             let saved = localStorage.getItem('haier_daily_plan_data');
@@ -340,7 +489,7 @@
             return { totalOutputs };
         }
 
-        // สร้างกราฟแผนการผลิต
+        // สร้างกราฟแผนการผลิตหลัก
         const ctxPlan = document.getElementById('planChart').getContext('2d');
         let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
 
@@ -376,7 +525,6 @@
             return String(val).trim();
         }
 
-        // ฟังก์ชันเรนเดอร์ตาราง พร้อมตรึงหัวตารางและแถว TOTAL
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -397,7 +545,6 @@
 
             let calc = calculateTotalOrders(groups, days);
 
-            // ตรึงแถว TOTAL ไว้ใต้หัวตาราง
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
             let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
@@ -483,6 +630,97 @@
                 }
             }
         });
+
+        // ฟังก์ชันอัปเดตชิ้นส่วนตามรุ่น (ตัวอย่างจำลอง)
+        function updatePartOptions() {
+            let model = document.getElementById('selectModel').value;
+            // สามารถปรับเปลี่ยนรายการ Part ตาม Model ที่เลือกได้ที่นี่
+        }
+
+        // ระบบสร้างกราฟ Line of Balance (LOB)
+        let lobChartInstance = null;
+        function generateLOBChart() {
+            let selectedModel = document.getElementById('selectModel').value;
+            let selectedPart = document.getElementById('selectPart').value;
+            document.getElementById('lobInfoLabel').textContent = `Model: ${selectedModel} | Part: ${selectedPart}`;
+
+            // ดึงค่าจากช่อง input ในตารางกระบวนการ
+            let inputs = document.querySelectorAll('.station-input');
+            let dataSt1 = [], dataSt2 = [], dataSt3 = [], dataSt4 = [];
+            
+            inputs.forEach((inp, idx) => {
+                let val = parseFloat(inp.value) || 0;
+                let stationIndex = Math.floor(idx / 6);
+                if (stationIndex === 0) dataSt1.push(val);
+                if (stationIndex === 1) dataSt2.push(val);
+                if (stationIndex === 2) dataSt3.push(val);
+                if (stationIndex === 3) dataSt4.push(val);
+            });
+
+            // เส้นเป้าหมายสะสม (Target Line ล้อตามแผน)
+            let targetLine = [480, 960, 1440, 1920, 2400, 2880];
+
+            const ctxLOB = document.getElementById('lobChart').getContext('2d');
+            if (lobChartInstance) {
+                lobChartInstance.destroy();
+            }
+
+            lobChartInstance = new Chart(ctxLOB, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6'],
+                    datasets: [
+                        {
+                            label: 'Target LOB (เป้าหมายสะสม)',
+                            data: targetLine,
+                            borderColor: '#e2e8f0',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            tension: 0.1
+                        },
+                        {
+                            label: '1. Press / Stamping',
+                            data: dataSt1,
+                            borderColor: '#3b82f6',
+                            backgroundColor: '#3b82f6',
+                            tension: 0.1
+                        },
+                        {
+                            label: '2. Welding Process',
+                            data: dataSt2,
+                            borderColor: '#06b6d4',
+                            backgroundColor: '#06b6d4',
+                            tension: 0.1
+                        },
+                        {
+                            label: '3. Painting / Coating',
+                            data: dataSt3,
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            tension: 0.1
+                        },
+                        {
+                            label: '4. Final Assembly',
+                            data: dataSt4,
+                            borderColor: '#f59e0b',
+                            backgroundColor: '#f59e0b',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#1e293b' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
 
         let tempImportedData = null;
         function previewExcelData(event) {
