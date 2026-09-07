@@ -524,7 +524,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel สำหรับโครงสร้าง Product Group & Model
+        // ระบบอ่านไฟล์ Excel รองรับโครงสร้าง Merge Cell Product Group
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -541,35 +541,44 @@
 
                 if (excelJson.length > 1) {
                     let headerRow = excelJson[0];
-                    let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && val !== '');
+                    let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
                     let days = rawDays.map(d => formatExcelDate(d));
 
                     if (days.length === 0) days = ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9', '7/9', '8/9'];
 
                     let groupMap = {};
-                    let lastGroup = 'Other';
+                    let groupOrderList = []; // รักษาลำดับการแสดงผลกลุ่มผลิตภัณฑ์ตามไฟล์จริง
+                    let currentProductGroup = 'Other';
+
                     for (let i = 1; i < excelJson.length; i += 2) {
                         let rowOrder = excelJson[i];
                         let rowUph = excelJson[i+1] || [];
-                        if (rowOrder && (rowOrder[0] !== undefined || rowOrder[1] !== undefined)) {
-                            if (rowOrder[0] !== undefined && String(rowOrder[0]).trim() !== '') {
-                                lastGroup = String(rowOrder[0]).trim();
+                        
+                        if (rowOrder) {
+                            // ตรวจสอบคอลัมน์ Product (ช่องที่ 0) ถ้ามีค่าให้เปลี่ยนกลุ่ม หากไม่มีให้ใช้กลุ่มเดิม (รองรับ Merge Cell)
+                            let prodCell = rowOrder[0];
+                            if (prodCell !== undefined && String(prodCell).trim() !== '') {
+                                currentProductGroup = String(prodCell).trim();
                             }
-                            let modelName = String(rowOrder[1] || '').trim();
-                            let orders = rowOrder.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
-                            let uph = rowUph.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
 
-                            if (!groupMap[lastGroup]) {
-                                groupMap[lastGroup] = [];
+                            let modelName = String(rowOrder[1] || '').trim();
+                            if (modelName !== '') {
+                                let orders = rowOrder.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+                                let uph = rowUph.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+
+                                if (!groupMap[currentProductGroup]) {
+                                    groupMap[currentProductGroup] = [];
+                                    groupOrderList.push(currentProductGroup);
+                                }
+                                groupMap[currentProductGroup].push({ name: modelName, orders: orders, uph: uph });
                             }
-                            groupMap[lastGroup].push({ name: modelName, orders: orders, uph: uph });
                         }
                     }
 
                     let groups = [];
-                    for (let gName in groupMap) {
+                    groupOrderList.forEach(gName => {
                         groups.push({ productGroup: gName, models: groupMap[gName] });
-                    }
+                    });
 
                     if (groups.length > 0) {
                         tempImportedData = { days: days, groups: groups };
@@ -580,9 +589,9 @@
                         planChart.data.datasets[0].data = newCalc.totalOutputs;
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กราฟอัปเดตเรียบร้อย กรุณากด "บันทึกข้อมูล"');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! ตารางและกราฟตรงกับไฟล์แล้ว กรุณากด "บันทึกข้อมูล"');
                     } else {
-                        alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
+                        alert('ไม่พบข้อมูลรุ่นสินค้าในไฟล์ Excel กรุณาตรวจสอบรูปแบบแถว');
                     }
                 } else {
                     alert('ไฟล์ Excel มีข้อมูลน้อยเกินไป');
