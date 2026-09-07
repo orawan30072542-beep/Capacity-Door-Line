@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haier Door Line - Production Dashboard</title>
+    <title>Haier Door Line - Work Process Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,22 +30,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Prompt', sans-serif; }
-        .chart-container-wrapper {
-            position: relative;
-            width: 100%;
-            height: 320px;
-        }
+        .chart-container-wrapper { position: relative; width: 100%; height: 320px; }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 antialiased">
 
-    <!-- Container -->
     <div class="flex h-screen overflow-hidden">
         
-        <!-- Sidebar Menu -->
+        <!-- Sidebar -->
         <aside class="w-64 bg-[#070D1F] border-r border-bordercolor hidden md:flex flex-col justify-between">
             <div>
-                <!-- Brand / Logo Area -->
                 <div class="p-6 border-b border-bordercolor flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -55,23 +49,19 @@
                         <p class="text-xs text-cyan-400 font-medium">Smart Door Line</p>
                     </div>
                 </div>
-                <!-- Navigation -->
                 <nav class="p-4 space-y-2">
-                    <a href="#overview" class="block px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>1. Overview</span>
-                    </a>
                     <a href="#plan-order" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">2. Order รายวันและ UPH</a>
-                    <a href="#door-line" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">3. Door Line Order</a>
-                    <a href="#work-process" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">4. Work Process</a>
-                    <a href="#model-section" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">5. Model Summary</a>
+                    <a href="#work-process" class="block px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span>4. Work Process Control</span>
+                    </a>
                 </nav>
             </div>
             <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-400 flex items-center justify-between">
                 <span>System Status</span>
                 <span class="flex items-center space-x-1.5 text-emerald-400 font-medium">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span>Online</span>
+                    <span>Ready (Local)</span>
                 </span>
             </div>
         </aside>
@@ -79,195 +69,67 @@
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-y-auto">
             
-            <!-- Top Header -->
-            <header class="bg-cardbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white md:hidden">H</div>
-                    <h1 class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
-                </div>
-
-                <!-- ส่วนกรอกชั่วโมงการทำงาน -->
+            <header class="bg-cardbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex justify-between items-center sticky top-0 z-20">
+                <h1 class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence (Standalone)</h1>
                 <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
-                    <span class="text-xs text-slate-400 font-medium pl-1">ชั่วโมงทำงาน:</span>
-                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
-                    <span class="text-xs text-slate-400">ชม.</span>
-                    <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
-                        บันทึกชั่วโมง
-                    </button>
+                    <span class="text-xs text-slate-400">ชั่วโมงทำงาน:</span>
+                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none" onchange="renderDashboard()">
+                    <button onclick="renderDashboard()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">คำนวณใหม่</button>
                 </div>
             </header>
 
-            <!-- Dashboard Body -->
             <div class="p-6 space-y-6">
-
-                <!-- 1. OVERVIEW SECTION -->
-                <section id="overview" class="space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">1. ภาพรวมการผลิต (Overview)</h2>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)</p>
-                            <h3 class="text-3xl font-bold text-white mt-2">12,500 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
-                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน</span>
-                        </div>
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)</p>
-                            <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
-                            <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%</span>
-                        </div>
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)</p>
-                            <h3 class="text-3xl font-bold text-amber-400 mt-2">1,300 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
-                            <span class="text-xs text-amber-400 font-medium mt-2 inline-block">ต้องเร่งดำเนินการตามรอบกะ</span>
-                        </div>
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">อัตราของเสีย (Defect Rate)</p>
-                            <h3 class="text-3xl font-bold text-rose-400 mt-2">1.4%</h3>
-                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">อยู่ในเกณฑ์ควบคุม (&lt; 2%)</span>
-                        </div>
-                    </div>
-                </section>
-
+                
                 <!-- 2. ORDER รายวันและ UPH -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและยอดรายวัน</h2>
+                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและ UPH</h2>
                         </div>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <span id="excelFileName" class="text-xs text-slate-400">ยังไม่ได้เลือกไฟล์</span>
-                            
-                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor flex items-center space-x-2 transition">
-                                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span>เลือกไฟล์ Excel</span>
-                                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="previewExcelData(event)">
-                            </label>
-
-                            <button onclick="saveDashboardData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                <span>บันทึกข้อมูล</span>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="document.getElementById('excelFileInput').click()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>นำเข้าข้อมูลจาก Excel</span>
                             </button>
+                            <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
                         </div>
                     </div>
 
-                    <!-- Layout: กราฟซ้าย / ตารางขวา -->
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                        
-                        <!-- ฝั่งซ้าย: กราฟ -->
-                        <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
-                            <div class="text-[11px] text-cyan-400 mb-2 flex items-center space-x-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                                <span>กราฟแสดงยอด Order รวมรายวัน</span>
-                            </div>
+                        <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor">
+                            <h3 class="text-xs font-semibold text-slate-400 mb-3">กราฟแสดงยอดผลิตรวมรายวัน</h3>
                             <div class="chart-container-wrapper">
                                 <canvas id="planChart"></canvas>
                             </div>
                         </div>
-
-                        <!-- ฝั่งขวา: ตาราง (ตรึง TOTAL แถวบนสุด) -->
                         <div class="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                            <h3 class="text-xs font-semibold text-slate-400 mb-3">ตารางรายละเอียด (แสดง Output และ UPH ต่อชั่วโมง)</h3>
                             <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                                 <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
-                                    <thead>
-                                        <tr class="border-b border-bordercolor text-slate-400"></tr>
-                                    </thead>
+                                    <thead><tr class="border-b border-bordercolor text-slate-400"></tr></thead>
                                     <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
                                 </table>
                             </div>
                         </div>
-
                     </div>
                 </section>
 
-                <!-- 3. ORDER ของ DOOR LINE -->
-                <section id="door-line" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">3. สถานะออเดอร์ของ Haier Door Line</h2>
-                    </div>
-                    <div class="h-48">
-                        <canvas id="doorChart"></canvas>
-                    </div>
-                </section>
-
-                <!-- 4. WORK PROCESS -->
+                <!-- 4. WORK PROCESS CONTROL -->
                 <section id="work-process" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงาน (Work Process Progress)</h2>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงาน (Work Process Progress)</h2>
+                        </div>
+                        <button onclick="addNewProcess()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg transition flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span>เพิ่มกระบวนการทำงาน</span>
+                        </button>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
-                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
-                                <span>1. Press / Stamping</span>
-                                <span class="text-cyan-400">100%</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
-                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
-                                <span>2. Welding Process</span>
-                                <span class="text-cyan-400">85%</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
-                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
-                                <span>3. Painting / Coating</span>
-                                <span class="text-cyan-400">70%</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 70%"></div>
-                            </div>
-                        </div>
-                        <div class="border border-bordercolor rounded-xl p-4 bg-slate-900/40">
-                            <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
-                                <span>4. Final Assembly</span>
-                                <span class="text-amber-400">45%</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="bg-amber-500 h-2 rounded-full" style="width: 45%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5. MODEL SUMMARY -->
-                <section id="model-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">5. สรุปยอดผลิตแยกตาม Model ผลิตภัณฑ์</h2>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="border-b border-bordercolor text-slate-400 text-xs">
-                                    <th class="p-3 font-medium">Model Code</th>
-                                    <th class="p-3 font-medium">Product Name</th>
-                                    <th class="p-3 font-medium">Order</th>
-                                    <th class="p-3 font-medium">Produced</th>
-                                    <th class="p-3 font-medium">Balance</th>
-                                    <th class="p-3 font-medium">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-bordercolor/50 text-slate-300">
-                                <tr>
-                                    <td class="p-3 font-semibold text-cyan-400">MD-X01</td>
-                                    <td class="p-3 text-white">Standard Door Type A</td>
-                                    <td class="p-3">1,500</td>
-                                    <td class="p-3">1,500</td>
-                                    <td class="p-3 text-slate-500">0</td>
-                                    <td class="p-3"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-semibold">Completed</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- พื้นที่แสดงผลการ์ด Work Process แบบไดนามิก -->
+                    <div id="workProcessContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- ถูกเรนเดอร์ด้วย JavaScript -->
                     </div>
                 </section>
 
@@ -275,109 +137,148 @@
         </main>
     </div>
 
-    <!-- JavaScript -->
+    <!-- Script สำหรับประมวลผลข้อมูล -->
     <script>
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.borderColor = '#1e293b';
-
-        let defaultDailyPlanData = {
-            days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
+        let globalData = {
+            days: ["01/08", "02/08", "03/08", "04/08", "05/08"],
             groups: [
                 {
-                    productGroup: '159',
+                    productGroup: "159",
                     models: [
-                        { name: '159C', orders: [610, 610, 592, 592, 592, 0, 629, 585] },
-                        { name: '159F', orders: [210, 163, 15, 225, 0, 0, 0, 0] }
+                        { name: "159C", orders: [120, 150, 140, 130, 160] },
+                        { name: "159F", orders: [100, 110, 105, 120, 115] }
                     ]
                 },
                 {
-                    productGroup: '199',
+                    productGroup: "199",
                     models: [
-                        { name: '199C', orders: [480, 480, 480, 480, 460, 0, 520, 455] },
-                        { name: '199F', orders: [0, 0, 0, 35, 260, 0, 260, 260] }
+                        { name: "199A", orders: [200, 190, 210, 220, 205] }
                     ]
                 }
+            ],
+            processes: [
+                { name: '1. Press / Stamping', progress: 100 },
+                { name: '2. Welding Process', progress: 85 },
+                { name: '3. Painting / Coating', progress: 70 },
+                { name: '4. Final Assembly', progress: 45 }
             ]
         };
 
-        // โหลดข้อมูลอย่างปลอดภัย (ถ้าข้อมูลพัง ให้ใช้ค่าตั้งต้นทันที)
-        let currentDailyData = defaultDailyPlanData;
-        try {
-            let saved = localStorage.getItem('haier_daily_plan_data');
-            if (saved) {
-                let parsed = JSON.parse(saved);
-                if (parsed && parsed.groups && parsed.groups.length > 0) {
-                    currentDailyData = parsed;
+        let planChart = null;
+
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (json.length < 2) return;
+
+                    let headerRow = json[0];
+                    let days = headerRow.slice(2);
+                    let groupMap = {};
+
+                    for (let i = 1; i < json.length; i++) {
+                        let row = json[i];
+                        if (!row || row.length < 2) continue;
+                        let g = row[0] || 'General';
+                        let m = row[1] || 'Model';
+
+                        if (!groupMap[g]) groupMap[g] = {};
+                        if (!groupMap[g][m]) groupMap[g][m] = new Array(days.length).fill(0);
+
+                        for (let j = 0; j < days.length; j++) {
+                            groupMap[g][m][j] = Number(row[j + 2]) || 0;
+                        }
+                    }
+
+                    let groups = [];
+                    for (let gName in groupMap) {
+                        let models = [];
+                        for (let mName in groupMap[gName]) {
+                            models.push({ name: mName, orders: groupMap[gName][mName] });
+                        }
+                        groups.push({ productGroup: gName, models: models });
+                    }
+
+                    globalData.days = days;
+                    globalData.groups = groups;
+                    renderDashboard();
+                } catch (err) {
+                    console.error(err);
                 }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // ฟังก์ชันสำหรับเพิ่มกระบวนการทำงานใหม่
+        function addNewProcess() {
+            let name = prompt("กรอกชื่อกระบวนการทำงานใหม่ (เช่น 5. Testing & QC):");
+            if (!name || name.trim() === "") return;
+
+            let progressInput = prompt("กรอกเปอร์เซ็นต์ความคืบหน้า (0 - 100):", "50");
+            let progress = parseInt(progressInput);
+            if (isNaN(progress) || progress < 0) progress = 0;
+            if (progress > 100) progress = 100;
+
+            globalData.processes.push({ name: name.trim(), progress: progress });
+            renderWorkProcesses();
+        }
+
+        // เรนเดอร์การ์ด Work Process แยกส่วน
+        function renderWorkProcesses() {
+            const container = document.getElementById('workProcessContainer');
+            container.innerHTML = '';
+
+            globalData.processes.forEach((proc, index) => {
+                let colorClass = proc.progress === 100 ? 'text-cyan-400' : (proc.progress < 50 ? 'text-amber-400' : 'text-cyan-400');
+                let barColor = proc.progress < 50 ? 'bg-amber-500' : 'bg-gradient-to-r from-blue-600 to-cyan-400';
+
+                let card = document.createElement('div');
+                card.className = 'border border-bordercolor rounded-xl p-4 bg-slate-900/40 relative group';
+                card.innerHTML = `
+                    <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
+                        <span class="truncate pr-2">${proc.name}</span>
+                        <span class="${colorClass}">${proc.progress}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div class="${barColor} h-2 rounded-full transition-all duration-300" style="width: ${proc.progress}%"></div>
+                    </div>
+                    <button onclick="deleteProcess(${index})" class="absolute top-2 right-2 text-rose-400 opacity-0 group-hover:opacity-100 transition text-xs bg-slate-800 px-1.5 py-0.5 rounded">ลบ</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ฟังก์ชันลบกระบวนการ
+        function deleteProcess(index) {
+            if (confirm("ต้องการลบกระบวนการนี้ใช่หรือไม่?")) {
+                globalData.processes.splice(index, 1);
+                renderWorkProcesses();
             }
-        } catch (err) {
-            console.error("Local storage load error, using default.", err);
         }
 
-        let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
-        document.getElementById('shiftHoursInput').value = savedShiftHours;
-
-        function saveShiftHours() {
-            let hours = document.getElementById('shiftHoursInput').value;
-            localStorage.setItem('haier_shift_hours', hours);
-            alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
-            renderUnifiedTable(currentDailyData);
-        }
-
-        function calculateTotalOrders(groupsData, days) {
+        function calculateTotals(groups, days) {
             let totalOutputs = new Array(days.length).fill(0);
-            if (groupsData && Array.isArray(groupsData)) {
-                groupsData.forEach(g => {
-                    if (g.models && Array.isArray(g.models)) {
-                        g.models.forEach(m => {
-                            for (let i = 0; i < days.length; i++) {
-                                totalOutputs[i] += Number(m.orders[i]) || 0;
-                            }
-                        });
+            groups.forEach(g => {
+                g.models.forEach(m => {
+                    for (let i = 0; i < days.length; i++) {
+                        totalOutputs[i] += Number(m.orders[i]) || 0;
                     }
                 });
-            }
+            });
             return { totalOutputs };
         }
 
-        // สร้างกราฟแผนการผลิต
-        const ctxPlan = document.getElementById('planChart').getContext('2d');
-        let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
-
-        let planChart = new Chart(ctxPlan, {
-            type: 'bar',
-            data: {
-                labels: currentDailyData.days,
-                datasets: [{
-                    label: 'Total Order (ยอดสั่งผลิตรวม)',
-                    data: initialCalc.totalOutputs,
-                    backgroundColor: '#00F0FF',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-
-        function formatExcelDate(val) {
-            let num = Number(val);
-            if (!isNaN(num) && num > 30000) {
-                let utc_days = Math.floor(num - 25569);
-                let dateInfo = new Date(utc_days * 86400 * 1000);
-                return `${dateInfo.getUTCMonth() + 1}/${dateInfo.getUTCDate()}`;
-            }
-            return String(val).trim();
-        }
-
-        // ฟังก์ชันเรนเดอร์ตาราง พร้อมตรึงหัวตารางและแถว TOTAL
-        function renderUnifiedTable(data) {
+        function renderDashboard() {
+            if (!globalData.days.length) return;
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
@@ -385,188 +286,67 @@
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            let days = data.days;
-            let groups = data.groups;
+            let days = globalData.days;
+            let groups = globalData.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
-            days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
-            });
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            days.forEach(d => headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${d}</th>`);
             headerRow.innerHTML = headerHtml;
 
-            let calc = calculateTotalOrders(groups, days);
+            let calc = calculateTotals(groups, days);
 
-            // ตรึงแถว TOTAL ไว้ใต้หัวตาราง
             let totalTr = document.createElement('tr');
-            totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
+            totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 border-b-2 border-bordercolor';
+            let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Output / UPH</td>`;
             for (let i = 0; i < days.length; i++) {
-                let dayTotal = calc.totalOutputs[i];
-                let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
-                totalHtml += `
-                    <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
-                        <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
-                        <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
-                    </td>
-                `;
+                let dayTot = calc.totalOutputs[i];
+                let uph = hours > 0 ? Math.round(dayTot / hours) : 0;
+                totalHtml += `<td class="p-2 text-center border-l border-bordercolor/40"><div class="text-amber-400">${dayTot.toLocaleString()}</div><div class="text-white text-[10px]">${uph.toLocaleString()}</div></td>`;
             }
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
 
-            if (!groups || groups.length === 0) return;
-
             groups.forEach(g => {
-                let models = g.models;
-                models.forEach((m, mIndex) => {
+                g.models.forEach((m, idx) => {
                     let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                    
+                    tr.className = 'hover:bg-slate-800/30 border-b border-bordercolor/40';
                     let html = '';
-                    if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${models.length}">${g.productGroup}</td>`;
-                    }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
-
+                    if (idx === 0) html += `<td class="p-3 font-semibold text-white bg-slate-900/60" rowspan="${g.models.length}">${g.productGroup}</td>`;
+                    html += `<td class="p-3 text-slate-200">${m.name}</td>`;
                     for (let i = 0; i < days.length; i++) {
-                        let orderVal = Number(m.orders[i]) || 0;
-                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
-                        let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
-
-                        html += `
-                            <td class="p-2 text-center border-l border-bordercolor/30">
-                                <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
-                                <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
-                            </td>
-                        `;
+                        let val = m.orders[i] || 0;
+                        let uphM = val > 0 && hours > 0 ? Math.round(val / hours) : '-';
+                        html += `<td class="p-2 text-center border-l border-bordercolor/30"><div class="text-cyan-400">${val > 0 ? val.toLocaleString() : '-'}</div><div class="text-white text-[10px]">${uphM}</div></td>`;
                     }
-
                     tr.innerHTML = html;
                     tbody.appendChild(tr);
                 });
             });
-        }
 
-        renderUnifiedTable(currentDailyData);
-
-        // กราฟ Door Line
-        const ctxDoor = document.getElementById('doorChart').getContext('2d');
-        new Chart(ctxDoor, {
-            type: 'line',
-            data: {
-                labels: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6'],
-                datasets: [
-                    {
-                        label: 'Order (เป้าหมาย Door Line)',
-                        data: [500, 500, 450, 450, 450, 450],
-                        borderColor: '#64748b',
-                        borderDash: [5, 5],
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Actual (ยอดผลิตจริง)',
-                        data: [480, 510, 420, 460, 380, 300],
-                        borderColor: '#00F0FF',
-                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
-                        fill: true,
-                        tension: 0.3
+            const ctx = document.getElementById('planChart').getContext('2d');
+            if (planChart) planChart.destroy();
+            planChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{ label: 'Total Output', data: calc.totalOutputs, backgroundColor: '#00F0FF', borderRadius: 4 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', font: { family: 'Prompt' } } } },
+                    scales: {
+                        x: { ticks: { color: '#94A3B8' }, grid: { color: '#1E293B' } },
+                        y: { ticks: { color: '#94A3B8' }, grid: { color: '#1E293B' } }
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
-                    x: { grid: { display: false } }
                 }
-            }
-        });
+            });
 
-        let tempImportedData = null;
-        function previewExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                    if (excelJson.length > 1) {
-                        let headerRow = excelJson[0];
-                        let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
-                        let days = rawDays.map(d => formatExcelDate(d));
-
-                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
-
-                        let groupMap = {};
-                        let groupOrderList = [];
-                        let currentProductGroup = 'Other';
-
-                        for (let i = 1; i < excelJson.length; i++) {
-                            let row = excelJson[i];
-                            if (!row || row.length === 0) continue;
-
-                            let prodCell = row[0];
-                            if (prodCell !== undefined && String(prodCell).trim() !== '') {
-                                currentProductGroup = String(prodCell).trim();
-                            }
-
-                            let modelName = String(row[1] || '').trim();
-                            if (modelName !== '') {
-                                let orders = row.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
-
-                                if (!groupMap[currentProductGroup]) {
-                                    groupMap[currentProductGroup] = [];
-                                    groupOrderList.push(currentProductGroup);
-                                }
-                                groupMap[currentProductGroup].push({ name: modelName, orders: orders });
-                            }
-                        }
-
-                        let groups = [];
-                        groupOrderList.forEach(gName => {
-                            groups.push({ productGroup: gName, models: groupMap[gName] });
-                        });
-
-                        if (groups.length > 0) {
-                            tempImportedData = { days: days, groups: groups };
-                            renderUnifiedTable(tempImportedData);
-                            
-                            let newCalc = calculateTotalOrders(tempImportedData.groups, tempImportedData.days);
-                            planChart.data.labels = tempImportedData.days;
-                            planChart.data.datasets[0].data = newCalc.totalOutputs;
-                            planChart.update();
-
-                            alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล"');
-                        } else {
-                            alert('ไม่พบข้อมูลรุ่นสินค้าในไฟล์ Excel');
-                        }
-                    }
-                } catch (err) {
-                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel: ' + err.message);
-                }
-            };
-            reader.readAsArrayBuffer(file);
+            renderWorkProcesses();
         }
 
-        function saveDashboardData() {
-            if (!tempImportedData) {
-                alert('กรุณาเลือกไฟล์ Excel ใหม่ก่อนบันทึกข้อมูล');
-                return;
-            }
-
-            currentDailyData = tempImportedData;
-            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
-        }
+        window.onload = renderDashboard;
     </script>
 </body>
 </html>
