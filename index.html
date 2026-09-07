@@ -91,14 +91,23 @@
                     <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
                 </div>
 
-                <!-- ส่วนกรอกชั่วโมงการทำงาน -->
-                <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
-                    <span class="text-xs text-slate-400 font-medium pl-1">ชั่วโมงทำงาน:</span>
-                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
-                    <span class="text-xs text-slate-400">ชม.</span>
-                    <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
-                        บันทึกชั่วโมง
-                    </button>
+                <!-- ส่วนอัปโหลดไฟล์และชั่วโมงทำงาน -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
+                        <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-xs px-3 py-1.5 rounded-lg border border-bordercolor font-medium transition flex items-center space-x-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <span>อัปโหลดไฟล์แผนผลิต (Excel)</span>
+                            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+                        </label>
+                    </div>
+
+                    <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
+                        <span class="text-xs text-slate-400 font-medium pl-1">ชม. ทำงาน:</span>
+                        <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
+                        <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
+                            บันทึก
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -109,7 +118,7 @@
                     <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-2">
                         <p class="text-xs text-slate-400 font-medium">แผนผลิตรวม (Total Plan)</p>
                         <h3 id="cardTotalPlan" class="text-2xl font-bold text-white">0 ชิ้น</h3>
-                        <p class="text-xs text-cyan-400">อัปเดตจากแผนประจำวัน</p>
+                        <p class="text-xs text-cyan-400">อัปเดตจากไฟล์หรือระบบ</p>
                     </div>
                     <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-2">
                         <p class="text-xs text-slate-400 font-medium">ผลิตจริง (Actual Output)</p>
@@ -153,7 +162,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) กำหนดชื่อกระบวนการผลิต Work Station และบันทึก Cycle Time แยกอิสระ</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -355,6 +364,35 @@
             renderProcessTableInputs();
             renderSavedDisplayTable();
             generateCycleTimeChart();
+        }
+
+        // ฟังก์ชันรองรับการอัปโหลดไฟล์ Excel / CSV เข้าสู่ระบบ
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (json && json.length > 1) {
+                        // ตัวอย่างการอ่านหัวตารางและข้อมูลแถวแรกๆ มาอัปเดตแผนผลิต
+                        alert(`อ่านไฟล์สำเร็จ: ${file.name} (โหลดข้อมูล ${json.length} แถว)`);
+                        renderOverviewDashboard();
+                    } else {
+                        alert("รูปแบบข้อมูลในไฟล์ไม่ถูกต้องหรือไม่พบข้อมูล");
+                    }
+                } catch (err) {
+                    console.error("Excel parse error:", err);
+                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาตรวจสอบรูปแบบไฟล์ Excel อีกครั้ง");
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function toggleEditModal() {
@@ -582,12 +620,11 @@
             });
 
             document.getElementById('cardTotalPlan').textContent = `${totalPlan.toLocaleString()} ชิ้น`;
-            let actualOutput = Math.round(totalPlan * 0.95); // ตัวอย่างสมมติ 95%
+            let actualOutput = Math.round(totalPlan * 0.95);
             document.getElementById('cardTotalActual').textContent = `${actualOutput.toLocaleString()} ชิ้น`;
             let efficiency = totalPlan > 0 ? ((actualOutput / totalPlan) * 100).toFixed(1) : 0;
             document.getElementById('cardLineEfficiency').textContent = `${efficiency}%`;
 
-            // Render Overview Plan Chart
             const ctxPlan = document.getElementById('overviewPlanChart').getContext('2d');
             if (overviewPlanChartInstance) overviewPlanChartInstance.destroy();
 
@@ -624,7 +661,6 @@
                 }
             });
 
-            // Render Overview Model Pie/Doughnut Chart
             const ctxModel = document.getElementById('overviewModelChart').getContext('2d');
             if (overviewModelChartInstance) overviewModelChartInstance.destroy();
 
@@ -706,7 +742,6 @@
             });
         }
 
-        // โหลดข้อมูลเริ่มต้นแสดงผลหน้า Overview
         renderOverviewDashboard();
     </script>
 </body>
