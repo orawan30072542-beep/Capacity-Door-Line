@@ -291,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group (เลือกได้หลายรายการ), เลือกรุ่นสินค้า (Model), เลือกชิ้นส่วนประกอบ (Part) และกำหนด Cycle Time</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group (เลือกได้หลายรายการ), เลือกรุ่นสินค้า (Model), เลือกชิ้นส่วนประกอบ (Part) และกำหนด Cycle Time แยกตามแต่ละรุ่น</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -310,7 +310,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                                <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model): <span class="text-[10px] text-amber-400 font-normal">(แต่ละ Model มีขั้นตอนและเวลาต่างกัน)</span></label>
                                 <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onSelectionChange()">
                                     <!-- โหลดอัตโนมัติจาก Group ที่เลือก -->
                                 </select>
@@ -350,7 +350,10 @@
                     <!-- ตารางกรอกข้อมูล (โหมดแก้ไข) -->
                     <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/80 p-4 rounded-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-3">
-                            <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
+                            <div>
+                                <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
+                                <p class="text-xs text-slate-300 mt-0.5">กำลังแก้ไขข้อมูลของ Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
+                            </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -503,8 +506,14 @@
         function loadProcessDataForCurrentSelection() {
             let modelSelect = document.getElementById('selectModel');
             if (!modelSelect) return;
-            let currentModel = modelSelect.value;
+            let currentModel = modelSelect.value || '-';
             let key = `${currentModel}_${selectedPartValue}`;
+
+            // อัปเดตป้ายชื่อ Model และ Part ที่กำลังแก้ไขบนหัวตาราง
+            const editModelTag = document.getElementById('editModelNameTag');
+            const editPartTag = document.getElementById('editPartNameTag');
+            if (editModelTag) editModelTag.textContent = currentModel;
+            if (editPartTag) editPartTag.textContent = selectedPartValue;
 
             if (processDatabase[key] && Array.isArray(processDatabase[key])) {
                 currentProcessData = JSON.parse(JSON.stringify(processDatabase[key]));
@@ -939,7 +948,6 @@
 
         function toggleGroupSelection(groupName, btnElement) {
             if (selectedProductGroups.has(groupName)) {
-                // ป้องกันไม่ให้เอาออกทั้งหมดจนเป็น 0 กลุ่ม
                 if (selectedProductGroups.size === 1) {
                     alert('ต้องเลือก Product Group อย่างน้อย 1 กลุ่ม');
                     return;
