@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haier Door Line - Work Process Dashboard</title>
+    <title>Haier Door Line - Supabase Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -26,6 +26,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SheetJS (xlsx) CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -52,15 +54,15 @@
                 <nav class="p-4 space-y-2">
                     <a href="#plan-order" class="block px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>2. Order รายวันและ UPH</span>
+                        <span>2. Order รายวันและ UPH (Supabase)</span>
                     </a>
                 </nav>
             </div>
             <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-400 flex items-center justify-between">
-                <span>System Status</span>
-                <span class="flex items-center space-x-1.5 text-emerald-400 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span>Ready (Local)</span>
+                <span>Supabase Status</span>
+                <span id="dbStatus" class="flex items-center space-x-1.5 text-amber-400 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>Connecting...</span>
                 </span>
             </div>
         </aside>
@@ -69,10 +71,10 @@
         <main class="flex-1 flex flex-col overflow-y-auto">
             
             <header class="bg-cardbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex justify-between items-center sticky top-0 z-20">
-                <h1 class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence (Standalone)</h1>
+                <h1 class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence (Supabase Integrated)</h1>
                 <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
                     <span class="text-xs text-slate-400">ชั่วโมงทำงาน:</span>
-                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none" onchange="renderDashboard()">
+                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
                     <button onclick="renderDashboard()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">คำนวณใหม่</button>
                 </div>
             </header>
@@ -83,28 +85,26 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและ UPH</h2>
+                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิต (ดึงข้อมูลจาก Supabase)</h2>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <button onclick="document.getElementById('excelFileInput').click()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span>นำเข้าข้อมูลจาก Excel</span>
+                            <button onclick="fetchDataFromSupabase()" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor transition">
+                                โหลดข้อมูลจาก Supabase
+                            </button>
+                            <button onclick="saveExcelToSupabase()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition">
+                                อัปโหลด Excel ขึ้น Supabase
                             </button>
                             <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                        <!-- กราฟแสดงผล -->
                         <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor">
-                            <h3 class="text-xs font-semibold text-slate-400 mb-3">กราฟแสดงยอดผลิตรวมรายวัน</h3>
                             <div class="chart-container-wrapper">
                                 <canvas id="planChart"></canvas>
                             </div>
                         </div>
-                        <!-- ตารางแสดงผล -->
                         <div class="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
-                            <h3 class="text-xs font-semibold text-slate-400 mb-3">ตารางรายละเอียด (แสดง Output และ UPH ต่อชั่วโมง)</h3>
                             <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                                 <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
                                     <thead><tr class="border-b border-bordercolor text-slate-400"></tr></thead>
@@ -118,87 +118,73 @@
         </main>
     </div>
 
-    <!-- Script สำหรับประมวลผลข้อมูลและไฟล์ Excel -->
+    <!-- Script เชื่อมต่อและประมวลผล -->
     <script>
-        // ข้อมูลตัวอย่างเริ่มต้น (สามารถแทนที่ด้วยการอัปโหลดไฟล์ Excel ได้ทันที)
-        let globalData = {
-            days: ["01/08", "02/08", "03/08", "04/08", "05/08"],
-            groups: [
-                {
-                    productGroup: "159",
-                    models: [
-                        { name: "159C", orders: [120, 150, 140, 130, 160] },
-                        { name: "159F", orders: [100, 110, 105, 120, 115] }
-                    ]
-                },
-                {
-                    productGroup: "199",
-                    models: [
-                        { name: "199A", orders: [200, 190, 210, 220, 205] }
-                    ]
-                }
-            ]
-        };
+        // กำหนดค่า Supabase Project ของคุณที่นี่
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let globalData = { days: [], groups: [] };
         let planChart = null;
 
-        // ฟังก์ชันอ่านไฟล์ Excel และแปลงข้อมูลเข้าสู่ตารางอัตโนมัติ
-        function handleExcelUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        async function checkConnection() {
+            const statusEl = document.getElementById('dbStatus');
+            try {
+                const { data, error } = await _supabase.from('production_plans').select('*').limit(1);
+                if (error) throw error;
+                statusEl.className = 'flex items-center space-x-1.5 text-emerald-400 font-medium';
+                statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span><span>Connected</span>';
+                fetchDataFromSupabase();
+            } catch (err) {
+                statusEl.className = 'flex items-center space-x-1.5 text-rose-400 font-medium';
+                statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>Connection Failed</span>';
+                console.error("Supabase connection error:", err.message);
+            }
+        }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // ดึงข้อมูลจาก Supabase มาแปลงเป็นโครงสร้างตาราง
+        async function fetchDataFromSupabase() {
+            try {
+                const { data, error } = await _supabase.from('production_plans').select('*');
+                if (error) throw error;
 
-                    if (json.length < 2) {
-                        alert("ไฟล์ Excel ไม่มีข้อมูลเพียงพอ");
-                        return;
-                    }
-
-                    // สมมติโครงสร้าง Excel: คอลัมน์ 0 = Product Group, คอลัมน์ 1 = Model, คอลัมน์ถัดไปเป็นวันที่
-                    let headerRow = json[0];
-                    let days = headerRow.slice(2); // วันที่เริ่มต้นตั้งแต่คอลัมน์ที่ 3 เป็นต้นไป
+                if (data && data.length > 0) {
+                    // จัดกลุ่มข้อมูลตาม Product Group และ Model
+                    let daysSet = new Set();
                     let groupMap = {};
 
-                    for (let i = 1; i < json.length; i++) {
-                        let row = json[i];
-                        if (!row || row.length < 2) continue;
-                        let g = row[0] || 'General';
-                        let m = row[1] || 'Model';
+                    data.forEach(row => {
+                        let g = row.product_group || 'General';
+                        let m = row.model_name || 'Standard';
+                        let d = row.plan_date;
+                        let qty = row.order_qty || 0;
 
+                        daysSet.add(d);
                         if (!groupMap[g]) groupMap[g] = {};
-                        if (!groupMap[g][m]) groupMap[g][m] = new Array(days.length).fill(0);
+                        if (!groupMap[g][m]) groupMap[g][m] = {};
+                        groupMap[g][m][d] = qty;
+                    });
 
-                        for (let j = 0; j < days.length; j++) {
-                            let val = Number(row[j + 2]) || 0;
-                            groupMap[g][m][j] = val;
-                        }
-                    }
-
+                    let days = Array.from(daysSet).sort();
                     let groups = [];
+
                     for (let gName in groupMap) {
                         let models = [];
                         for (let mName in groupMap[gName]) {
-                            models.push({ name: mName, orders: groupMap[gName][mName] });
+                            let orders = days.map(d => groupMap[gName][mName][d] || 0);
+                            models.initializeAppObject ? '' : models.push({ name: mName, orders: orders });
                         }
                         groups.push({ productGroup: gName, models: models });
                     }
 
                     globalData = { days, groups };
                     renderDashboard();
-                    alert("โหลดข้อมูลจาก Excel สำเร็จ!");
-                } catch (err) {
-                    console.error(err);
-                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel");
                 }
-            };
-            reader.readAsArrayBuffer(file);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+            }
         }
 
         function calculateTotals(groups, days) {
@@ -226,14 +212,13 @@
             let groups = globalData.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            // สร้าง Header ตาราง
             let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             days.forEach(d => headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${d}</th>`);
             headerRow.innerHTML = headerHtml;
 
             let calc = calculateTotals(groups, days);
 
-            // แถวสรุปผล (TOTAL & UPH)
+            // แถว Total
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 border-b-2 border-bordercolor';
             let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Output / UPH</td>`;
@@ -245,7 +230,6 @@
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
 
-            // แถวข้อมูลแต่ละ Model
             groups.forEach(g => {
                 g.models.forEach((m, idx) => {
                     let tr = document.createElement('tr');
@@ -263,36 +247,21 @@
                 });
             });
 
-            // สร้างหรืออัปเดตกราฟ Chart.js
+            // อัปเดตกราฟ
             const ctx = document.getElementById('planChart').getContext('2d');
             if (planChart) planChart.destroy();
             planChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: days,
-                    datasets: [{
-                        label: 'Total Output',
-                        data: calc.totalOutputs,
-                        backgroundColor: '#00F0FF',
-                        borderRadius: 4
-                    }]
+                    datasets: [{ label: 'Total Order', data: calc.totalOutputs, backgroundColor: '#00F0FF', borderRadius: 4 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#94A3B8', font: { family: 'Prompt' } } }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#94A3B8' }, grid: { color: '#1E293B' } },
-                        y: { ticks: { color: '#94A3B8' }, grid: { color: '#1E293B' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
         }
 
-        // โหลดแสดงผลเมื่อเปิดหน้าเว็บครั้งแรก
-        window.onload = renderDashboard;
+        // เริ่มต้นตรวจสอบการเชื่อมต่อ Supabase เมื่อเปิดหน้าเว็บ
+        window.onload = checkConnection;
     </script>
 </body>
 </html>
