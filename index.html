@@ -334,6 +334,8 @@
             let hours = document.getElementById('shiftHoursInput').value;
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
+            // เรนเดอร์ตารางใหม่ทันทีเพื่อให้คำนวณ UPH ตามชั่วโมงใหม่
+            renderUnifiedTable(currentDailyData);
         }
 
         // ฟังก์ชันคำนวณผลรวม Total Output แยกตามวันจากโครงสร้าง groups
@@ -397,7 +399,7 @@
             return String(val).trim();
         }
 
-        // ฟังก์ชันเรนเดอร์ตารางสไตล์ตามภาพตัวอย่าง (1 บรรทัดต่อ 1 รุ่น)
+        // ฟังก์ชันเรนเดอร์ตารางสไตล์ตามภาพตัวอย่าง (แสดง UPH สีขาวเล็กใต้ Order แต่ละบรรทัด)
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -408,6 +410,7 @@
 
             let days = data.days;
             let groups = data.groups;
+            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
             // สร้างหัวตาราง (Product Group, Model, วันที่ต่างๆ)
             let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300">Product Group</th><th class="p-3 font-medium w-32 text-slate-300">Model</th>`;
@@ -419,14 +422,17 @@
             // คำนวณภาพรวม TOTAL
             let calc = calculateTotalOrders(groups, days);
 
-            // แถว TOTAL ด้านบนสุด
+            // แถว TOTAL ด้านบนสุด (แสดง UPH รวมภาพใหญ่ด้วย)
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/60 border-b-2 border-bordercolor font-bold text-cyan-300';
             let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Total Output</td>`;
             for (let i = 0; i < days.length; i++) {
+                let dayTotal = calc.totalOutputs[i];
+                let dayUph = hours > 0 ? (dayTotal / hours).toFixed(1) : 0;
                 totalHtml += `
                     <td class="p-2 text-center border-l border-bordercolor/40">
-                        <div class="text-amber-400 text-sm font-bold">${calc.totalOutputs[i].toLocaleString()}</div>
+                        <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
+                        <div class="text-white text-[10px] font-normal opacity-90">UPH: ${dayUph}</div>
                     </td>
                 `;
             }
@@ -452,10 +458,12 @@
                     for (let i = 0; i < days.length; i++) {
                         let orderVal = Number(m.orders[i]) || 0;
                         let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
+                        let modelUph = orderVal > 0 && hours > 0 ? (orderVal / hours).toFixed(1) : '-';
 
                         html += `
                             <td class="p-2 text-center border-l border-bordercolor/30">
                                 <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
+                                <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUph !== '-' ? `UPH: ${modelUph}` : '-'}</div>
                             </td>
                         `;
                     }
