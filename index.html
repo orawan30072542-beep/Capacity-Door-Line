@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haier Door Line - Production Dashboard</title>
+    <title>Haier Door Line - Daily Production Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,7 +24,7 @@
     </script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (xlsx) CDN สำหรับอ่านไฟล์ Excel -->
+    <!-- SheetJS (xlsx) CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -59,7 +59,7 @@
                     <a href="#plan-order" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">2. Order ตามแผนผลิต</a>
                     <a href="#door-line" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">3. Door Line Order</a>
                     <a href="#work-process" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">4. Work Process</a>
-                    <a href="#model-section" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">5. Model Summary</a>
+                    <a href="#daily-model" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">5. รายวัน (Model & UPH)</a>
                 </nav>
             </div>
             <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-400 flex items-center justify-between">
@@ -133,32 +133,26 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line + Excel Import + Save System) -->
+                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order ตามแผนผลิต (Plan vs Actual)</h2>
                         </div>
-                        <!-- ปุ่มจัดการไฟล์และบันทึก -->
                         <div class="flex flex-wrap items-center gap-3">
                             <span id="excelFileName" class="text-xs text-slate-400">ยังไม่ได้เลือกไฟล์</span>
-                            
-                            <!-- ปุ่มเลือกไฟล์ -->
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor flex items-center space-x-2 transition">
                                 <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 <span>เลือกไฟล์ Excel</span>
                                 <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="previewExcelData(event)">
                             </label>
-
-                            <!-- ปุ่มบันทึกข้อมูลไม่ให้หาย -->
                             <button onclick="saveDashboardData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                 <span>บันทึกข้อมูล</span>
                             </button>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
                         <div class="h-72">
                             <canvas id="planChart"></canvas>
@@ -173,9 +167,7 @@
                                         <th class="p-3 font-medium">% ความสำเร็จ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
-                                    <!-- ข้อมูลจะถูกโหลดใส่ที่นี่อัตโนมัติ -->
-                                </tbody>
+                                <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
                             </table>
                         </div>
                     </div>
@@ -268,57 +260,48 @@
                     </div>
                 </section>
 
-                <!-- 5. MODEL (สรุปตามรุ่นผลิตภัณฑ์) -->
-                <section id="model-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">5. สรุปยอดผลิตแยกตาม Model ผลิตภัณฑ์</h2>
+                <!-- 5. รายวัน: Model, ออเดอร์รายวัน & UPH รายชั่วโมง (กราฟด้านบน / ตารางด้านล่าง) -->
+                <section id="daily-model" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">5. สรุปข้อมูลรายวัน (Model, ออเดอร์รายวัน และ UPH รายชั่วโมง)</h2>
+                        </div>
+                        <!-- ตัวตั้งค่ากำหนดเวลาทำงาน (Shift Hours Configuration) -->
+                        <div class="flex items-center space-x-2 bg-slate-900/60 p-2.5 rounded-xl border border-bordercolor">
+                            <span class="text-xs text-slate-400">ตั้งค่าเวลาทำงาน:</span>
+                            <select id="workHoursSelect" onchange="updateDailyChart()" class="bg-slate-800 text-xs text-cyan-400 font-semibold px-2 py-1 rounded-lg border border-bordercolor outline-none">
+                                <option value="8">8 ชั่วโมง (ปกติ)</option>
+                                <option value="10" selected>10 ชั่วโมง (OT 2 ชม.)</option>
+                                <option value="12">12 ชั่วโมง (OT 4 ชม.)</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <!-- ส่วนที่ 1: กราฟอยู่ด้านบน -->
+                    <div class="bg-slate-900/40 p-4 rounded-xl border border-bordercolor space-y-2">
+                        <div class="flex justify-between items-center text-xs text-slate-400 px-2">
+                            <span>ภาพรวมกราฟเปรียบเทียบ (ออเดอร์รายวัน vs UPH เฉลี่ย)</span>
+                            <span id="currentShiftDisplay" class="text-cyan-400 font-medium">ระยะเวลาทำงาน: 10 ชั่วโมง</span>
+                        </div>
+                        <div class="h-72">
+                            <canvas id="dailyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนที่ 2: ตารางอยู่ด้านล่าง -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="border-b border-bordercolor text-slate-400 text-xs">
-                                    <th class="p-3 font-medium">Model Code</th>
-                                    <th class="p-3 font-medium">Product Name</th>
-                                    <th class="p-3 font-medium">Order (ยอดสั่งผลิต)</th>
-                                    <th class="p-3 font-medium">Produced (ผลิตได้)</th>
-                                    <th class="p-3 font-medium">Balance (คงเหลือผลิต)</th>
-                                    <th class="p-3 font-medium">Status</th>
+                                    <th class="p-3 font-medium">1. รุ่น (Model)</th>
+                                    <th class="p-3 font-medium">2. ออเดอร์แต่ละวัน / UPH รายชั่วโมง</th>
+                                    <th class="p-3 font-medium">ยอดผลิตสะสมรวม</th>
+                                    <th class="p-3 font-medium">สถานะ</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-bordercolor/50 text-slate-300">
-                                <tr>
-                                    <td class="p-3 font-semibold text-cyan-400">MD-X01</td>
-                                    <td class="p-3 text-white">Standard Door Type A</td>
-                                    <td class="p-3">1,500</td>
-                                    <td class="p-3">1,500</td>
-                                    <td class="p-3 text-slate-500">0</td>
-                                    <td class="p-3"><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-semibold">Completed</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-cyan-400">MD-X02</td>
-                                    <td class="p-3 text-white">Premium Door Type B</td>
-                                    <td class="p-3">1,300</td>
-                                    <td class="p-3">1,050</td>
-                                    <td class="p-3 text-amber-400 font-medium">250</td>
-                                    <td class="p-3"><span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-xs font-semibold">In Progress</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-cyan-400">MD-Y10</td>
-                                    <td class="p-3 text-white">Heavy Duty Chassis</td>
-                                    <td class="p-3">4,500</td>
-                                    <td class="p-3">3,900</td>
-                                    <td class="p-3 text-amber-400 font-medium">600</td>
-                                    <td class="p-3"><span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-xs font-semibold">In Progress</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-semibold text-cyan-400">MD-Z99</td>
-                                    <td class="p-3 text-white">Special Component Frame</td>
-                                    <td class="p-3">5,200</td>
-                                    <td class="p-3">4,750</td>
-                                    <td class="p-3 text-amber-400 font-medium">450</td>
-                                    <td class="p-3"><span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-xs font-semibold">In Progress</span></td>
-                                </tr>
+                            <tbody id="dailyTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
+                                <!-- ข้อมูลจะถูกเรนเดอร์มาที่นี่อัตโนมัติ -->
                             </tbody>
                         </table>
                     </div>
@@ -328,37 +311,42 @@
         </main>
     </div>
 
-    <!-- JavaScript ระบบจัดการข้อมูลและบันทึก (LocalStorage) -->
+    <!-- JavaScript สำหรับระบบแดชบอร์ดรายวัน และการคำนวณ UPH รายชั่วโมง -->
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้น (Default Data) หรือโหลดจากที่เคยบันทึกไว้
-        let defaultProductionData = [
-            { line: 'Line A (Assembly)', plan: 4000, actual: 3850 },
-            { line: 'Line B (Stamping)', plan: 3500, actual: 3100 },
-            { line: 'Line C (Welding)', plan: 5000, actual: 4250 }
+        // 1. ข้อมูลตัวอย่างรายวัน (Model, Daily Order, Total Produced)
+        let dailyData = [
+            { code: 'MD-X01', name: 'Standard Door Type A', dailyOrder: 1500, produced: 1500, status: 'Completed' },
+            { code: 'MD-X02', name: 'Premium Door Type B', dailyOrder: 1300, produced: 1050, status: 'In Progress' },
+            { code: 'MD-Y10', name: 'Heavy Duty Chassis', dailyOrder: 4500, produced: 3900, status: 'In Progress' },
+            { code: 'MD-Z99', name: 'Special Component Frame', dailyOrder: 5200, produced: 4750, status: 'In Progress' }
         ];
 
-        let currentData = loadSavedData() || defaultProductionData;
+        // โหลดข้อมูลเก่าที่เคยบันทึกไว้ (ถ้ามี)
+        let savedDaily = localStorage.getItem('haier_daily_data');
+        if(savedDaily) {
+            dailyData = JSON.parse(savedDaily);
+        }
 
-        // สร้างกราฟ Plan vs Actual
-        const ctxPlan = document.getElementById('planChart').getContext('2d');
-        const planChart = new Chart(ctxPlan, {
+        // สร้างกราฟรายวัน (ด้านบน)
+        const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+        const dailyChart = new Chart(ctxDaily, {
             type: 'bar',
             data: {
-                labels: currentData.map(d => d.line),
+                labels: dailyData.map(d => `${d.code} (${d.name})`),
                 datasets: [
                     {
-                        label: 'แผนผลิต (Plan)',
-                        data: currentData.map(d => d.plan),
+                        label: 'ออเดอร์รายวัน (Daily Order)',
+                        data: dailyData.map(d => d.dailyOrder),
                         backgroundColor: '#334155',
                         borderRadius: 6
                     },
                     {
-                        label: 'ทำได้จริง (Actual)',
-                        data: currentData.map(d => d.actual),
-                        backgroundColor: '#0066FF',
+                        label: 'UPH เฉลี่ยต่อชั่วโมง (Calculated UPH)',
+                        data: dailyData.map(d => Math.round(d.dailyOrder / 10)), // เริ่มต้นที่ 10 ชั่วโมง
+                        backgroundColor: '#00F0FF',
                         borderRadius: 6
                     }
                 ]
@@ -374,102 +362,141 @@
             }
         });
 
-        // แสดงผลข้อมูลลงในตาราง HTML
-        function renderTable(data) {
-            const tbody = document.getElementById('planTableBody');
+        // ฟังก์ชันสร้างตารางรายวัน (ด้านล่าง) โดยคอลัมน์ 2 แยกเป็น ออเดอร์รายวัน (บน) และ UPH (ล่าง)
+        function renderDailyTable(hours) {
+            const tbody = document.getElementById('dailyTableBody');
             tbody.innerHTML = '';
-            
-            data.forEach(item => {
-                let percentage = ((item.actual / item.plan) * 100).toFixed(2);
-                let badgeColor = percentage >= 90 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 
-                                 percentage >= 80 ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 
-                                 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+
+            dailyData.forEach(item => {
+                let uph = Math.round(item.dailyOrder / hours);
+                let badgeColor = item.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
 
                 let row = `
-                    <tr>
-                        <td class="p-3 font-semibold text-white">${item.line}</td>
-                        <td class="p-3">${item.plan.toLocaleString()}</td>
-                        <td class="p-3 text-cyan-400 font-semibold">${item.actual.toLocaleString()}</td>
-                        <td class="p-3"><span class="${badgeColor} px-2.5 py-1 rounded-lg text-xs font-bold border">${percentage}%</span></td>
+                    <tr class="hover:bg-slate-800/30 transition">
+                        <!-- คอลัมน์ที่ 1: รุ่น (Model) -->
+                        <td class="p-3 font-semibold text-cyan-400">
+                            <div>${item.code}</div>
+                            <div class="text-xs text-slate-400 font-normal">${item.name}</div>
+                        </td>
+                        <!-- คอลัมน์ที่ 2: ด้านบนเป็นออเดอร์รายวัน / ด้านล่างเป็น UPH รายชั่วโมง -->
+                        <td class="p-3 space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-medium">ออเดอร์รายวัน</span>
+                                <span class="text-white font-bold">${item.dailyOrder.toLocaleString()} PCS</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/20 font-medium">UPH รายชั่วโมง (${hours} ชม.)</span>
+                                <span class="text-cyan-400 font-bold">${uph.toLocaleString()} PCS/Hr</span>
+                            </div>
+                        </td>
+                        <!-- ยอดสะสม -->
+                        <td class="p-3 text-slate-200 font-medium">${item.produced.toLocaleString()} PCS</td>
+                        <!-- สถานะ -->
+                        <td class="p-3"><span class="${badgeColor} px-2.5 py-1 rounded-full text-xs font-semibold border">${item.status}</span></td>
                     </tr>
                 `;
                 tbody.innerHTML += row;
             });
         }
 
-        // โหลดตารางครั้งแรก
-        renderTable(currentData);
+        // อัปเดตกราฟและตารางรายวันเมื่อมีการเปลี่ยนเวลาทำงาน (ชั่วโมง)
+        function updateDailyChart() {
+            const hours = parseInt(document.getElementById('workHoursSelect').value);
+            document.getElementById('currentShiftDisplay').textContent = `ระยะเวลาทำงาน: ${hours} ชั่วโมง`;
 
-        // กราฟ 3: Door Line Order Trend
-        const ctxDoor = document.getElementById('doorChart').getContext('2d');
-        new Chart(ctxDoor, {
-            type: 'line',
+            // คำนวณ UPH ใหม่ตามชั่วโมงที่เลือก
+            const newUphData = dailyData.map(d => Math.round(d.dailyOrder / hours));
+
+            dailyChart.data.datasets[1].label = `UPH เฉลี่ยต่อชั่วโมง (${hours} ชม.)`;
+            dailyChart.data.datasets[1].data = newUphData;
+            dailyChart.update();
+
+            renderDailyTable(hours);
+        }
+
+        // โหลดตารางครั้งแรกที่ 10 ชั่วโมง
+        updateDailyChart();
+
+        // ------------------ โค้ดส่วนอื่นๆ (Plan vs Actual & Excel Import) ------------------
+        let defaultProductionData = [
+            { line: 'Line A (Assembly)', plan: 4000, actual: 3850 },
+            { line: 'Line B (Stamping)', plan: 3500, actual: 3100 },
+            { line: 'Line C (Welding)', plan: 5000, actual: 4250 }
+        ];
+        let currentData = localStorage.getItem('haier_production_data') ? JSON.parse(localStorage.getItem('haier_production_data')) : defaultProductionData;
+
+        const ctxPlan = document.getElementById('planChart').getContext('2d');
+        const planChart = new Chart(ctxPlan, {
+            type: 'bar',
             data: {
-                labels: ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
+                labels: currentData.map(d => d.line),
                 datasets: [
-                    {
-                        label: 'Order (เป้าหมาย Door Line)',
-                        data: [500, 500, 450, 450, 450, 450],
-                        borderColor: '#64748b',
-                        borderDash: [5, 5],
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Actual (ยอดผลิตจริง Door Line)',
-                        data: [480, 510, 420, 460, 380, 300],
-                        borderColor: '#00F0FF',
-                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointBackgroundColor: '#00F0FF'
-                    }
+                    { label: 'แผนผลิต (Plan)', data: currentData.map(d => d.plan), backgroundColor: '#334155', borderRadius: 6 },
+                    { label: 'ทำได้จริง (Actual)', data: currentData.map(d => d.actual), backgroundColor: '#0066FF', borderRadius: 6 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { position: 'bottom' } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
-                    x: { grid: { display: false } }
-                }
+                scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } }, x: { grid: { display: false } } }
             }
         });
 
-        // 1. ฟังก์ชันอ่านไฟล์ Excel และนำมาแสดงผลทันที
+        function renderTable(data) {
+            const tbody = document.getElementById('planTableBody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                let percentage = ((item.actual / item.plan) * 100).toFixed(2);
+                let badgeColor = percentage >= 90 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : percentage >= 80 ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                tbody.innerHTML += `<tr><td class="p-3 font-semibold text-white">${item.line}</td><td class="p-3">${item.plan.toLocaleString()}</td><td class="p-3 text-cyan-400 font-semibold">${item.actual.toLocaleString()}</td><td class="p-3"><span class="${badgeColor} px-2.5 py-1 rounded-lg text-xs font-bold border">${percentage}%</span></td></tr>`;
+            });
+        }
+        renderTable(currentData);
+
+        const ctxDoor = document.getElementById('doorChart').getContext('2d');
+        new Chart(ctxDoor, {
+            type: 'line',
+            data: {
+                labels: ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
+                datasets: [
+                    { label: 'Order (เป้าหมาย Door Line)', data: [500, 500, 450, 450, 450, 450], borderColor: '#64748b', borderDash: [5, 5], tension: 0.1 },
+                    { label: 'Actual (ยอดผลิตจริง Door Line)', data: [480, 510, 420, 460, 380, 300], borderColor: '#00F0FF', backgroundColor: 'rgba(0, 240, 255, 0.1)', fill: true, tension: 0.3, pointBackgroundColor: '#00F0FF' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } }, x: { grid: { display: false } } }
+            }
+        });
+
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                // คาดหวังรูปแบบแถว Excel (แถวที่ 1 คือหัวตาราง, แถว 2-4 คือข้อมูล Line A, B, C)
-                // คอลัมน์ที่สมมติ: [0] ชื่อ Line, [1] Plan, [2] Actual
                 let parsedData = [];
                 for (let i = 1; i < excelJson.length; i++) {
                     let row = excelJson[i];
                     if (row && row[0]) {
-                        parsedData.push({
-                            line: row[0],
-                            plan: Number(row[1]) || 0,
-                            actual: Number(row[2]) || 0
-                        });
+                        parsedData.push({ line: row[0], plan: Number(row[1]) || 0, actual: Number(row[2]) || 0 });
                     }
                 }
-
                 if (parsedData.length > 0) {
                     tempImportedData = parsedData;
-                    // อัปเดตตารางและกราฟชั่วคราวก่อนกดบันทึก
-                    updateDashboardUI(tempImportedData);
+                    renderTable(tempImportedData);
+                    planChart.data.labels = tempImportedData.map(d => d.line);
+                    planChart.data.datasets[0].data = tempImportedData.map(d => d.plan);
+                    planChart.data.datasets[1].data = tempImportedData.map(d => d.actual);
+                    planChart.update();
                     alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
                 } else {
                     alert('ไม่พบข้อมูลในไฟล์ หรือรูปแบบตารางไม่ถูกต้อง');
@@ -478,31 +505,15 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // ฟังก์ชันอัปเดตหน้าจอ UI (กราฟและตาราง)
-        function updateDashboardUI(data) {
-            renderTable(data);
-            planChart.data.labels = data.map(d => d.line);
-            planChart.data.datasets[0].data = data.map(d => d.plan);
-            planChart.data.datasets[1].data = data.map(d => d.actual);
-            planChart.update();
-        }
-
-        // 2. ฟังก์ชันกดปุ่มบันทึกข้อมูล (เก็บลงในเบราว์เซอร์ LocalStorage ไม่ให้หาย)
         function saveDashboardData() {
             if (!tempImportedData) {
                 alert('ยังไม่มีการเลือกหรืออัปเดตไฟล์ Excel ใหม่สำหรับการบันทึก');
                 return;
             }
-
             currentData = tempImportedData;
             localStorage.setItem('haier_production_data', JSON.stringify(currentData));
-            alert('บันทึกข้อมูลเรียบร้อย! ข้อมูลจะคงอยู่ถาวรแม้จะปิดหรือรีเฟรชเบราว์เซอร์');
-        }
-
-        // 3. ฟังก์ชันโหลดข้อมูลที่เคยบันทึกไว้
-        function loadSavedData() {
-            let saved = localStorage.getItem('haier_production_data');
-            return saved ? JSON.parse(saved) : null;
+            localStorage.setItem('haier_daily_data', JSON.stringify(dailyData));
+            alert('บันทึกข้อมูลเรียบร้อย! ข้อมูลจะคงอยู่ถาวร');
         }
     </script>
 </body>
