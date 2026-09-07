@@ -291,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) เลือกชิ้นส่วนประกอบ (Part) ด้านบน และกำหนด Cycle Time</p>
+                                <p class="text-xs text-slate-400">เลือก Product Group เลือกรุ่นสินค้า (Model) และเลือกชิ้นส่วนประกอบ (Part) เพื่อบันทึกหรือเรียกดูข้อมูลเฉพาะของรุ่นนั้นๆ</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -299,7 +299,7 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group, Model และปรับ Part เป็นแบบปุ่ม Tab สลับไปมา -->
+                    <!-- ฟอร์มเลือก Product Group, Model และเลือกชิ้นส่วน (Part) -->
                     <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -310,8 +310,8 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
-                                <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
-                                    <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
+                                <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="loadProcessDataForCurrentSelection()">
+                                    <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก และเมื่อเปลี่ยนจะโหลดข้อมูลของ Model นั้นๆ -->
                                 </select>
                             </div>
                         </div>
@@ -328,11 +328,11 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนปุ่มกดเปิด/ปิดหน้าต่างแก้ไขตารางข้อมูลกระบวนการทำงาน, Work Station และ Cycle Time -->
+                    <!-- ส่วนปุ่มกดเปิด/ปิดหน้าต่างแก้ไขตารางข้อมูลกระบวนการทำงาน -->
                     <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">คลิกปุ่มด้านข้างเพื่อเปิดหน้าต่างแก้ไขข้อมูล Station, Process และ Cycle Time</p>
+                            <p class="text-xs text-slate-400 mt-0.5">คลิกปุ่มด้านข้างเพื่อเปิดหน้าต่างแก้ไขข้อมูล Station, Process และ Cycle Time ของรุ่น/ชิ้นส่วนที่เลือก</p>
                         </div>
                         <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -437,7 +437,7 @@
                     btn.className = 'part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                 }
             });
-            generateCycleTimeChart();
+            loadProcessDataForCurrentSelection();
         }
 
         let defaultDailyPlanData = {
@@ -486,13 +486,31 @@
         ];
 
         let currentProcessData = defaultProcessData;
-        try {
-            let savedProc = localStorage.getItem('haier_process_station_data_v2');
-            if (savedProc) {
-                currentProcessData = JSON.parse(savedProc);
+
+        // ฟังก์ชันสร้าง Key เฉพาะสำหรับอ้างอิง Model และ Part ใน LocalStorage
+        function getProcessStorageKey() {
+            let group = document.getElementById('selectGroup')?.value || '159';
+            let model = document.getElementById('selectModel')?.value || '159F';
+            return `haier_process_data_${group}_${model}_${selectedPartValue}`;
+        }
+
+        // โหลดข้อมูลกระบวนการทำงานตาม Model และ Part ที่เลือกปัจจุบัน
+        function loadProcessDataForCurrentSelection() {
+            let storageKey = getProcessStorageKey();
+            try {
+                let savedProc = localStorage.getItem(storageKey);
+                if (savedProc) {
+                    currentProcessData = JSON.parse(savedProc);
+                } else {
+                    currentProcessData = JSON.parse(JSON.stringify(defaultProcessData));
+                }
+            } catch (e) {
+                console.error(e);
+                currentProcessData = JSON.parse(JSON.stringify(defaultProcessData));
             }
-        } catch (e) {
-            console.error(e);
+            renderProcessTableInputs();
+            renderSavedDisplayTable();
+            generateCycleTimeChart();
         }
 
         let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
@@ -783,11 +801,11 @@
                     <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p1-input" value="${item.p1}"></td>
                     <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p2-input" value="${item.p2}"></td>
                     <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p3-input" value="${item.p3}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt1-input" value="${item.wt1 !== null ? item.wt1 : ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt2-input" value="${item.wt2 !== null ? item.wt2 : ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt3-input" value="${item.wt3 !== null ? item.wt3 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt1-input" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt2-input" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt3-input" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
                     <td class="p-2 text-center font-bold text-slate-200 wt-total-cell">—</td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null ? item.loss : ''}"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
                     <td class="p-2 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
                 `;
                 tbody.appendChild(tr);
@@ -825,11 +843,11 @@
                     <td class="p-2.5 font-medium text-white">${item.p1 || '—'}</td>
                     <td class="p-2.5 text-slate-300">${item.p2 || '—'}</td>
                     <td class="p-2.5 text-slate-300">${item.p3 || '—'}</td>
-                    <td class="p-2.5 text-center text-slate-300">${item.wt1 !== null && item.wt1 !== '' ? Number(item.wt1).toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center text-slate-300">${item.wt2 !== null && item.wt2 !== '' ? Number(item.wt2).toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center text-slate-300">${item.wt3 !== null && item.wt3 !== '' ? Number(item.wt3).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-slate-300">${item.wt1 !== null && item.wt1 !== '' && item.wt1 !== undefined ? Number(item.wt1).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-slate-300">${item.wt2 !== null && item.wt2 !== '' && item.wt2 !== undefined ? Number(item.wt2).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-slate-300">${item.wt3 !== null && item.wt3 !== '' && item.wt3 !== undefined ? Number(item.wt3).toFixed(2) : '—'}</td>
                     <td class="p-2.5 text-center font-bold text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
+                    <td class="p-2.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && item.loss !== undefined && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
                     <td class="p-2.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
                 `;
                 displayBody.appendChild(tr);
@@ -862,12 +880,13 @@
             });
 
             currentProcessData = updatedList;
-            localStorage.setItem('haier_process_station_data_v2', JSON.stringify(currentProcessData));
+            let storageKey = getProcessStorageKey();
+            localStorage.setItem(storageKey, JSON.stringify(currentProcessData));
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
             toggleEditModal();
-            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
+            alert(`บันทึกข้อมูล Work Station และ Cycle Time ของชิ้นส่วน (${selectedPartValue}) เรียบร้อยแล้ว!`);
         }
 
         function initGroupAndModelDropdowns(data) {
@@ -903,11 +922,10 @@
                     selectModel.appendChild(opt);
                 });
             }
+            loadProcessDataForCurrentSelection();
         }
 
         initGroupAndModelDropdowns(currentDailyData);
-        renderProcessTableInputs();
-        renderSavedDisplayTable();
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
