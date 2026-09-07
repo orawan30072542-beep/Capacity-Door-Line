@@ -137,12 +137,12 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER รายวันและ UPH (กราฟเลื่อนได้ด้านบน / ตารางแบบกระชับรวมช่อง UPH ด้านล่าง) -->
+                <!-- 2. ORDER รายวันและ UPH (กราฟแสดงเฉพาะ Production A และ B / ตารางแสดง Line และ รุ่นครบถ้วน) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order รายวัน และ UPH แยกตามรุ่น</h2>
+                            <h2 class="text-lg font-bold text-white">2. เปรียบเทียบ Order รายวัน และ UPH แยกตาม Line และรุ่น</h2>
                         </div>
                         <!-- ปุ่มจัดการไฟล์และบันทึก -->
                         <div class="flex flex-wrap items-center gap-3">
@@ -161,11 +161,13 @@
                         </div>
                     </div>
 
-                    <!-- กราฟอยู่ด้านบน (รองรับการเลื่อนไปมาซ้าย-ขวา) -->
+                    <!-- กราฟอยู่ด้านบน (แสดงเฉพาะ Production A และ Production B) -->
                     <div class="bg-slate-900/40 p-4 rounded-xl border border-bordercolor">
-                        <div class="text-[11px] text-cyan-400 mb-2 flex items-center space-x-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                            <span>สามารถเลื่อนกราฟไปทางซ้าย-ขวาได้หากมีวันจำนวนมาก</span>
+                        <div class="text-[11px] text-cyan-400 mb-2 flex items-center justify-between">
+                            <span class="flex items-center space-x-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                                <span>กราฟแสดงข้อมูลเฉพาะ Production A และ Production B (เลื่อนซ้าย-ขวาได้)</span>
+                            </span>
                         </div>
                         <div class="chart-container-wrapper">
                             <div class="chart-inner-container">
@@ -174,7 +176,7 @@
                         </div>
                     </div>
 
-                    <!-- ตารางอยู่ด้านล่าง (Compact Mode: รวม UPH ไว้ในช่องเดียวกัน ตัวหนังสือและช่องเล็กลง) -->
+                    <!-- ตารางอยู่ด้านล่าง (แสดงครบถ้วนทั้ง Line และ Model พร้อมรวมช่อง UPH กระชับ) -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-xs">
                             <thead>
@@ -183,7 +185,7 @@
                                 </tr>
                             </thead>
                             <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
-                                <!-- ข้อมูลรุ่น ออเดอร์และ UPH รวมในช่องเดียว -->
+                                <!-- ข้อมูล Line, Model และ UPH รวมในช่องเดียว -->
                             </tbody>
                         </table>
                     </div>
@@ -301,13 +303,14 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้น
+        // โครงสร้างข้อมูลตั้งต้น รองรับ Line และ Model
         let defaultDailyPlanData = {
-            days: ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06'],
+            days: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
             models: [
-                { name: 'One Door', orders: [1150, 1148, 1149, 1200, 1200, 1200], uph: [55, 55, 55, 57, 57, 57] },
-                { name: 'TM545', orders: [402, 520, 558, 520, 520, 421], uph: [19, 25, 27, 25, 25, 20] },
-                { name: 'G3 ECO', orders: [361, 442, 403, 390, 390, 390], uph: [17, 21, 19, 19, 19, 19] }
+                { line: 'Production A', name: 'Model 159', orders: [159, 0, 610, 610, 592, 592], uph: [0, 0, 210, 163, 15, 225] },
+                { line: 'Production A', name: 'Model 199', orders: [0, 480, 480, 480, 480, 460], uph: [0, 0, 0, 0, 35, 260] },
+                { line: 'Production B', name: 'TM545', orders: [0, 610, 610, 610, 610, 293], uph: [0, 0, 0, 0, 0, 337] },
+                { line: 'Production B', name: 'G3 ECO', orders: [0, 0, 0, 0, 34, 238], uph: [0, 260, 260, 238, 204, 0] }
             ]
         };
 
@@ -326,21 +329,31 @@
             alert(`บันทึกเวลาทำงานเป็น: ${start} ถึง ${end} เรียบร้อยแล้ว`);
         }
 
-        // สร้างกราฟ Plan (เลื่อนได้)
+        // ฟังก์ชันสร้าง Dataset สำหรับกราฟ (เลือกเฉพาะ Production A และ Production B ตามต้องการ)
+        function getChartDatasets(modelsData) {
+            // กรองเฉพาะ Model ที่อยู่ใน Line "Production A" หรือ "Production B"
+            const targetLines = ['Production A', 'Production B'];
+            const filteredModels = modelsData.filter(m => targetLines.includes(m.line));
+
+            const colors = ['#0066FF', '#00F0FF', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#f43f5e'];
+            
+            return filteredModels.map((m, index) => {
+                return {
+                    label: `${m.line} - ${m.name}`,
+                    data: m.orders,
+                    backgroundColor: colors[index % colors.length],
+                    borderRadius: 4
+                };
+            });
+        }
+
+        // สร้างกราฟ Plan (แสดงเฉพาะ Production A และ Production B)
         const ctxPlan = document.getElementById('planChart').getContext('2d');
         let planChart = new Chart(ctxPlan, {
             type: 'bar',
             data: {
                 labels: currentDailyData.days,
-                datasets: currentDailyData.models.map((m, index) => {
-                    const colors = ['#0066FF', '#00F0FF', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'];
-                    return {
-                        label: m.name,
-                        data: m.orders,
-                        backgroundColor: colors[index % colors.length],
-                        borderRadius: 4
-                    };
-                })
+                datasets: getChartDatasets(currentDailyData.models)
             },
             options: {
                 responsive: true,
@@ -353,7 +366,7 @@
             }
         });
 
-        // ฟังก์ชันแปลงค่าวันที่จาก Excel ให้เป็น วัน/เดือน (DD/MM) ที่แม่นยำ
+        // ฟังก์ชันแปลงค่าวันที่จาก Excel ให้เป็น วัน/เดือน (DD/MM)
         function formatExcelDate(val) {
             let num = Number(val);
             if (!isNaN(num) && num > 30000) {
@@ -389,7 +402,7 @@
             return strVal;
         }
 
-        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง (Compact Mode: รวม UPH ไว้ในช่องเดียวกัน)
+        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง (แสดงทั้ง Line และ รุ่นครบถ้วน พร้อมรวมช่อง UPH)
         function renderDailyPlanTable(data) {
             const headerRow = document.getElementById('tableHeaderRow');
             const tbody = document.getElementById('planTableBody');
@@ -397,7 +410,7 @@
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            let headerHtml = `<th class="p-2 font-medium w-36">รุ่น / วันที่</th>`;
+            let headerHtml = `<th class="p-2 font-medium w-44">Line / รุ่น</th>`;
             data.days.forEach(day => {
                 headerHtml += `<th class="p-2 font-medium text-center">${day}</th>`;
             });
@@ -407,7 +420,12 @@
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
                 
-                let html = `<td class="p-2 font-semibold text-cyan-400 bg-slate-900/40">${m.name}</td>`;
+                let html = `
+                    <td class="p-2 bg-slate-900/40">
+                        <div class="text-[10px] text-slate-400 font-medium">${m.line || 'Production Line'}</div>
+                        <div class="font-semibold text-cyan-400">${m.name}</div>
+                    </td>
+                `;
                 
                 for (let i = 0; i < data.days.length; i++) {
                     let orderVal = Math.round(Number(m.orders[i]) || 0);
@@ -433,7 +451,7 @@
         new Chart(ctxDoor, {
             type: 'line',
             data: {
-                labels: ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06'],
+                labels: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
                 datasets: [
                     {
                         label: 'Order (เป้าหมาย Door Line)',
@@ -464,7 +482,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel แปลงวันที่และจัดการข้อมูล
+        // ระบบอ่านไฟล์ Excel รองรับคอลัมน์ Line และ Model
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -480,20 +498,30 @@
                 const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                 if (excelJson.length > 2) {
-                    let rawDays = excelJson[0].slice(1).filter(val => val !== undefined && val !== null && val !== '');
+                    // สมาสตรัปเจอร์ Excel: แถวแรกคือหัวตารางวันที่ (เริ่มตั้งแต่คอลัมน์ที่ 2 หรือ index 2 ถ้ามี Line และ Model แยกกัน)
+                    // รองรับทั้งแบบ [Line, Model, วัน1, วัน2...] หรือ [Model, วัน1, วัน2...]
+                    let headerRow = excelJson[0];
+                    let dateStartIndex = headerRow[0] && String(headerRow[0]).toLowerCase().includes('line') ? 2 : 1;
+                    
+                    let rawDays = headerRow.slice(dateStartIndex).filter(val => val !== undefined && val !== null && val !== '');
                     let days = rawDays.map(d => formatExcelDate(d));
 
-                    if (days.length === 0) days = ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06'];
+                    if (days.length === 0) days = ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'];
 
                     let models = [];
+                    // วนลูปอ่านข้อมูลทีละคู่แถว (Order และ UPH)
                     for (let i = 1; i < excelJson.length; i += 2) {
                         let rowOrder = excelJson[i];
                         let rowUph = excelJson[i+1] || [];
-                        if (rowOrder && rowOrder[0]) {
-                            let modelName = rowOrder[0];
-                            let orders = rowOrder.slice(1, rawDays.length + 1).map(val => Math.round(Number(val) || 0));
-                            let uph = rowUph.slice(1, rawDays.length + 1).map(val => Math.round(Number(val) || 0));
-                            models.push({ name: modelName, orders: orders, uph: uph });
+                        if (rowOrder && (rowOrder[0] !== undefined || rowOrder[1] !== undefined)) {
+                            let lineName = dateStartIndex === 2 ? (rowOrder[0] || 'Production A') : 'Production A';
+                            let modelName = dateStartIndex === 2 ? rowOrder[1] : rowOrder[0];
+
+                            if (modelName) {
+                                let orders = rowOrder.slice(dateStartIndex, dateStartIndex + days.length).map(val => Math.round(Number(val) || 0));
+                                let uph = rowUph.slice(dateStartIndex, dateStartIndex + days.length).map(val => Math.round(Number(val) || 0));
+                                models.push({ line: lineName, name: modelName, orders: orders, uph: uph });
+                            }
                         }
                     }
 
@@ -502,18 +530,10 @@
                         renderDailyPlanTable(tempImportedData);
                         
                         planChart.data.labels = tempImportedData.days;
-                        planChart.data.datasets = tempImportedData.models.map((m, index) => {
-                            const colors = ['#0066FF', '#00F0FF', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'];
-                            return {
-                                label: m.name,
-                                data: m.orders,
-                                backgroundColor: colors[index % colors.length],
-                                borderRadius: 4
-                            };
-                        });
+                        planChart.data.datasets = getChartDatasets(tempImportedData.models);
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กราฟอัปเดตเฉพาะ Production A และ B เรียบร้อย กรุณากด "บันทึกข้อมูล"');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
