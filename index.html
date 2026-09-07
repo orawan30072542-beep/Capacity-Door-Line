@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production & Order Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Container -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Menu -->
+        <aside class="w-64 bg-slate-900 text-white hidden md:flex flex-col justify-between">
+            <div>
+                <div class="p-5 text-xl font-bold tracking-wider border-b border-slate-800 flex items-center space-x-2">
+                    <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Smart Factory</span>
+                </div>
+                <nav class="p-4 space-y-2">
+                    <a href="#overview" class="block px-4 py-2.5 rounded bg-indigo-600 text-white font-medium">1. Overview</a>
+                    <a href="#plan-order" class="block px-4 py-2.5 rounded hover:bg-slate-800 text-slate-300 transition">2. Order ตามแผนผลิต</a>
+                    <a href="#door-line" class="block px-4 py-2.5 rounded hover:bg-slate-800 text-slate-300 transition">3. Door Line Order</a>
+                    <a href="#work-process" class="block px-4 py-2.5 rounded hover:bg-slate-800 text-slate-300 transition">4. Work Process</a>
+                    <a href="#model-section" class="block px-4 py-2.5 rounded hover:bg-slate-800 text-slate-300 transition">5. Model Summary</a>
+                </nav>
+            </div>
+            <div class="p-4 text-xs text-slate-500 border-t border-slate-800">
+                System Status: <span class="text-green-400 font-semibold">● Online</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center z-10">
+                <h1 class="text-xl font-semibold text-slate-800">Production & Order Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">อัปเดตล่าสุด: วันนี้, 09:30 น.</span>
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">AD</div>
+                </div>
+            </header>
+
+            <!-- Dashboard Body -->
+            <div class="p-6 space-y-6">
+
+                <!-- 1. OVERVIEW SECTION -->
+                <section id="overview" class="space-y-4">
+                    <h2 class="text-lg font-bold text-slate-700 border-l-4 border-indigo-600 pl-3">1. ภาพรวมการผลิต (Overview)</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                            <p class="text-sm text-gray-500 font-medium">ยอดออเดอร์รวมทั้งหมด (Order)</p>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-2">12,500 <span class="text-sm font-normal text-gray-400">PCS</span></h3>
+                            <span class="text-xs text-green-600 font-semibold mt-1 inline-block">↑ +8% จากเป้าหมายสัปดาห์ก่อน</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                            <p class="text-sm text-gray-500 font-medium">ผลิตได้จริงตามแผน (Actual)</p>
+                            <h3 class="text-2xl font-bold text-indigo-600 mt-2">11,200 <span class="text-sm font-normal text-gray-400">PCS</span></h3>
+                            <span class="text-xs text-blue-600 font-semibold mt-1 inline-block">Achievement: 89.6%</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                            <p class="text-sm text-gray-500 font-medium">งานค้างส่งมอบ (Backlog)</p>
+                            <h3 class="text-2xl font-bold text-amber-600 mt-2">1,300 <span class="text-sm font-normal text-gray-400">PCS</span></h3>
+                            <span class="text-xs text-amber-600 font-semibold mt-1 inline-block">ต้องเร่งดำเนินการ</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                            <p class="text-sm text-gray-500 font-medium">อัตราของเสีย (Defect Rate)</p>
+                            <h3 class="text-2xl font-bold text-rose-600 mt-2">1.4%</h3>
+                            <span class="text-xs text-green-600 font-semibold mt-1 inline-block">อยู่ในเกณฑ์ควบคุม (< 2%)</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. ORDER ตามแผนผลิต (Plan vs Actual by Line) -->
+                <section id="plan-order" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-slate-700 border-l-4 border-indigo-600 pl-3">2. เปรียบเทียบ Order ตามแผนผลิต (Plan vs Actual)</h2>
+                        <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-medium">แยกตาม Line การผลิต</span>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                        <!-- Chart -->
+                        <div class="h-72">
+                            <canvas id="planChart"></canvas>
+                        </div>
+                        <!-- Table Summary -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-600 border-b">
+                                        <th class="p-3">Production Line</th>
+                                        <th class="p-3">แผนผลิต (Plan)</th>
+                                        <th class="p-3">ทำได้จริง (Actual)</th>
+                                        <th class="p-3">% ความสำเร็จ</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    <tr>
+                                        <td class="p-3 font-medium">Line A (Assembly)</td>
+                                        <td class="p-3">4,000</td>
+                                        <td class="p-3 text-indigo-600 font-semibold">3,850</td>
+                                        <td class="p-3"><span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs font-bold">96.25%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Line B (Stamping)</td>
+                                        <td class="p-3">3,500</td>
+                                        <td class="p-3 text-indigo-600 font-semibold">3,100</td>
+                                        <td class="p-3"><span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs font-bold">88.57%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-medium">Line C (Welding)</td>
+                                        <td class="p-3">5,000</td>
+                                        <td class="p-3 text-indigo-600 font-semibold">4,250</td>
+                                        <td class="p-3"><span class="text-rose-600 bg-rose-50 px-2 py-0.5 rounded text-xs font-bold">85.00%</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. ORDER ของ DOOR LINE -->
+                <section id="door-line" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-700 border-l-4 border-indigo-600 pl-3">3. สถานะออเดอร์ของ Door Line (สายการผลิตประตู)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <span class="text-xs text-gray-500 font-medium">Door Line Target (Order)</span>
+                            <h4 class="text-xl font-bold text-slate-800 mt-1">2,800 Sets</h4>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <span class="text-xs text-gray-500 font-medium">Door Line Completed (Actual)</span>
+                            <h4 class="text-xl font-bold text-indigo-600 mt-1">2,550 Sets</h4>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                            <span class="text-xs text-gray-500 font-medium">Efficiency Rate</span>
+                            <h4 class="text-xl font-bold text-green-600 mt-1">91.07%</h4>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="doorChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- 4. WORK PROCESS (กระบวนการทำงาน) -->
+                <section id="work-process" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-700 border-l-4 border-indigo-600 pl-3">4. สถานะกระบวนการทำงาน (Work Process Progress)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between font-semibold text-sm mb-2">
+                                <span>1. Press / Stamping</span>
+                                <span class="text-indigo-600">100%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 100%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">สถานะ: เสร็จสิ้นตามรอบ</p>
+                        </div>
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between font-semibold text-sm mb-2">
+                                <span>2. Welding Process</span>
+                                <span class="text-indigo-600">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">สถานะ: กำลังดำเนินการ</p>
+                        </div>
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between font-semibold text-sm mb-2">
+                                <span>3. Painting / Coating</span>
+                                <span class="text-indigo-600">70%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 70%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">สถานะ: กำลังดำเนินการ</p>
+                        </div>
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between font-semibold text-sm mb-2">
+                                <span>4. Final Assembly</span>
+                                <span class="text-amber-600">45%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 45%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">สถานะ: รอคิวชิ้นงาน</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. MODEL (สรุปตามรุ่นผลิตภัณฑ์) -->
+                <section id="model-section" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-700 border-l-4 border-indigo-600 pl-3">5. สรุปยอดผลิตแยกตาม Model ผลิตภัณฑ์</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 border-b">
+                                    <th class="p-3">Model Code</th>
+                                    <th class="p-3">Product Name</th>
+                                    <th class="p-3">Order (ยอดสั่งผลิต)</th>
+                                    <th class="p-3">Produced (ผลิตได้)</th>
+                                    <th class="p-3">Balance (คงเหลือผลิต)</th>
+                                    <th class="p-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr>
+                                    <td class="p-3 font-semibold text-indigo-600">MD-X01</td>
+                                    <td class="p-3">Standard Door Type A</td>
+                                    <td class="p-3">1,500</td>
+                                    <td class="p-3">1,500</td>
+                                    <td class="p-3 text-gray-400">0</td>
+                                    <td class="p-3"><span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-indigo-600">MD-X02</td>
+                                    <td class="p-3">Premium Door Type B</td>
+                                    <td class="p-3">1,300</td>
+                                    <td class="p-3">1,050</td>
+                                    <td class="p-3 text-amber-600 font-medium">250</td>
+                                    <td class="p-3"><span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-xs font-semibold">In Progress</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-indigo-600">MD-Y10</td>
+                                    <td class="p-3">Heavy Duty Chassis</td>
+                                    <td class="p-3">4,500</td>
+                                    <td class="p-3">3,900</td>
+                                    <td class="p-3 text-amber-600 font-medium">600</td>
+                                    <td class="p-3"><span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-xs font-semibold">In Progress</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-semibold text-indigo-600">MD-Z99</td>
+                                    <td class="p-3">Special Component Frame</td>
+                                    <td class="p-3">5,200</td>
+                                    <td class="p-3">4,750</td>
+                                    <td class="p-3 text-amber-600 font-medium">450</td>
+                                    <td class="p-3"><span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-xs font-semibold">In Progress</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript สำหรับสร้างกราฟด้วย Chart.js -->
+    <script>
+        // กราฟ 2: Plan vs Actual by Line
+        const ctxPlan = document.getElementById('planChart').getContext('2d');
+        new Chart(ctxPlan, {
+            type: 'bar',
+            data: {
+                labels: ['Line A', 'Line B', 'Line C'],
+                datasets: [
+                    {
+                        label: 'แผนผลิต (Plan)',
+                        data: [4000, 3500, 5000],
+                        backgroundColor: '#94a3b8',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'ทำได้จริง (Actual)',
+                        data: [3850, 3100, 4250],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // กราฟ 3: Door Line Order Trend
+        const ctxDoor = document.getElementById('doorChart').getContext('2d');
+        new Chart(ctxDoor, {
+            type: 'line',
+            data: {
+                labels: ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
+                datasets: [
+                    {
+                        label: 'Order (เป้าหมาย Door Line)',
+                        data: [500, 500, 450, 450, 450, 450],
+                        borderColor: '#94a3b8',
+                        borderDash: [5, 5],
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Actual (ยอดผลิตจริง Door Line)',
+                        data: [480, 510, 420, 460, 380, 300],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+</body>
+</html>
