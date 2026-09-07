@@ -38,7 +38,7 @@
         .lob-chart-wrapper {
             position: relative;
             width: 100%;
-            height: 420px;
+            height: 380px;
         }
     </style>
 </head>
@@ -386,9 +386,7 @@
                                         <th class="p-3 text-center w-16">ลบ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
-                                    <!-- Dynamic rows -->
-                                </tbody>
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30"></tbody>
                             </table>
                         </div>
                     </div>
@@ -415,18 +413,16 @@
                                         <th class="p-2.5 text-center text-cyan-300">Cycle Time</th>
                                     </tr>
                                 </thead>
-                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
-                                    <!-- Rendered saved records -->
-                                </tbody>
+                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟ Cycle Time และช่องกรอก Takt Time -->
-                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                    <!-- ส่วนแสดงกราฟแท่ง CT และตารางประกอบจุดงาน -->
+                    <div class="bg-slate-900/60 p-5 rounded-xl border border-bordercolor space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                             <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แบบแท่งเปรียบเทียบกับเส้น Takt Time</h3>
+                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแท่งเปรียบเทียบ Cycle Time (CT) ในแต่ละจุดงานกับ Takt Time</h3>
                                 <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
                             </div>
                             <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
@@ -435,8 +431,26 @@
                                 <span class="text-xs text-slate-400">วิ/ชิ้น</span>
                             </div>
                         </div>
-                        <div class="lob-chart-wrapper">
+
+                        <!-- กราฟแท่ง CT -->
+                        <div class="lob-chart-wrapper bg-slate-950/40 p-3 rounded-xl border border-bordercolor/50">
                             <canvas id="cycleTimeChart"></canvas>
+                        </div>
+
+                        <!-- ตารางสรุปค่า CT รายจุดงานประกอบใต้กราฟแท่ง -->
+                        <div class="overflow-x-auto rounded-lg border border-bordercolor/50 mt-4">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-950">
+                                        <th class="p-2.5 text-center">จุดงาน (Station)</th>
+                                        <th class="p-2.5 text-center">WT Total (วิ)</th>
+                                        <th class="p-2.5 text-center">Loss (วิ)</th>
+                                        <th class="p-2.5 text-center text-cyan-300">Cycle Time (CT) รวม</th>
+                                        <th class="p-2.5 text-center">สถานะเทียบ Takt Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ctSummaryTableBody" class="divide-y divide-bordercolor/40 text-slate-300 bg-slate-900/30"></tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
@@ -512,72 +526,8 @@
 
         function getEmptyDefaultStations() {
             return [
-                { station: 'STA01', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 13.90, wt2: 11.30, wt3: null, loss: 3.21 },
-                { station: 'STA02', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: '—', wt1: 8.80, wt2: 10.20, wt3: null, loss: 2.54 }
+                { station: 'STA01', p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null }
             ];
-        }
-
-        function initGroupRadioButtons(data) {
-            const container = document.getElementById('groupRadioContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (data && data.groups && data.groups.length > 0) {
-                data.groups.forEach((g, index) => {
-                    let isChecked = (index === 0 || g.productGroup === selectedProductGroup);
-                    if (isChecked && !selectedProductGroup) {
-                        selectedProductGroup = g.productGroup;
-                    }
-
-                    let label = document.createElement('label');
-                    label.className = `cursor-pointer px-4 py-2 rounded-xl text-xs font-medium transition border flex items-center space-x-2 ${selectedProductGroup === g.productGroup ? 'bg-blue-600/20 border-blue-500 text-cyan-300' : 'bg-slate-800 border-bordercolor text-slate-300 hover:bg-slate-700'}`;
-                    label.innerHTML = `
-                        <input type="radio" name="productGroupRadio" value="${g.productGroup}" ${selectedProductGroup === g.productGroup ? 'checked' : ''} onchange="onGroupRadioChange('${g.productGroup}')" class="hidden">
-                        <span>Group ${g.productGroup}</span>
-                    `;
-                    container.appendChild(label);
-                });
-                updateModelCheckboxes();
-            }
-        }
-
-        function onGroupRadioChange(groupName) {
-            selectedProductGroup = groupName;
-            initGroupRadioButtons(currentDailyData);
-        }
-
-        function updateModelCheckboxes() {
-            const container = document.getElementById('modelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            let targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedProductGroup);
-            if (targetGroup && targetGroup.models) {
-                if (selectedModels.size === 0 && targetGroup.models.length > 0) {
-                    selectedModels.add(targetGroup.models[0].name);
-                }
-
-                targetGroup.models.forEach(m => {
-                    let isChecked = selectedModels.has(m.name);
-                    let label = document.createElement('label');
-                    label.className = `cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium transition border flex items-center space-x-2 ${isChecked ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-bordercolor hover:bg-slate-800'}`;
-                    label.innerHTML = `
-                        <input type="checkbox" value="${m.name}" ${isChecked ? 'checked' : ''} onchange="onModelCheckboxChange(this)" class="rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0">
-                        <span>${m.name}</span>
-                    `;
-                    container.appendChild(label);
-                });
-            }
-            loadProcessDataForCurrentSelection();
-        }
-
-        function onModelCheckboxChange(checkbox) {
-            if (checkbox.checked) {
-                selectedModels.add(checkbox.value);
-            } else {
-                selectedModels.delete(checkbox.value);
-            }
-            updateModelCheckboxes();
         }
 
         function loadProcessDataForCurrentSelection() {
@@ -877,36 +827,43 @@
                     const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                     if (excelJson.length > 1) {
-                        let importedList = [];
+                        let importedStations = [];
                         for (let i = 1; i < excelJson.length; i++) {
                             let row = excelJson[i];
                             if (!row || row.length === 0) continue;
+
                             let station = String(row[0] || '').trim();
                             if (!station) continue;
 
-                            importedList.push({
+                            importedStations.push({
                                 station: station,
                                 p1: String(row[1] || '').trim(),
                                 p2: String(row[2] || '').trim(),
                                 p3: String(row[3] || '').trim(),
-                                wt1: row[4] !== undefined && row[4] !== '' ? parseFloat(row[4]) : null,
-                                wt2: row[5] !== undefined && row[5] !== '' ? parseFloat(row[5]) : null,
-                                wt3: row[6] !== undefined && row[6] !== '' ? parseFloat(row[6]) : null,
-                                loss: row[7] !== undefined && row[7] !== '' ? parseFloat(row[7]) : null
+                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
+                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
+                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
                             });
                         }
 
-                        if (importedList.length > 0) {
-                            currentProcessData = importedList;
+                        if (importedStations.length > 0) {
+                            currentProcessData = importedStations;
                             renderProcessTableInputs();
-                            alert('นำเข้าข้อมูลเข้าตารางสำเร็จ! กรุณากด "บันทึกข้อมูลและแสดงผล"');
+                            
+                            const editSection = document.getElementById('editProcessSection');
+                            if (editSection.classList.contains('hidden')) {
+                                toggleEditModal();
+                            }
+                            alert('นำเข้าข้อมูล Work Station จาก Excel สำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกข้อมูลและแสดงผล" ได้ทันที');
                         } else {
-                            alert('ไม่พบข้อมูลในไฟล์ Excel');
+                            alert('ไม่พบข้อมูล Station ในไฟล์ Excel ที่อัปโหลด');
                         }
                     }
                 } catch (err) {
                     alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์: ' + err.message);
                 }
+                event.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         }
@@ -961,7 +918,7 @@
                     <td class="p-2 text-center font-bold text-slate-200 wt-total-cell">—</td>
                     <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
                     <td class="p-2 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
-                    <td class="p-2 text-center"><button type="button" onclick="removeStationRow(${index})" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-2 py-1 rounded text-xs transition">ลบ</button></td>
+                    <td class="p-2 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 p-1">✕</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -988,6 +945,11 @@
             const displayBody = document.getElementById('displaySavedTableBody');
             if (!displayBody) return;
             displayBody.innerHTML = '';
+
+            if (!currentProcessData || currentProcessData.length === 0) {
+                displayBody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูล Work Station สำหรับรุ่นและพาร์ทนี้</td></tr>`;
+                return;
+            }
 
             currentProcessData.forEach((item) => {
                 let { wtTotal, cycleTime } = calculateRowTotals(item);
@@ -1034,18 +996,111 @@
                 });
             });
 
-            currentProcessData = updatedList;
             let modelsArray = Array.from(selectedModels);
-            if (modelsArray.length > 0) {
-                let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
-                processDatabase[storageKey] = currentProcessData;
-                localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
+            if (modelsArray.length === 0) {
+                alert('กรุณาเลือก Model อย่างน้อย 1 รายการ');
+                return;
             }
+
+            let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
+            processDatabase[storageKey] = updatedList;
+            currentProcessData = updatedList;
+
+            localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
             toggleEditModal();
-            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
+            alert(`บันทึกข้อมูลสำหรับ Model: ${modelsArray.join(', ')} (${selectedPartValue}) สำเร็จ!`);
+        }
+
+        function initGroupRadioButtons(data) {
+            const container = document.getElementById('groupRadioContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (data && data.groups && data.groups.length > 0) {
+                data.groups.forEach((g, idx) => {
+                    let btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.setAttribute('data-group', g.productGroup);
+                    btn.textContent = `Group ${g.productGroup}`;
+                    
+                    if (idx === 0) {
+                        selectedProductGroup = g.productGroup;
+                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                    } else {
+                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    }
+
+                    btn.onclick = function() {
+                        selectProductGroup(g.productGroup);
+                    };
+                    container.appendChild(btn);
+                });
+            }
+            updateModelCheckboxesByGroup();
+        }
+
+        function selectProductGroup(groupName) {
+            selectedProductGroup = groupName;
+            document.querySelectorAll('.group-radio-btn').forEach(btn => {
+                if (btn.getAttribute('data-group') === groupName) {
+                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                } else {
+                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                }
+            });
+            updateModelCheckboxesByGroup();
+        }
+
+        function updateModelCheckboxesByGroup() {
+            const container = document.getElementById('modelCheckboxContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            selectedModels.clear();
+
+            let targetGroup = null;
+            if (currentDailyData && currentDailyData.groups) {
+                targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedProductGroup);
+            }
+
+            if (!targetGroup || !targetGroup.models || targetGroup.models.length === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-500">ไม่พบ Model ในกลุ่มนี้</span>`;
+                loadProcessDataForCurrentSelection();
+                return;
+            }
+
+            targetGroup.models.forEach((m) => {
+                selectedModels.add(m.name);
+
+                let label = document.createElement('label');
+                label.className = 'flex items-center space-x-2 bg-slate-900/60 px-3 py-2 rounded-lg border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
+                
+                let checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = true;
+                checkbox.value = m.name;
+                checkbox.className = 'rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0';
+                checkbox.onchange = function() {
+                    if (checkbox.checked) {
+                        selectedModels.add(m.name);
+                    } else {
+                        selectedModels.delete(m.name);
+                    }
+                    loadProcessDataForCurrentSelection();
+                };
+
+                let span = document.createElement('span');
+                span.className = 'text-xs font-medium text-slate-200';
+                span.textContent = m.name;
+
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                container.appendChild(label);
+            });
+
+            loadProcessDataForCurrentSelection();
         }
 
         initGroupRadioButtons(currentDailyData);
@@ -1070,15 +1125,24 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                setTimeout(() => { generateCycleTimeChart(); }, 200);
+                setTimeout(() => {
+                    generateCycleTimeChart();
+                    if (cycleTimeChartInstance) {
+                        cycleTimeChartInstance.resize();
+                        cycleTimeChartInstance.update();
+                    }
+                }, 50);
             }
         }
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
             let modelsArray = Array.from(selectedModels);
-            let modelStr = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            document.getElementById('ctInfoLabel').textContent = `Model: ${modelStr} | Part: ${selectedPartValue}`;
+            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
+            const infoLabel = document.getElementById('ctInfoLabel');
+            if (infoLabel) {
+                infoLabel.textContent = `Model: ${modelKey} | Part: ${selectedPartValue}`;
+            }
 
             let labels = [];
             let ctData = [];
@@ -1090,12 +1154,16 @@
                 ctData.push(cycleTime);
             });
 
-            let taktTimeVal = parseFloat(document.getElementById('taktTimeInput').value) || 60;
-            let taktLineData = new Array(labels.length).fill(taktTimeVal);
+            let taktVal = parseFloat(document.getElementById('taktTimeInput').value) || 0;
+            let taktLineData = new Array(labels.length).fill(taktVal);
 
-            const ctxCT = document.getElementById('cycleTimeChart').getContext('2d');
+            const canvasEl = document.getElementById('cycleTimeChart');
+            if (!canvasEl) return;
+            const ctxCT = canvasEl.getContext('2d');
+
             if (cycleTimeChartInstance) {
                 cycleTimeChartInstance.destroy();
+                cycleTimeChartInstance = null;
             }
 
             cycleTimeChartInstance = new Chart(ctxCT, {
@@ -1113,12 +1181,13 @@
                         },
                         {
                             type: 'line',
-                            label: 'Takt Time Target',
+                            label: 'Takt Time (เป้าหมาย)',
                             data: taktLineData,
                             borderColor: '#f43f5e',
                             borderWidth: 2,
-                            borderDash: [5, 5],
+                            borderDash: [6, 6],
                             pointRadius: 0,
+                            fill: false,
                             order: 1
                         }
                     ]
@@ -1149,6 +1218,34 @@
                     }
                 }
             });
+
+            // เรนเดอร์ตารางสรุป CT ใต้กราฟแท่ง
+            const summaryBody = document.getElementById('ctSummaryTableBody');
+            if (summaryBody) {
+                summaryBody.innerHTML = '';
+                if (!currentProcessData || currentProcessData.length === 0) {
+                    summaryBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลจุดงาน</td></tr>`;
+                } else {
+                    currentProcessData.forEach((item) => {
+                        let { wtTotal, cycleTime } = calculateRowTotals(item);
+                        let isOver = taktVal > 0 && cycleTime > taktVal;
+                        let statusBadge = isOver 
+                            ? `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[11px] font-semibold">Over Takt Time</span>`
+                            : `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[11px] font-semibold">In Target</span>`;
+
+                        let tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-800/30 transition';
+                        tr.innerHTML = `
+                            <td class="p-2.5 text-center font-semibold text-cyan-300">${item.station || '-'}</td>
+                            <td class="p-2.5 text-center text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
+                            <td class="p-2.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
+                            <td class="p-2.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
+                            <td class="p-2.5 text-center">${statusBadge}</td>
+                        `;
+                        summaryBody.appendChild(tr);
+                    });
+                }
+            }
         }
     </script>
 </body>
