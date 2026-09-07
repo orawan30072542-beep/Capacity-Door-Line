@@ -50,10 +50,9 @@
                     </div>
                 </div>
                 <nav class="p-4 space-y-2">
-                    <a href="#plan-order" class="block px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition">2. Order รายวันและ UPH</a>
-                    <a href="#work-process" class="block px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
+                    <a href="#plan-order" class="block px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>4. Work Process Control</span>
+                        <span>2. Order รายวันและ UPH</span>
                     </a>
                 </nav>
             </div>
@@ -79,7 +78,6 @@
             </header>
 
             <div class="p-6 space-y-6">
-                
                 <!-- 2. ORDER รายวันและ UPH -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -114,30 +112,10 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- 4. WORK PROCESS CONTROL -->
-                <section id="work-process" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงาน (Work Process Progress)</h2>
-                        </div>
-                        <button onclick="addNewProcess()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg transition flex items-center space-x-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            <span>เพิ่มกระบวนการทำงาน</span>
-                        </button>
-                    </div>
-                    <!-- พื้นที่แสดงผลการ์ด Work Process แบบไดนามิก -->
-                    <div id="workProcessContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- ถูกเรนเดอร์ด้วย JavaScript -->
-                    </div>
-                </section>
-
             </div>
         </main>
     </div>
 
-    <!-- Script สำหรับประมวลผลข้อมูล -->
     <script>
         let globalData = {
             days: ["01/08", "02/08", "03/08", "04/08", "05/08"],
@@ -155,12 +133,6 @@
                         { name: "199A", orders: [200, 190, 210, 220, 205] }
                     ]
                 }
-            ],
-            processes: [
-                { name: '1. Press / Stamping', progress: 100 },
-                { name: '2. Welding Process', progress: 85 },
-                { name: '3. Painting / Coating', progress: 70 },
-                { name: '4. Final Assembly', progress: 45 }
             ]
         };
 
@@ -216,53 +188,6 @@
                 }
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        // ฟังก์ชันสำหรับเพิ่มกระบวนการทำงานใหม่
-        function addNewProcess() {
-            let name = prompt("กรอกชื่อกระบวนการทำงานใหม่ (เช่น 5. Testing & QC):");
-            if (!name || name.trim() === "") return;
-
-            let progressInput = prompt("กรอกเปอร์เซ็นต์ความคืบหน้า (0 - 100):", "50");
-            let progress = parseInt(progressInput);
-            if (isNaN(progress) || progress < 0) progress = 0;
-            if (progress > 100) progress = 100;
-
-            globalData.processes.push({ name: name.trim(), progress: progress });
-            renderWorkProcesses();
-        }
-
-        // เรนเดอร์การ์ด Work Process แยกส่วน
-        function renderWorkProcesses() {
-            const container = document.getElementById('workProcessContainer');
-            container.innerHTML = '';
-
-            globalData.processes.forEach((proc, index) => {
-                let colorClass = proc.progress === 100 ? 'text-cyan-400' : (proc.progress < 50 ? 'text-amber-400' : 'text-cyan-400');
-                let barColor = proc.progress < 50 ? 'bg-amber-500' : 'bg-gradient-to-r from-blue-600 to-cyan-400';
-
-                let card = document.createElement('div');
-                card.className = 'border border-bordercolor rounded-xl p-4 bg-slate-900/40 relative group';
-                card.innerHTML = `
-                    <div class="flex justify-between font-medium text-sm mb-2 text-slate-200">
-                        <span class="truncate pr-2">${proc.name}</span>
-                        <span class="${colorClass}">${proc.progress}%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                        <div class="${barColor} h-2 rounded-full transition-all duration-300" style="width: ${proc.progress}%"></div>
-                    </div>
-                    <button onclick="deleteProcess(${index})" class="absolute top-2 right-2 text-rose-400 opacity-0 group-hover:opacity-100 transition text-xs bg-slate-800 px-1.5 py-0.5 rounded">ลบ</button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // ฟังก์ชันลบกระบวนการ
-        function deleteProcess(index) {
-            if (confirm("ต้องการลบกระบวนการนี้ใช่หรือไม่?")) {
-                globalData.processes.splice(index, 1);
-                renderWorkProcesses();
-            }
         }
 
         function calculateTotals(groups, days) {
@@ -342,8 +267,6 @@
                     }
                 }
             });
-
-            renderWorkProcesses();
         }
 
         window.onload = renderDashboard;
