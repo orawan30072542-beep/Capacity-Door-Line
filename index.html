@@ -136,7 +136,7 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER รายวันและ UPH (กราฟรวมยอด A และ B แยกสี / ตารางแบ่งซ้าย Production A ขวา Production B) -->
+                <!-- 2. ORDER รายวันและ UPH -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
@@ -190,13 +190,9 @@
                             <div class="overflow-x-auto">
                                 <table id="tableProdA" class="w-full text-left border-collapse text-xs">
                                     <thead>
-                                        <tr class="border-b border-bordercolor text-slate-400">
-                                            <!-- หัวตาราง A -->
-                                        </tr>
+                                        <tr class="border-b border-bordercolor text-slate-400"></tr>
                                     </thead>
-                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300">
-                                        <!-- ข้อมูล Production A -->
-                                    </tbody>
+                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -213,13 +209,9 @@
                             <div class="overflow-x-auto">
                                 <table id="tableProdB" class="w-full text-left border-collapse text-xs">
                                     <thead>
-                                        <tr class="border-b border-bordercolor text-slate-400">
-                                            <!-- หัวตาราง B -->
-                                        </tr>
+                                        <tr class="border-b border-bordercolor text-slate-400"></tr>
                                     </thead>
-                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300">
-                                        <!-- ข้อมูล Production B -->
-                                    </tbody>
+                                    <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -339,14 +331,14 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้น รองรับ Line A และ B
+        // โครงสร้างข้อมูลตั้งต้น (มีทั้ง Production A และ Production B ครบทั้ง 2 ฝั่ง)
         let defaultDailyPlanData = {
             days: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
             models: [
                 { line: 'Production A', name: 'Model 159', orders: [159, 0, 610, 610, 592, 592], uph: [0, 0, 210, 163, 15, 225] },
                 { line: 'Production A', name: 'Model 199', orders: [0, 480, 480, 480, 480, 460], uph: [0, 0, 0, 0, 35, 260] },
-                { line: 'Production B', name: 'TM545', orders: [0, 610, 610, 610, 610, 293], uph: [0, 0, 0, 0, 0, 337] },
-                { line: 'Production B', name: 'G3 ECO', orders: [0, 0, 0, 0, 34, 238], uph: [0, 260, 260, 238, 204, 0] }
+                { line: 'Production B', name: 'Model TM545', orders: [0, 610, 610, 610, 610, 293], uph: [0, 0, 0, 0, 0, 337] },
+                { line: 'Production B', name: 'Model G3 ECO', orders: [0, 0, 0, 0, 34, 238], uph: [0, 260, 260, 238, 204, 0] }
             ]
         };
 
@@ -374,10 +366,10 @@
                 let lineStr = String(m.line || '').trim().toLowerCase();
                 for (let i = 0; i < days.length; i++) {
                     let val = Number(m.orders[i]) || 0;
-                    if (lineStr.includes('a')) {
-                        totalsA[i] += val;
-                    } else if (lineStr.includes('b')) {
+                    if (lineStr.includes('production b') || lineStr === 'b' || lineStr.includes('b')) {
                         totalsB[i] += val;
+                    } else {
+                        totalsA[i] += val;
                     }
                 }
             });
@@ -457,15 +449,21 @@
 
         // ฟังก์ชันเรนเดอร์ตารางแยกฝั่ง (ซ้าย Production A, ขวา Production B) พร้อมแถว Total ด้านบน
         function renderSplitTables(data) {
-            // กรองโมเดลตาม Line
-            const modelsA = data.models.filter(m => String(m.line || '').trim().toLowerCase().includes('a'));
-            const modelsB = data.models.filter(m => String(m.line || '').trim().toLowerCase().includes('b'));
+            const modelsA = data.models.filter(m => {
+                let l = String(m.line || '').toLowerCase();
+                return !l.includes('production b') && l !== 'b';
+            });
+            
+            const modelsB = data.models.filter(m => {
+                let l = String(m.line || '').toLowerCase();
+                return l.includes('production b') || l === 'b';
+            });
 
-            renderSingleTable('tableProdA', modelsA, data.days, 'Production A');
-            renderSingleTable('tableProdB', modelsB, data.days, 'Production B');
+            renderSingleTable('tableProdA', modelsA, data.days);
+            renderSingleTable('tableProdB', modelsB, data.days);
         }
 
-        function renderSingleTable(tableId, modelsList, days, lineTitle) {
+        function renderSingleTable(tableId, modelsList, days) {
             const tableElement = document.getElementById(tableId);
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
@@ -505,6 +503,13 @@
             }
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
+
+            if (modelsList.length === 0) {
+                let emptyTr = document.createElement('tr');
+                emptyTr.innerHTML = `<td colspan="${days.length + 1}" class="p-4 text-center text-slate-500">ไม่มีข้อมูล Model ใน Line นี้</td>`;
+                tbody.appendChild(emptyTr);
+                return;
+            }
 
             // สร้างแถวข้อมูลแต่ละ Model
             modelsList.forEach(m => {
