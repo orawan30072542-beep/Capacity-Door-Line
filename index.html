@@ -783,7 +783,6 @@
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
-        // ฟังก์ชันดาวน์โหลดเทมเพลต Excel สำหรับกรอกข้อมูล Work Station
         function downloadProcessTemplate() {
             let templateData = [
                 ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
@@ -796,7 +795,6 @@
             XLSX.writeFile(wb, "Work_Process_Template.xlsx");
         }
 
-        // ฟังก์ชันอัปโหลด Excel เข้าตารางโหมดแก้ไข
         function importProcessExcelData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -825,7 +823,7 @@
                                 p3: String(row[3] || '').trim(),
                                 wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
                                 wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
-                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6] !== '' ? row[6] : null) : null,
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
                                 loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
                             });
                         }
@@ -834,7 +832,6 @@
                             currentProcessData = importedStations;
                             renderProcessTableInputs();
                             
-                            // เปิดตารางแก้ไขให้อัตโนมัติเพื่อให้ผู้ใช้ตรวจสอบข้อมูล
                             const editSection = document.getElementById('editProcessSection');
                             if (editSection.classList.contains('hidden')) {
                                 toggleEditModal();
@@ -847,7 +844,6 @@
                 } catch (err) {
                     alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์: ' + err.message);
                 }
-                // ล้างค่าเพื่อให้สามารถเลือกไฟล์เดิมซ้ำได้
                 event.target.value = '';
             };
             reader.readAsArrayBuffer(file);
@@ -1110,7 +1106,14 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                setTimeout(() => { generateCycleTimeChart(); }, 200);
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        generateCycleTimeChart();
+                        if (cycleTimeChartInstance) {
+                            cycleTimeChartInstance.resize();
+                        }
+                    }, 100);
+                });
             }
         }
 
@@ -1118,7 +1121,10 @@
         function generateCycleTimeChart() {
             let modelsArray = Array.from(selectedModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            document.getElementById('ctInfoLabel').textContent = `Model: ${modelKey} | Part: ${selectedPartValue}`;
+            const infoLabel = document.getElementById('ctInfoLabel');
+            if (infoLabel) {
+                infoLabel.textContent = `Model: ${modelKey} | Part: ${selectedPartValue}`;
+            }
 
             let labels = [];
             let ctData = [];
@@ -1130,9 +1136,13 @@
                 ctData.push(cycleTime);
             });
 
-            const ctxCT = document.getElementById('cycleTimeChart').getContext('2d');
+            const canvasEl = document.getElementById('cycleTimeChart');
+            if (!canvasEl) return;
+            const ctxCT = canvasEl.getContext('2d');
+
             if (cycleTimeChartInstance) {
                 cycleTimeChartInstance.destroy();
+                cycleTimeChartInstance = null;
             }
 
             cycleTimeChartInstance = new Chart(ctxCT, {
