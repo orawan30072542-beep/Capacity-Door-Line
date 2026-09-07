@@ -201,7 +201,7 @@
                             <h2 class="text-lg font-bold text-white">4. สถานะกระบวนการทำงานภาพรวม (Work Process Progress)</h2>
                         </div>
                         <button onclick="switchTab('workprocess')" class="text-xs bg-blue-600/20 hover:bg-blue-600/40 text-cyan-400 border border-cyan-500/30 px-3 py-1.5 rounded-lg transition">
-                            ไปหน้าบันทึกพนักงานและ Cycle Time &rarr;
+                            ไปหน้าบันทึกกระบวนการและ Cycle Time &rarr;
                         </button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -285,8 +285,8 @@
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
-                                <h2 class="text-lg font-bold text-white">บันทึกข้อมูลพนักงานและรอบการทำงาน (Operator & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">กำหนดชื่อพนักงานประจำจุดงาน, ชิ้นส่วน (Parts) และระบุ Cycle Time (วินาที) เพื่อวิเคราะห์ประสิทธิภาพ</p>
+                                <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
+                                <p class="text-xs text-slate-400">ระบุชื่อกระบวนการผลิต (Work Process Name) ชิ้นส่วน และกำหนด Cycle Time (วินาที) ของแต่ละขั้นตอนเพื่อวิเคราะห์</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -321,42 +321,42 @@
                         </div>
                     </div>
 
-                    <!-- ตารางกรอกชื่อพนักงานและ Cycle Time ประจำแต่ละจุดงาน -->
+                    <!-- ตารางกรอกชื่อกระบวนการและ Cycle Time -->
                     <div class="space-y-3">
-                        <h3 class="text-sm font-semibold text-slate-300">ตารางกำหนดชื่อพนักงานและบันทึก Cycle Time (วินาที/ชิ้น) แต่ละจุดงาน</h3>
+                        <h3 class="text-sm font-semibold text-slate-300">ตารางกำหนดชื่อกระบวนการทำงานและบันทึก Cycle Time (วินาที/ชิ้น)</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
-                                        <th class="p-3">กระบวนการ (Work Station)</th>
-                                        <th class="p-3">ชื่อพนักงานปฏิบัติงาน (Operator Name)</th>
-                                        <th class="p-3">หน้าที่ / รายละเอียดงาน (Task Description)</th>
+                                        <th class="p-3 w-16 text-center">ลำดับ</th>
+                                        <th class="p-3">ชื่อกระบวนการผลิต (Work Process Name)</th>
+                                        <th class="p-3">รายละเอียดขั้นตอนการทำงาน (Task Description)</th>
                                         <th class="p-3 text-center">Cycle Time (วินาที)</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
                                     <tr>
-                                        <td class="p-3 font-medium text-white">1. Press / Stamping</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-2 py-1.5 rounded border border-bordercolor operator-input" value="สมชาย ใจดี"></td>
-                                        <td class="text-slate-400 px-3">ควบคุมเครื่องปั๊มขึ้นรูปชิ้นส่วนโลหะแผ่น</td>
+                                        <td class="p-3 text-center font-bold text-cyan-400">1</td>
+                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Press / Stamping"></td>
+                                        <td class="text-slate-400 px-3">ปั๊มขึ้นรูปชิ้นส่วนเหล็กแผ่นประตูตู้เย็น</td>
                                         <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="45"></td>
                                     </tr>
                                     <tr>
-                                        <td class="p-3 font-medium text-white">2. Welding Process</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-2 py-1.5 rounded border border-bordercolor operator-input" value="วิชัย รักงาน"></td>
-                                        <td class="text-slate-400 px-3">เชื่อมประกอบโครงสร้างและจุดยึด</td>
+                                        <td class="p-3 text-center font-bold text-cyan-400">2</td>
+                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Welding Assembly"></td>
+                                        <td class="text-slate-400 px-3">เชื่อมประกอบโครงสร้างและจุดยึดโครงประตู</td>
                                         <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="60"></td>
                                     </tr>
                                     <tr>
-                                        <td class="p-3 font-medium text-white">3. Painting / Coating</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-2 py-1.5 rounded border border-bordercolor operator-input" value="มานิตา สีสวย"></td>
-                                        <td class="text-slate-400 px-3">พ่นสีเคลือบกันสนิมและตรวจสอบความเรียบเนียน</td>
+                                        <td class="p-3 text-center font-bold text-cyan-400">3</td>
+                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Painting & Coating"></td>
+                                        <td class="text-slate-400 px-3">พ่นสีเคลือบกันสนิมและอบความร้อนผิวชิ้นงาน</td>
                                         <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="50"></td>
                                     </tr>
                                     <tr>
-                                        <td class="p-3 font-medium text-white">4. Final Assembly & Gasket</td>
-                                        <td><input type="text" class="w-full bg-slate-800 text-white px-2 py-1.5 rounded border border-bordercolor operator-input" value="กcร ภักดี"></td>
-                                        <td class="text-slate-400 px-3">ประกอบชิ้นส่วนรวมและใส่ขอบยาง (Gasket)</td>
+                                        <td class="p-3 text-center font-bold text-cyan-400">4</td>
+                                        <td><input type="text" class="w-full bg-slate-800 text-white px-3 py-1.5 rounded border border-bordercolor process-input" value="Final Gasket Assembly"></td>
+                                        <td class="text-slate-400 px-3">ประกอบขอบยางแม่เหล็กและตรวจสอบคุณภาพขั้นสุดท้าย</td>
                                         <td class="text-center"><input type="number" class="w-24 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor cycletime-input" value="75"></td>
                                     </tr>
                                 </tbody>
@@ -367,7 +367,7 @@
                     <!-- ส่วนแสดงกราฟ Cycle Time เป็นกราฟแท่ง -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time ของพนักงานแต่ละกระบวนการ (วินาที/ชิ้น)</h3>
+                            <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตามชื่อกระบวนการ (วินาที/ชิ้น)</h3>
                             <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: 159C | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
@@ -607,24 +607,23 @@
             }
         });
 
-        // ระบบสร้างกราฟแท่ง Cycle Time ของพนักงานแต่ละกระบวนการ
+        // ระบบสร้างกราฟแท่ง Cycle Time ของชื่อกระบวนการผลิต
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
             let selectedModel = document.getElementById('selectModel').value;
             let selectedPart = document.getElementById('selectPart').value;
             document.getElementById('ctInfoLabel').textContent = `Model: ${selectedModel} | Part: ${selectedPart}`;
 
-            let operators = document.querySelectorAll('.operator-input');
+            let processInputs = document.querySelectorAll('.process-input');
             let ctInputs = document.querySelectorAll('.cycletime-input');
 
             let labels = [];
             let ctData = [];
-            let backgroundColors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
+            let backgroundColors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
-            operators.forEach((opInput, idx) => {
-                let opName = opInput.value.trim() || `พนักงานจุดที่ ${idx + 1}`;
-                let stationName = ['Press/Stamping', 'Welding', 'Painting', 'Final Assembly'][idx];
-                labels.push(`${stationName}\n(${opName})`);
+            processInputs.forEach((procInput, idx) => {
+                let procName = procInput.value.trim() || `กระบวนการที่ ${idx + 1}`;
+                labels.push(procName);
             });
 
             ctInputs.forEach((inp) => {
@@ -643,7 +642,7 @@
                     datasets: [{
                         label: 'Cycle Time (วินาที / ชิ้น)',
                         data: ctData,
-                        backgroundColor: backgroundColors,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
                         borderRadius: 6
                     }]
                 },
