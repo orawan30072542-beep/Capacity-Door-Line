@@ -283,7 +283,7 @@
 
             </div>
 
-            <!-- Work Process & Cycle Time Tab Content -->
+            <!-- Work Process & Cycle Time Tab Content (Hidden by default) -->
             <div id="tab-content-workprocess" class="p-6 space-y-6 hidden">
                 <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
@@ -322,18 +322,20 @@
                         </div>
                     </div>
 
-                    <!-- แถบเครื่องมือจัดการตาราง -->
+                    <!-- แถบเครื่องมือจัดการตาราง (เพิ่ม Station, ดาวน์โหลดเทมเพลต, อัปโหลด Excel เข้าตาราง, เปิด/ปิดตารางแก้ไข) -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
                             <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <!-- ปุ่มดาวน์โหลด Template -->
                             <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span>ดาวน์โหลดเทมเพลต Excel</span>
                             </button>
 
+                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 <span>อัปโหลดเข้าตาราง</span>
@@ -386,7 +388,9 @@
                                         <th class="p-3 text-center w-16">ลบ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30"></tbody>
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                    <!-- Dynamic rows -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -413,22 +417,19 @@
                                         <th class="p-2.5 text-center text-cyan-300">Cycle Time</th>
                                     </tr>
                                 </thead>
-                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
+                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                    <!-- Rendered saved records -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงกราฟ Cycle Time และช่องกรอก Takt Time -->
+                    <!-- ส่วนแสดงกราฟ Cycle Time (ลบช่องกรอก Takt Time ออกแล้ว) -->
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                             <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แบบแท่งเปรียบเทียบกับเส้น Takt Time</h3>
+                                <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time ของแต่ละสถานี</h3>
                                 <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
-                                <span class="text-xs text-slate-300 font-medium">เป้าหมาย Takt Time (วินาที):</span>
-                                <input type="number" id="taktTimeInput" value="60" min="1" step="0.5" oninput="generateCycleTimeChart()" class="bg-slate-900 text-amber-400 font-bold text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none">
-                                <span class="text-xs text-slate-400">วิ/ชิ้น</span>
                             </div>
                         </div>
                         <div class="lob-chart-wrapper">
@@ -1136,9 +1137,6 @@
                 ctData.push(cycleTime);
             });
 
-            let taktVal = parseFloat(document.getElementById('taktTimeInput').value) || 0;
-            let taktLineData = new Array(labels.length).fill(taktVal);
-
             const canvasEl = document.getElementById('cycleTimeChart');
             if (!canvasEl) return;
             const ctxCT = canvasEl.getContext('2d');
@@ -1158,19 +1156,7 @@
                             label: 'Cycle Time (วินาที / ชิ้น)',
                             data: ctData,
                             backgroundColor: backgroundColors.slice(0, labels.length),
-                            borderRadius: 6,
-                            order: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Takt Time (เป้าหมาย)',
-                            data: taktLineData,
-                            borderColor: '#f43f5e',
-                            borderWidth: 2,
-                            borderDash: [6, 6],
-                            pointRadius: 0,
-                            fill: false,
-                            order: 1
+                            borderRadius: 6
                         }
                     ]
                 },
