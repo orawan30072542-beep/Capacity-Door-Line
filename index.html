@@ -91,14 +91,13 @@
                     <h1 class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
                 </div>
 
-                <!-- ส่วนกรอกเวลาทำงานด้านบน -->
+                <!-- ส่วนกรอกชั่วโมงการทำงานเป็นตัวเลขด้านบน -->
                 <div class="flex items-center space-x-2 bg-slate-900/60 p-2 rounded-xl border border-bordercolor">
-                    <span class="text-xs text-slate-400 font-medium pl-1">เวลาทำงาน:</span>
-                    <input type="time" id="shiftStartInput" value="08:00" class="bg-slate-800 text-cyan-400 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none">
-                    <span class="text-slate-500 text-xs">ถึง</span>
-                    <input type="time" id="shiftEndInput" value="17:00" class="bg-slate-800 text-cyan-400 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none">
-                    <button onclick="saveShiftTime()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1 rounded-lg font-medium transition shadow">
-                        ตั้งค่าเวลา
+                    <span class="text-xs text-slate-400 font-medium pl-1">ชั่วโมงทำงาน:</span>
+                    <input type="number" id="shiftHoursInput" value="8" min="1" max="24" step="0.5" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 w-16 text-center rounded border border-bordercolor focus:outline-none">
+                    <span class="text-xs text-slate-400">ชม.</span>
+                    <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
+                        บันทึกชั่วโมง
                     </button>
                 </div>
             </header>
@@ -136,7 +135,7 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER รายวันและ UPH (จัดรูปแบบ กราฟซ้าย / ตารางขวา) -->
+                <!-- 2. ORDER รายวันและ UPH (กราฟซ้าย / ตารางขวา) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
@@ -160,7 +159,7 @@
                         </div>
                     </div>
 
-                    <!-- Layout: กราฟอยู่ซ้าย (w-5/12) / ตารางอยู่ขวา (w-7/12) -->
+                    <!-- Layout: กราฟซ้าย (w-5/12) / ตารางขวา (w-7/12) -->
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                         
                         <!-- ฝั่งซ้าย: กราฟ -->
@@ -328,17 +327,13 @@
 
         let currentDailyData = localStorage.getItem('haier_daily_plan_data') ? JSON.parse(localStorage.getItem('haier_daily_plan_data')) : defaultDailyPlanData;
         
-        let savedStartTime = localStorage.getItem('haier_shift_start') || '08:00';
-        let savedEndTime = localStorage.getItem('haier_shift_end') || '17:00';
-        document.getElementById('shiftStartInput').value = savedStartTime;
-        document.getElementById('shiftEndInput').value = savedEndTime;
+        let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
+        document.getElementById('shiftHoursInput').value = savedShiftHours;
 
-        function saveShiftTime() {
-            let start = document.getElementById('shiftStartInput').value;
-            let end = document.getElementById('shiftEndInput').value;
-            localStorage.setItem('haier_shift_start', start);
-            localStorage.setItem('haier_shift_end', end);
-            alert(`บันทึกเวลาทำงานเป็น: ${start} ถึง ${end} เรียบร้อยแล้ว`);
+        function saveShiftHours() {
+            let hours = document.getElementById('shiftHoursInput').value;
+            localStorage.setItem('haier_shift_hours', hours);
+            alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
         }
 
         // ฟังก์ชันคำนวณผลรวม Total Output แยกตามวันจากโครงสร้าง groups
