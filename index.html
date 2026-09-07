@@ -1115,21 +1115,22 @@
                     if (planChart) { planChart.resize(); planChart.update(); }
                     if (doorChart) { doorChart.resize(); doorChart.update(); }
                 }, 50);
-            } else {
+           } else {
                 dashboardTab.classList.add('hidden');
                 workProcessTab.classList.remove('hidden');
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
+                // เพิ่มคำสั่งนี้เพื่อบังคับวาดกราฟใหม่หลังจากเปิดแท็บ
                 setTimeout(() => {
                     generateCycleTimeChart();
-                    generateLOBChart();
-                    if (cycleTimeChartInstance) { cycleTimeChartInstance.resize(); cycleTimeChartInstance.update(); }
-                    if (lobChartInstance) { lobChartInstance.resize(); lobChartInstance.update(); }
+                    if (cycleTimeChartInstance) {
+                        cycleTimeChartInstance.resize();
+                        cycleTimeChartInstance.update();
+                    }
                 }, 50);
             }
-        }
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
