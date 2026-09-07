@@ -133,7 +133,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
-                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
+                            <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none" onchange="onModelChange()">
                                 <!-- รายชื่อ Model จะกรองตาม Group ที่เลือก -->
                             </select>
                         </div>
@@ -284,7 +284,7 @@
             console.error("Local storage load error, using default.", err);
         }
 
-        let defaultProcessData = [
+        let defaultModelProcessData = [
             { station: 'BTA01', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 13.90, wt2: 11.30, wt3: null, loss: 3.21 },
             { station: 'BTA02', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 8.80, wt2: 10.20, wt3: null, loss: 2.54 },
             { station: 'BTA03', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', wt1: 5.90, wt2: 6.50, wt3: 3.80, loss: null },
@@ -296,14 +296,27 @@
             { station: 'BTA09', p1: '—', p2: '—', p3: '—', wt1: 16.10, wt2: null, wt3: null, loss: 5.77 }
         ];
 
-        let currentProcessData = defaultProcessData;
-        try {
-            let savedProc = localStorage.getItem('haier_process_station_data_v2');
-            if (savedProc) {
-                currentProcessData = JSON.parse(savedProc);
+        let currentProcessData = [];
+
+        function loadProcessDataForCurrentModel() {
+            const selectModel = document.getElementById('selectModel');
+            if (!selectModel || !selectModel.value) return;
+            let modelName = selectModel.value;
+
+            try {
+                let allModelsData = JSON.parse(localStorage.getItem('haier_all_models_process_data') || '{}');
+                if (allModelsData[modelName]) {
+                    currentProcessData = allModelsData[modelName];
+                } else {
+                    currentProcessData = JSON.parse(JSON.stringify(defaultModelProcessData));
+                }
+            } catch (e) {
+                currentProcessData = JSON.parse(JSON.stringify(defaultModelProcessData));
             }
-        } catch (e) {
-            console.error(e);
+
+            renderProcessTableInputs();
+            renderSavedDisplayTable();
+            generateCycleTimeChart();
         }
 
         // ฟังก์ชันสลับการแสดงผลตารางแก้ไขข้อมูล (Toggle)
@@ -395,6 +408,10 @@
         }
 
         function saveProcessAndStationData() {
+            const selectModel = document.getElementById('selectModel');
+            if (!selectModel || !selectModel.value) return;
+            let modelName = selectModel.value;
+
             let rows = document.querySelectorAll('#processTableBody tr');
             let updatedList = [];
             rows.forEach((row) => {
@@ -420,12 +437,19 @@
             });
 
             currentProcessData = updatedList;
-            localStorage.setItem('haier_process_station_data_v2', JSON.stringify(currentProcessData));
+
+            try {
+                let allModelsData = JSON.parse(localStorage.getItem('haier_all_models_process_data') || '{}');
+                allModelsData[modelName] = currentProcessData;
+                localStorage.setItem('haier_all_models_process_data', JSON.stringify(allModelsData));
+            } catch (err) {
+                console.error("Save error", err);
+            }
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
-            toggleEditModal(); // ซ่อนตารางแก้ไขอัตโนมัติหลังบันทึกเสร็จ
-            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
+            toggleEditModal();
+            alert(`บันทึกข้อมูล Work Station ของรุ่น ${modelName} สำเร็จ!`);
         }
 
         function initGroupAndModelDropdowns(data) {
@@ -461,11 +485,14 @@
                     selectModel.appendChild(opt);
                 });
             }
+            onModelChange();
+        }
+
+        function onModelChange() {
+            loadProcessDataForCurrentModel();
         }
 
         initGroupAndModelDropdowns(currentDailyData);
-        renderProcessTableInputs();
-        renderSavedDisplayTable();
 
         function switchTab(tabName) {
             const dashboardTab = document.getElementById('tab-content-dashboard');
