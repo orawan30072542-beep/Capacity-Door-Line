@@ -286,7 +286,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">ระบุชื่อกระบวนการผลิต (Work Process Name) ชิ้นส่วน และกำหนด Cycle Time (วินาที) ของแต่ละขั้นตอนเพื่อวิเคราะห์</p>
+                                <p class="text-xs text-slate-400">เลือกรุ่นสินค้าตามออเดอร์, กำหนดชื่อกระบวนการผลิต (Work Process Name) และบันทึก Cycle Time (วินาที)</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -294,15 +294,12 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Model และ Parts -->
+                    <!-- ฟอร์มเลือก Model (อิงตามออเดอร์) และ Parts -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/50 p-4 rounded-xl border border-bordercolor">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้า (Model):</label>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">เลือกรุ่นสินค้าตามออเดอร์ (Model):</label>
                             <select id="selectModel" class="w-full bg-slate-800 text-white text-xs p-2.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <option value="159C">159C (Group 159)</option>
-                                <option value="159F">159F (Group 159)</option>
-                                <option value="199C">199C (Group 199)</option>
-                                <option value="199F">199F (Group 199)</option>
+                                <!-- รายชื่อ Model จะถูกโหลดอัตโนมัติตามออเดอร์ -->
                             </select>
                         </div>
                         <div>
@@ -368,7 +365,7 @@
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="flex justify-between items-center">
                             <h3 class="text-sm font-semibold text-cyan-400">กราฟแสดง Cycle Time แยกตามชื่อกระบวนการ (วินาที/ชิ้น)</h3>
-                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: 159C | Part: Back Plate</span>
+                            <span id="ctInfoLabel" class="text-xs text-slate-400 font-medium">Model: - | Part: Back Plate</span>
                         </div>
                         <div class="lob-chart-wrapper">
                             <canvas id="cycleTimeChart"></canvas>
@@ -383,30 +380,6 @@
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
-
-        function switchTab(tabName) {
-            const dashboardTab = document.getElementById('tab-content-dashboard');
-            const workProcessTab = document.getElementById('tab-content-workprocess');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navWorkProcess = document.getElementById('nav-workprocess');
-            const headerTitle = document.getElementById('headerTitle');
-
-            if (tabName === 'dashboard') {
-                dashboardTab.classList.remove('hidden');
-                workProcessTab.classList.add('hidden');
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-            } else {
-                dashboardTab.classList.add('hidden');
-                workProcessTab.classList.remove('hidden');
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-                
-                setTimeout(() => { generateCycleTimeChart(); }, 200);
-            }
-        }
 
         let defaultDailyPlanData = {
             days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
@@ -439,6 +412,52 @@
             }
         } catch (err) {
             console.error("Local storage load error, using default.", err);
+        }
+
+        // ฟังก์ชันอัปเดตตัวเลือก Model ในหน้า Work Process ตามออเดอร์จริง
+        function updateModelDropdownOptions(data) {
+            const selectModel = document.getElementById('selectModel');
+            if (!selectModel) return;
+            
+            selectModel.innerHTML = '';
+            if (data && data.groups) {
+                data.groups.forEach(g => {
+                    if (g.models) {
+                        g.models.forEach(m => {
+                            let opt = document.createElement('option');
+                            opt.value = m.name;
+                            opt.textContent = `${m.name} (Group ${g.productGroup})`;
+                            selectModel.appendChild(opt);
+                        });
+                    }
+                });
+            }
+        }
+
+        updateModelDropdownOptions(currentDailyData);
+
+        function switchTab(tabName) {
+            const dashboardTab = document.getElementById('tab-content-dashboard');
+            const workProcessTab = document.getElementById('tab-content-workprocess');
+            const navDashboard = document.getElementById('nav-dashboard');
+            const navWorkProcess = document.getElementById('nav-workprocess');
+            const headerTitle = document.getElementById('headerTitle');
+
+            if (tabName === 'dashboard') {
+                dashboardTab.classList.remove('hidden');
+                workProcessTab.classList.add('hidden');
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
+            } else {
+                dashboardTab.classList.add('hidden');
+                workProcessTab.classList.remove('hidden');
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
+                
+                setTimeout(() => { generateCycleTimeChart(); }, 200);
+            }
         }
 
         let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
@@ -612,7 +631,7 @@
         function generateCycleTimeChart() {
             let selectedModel = document.getElementById('selectModel').value;
             let selectedPart = document.getElementById('selectPart').value;
-            document.getElementById('ctInfoLabel').textContent = `Model: ${selectedModel} | Part: ${selectedPart}`;
+            document.getElementById('ctInfoLabel').textContent = `Model: ${selectedModel || '-'} | Part: ${selectedPart}`;
 
             let processInputs = document.querySelectorAll('.process-input');
             let ctInputs = document.querySelectorAll('.cycletime-input');
@@ -755,7 +774,8 @@
 
             currentDailyData = tempImportedData;
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+            updateModelDropdownOptions(currentDailyData);
+            alert('บันทึกข้อมูลและอัปเดตรุ่นสินค้าเรียบร้อยแล้ว!');
         }
     </script>
 </body>
