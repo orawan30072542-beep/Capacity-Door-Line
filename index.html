@@ -141,7 +141,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. แผน Order รายวันและ UPH (Product และ Model)</h2>
+                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและ UPH รายรุ่น</h2>
                         </div>
                         <!-- ปุ่มจัดการไฟล์และบันทึก -->
                         <div class="flex flex-wrap items-center gap-3">
@@ -175,15 +175,8 @@
                         </div>
                     </div>
 
-                    <!-- ตารางแสดง Product และ Model -->
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-3">
-                        <div class="flex items-center justify-between border-b border-bordercolor pb-2">
-                            <h3 class="font-bold text-cyan-400 text-sm flex items-center space-x-2">
-                                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                                <span>ตารางสรุปยอด Order และ UPH (ช่องที่ 1: Product, ช่องที่ 2: Model)</span>
-                            </h3>
-                            <span class="text-[11px] text-slate-400">มี Total ภาพรวมรายวันด้านบนสุด</span>
-                        </div>
+                    <!-- ตารางสไตล์ตามภาพตัวอย่าง -->
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor space-y-3">
                         <div class="overflow-x-auto">
                             <table id="tablePlanOrder" class="w-full text-left border-collapse text-xs">
                                 <thead>
@@ -307,14 +300,37 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้น (Product และ Model)
+        // โครงสร้างข้อมูลตั้งต้นจัดกลุ่มตาม Product Group และ Model
         let defaultDailyPlanData = {
-            days: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
-            models: [
-                { product: 'Refrigerator Door', name: 'Model 159', orders: [159, 0, 610, 610, 592, 592], uph: [0, 0, 210, 163, 15, 225] },
-                { product: 'Refrigerator Door', name: 'Model 199', orders: [0, 480, 480, 480, 480, 460], uph: [0, 0, 0, 0, 35, 260] },
-                { product: 'Freezer Door', name: 'Model TM545', orders: [0, 610, 610, 610, 610, 293], uph: [0, 0, 0, 0, 0, 337] },
-                { product: 'Freezer Door', name: 'Model G3 ECO', orders: [0, 0, 0, 0, 34, 238], uph: [0, 260, 260, 238, 204, 0] }
+            days: ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9', '7/9', '8/9'],
+            groups: [
+                {
+                    productGroup: '159',
+                    models: [
+                        { name: '159C', orders: [610, 610, 592, 592, 592, 0, 629, 585], uph: [55, 55, 54, 54, 54, 0, 57, 53] },
+                        { name: '159F', orders: [210, 163, 15, 225, 0, 0, 0, 0], uph: [19, 15, 1, 20, 0, 0, 0, 0] }
+                    ]
+                },
+                {
+                    productGroup: '199',
+                    models: [
+                        { name: '199C', orders: [480, 480, 480, 480, 460, 0, 520, 455], uph: [44, 44, 44, 44, 42, 0, 47, 41] },
+                        { name: '199F', orders: [0, 0, 0, 35, 260, 0, 260, 260], uph: [0, 0, 0, 3, 24, 0, 24, 24] }
+                    ]
+                },
+                {
+                    productGroup: 'TM545',
+                    models: [
+                        { name: 'TM545#212', orders: [610, 610, 610, 610, 293, 0, 0, 160], uph: [55, 55, 55, 55, 27, 0, 0, 15] },
+                        { name: 'TM545#235', orders: [0, 0, 0, 0, 337, 0, 671, 490], uph: [0, 0, 0, 0, 31, 0, 61, 45] }
+                    ]
+                },
+                {
+                    productGroup: 'G3 ECO',
+                    models: [
+                        { name: 'G3 ECO 320', orders: [0, 0, 0, 34, 238, 0, 260, 246], uph: [0, 0, 0, 3, 22, 0, 24, 22] }
+                    ]
+                }
             ]
         };
 
@@ -333,20 +349,25 @@
             alert(`บันทึกเวลาทำงานเป็น: ${start} ถึง ${end} เรียบร้อยแล้ว`);
         }
 
-        // คำนวณยอดรวมรายวันทุกรุ่น สำหรับแสดงในกราฟ
-        function calculateTotalOrders(modelsData, days) {
-            let totals = new Array(days.length).fill(0);
-            modelsData.forEach(m => {
-                for (let i = 0; i < days.length; i++) {
-                    totals[i] += Number(m.orders[i]) || 0;
-                }
+        // คำนวณยอดรวมรายวันทุกรุ่น สำหรับแสดงในกราฟและแถว Total
+        function calculateTotalOrdersAndUph(groupsData, days) {
+            let totalOutputs = new Array(days.length).fill(0);
+            let totalUphs = new Array(days.length).fill(0);
+
+            groupsData.forEach(g => {
+                g.models.forEach(m => {
+                    for (let i = 0; i < days.length; i++) {
+                        totalOutputs[i] += Number(m.orders[i]) || 0;
+                        totalUphs[i] += Number(m.uph[i]) || 0;
+                    }
+                });
             });
-            return totals;
+            return { totalOutputs, totalUphs };
         }
 
         // สร้างกราฟแท่งรวมยอด Order รายวัน
         const ctxPlan = document.getElementById('planChart').getContext('2d');
-        let initialTotals = calculateTotalOrders(currentDailyData.models, currentDailyData.days);
+        let initialCalc = calculateTotalOrdersAndUph(currentDailyData.groups, currentDailyData.days);
 
         let planChart = new Chart(ctxPlan, {
             type: 'bar',
@@ -354,7 +375,7 @@
                 labels: currentDailyData.days,
                 datasets: [{
                     label: 'Total Order (ยอดสั่งผลิตรวมทุกรุ่น)',
-                    data: initialTotals,
+                    data: initialCalc.totalOutputs,
                     backgroundColor: '#00F0FF',
                     borderRadius: 4
                 }]
@@ -370,43 +391,24 @@
             }
         });
 
-        // ฟังก์ชันแปลงค่าวันที่จาก Excel ให้เป็น วัน/เดือน (DD/MM)
+        // ฟังก์ชันแปลงค่าวันที่จาก Excel ให้เป็น วัน/เดือน
         function formatExcelDate(val) {
             let num = Number(val);
             if (!isNaN(num) && num > 30000) {
                 let utc_days = Math.floor(num - 25569);
                 let utc_value = utc_days * 86400;
                 let dateInfo = new Date(utc_value * 1000);
-                let day = String(dateInfo.getUTCDate()).padStart(2, '0');
-                let month = String(dateInfo.getUTCMonth() + 1).padStart(2, '0');
+                let day = dateInfo.getUTCDate();
+                let month = dateInfo.getUTCMonth() + 1;
                 return `${day}/${month}`;
             }
-            
             if (val instanceof Date) {
-                let day = String(val.getDate()).padStart(2, '0');
-                let month = String(val.getMonth() + 1).padStart(2, '0');
-                return `${day}/${month}`;
+                return `${val.getDate()}/${val.getMonth() + 1}`;
             }
-
-            let strVal = String(val).trim();
-            let matchISO = strVal.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-            if (matchISO) {
-                let m = String(matchISO[2]).padStart(2, '0');
-                let d = String(matchISO[3]).padStart(2, '0');
-                return `${d}/${m}`;
-            }
-
-            let matchDMY = strVal.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
-            if (matchDMY) {
-                let d = String(matchDMY[1]).padStart(2, '0');
-                let m = String(matchDMY[2]).padStart(2, '0');
-                return `${d}/${m}`;
-            }
-
-            return strVal;
+            return String(val).trim();
         }
 
-        // ฟังก์ชันเรนเดอร์ตาราง (ช่องที่ 1: Product, ช่องที่ 2: Model)
+        // ฟังก์ชันเรนเดอร์ตารางสไตล์ตามภาพตัวอย่าง
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             const headerRow = tableElement.querySelector('thead tr');
@@ -416,72 +418,65 @@
             tbody.innerHTML = '';
 
             let days = data.days;
-            let modelsList = data.models;
+            let groups = data.groups;
 
-            // สร้างหัวตาราง (ช่องที่ 1 Product, ช่องที่ 2 Model)
-            let headerHtml = `<th class="p-2 font-medium w-36">Product</th><th class="p-2 font-medium w-32">Model</th>`;
+            // สร้างหัวตาราง (Product Group, Model, วันที่ต่างๆ)
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300">Product Group</th><th class="p-3 font-medium w-32 text-slate-300">Model</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="p-2 font-medium text-center">${day}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
-            // คำนวณผลรวม Total ทั้งหมดทุกรุ่นรายวัน
-            let totalOrders = new Array(days.length).fill(0);
-            let totalUph = new Array(days.length).fill(0);
+            // คำนวณภาพรวม TOTAL
+            let calc = calculateTotalOrdersAndUph(groups, days);
 
-            modelsList.forEach(m => {
-                for (let i = 0; i < days.length; i++) {
-                    totalOrders[i] += Math.round(Number(m.orders[i]) || 0);
-                    totalUph[i] += Math.round(Number(m.uph[i]) || 0);
-                }
-            });
-
-            // สร้างแถว Total ไว้ด้านบนสุดของตาราง
+            // แถว TOTAL ด้านบนสุด
             let totalTr = document.createElement('tr');
-            totalTr.className = 'bg-blue-950/40 border-b-2 border-bordercolor font-bold';
-            let totalHtml = `<td colspan="2" class="p-2 text-cyan-300">Total (รวมทุกรุ่น)</td>`;
+            totalTr.className = 'bg-blue-950/60 border-b-2 border-bordercolor font-bold text-cyan-300';
+            let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Total Output</td>`;
             for (let i = 0; i < days.length; i++) {
                 totalHtml += `
-                    <td class="p-1.5 text-center border-l border-bordercolor/30">
-                        <div class="text-cyan-300 text-xs">${totalOrders[i].toLocaleString()}</div>
-                        <div class="text-[10px] text-cyan-400/80 font-normal">UPH: ${totalUph[i].toLocaleString()}</div>
+                    <td class="p-2 text-center border-l border-bordercolor/40">
+                        <div class="text-amber-400 text-sm font-bold">${calc.totalOutputs[i].toLocaleString()}</div>
+                        <div class="text-[10px] text-slate-300 font-normal">UPH Total: ${calc.totalUphs[i].toLocaleString()}</div>
                     </td>
                 `;
             }
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
 
-            if (modelsList.length === 0) {
-                let emptyTr = document.createElement('tr');
-                emptyTr.innerHTML = `<td colspan="${days.length + 2}" class="p-4 text-center text-slate-500">ไม่มีข้อมูล Product / Model</td>`;
-                tbody.appendChild(emptyTr);
-                return;
-            }
-
-            // สร้างแถวข้อมูลแต่ละ Model (ช่อง 1 Product, ช่อง 2 Model)
-            modelsList.forEach(m => {
-                let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition';
-                
-                let html = `
-                    <td class="p-2 font-medium text-slate-300 bg-slate-900/40">${m.product || '-'}</td>
-                    <td class="p-2 font-semibold text-white bg-slate-900/40">${m.name}</td>
-                `;
-                
-                for (let i = 0; i < days.length; i++) {
-                    let orderVal = Math.round(Number(m.orders[i]) || 0);
-                    let uphVal = Math.round(Number(m.uph[i]) || 0);
+            // วนลูปสร้างแถวตาม Product Group และ Model
+            groups.forEach(g => {
+                let models = g.models;
+                models.forEach((m, mIndex) => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     
-                    html += `
-                        <td class="p-1.5 text-center border-l border-bordercolor/30">
-                            <div class="text-slate-200 font-medium text-xs">${orderVal.toLocaleString()}</div>
-                            <div class="text-[10px] text-cyan-400 font-normal">UPH: ${uphVal.toLocaleString()}</div>
-                        </td>
-                    `;
-                }
-                
-                tr.innerHTML = html;
-                tbody.appendChild(tr);
+                    let html = '';
+                    // ใส่ Product Group เฉพาะแถวแรกของกลุ่ม (Rowspan)
+                    if (mIndex === 0) {
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${models.length}">${g.productGroup}</td>`;
+                    }
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+
+                    for (let i = 0; i < days.length; i++) {
+                        let orderVal = Number(m.orders[i]) || 0;
+                        let uphVal = Number(m.uph[i]) || 0;
+                        
+                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()} ชิ้น` : '-';
+                        let uphDisplay = `UPH: ${uphVal}`;
+
+                        html += `
+                            <td class="p-2 text-center border-l border-bordercolor/30">
+                                <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
+                                <div class="text-[10px] text-slate-400 font-normal mt-0.5">${uphDisplay}</div>
+                            </td>
+                        `;
+                    }
+
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
             });
         }
 
@@ -492,7 +487,7 @@
         new Chart(ctxDoor, {
             type: 'line',
             data: {
-                labels: ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'],
+                labels: ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9'],
                 datasets: [
                     {
                         label: 'Order (เป้าหมาย Door Line)',
@@ -523,7 +518,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel (ช่องที่ 1: Product, ช่องที่ 2: Model)
+        // ระบบอ่านไฟล์ Excel สำหรับโครงสร้าง Product Group & Model
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -538,37 +533,45 @@
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                if (excelJson.length > 2) {
+                if (excelJson.length > 1) {
                     let headerRow = excelJson[0];
-                    // ข้ามหัวข้อคอลัมน์ 2 ช่องแรก (Product และ Model)
                     let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && val !== '');
                     let days = rawDays.map(d => formatExcelDate(d));
 
-                    if (days.length === 0) days = ['01/09', '02/09', '03/09', '04/09', '05/09', '06/09'];
+                    if (days.length === 0) days = ['1/9', '2/9', '3/9', '4/9', '5/9', '6/9', '7/9', '8/9'];
 
-                    let models = [];
+                    let groupMap = {};
                     for (let i = 1; i < excelJson.length; i += 2) {
                         let rowOrder = excelJson[i];
                         let rowUph = excelJson[i+1] || [];
-                        if (rowOrder && (rowOrder[0] !== undefined || rowOrder[1] !== undefined)) {
-                            let productName = rowOrder[0] || '-';
-                            let modelName = rowOrder[1] || '-';
+                        if (rowOrder && rowOrder[1] !== undefined) {
+                            let prodGroup = String(rowOrder[0] || 'Other').trim();
+                            let modelName = String(rowOrder[1] || '').trim();
                             let orders = rowOrder.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
                             let uph = rowUph.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
-                            models.push({ product: productName, name: modelName, orders: orders, uph: uph });
+
+                            if (!groupMap[prodGroup]) {
+                                groupMap[prodGroup] = [];
+                            }
+                            groupMap[prodGroup].push({ name: modelName, orders: orders, uph: uph });
                         }
                     }
 
-                    if (models.length > 0) {
-                        tempImportedData = { days: days, models: models };
+                    let groups = [];
+                    for (let gName in groupMap) {
+                        groups.push({ productGroup: gName, models: groupMap[gName] });
+                    }
+
+                    if (groups.length > 0) {
+                        tempImportedData = { days: days, groups: groups };
                         renderUnifiedTable(tempImportedData);
                         
-                        let newTotals = calculateTotalOrders(tempImportedData.models, tempImportedData.days);
+                        let newCalc = calculateTotalOrdersAndUph(tempImportedData.groups, tempImportedData.days);
                         planChart.data.labels = tempImportedData.days;
-                        planChart.data.datasets[0].data = newTotals;
+                        planChart.data.datasets[0].data = newCalc.totalOutputs;
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! แสดงคอลัมน์ Product และ Model เรียบร้อย กรุณากด "บันทึกข้อมูล"');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากด "บันทึกข้อมูล"');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
