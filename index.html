@@ -38,7 +38,7 @@
             overflow-y: hidden;
         }
         .chart-inner-container {
-            min-width: 900px; /* ขยายความกว้างขั้นต่ำเพื่อให้รองรับวันจำนวนมากและเลื่อนดูได้ */
+            min-width: 900px;
             height: 320px;
         }
     </style>
@@ -137,7 +137,7 @@
                     </div>
                 </section>
 
-                <!-- 2. ORDER รายวันและ UPH (กราฟเลื่อนได้ด้านบน / ตารางด้านล่าง) -->
+                <!-- 2. ORDER รายวันและ UPH (กราฟเลื่อนได้ด้านบน / ตารางแบบกระชับรวมช่อง UPH ด้านล่าง) -->
                 <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
@@ -174,16 +174,16 @@
                         </div>
                     </div>
 
-                    <!-- ตารางอยู่ด้านล่าง (รูปแบบวันที่ วัน/เดือน และตัวเลขจำนวนเต็ม) -->
+                    <!-- ตารางอยู่ด้านล่าง (Compact Mode: รวม UPH ไว้ในช่องเดียวกัน ตัวหนังสือและช่องเล็กลง) -->
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
+                        <table class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr id="tableHeaderRow" class="border-b border-bordercolor text-slate-400 text-xs">
+                                <tr id="tableHeaderRow" class="border-b border-bordercolor text-slate-400">
                                     <!-- สร้างหัวตารางวันอัตโนมัติ -->
                                 </tr>
                             </thead>
                             <tbody id="planTableBody" class="divide-y divide-bordercolor/50 text-slate-300">
-                                <!-- ข้อมูลรุ่น ออเดอร์รายวัน และ UPH จำนวนเต็ม -->
+                                <!-- ข้อมูลรุ่น ออเดอร์และ UPH รวมในช่องเดียว -->
                             </tbody>
                         </table>
                     </div>
@@ -355,7 +355,6 @@
 
         // ฟังก์ชันแปลงค่าวันที่จาก Excel ให้เป็น วัน/เดือน (DD/MM) ที่แม่นยำ
         function formatExcelDate(val) {
-            // กรณีเป็นเลข Serial Date ของ Excel (เช่น 46266)
             let num = Number(val);
             if (!isNaN(num) && num > 30000) {
                 let utc_days = Math.floor(num - 25569);
@@ -366,7 +365,6 @@
                 return `${day}/${month}`;
             }
             
-            // กรณีเป็นประเภท Date Object หรือ ข้อความวันที่อยู่แล้ว
             if (val instanceof Date) {
                 let day = String(val.getDate()).padStart(2, '0');
                 let month = String(val.getMonth() + 1).padStart(2, '0');
@@ -374,7 +372,6 @@
             }
 
             let strVal = String(val).trim();
-            // ตรวจสอบรูปแบบ YYYY-MM-DD หรือ YYYY/MM/DD
             let matchISO = strVal.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
             if (matchISO) {
                 let m = String(matchISO[2]).padStart(2, '0');
@@ -382,7 +379,6 @@
                 return `${d}/${m}`;
             }
 
-            // ตรวจสอบรูปแบบ DD/MM/YYYY หรือ DD-MM-YYYY
             let matchDMY = strVal.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
             if (matchDMY) {
                 let d = String(matchDMY[1]).padStart(2, '0');
@@ -393,7 +389,7 @@
             return strVal;
         }
 
-        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง
+        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง (Compact Mode: รวม UPH ไว้ในช่องเดียวกัน)
         function renderDailyPlanTable(data) {
             const headerRow = document.getElementById('tableHeaderRow');
             const tbody = document.getElementById('planTableBody');
@@ -401,32 +397,32 @@
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            let headerHtml = `<th class="p-3 font-medium w-40">รุ่น / รายการ</th>`;
+            let headerHtml = `<th class="p-2 font-medium w-36">รุ่น / วันที่</th>`;
             data.days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center">${day}</th>`;
+                headerHtml += `<th class="p-2 font-medium text-center">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
             data.models.forEach(m => {
-                let orderTr = document.createElement('tr');
-                orderTr.className = 'hover:bg-slate-800/30 transition';
-                let orderHtml = `<td class="p-3 font-semibold text-cyan-400 bg-slate-900/40">${m.name}</td>`;
-                m.orders.forEach(val => {
-                    let intVal = Math.round(Number(val) || 0);
-                    orderHtml += `<td class="p-3 text-center text-white font-medium">${intVal.toLocaleString()}</td>`;
-                });
-                orderTr.innerHTML = orderHtml;
-                tbody.appendChild(orderTr);
-
-                let uphTr = document.createElement('tr');
-                uphTr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/30';
-                let uphHtml = `<td class="p-3 text-xs font-bold text-blue-400 bg-slate-900/20 pl-6">UPH</td>`;
-                m.uph.forEach(val => {
-                    let intUph = Math.round(Number(val) || 0);
-                    uphHtml += `<td class="p-3 text-center text-blue-400 font-bold">${intUph.toLocaleString()}</td>`;
-                });
-                uphTr.innerHTML = uphHtml;
-                tbody.appendChild(uphTr);
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/30 transition';
+                
+                let html = `<td class="p-2 font-semibold text-cyan-400 bg-slate-900/40">${m.name}</td>`;
+                
+                for (let i = 0; i < data.days.length; i++) {
+                    let orderVal = Math.round(Number(m.orders[i]) || 0);
+                    let uphVal = Math.round(Number(m.uph[i]) || 0);
+                    
+                    html += `
+                        <td class="p-1.5 text-center border-l border-bordercolor/30">
+                            <div class="text-white font-medium text-xs">${orderVal.toLocaleString()}</div>
+                            <div class="text-[10px] text-cyan-400 font-normal">UPH: ${uphVal.toLocaleString()}</div>
+                        </td>
+                    `;
+                }
+                
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
             });
         }
 
@@ -485,8 +481,6 @@
 
                 if (excelJson.length > 2) {
                     let rawDays = excelJson[0].slice(1).filter(val => val !== undefined && val !== null && val !== '');
-                    
-                    // แปลงหัวตารางวันที่ทั้งหมดให้เป็น DD/MM อัตโนมัติ
                     let days = rawDays.map(d => formatExcelDate(d));
 
                     if (days.length === 0) days = ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06'];
@@ -519,7 +513,7 @@
                         });
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! แปลงวันที่เป็น DD/MM เรียบร้อย กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
