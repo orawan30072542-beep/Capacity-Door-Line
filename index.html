@@ -38,7 +38,7 @@
             overflow-y: hidden;
         }
         .chart-inner-container {
-            min-width: 800px; /* บังคับความกว้างขั้นต่ำเพื่อให้เลื่อนดูได้ถ้ารายการเยอะ */
+            min-width: 900px; /* ขยายความกว้างขั้นต่ำเพื่อให้รองรับวันจำนวนมากและเลื่อนดูได้ */
             height: 320px;
         }
     </style>
@@ -301,7 +301,7 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // โครงสร้างข้อมูลตั้งต้น (รูปแบบวันที่ วัน/เดือน เช่น 01/06)
+        // โครงสร้างข้อมูลตั้งต้น
         let defaultDailyPlanData = {
             days: ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06'],
             models: [
@@ -311,10 +311,8 @@
             ]
         };
 
-        // โหลดข้อมูลจาก LocalStorage
         let currentDailyData = localStorage.getItem('haier_daily_plan_data') ? JSON.parse(localStorage.getItem('haier_daily_plan_data')) : defaultDailyPlanData;
         
-        // โหลดเวลาทำงานจาก LocalStorage
         let savedStartTime = localStorage.getItem('haier_shift_start') || '08:00';
         let savedEndTime = localStorage.getItem('haier_shift_end') || '17:00';
         document.getElementById('shiftStartInput').value = savedStartTime;
@@ -355,7 +353,23 @@
             }
         });
 
-        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง (บังคับตัวเลขจำนวนเต็ม ไม่มีทศนิยม)
+        // ฟังก์ชันแปลงเลข Serial Date ของ Excel (เช่น 46266) ให้เป็น "วัน/เดือน" (DD/MM)
+        function formatExcelDate(serial) {
+            let num = Number(serial);
+            if (!isNaN(num) && num > 30000) { // ตรวจสอบว่าเป็น Serial Date ของ Excel จริงๆ
+                // Excel นับวันเริ่มจาก 1 มกราคม 1900 (มีบั๊กปีอธิกสุรทิน 1900 จึงต้องลบ 2 วันชดเชย)
+                let utc_days = Math.floor(num - 25569);
+                let utc_value = utc_days * 86400;
+                let dateInfo = new Date(utc_value * 1000);
+                
+                let day = String(dateInfo.getDate()).padStart(2, '0');
+                let month = String(dateInfo.getMonth() + 1).padStart(2, '0');
+                return `${day}/${month}`;
+            }
+            return String(serial); // ถ้าไม่ใช่ตัวเลขวันที่ ให้คืนค่าเดิมตามข้อความ
+        }
+
+        // ฟังก์ชันเรนเดอร์หัวตารางและข้อมูลตาราง
         function renderDailyPlanTable(data) {
             const headerRow = document.getElementById('tableHeaderRow');
             const tbody = document.getElementById('planTableBody');
@@ -374,7 +388,7 @@
                 orderTr.className = 'hover:bg-slate-800/30 transition';
                 let orderHtml = `<td class="p-3 font-semibold text-cyan-400 bg-slate-900/40">${m.name}</td>`;
                 m.orders.forEach(val => {
-                    let intVal = Math.round(Number(val) || 0); // บังคับเป็นจำนวนเต็ม
+                    let intVal = Math.round(Number(val) || 0);
                     orderHtml += `<td class="p-3 text-center text-white font-medium">${intVal.toLocaleString()}</td>`;
                 });
                 orderTr.innerHTML = orderHtml;
@@ -384,7 +398,7 @@
                 uphTr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/30';
                 let uphHtml = `<td class="p-3 text-xs font-bold text-blue-400 bg-slate-900/20 pl-6">UPH</td>`;
                 m.uph.forEach(val => {
-                    let intUph = Math.round(Number(val) || 0); // บังคับเป็นจำนวนเต็ม
+                    let intUph = Math.round(Number(val) || 0);
                     uphHtml += `<td class="p-3 text-center text-blue-400 font-bold">${intUph.toLocaleString()}</td>`;
                 });
                 uphTr.innerHTML = uphHtml;
@@ -430,7 +444,7 @@
             }
         });
 
-        // ระบบอ่านไฟล์ Excel แปลงวันที่เป็น วัน/เดือน และตัวเลขเป็นจำนวนเต็ม
+        // ระบบอ่านไฟล์ Excel แปลง Serial Date เป็น วัน/เดือน อัตโนมัติ
         let tempImportedData = null;
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -446,21 +460,10 @@
                 const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                 if (excelJson.length > 2) {
-                    let rawDays = excelJson[0].slice(1).filter(Boolean);
+                    let rawDays = excelJson[0].slice(1).filter(val => val !== undefined && val !== null && val !== '');
                     
-                    // แปลงรูปแบบวันที่ใน Excel ให้เป็น วัน/เดือน (ถ้าเป็น Serial Number หรือข้อความ)
-                    let days = rawDays.map(d => {
-                        if (!isNaN(d) && typeof d === 'number') {
-                            // แปลง Excel Serial Date คร่าวๆ หรือใช้รูปแบบมาตรฐาน
-                            let utc_days = Math.floor(d - 25569);
-                            let utc_value = utc_days * 86400;
-                            let dateInfo = new Date(utc_value * 1000);
-                            let dayStr = String(dateInfo.getDate()).padStart(2, '0');
-                            let monthStr = String(dateInfo.getMonth() + 1).padStart(2, '0');
-                            return `${dayStr}/${monthStr}`;
-                        }
-                        return String(d);
-                    });
+                    // แปลงหัวตารางที่เป็นตัวเลข Serial Date ให้เป็น วัน/เดือน (DD/MM)
+                    let days = rawDays.map(d => formatExcelDate(d));
 
                     if (days.length === 0) days = ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06'];
 
@@ -470,8 +473,8 @@
                         let rowUph = excelJson[i+1] || [];
                         if (rowOrder && rowOrder[0]) {
                             let modelName = rowOrder[0];
-                            let orders = rowOrder.slice(1).map(val => Math.round(Number(val) || 0)); // บังคับจำนวนเต็ม
-                            let uph = rowUph.slice(1).map(val => Math.round(Number(val) || 0)); // บังคับจำนวนเต็ม
+                            let orders = rowOrder.slice(1, rawDays.length + 1).map(val => Math.round(Number(val) || 0));
+                            let uph = rowUph.slice(1, rawDays.length + 1).map(val => Math.round(Number(val) || 0));
                             models.push({ name: modelName, orders: orders, uph: uph });
                         }
                     }
@@ -492,7 +495,7 @@
                         });
                         planChart.update();
 
-                        alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
+                        alert('โหลดข้อมูลจาก Excel สำเร็จ! แปลงวันที่เป็น DD/MM เรียบร้อย กรุณากดปุ่ม "บันทึกข้อมูล" เพื่อยืนยัน');
                     } else {
                         alert('รูปแบบข้อมูลใน Excel ไม่ถูกต้องตามโครงสร้าง');
                     }
