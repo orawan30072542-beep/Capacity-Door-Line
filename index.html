@@ -322,20 +322,18 @@
                         </div>
                     </div>
 
-                    <!-- แถบเครื่องมือจัดการตาราง (เพิ่ม Station, ดาวน์โหลดเทมเพลต, อัปโหลด Excel เข้าตาราง, เปิด/ปิดตารางแก้ไข) -->
+                    <!-- แถบเครื่องมือจัดการตาราง -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div>
                             <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
                             <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <!-- ปุ่มดาวน์โหลด Template -->
                             <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span>ดาวน์โหลดเทมเพลต Excel</span>
                             </button>
 
-                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 <span>อัปโหลดเข้าตาราง</span>
@@ -512,6 +510,76 @@
 
         let currentProcessData = [];
 
+        function getEmptyDefaultStations() {
+            return [
+                { station: 'STA01', p1: 'ประกอบขา Leg เข้ากับชิ้นส่วน+เคาะ', p2: 'ประกอบชิ้นส่วนด้านข้าง', p3: '—', wt1: 13.90, wt2: 11.30, wt3: null, loss: 3.21 },
+                { station: 'STA02', p1: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p2: 'ติดเทปเหนียวด้านข้าง 1 Pcs.', p3: '—', wt1: 8.80, wt2: 10.20, wt3: null, loss: 2.54 }
+            ];
+        }
+
+        function initGroupRadioButtons(data) {
+            const container = document.getElementById('groupRadioContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (data && data.groups && data.groups.length > 0) {
+                data.groups.forEach((g, index) => {
+                    let isChecked = (index === 0 || g.productGroup === selectedProductGroup);
+                    if (isChecked && !selectedProductGroup) {
+                        selectedProductGroup = g.productGroup;
+                    }
+
+                    let label = document.createElement('label');
+                    label.className = `cursor-pointer px-4 py-2 rounded-xl text-xs font-medium transition border flex items-center space-x-2 ${selectedProductGroup === g.productGroup ? 'bg-blue-600/20 border-blue-500 text-cyan-300' : 'bg-slate-800 border-bordercolor text-slate-300 hover:bg-slate-700'}`;
+                    label.innerHTML = `
+                        <input type="radio" name="productGroupRadio" value="${g.productGroup}" ${selectedProductGroup === g.productGroup ? 'checked' : ''} onchange="onGroupRadioChange('${g.productGroup}')" class="hidden">
+                        <span>Group ${g.productGroup}</span>
+                    `;
+                    container.appendChild(label);
+                });
+                updateModelCheckboxes();
+            }
+        }
+
+        function onGroupRadioChange(groupName) {
+            selectedProductGroup = groupName;
+            initGroupRadioButtons(currentDailyData);
+        }
+
+        function updateModelCheckboxes() {
+            const container = document.getElementById('modelCheckboxContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedProductGroup);
+            if (targetGroup && targetGroup.models) {
+                if (selectedModels.size === 0 && targetGroup.models.length > 0) {
+                    selectedModels.add(targetGroup.models[0].name);
+                }
+
+                targetGroup.models.forEach(m => {
+                    let isChecked = selectedModels.has(m.name);
+                    let label = document.createElement('label');
+                    label.className = `cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium transition border flex items-center space-x-2 ${isChecked ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 border-bordercolor hover:bg-slate-800'}`;
+                    label.innerHTML = `
+                        <input type="checkbox" value="${m.name}" ${isChecked ? 'checked' : ''} onchange="onModelCheckboxChange(this)" class="rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0">
+                        <span>${m.name}</span>
+                    `;
+                    container.appendChild(label);
+                });
+            }
+            loadProcessDataForCurrentSelection();
+        }
+
+        function onModelCheckboxChange(checkbox) {
+            if (checkbox.checked) {
+                selectedModels.add(checkbox.value);
+            } else {
+                selectedModels.delete(checkbox.value);
+            }
+            updateModelCheckboxes();
+        }
+
         function loadProcessDataForCurrentSelection() {
             let modelsArray = Array.from(selectedModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
@@ -522,15 +590,10 @@
             if (editModelTag) editModelTag.textContent = modelKey;
             if (editPartTag) editPartTag.textContent = selectedPartValue;
 
-            if (processDatabase[storageKey] && Array.isArray(processDatabase[storageKey]) && processDatabase[storageKey].length > 0) {
+            if (processDatabase[storageKey] && Array.isArray(processDatabase[storageKey])) {
                 currentProcessData = JSON.parse(JSON.stringify(processDatabase[storageKey]));
             } else {
-                // ข้อมูลตัวอย่างสำรองเพื่อให้กราฟแสดงผลได้ทันที
-                currentProcessData = [
-                    { station: 'STA01', p1: 'Setup', p2: 'Process', p3: '', wt1: 20, wt2: 15, wt3: null, loss: 2 },
-                    { station: 'STA02', p1: 'Assembly', p2: 'Check', p3: '', wt1: 25, wt2: 10, wt3: null, loss: 3 },
-                    { station: 'STA03', p1: 'Packing', p2: '', p3: '', wt1: 18, wt2: null, wt3: null, loss: 1 }
-                ];
+                currentProcessData = getEmptyDefaultStations();
             }
 
             renderProcessTableInputs();
@@ -814,43 +877,36 @@
                     const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
                     if (excelJson.length > 1) {
-                        let importedStations = [];
+                        let importedList = [];
                         for (let i = 1; i < excelJson.length; i++) {
                             let row = excelJson[i];
                             if (!row || row.length === 0) continue;
-
                             let station = String(row[0] || '').trim();
                             if (!station) continue;
 
-                            importedStations.push({
+                            importedList.push({
                                 station: station,
                                 p1: String(row[1] || '').trim(),
                                 p2: String(row[2] || '').trim(),
                                 p3: String(row[3] || '').trim(),
-                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
-                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
-                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
-                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
+                                wt1: row[4] !== undefined && row[4] !== '' ? parseFloat(row[4]) : null,
+                                wt2: row[5] !== undefined && row[5] !== '' ? parseFloat(row[5]) : null,
+                                wt3: row[6] !== undefined && row[6] !== '' ? parseFloat(row[6]) : null,
+                                loss: row[7] !== undefined && row[7] !== '' ? parseFloat(row[7]) : null
                             });
                         }
 
-                        if (importedStations.length > 0) {
-                            currentProcessData = importedStations;
+                        if (importedList.length > 0) {
+                            currentProcessData = importedList;
                             renderProcessTableInputs();
-                            
-                            const editSection = document.getElementById('editProcessSection');
-                            if (editSection.classList.contains('hidden')) {
-                                toggleEditModal();
-                            }
-                            alert('นำเข้าข้อมูล Work Station จาก Excel สำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกข้อมูลและแสดงผล" ได้ทันที');
+                            alert('นำเข้าข้อมูลเข้าตารางสำเร็จ! กรุณากด "บันทึกข้อมูลและแสดงผล"');
                         } else {
-                            alert('ไม่พบข้อมูล Station ในไฟล์ Excel ที่อัปโหลด');
+                            alert('ไม่พบข้อมูลในไฟล์ Excel');
                         }
                     }
                 } catch (err) {
                     alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์: ' + err.message);
                 }
-                event.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         }
@@ -905,7 +961,7 @@
                     <td class="p-2 text-center font-bold text-slate-200 wt-total-cell">—</td>
                     <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
                     <td class="p-2 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
-                    <td class="p-2 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 p-1">✕</button></td>
+                    <td class="p-2 text-center"><button type="button" onclick="removeStationRow(${index})" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-2 py-1 rounded text-xs transition">ลบ</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -932,11 +988,6 @@
             const displayBody = document.getElementById('displaySavedTableBody');
             if (!displayBody) return;
             displayBody.innerHTML = '';
-
-            if (!currentProcessData || currentProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูล Work Station สำหรับรุ่นและพาร์ทนี้</td></tr>`;
-                return;
-            }
 
             currentProcessData.forEach((item) => {
                 let { wtTotal, cycleTime } = calculateRowTotals(item);
@@ -983,111 +1034,18 @@
                 });
             });
 
-            let modelsArray = Array.from(selectedModels);
-            if (modelsArray.length === 0) {
-                alert('กรุณาเลือก Model อย่างน้อย 1 รายการ');
-                return;
-            }
-
-            let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
-            processDatabase[storageKey] = updatedList;
             currentProcessData = updatedList;
-
-            localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
+            let modelsArray = Array.from(selectedModels);
+            if (modelsArray.length > 0) {
+                let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
+                processDatabase[storageKey] = currentProcessData;
+                localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
+            }
 
             renderSavedDisplayTable();
             generateCycleTimeChart();
             toggleEditModal();
-            alert(`บันทึกข้อมูลสำหรับ Model: ${modelsArray.join(', ')} (${selectedPartValue}) สำเร็จ!`);
-        }
-
-        function initGroupRadioButtons(data) {
-            const container = document.getElementById('groupRadioContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (data && data.groups && data.groups.length > 0) {
-                data.groups.forEach((g, idx) => {
-                    let btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.setAttribute('data-group', g.productGroup);
-                    btn.textContent = `Group ${g.productGroup}`;
-                    
-                    if (idx === 0) {
-                        selectedProductGroup = g.productGroup;
-                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
-                    } else {
-                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                    }
-
-                    btn.onclick = function() {
-                        selectProductGroup(g.productGroup);
-                    };
-                    container.appendChild(btn);
-                });
-            }
-            updateModelCheckboxesByGroup();
-        }
-
-        function selectProductGroup(groupName) {
-            selectedProductGroup = groupName;
-            document.querySelectorAll('.group-radio-btn').forEach(btn => {
-                if (btn.getAttribute('data-group') === groupName) {
-                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
-                } else {
-                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                }
-            });
-            updateModelCheckboxesByGroup();
-        }
-
-        function updateModelCheckboxesByGroup() {
-            const container = document.getElementById('modelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedModels.clear();
-
-            let targetGroup = null;
-            if (currentDailyData && currentDailyData.groups) {
-                targetGroup = currentDailyData.groups.find(g => g.productGroup === selectedProductGroup);
-            }
-
-            if (!targetGroup || !targetGroup.models || targetGroup.models.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-500">ไม่พบ Model ในกลุ่มนี้</span>`;
-                loadProcessDataForCurrentSelection();
-                return;
-            }
-
-            targetGroup.models.forEach((m) => {
-                selectedModels.add(m.name);
-
-                let label = document.createElement('label');
-                label.className = 'flex items-center space-x-2 bg-slate-900/60 px-3 py-2 rounded-lg border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
-                
-                let checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = true;
-                checkbox.value = m.name;
-                checkbox.className = 'rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0';
-                checkbox.onchange = function() {
-                    if (checkbox.checked) {
-                        selectedModels.add(m.name);
-                    } else {
-                        selectedModels.delete(m.name);
-                    }
-                    loadProcessDataForCurrentSelection();
-                };
-
-                let span = document.createElement('span');
-                span.className = 'text-xs font-medium text-slate-200';
-                span.textContent = m.name;
-
-                label.appendChild(checkbox);
-                label.appendChild(span);
-                container.appendChild(label);
-            });
-
-            loadProcessDataForCurrentSelection();
+            alert('บันทึกข้อมูล Work Station และ Cycle Time สำเร็จ!');
         }
 
         initGroupRadioButtons(currentDailyData);
@@ -1112,24 +1070,15 @@
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
                 
-                setTimeout(() => {
-                    generateCycleTimeChart();
-                    if (cycleTimeChartInstance) {
-                        cycleTimeChartInstance.resize();
-                        cycleTimeChartInstance.update();
-                    }
-                }, 50);
+                setTimeout(() => { generateCycleTimeChart(); }, 200);
             }
         }
 
         let cycleTimeChartInstance = null;
         function generateCycleTimeChart() {
             let modelsArray = Array.from(selectedModels);
-            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            const infoLabel = document.getElementById('ctInfoLabel');
-            if (infoLabel) {
-                infoLabel.textContent = `Model: ${modelKey} | Part: ${selectedPartValue}`;
-            }
+            let modelStr = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
+            document.getElementById('ctInfoLabel').textContent = `Model: ${modelStr} | Part: ${selectedPartValue}`;
 
             let labels = [];
             let ctData = [];
@@ -1141,16 +1090,12 @@
                 ctData.push(cycleTime);
             });
 
-            let taktVal = parseFloat(document.getElementById('taktTimeInput').value) || 0;
-            let taktLineData = new Array(labels.length).fill(taktVal);
+            let taktTimeVal = parseFloat(document.getElementById('taktTimeInput').value) || 60;
+            let taktLineData = new Array(labels.length).fill(taktTimeVal);
 
-            const canvasEl = document.getElementById('cycleTimeChart');
-            if (!canvasEl) return;
-            const ctxCT = canvasEl.getContext('2d');
-
+            const ctxCT = document.getElementById('cycleTimeChart').getContext('2d');
             if (cycleTimeChartInstance) {
                 cycleTimeChartInstance.destroy();
-                cycleTimeChartInstance = null;
             }
 
             cycleTimeChartInstance = new Chart(ctxCT, {
@@ -1168,13 +1113,12 @@
                         },
                         {
                             type: 'line',
-                            label: 'Takt Time (เป้าหมาย)',
+                            label: 'Takt Time Target',
                             data: taktLineData,
                             borderColor: '#f43f5e',
                             borderWidth: 2,
-                            borderDash: [6, 6],
+                            borderDash: [5, 5],
                             pointRadius: 0,
-                            fill: false,
                             order: 1
                         }
                     ]
