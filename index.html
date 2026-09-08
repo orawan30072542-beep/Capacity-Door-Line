@@ -429,7 +429,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
-                                <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time ($TT = 3600 / UPH$) และเปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
+                                <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time ($TT = 3600 / UPH$) และเส้นที่ 2 ($UPH \times 85\%$) เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
                             </div>
                             <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
                                 <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
@@ -445,8 +445,8 @@
                                 <div id="displayTtVal" class="text-lg font-bold text-yellow-300 mt-1">30.00 วินาที</div>
                             </div>
                             <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ)</span>
-                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">35.29 วินาที</div>
+                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, สูตร UPH*85%)</span>
+                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">102.00 PCS/Hr</div>
                             </div>
                         </div>
 
@@ -635,7 +635,7 @@
                     },
                     {
                         type: 'line',
-                        label: 'Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ)',
+                        label: 'Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, UPH*85%)',
                         data: [],
                         borderColor: '#fb7185', // แดงสว่าง (rose-400)
                         borderDash: [6, 6],
@@ -682,10 +682,14 @@
         function updateLobChart() {
             let uph = parseFloat(document.getElementById('uphInput').value) || 120;
             let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            let taktTime85 = uph > 0 ? (3600 / uph) / 0.85 : 0;
+            
+            // ปรับสูตรเส้นที่ 2 เป็น UPH * 85% แปลงเป็น Takt Time (วินาที) หรือใช้สูตรเวลาตามโจทย์
+            // เนื่องจากเส้นกราฟแกน Y เป็นหน่วยเวลา (วินาที) สูตร UPH*85% จะหมายถึงเป้าหมาย UPH ที่ลดลงเหลือ 85% -> Takt Time = 3600 / (UPH * 0.85)
+            let adjustedUph85 = uph * 0.85;
+            let taktTime85 = adjustedUph85 > 0 ? 3600 / adjustedUph85 : 0;
 
             document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)} วินาที`;
-            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)} วินาที`;
+            document.getElementById('displayTtRedVal').textContent = `${adjustedUph85.toFixed(2)} PCS/Hr (${taktTime85.toFixed(2)} วินาที)`;
 
             let labels = [];
             let ctData = [];
@@ -707,7 +711,7 @@
             lobChart.data.datasets[1].data = ttLine1;
             lobChart.data.datasets[1].label = `Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง - ${taktTime100.toFixed(2)}s)`;
             lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ - ${taktTime85.toFixed(2)}s)`;
+            lobChart.data.datasets[2].label = `Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, UPH*85% = ${adjustedUph85.toFixed(1)} PCS/h - ${taktTime85.toFixed(2)}s)`;
             lobChart.update();
         }
 
