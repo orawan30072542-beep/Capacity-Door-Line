@@ -339,10 +339,15 @@
                         <!-- แถวตัวเลือกย่อย Door (Bending / Foaming) และ Door Type (RR, RL, FR, FL, VEG, FB) -->
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
+                                span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
                                 <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
                                 <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
-                            </div>
+                            <!-- เพิ่มชิ้นส่วน Door Process ใหม่ตรงนี้ -->
+    <button type="button" onclick="selectDoorSubPart('Door Cap Assembly')" data-subpart="Door Cap Assembly" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Cap Assembly</button>
+    <button type="button" onclick="selectDoorSubPart('Door Liner')" data-subpart="Door Liner" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Liner</button>
+    <button type="button" onclick="selectDoorSubPart('Door Frame')" data-subpart="Door Frame" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Frame</button>
+    <button type="button" onclick="selectDoorSubPart('Door Glass')" data-subpart="Door Glass" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Glass</button>
+</div>
                             <div class="flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40">
                                 <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:</span>
                                 <button type="button" onclick="selectDoorType('RR')" data-doortype="RR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500">RR</button>
