@@ -929,48 +929,50 @@
         return;
     }
 
-            groups.forEach(g => {
-                g.models.forEach(m => {
-                    let storageKey = '';
-                    let dbSource = processDatabase;
-                    if (selectedPart.startsWith('Door - ')) {
-                        let subPartName = selectedPart.replace('Door - ', '').replace(' (RR)', '');
-                        storageKey = `${m.name}_Door (${subPartName} - RR)`;
-                        dbSource = doorProcessDatabase;
-                    } else {
-                        storageKey = `${m.name}_${selectedPart}`;
-                        dbSource = processDatabase;
-                    }
+    groups.forEach(g => {
+        g.models.forEach(m => {
+            let storageKey = '';
+            let dbSource = processDatabase;
 
-                    let stations = dbSource[storageKey] || getEmptyDefaultStations();
-                    let totalLeadtime = 0;
-                    let maxCt = 0;
+            if (selectedPart === 'Door') {
+                dbSource = doorProcessDatabase;
+                // ค้นหา Key ของ Door สำหรับ Model นี้ในฐานข้อมูล Door (เช่น Door (Bending - RR) หรือคีย์แรกที่พบ)
+                let foundKey = Object.keys(doorProcessDatabase).find(k => k.startsWith(`${m.name}_Door`));
+                storageKey = foundKey || `${m.name}_Door (Bending - RR)`;
+            } else {
+                storageKey = `${m.name}_${selectedPart}`;
+                dbSource = processDatabase;
+            }
 
-                    stations.forEach(st => {
-                        let w1 = parseFloat(st.wt1) || 0;
-                        let w2 = parseFloat(st.wt2) || 0;
-                        let w3 = parseFloat(st.wt3) || 0;
-                        let l = parseFloat(st.loss) || 0;
-                        let ct = w1 + w2 + w3 + l;
-                        totalLeadtime += ct;
-                        if (ct > maxCt) maxCt = ct;
-                    });
+            let stations = dbSource[storageKey] || getEmptyDefaultStations();
+            let totalLeadtime = 0;
+            let maxCt = 0;
 
-                    let uphVal = maxCt > 0 ? (3600 / maxCt) * 0.85 : 0;
-
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition';
-                    tr.innerHTML = `
-                        <td class="p-3 font-semibold text-white">Group ${g.productGroup} - ${m.name}</td>
-                        <td class="p-3 text-cyan-400 font-medium">${selectedPart}</td>
-                        <td class="p-3 text-center font-bold text-slate-200">${totalLeadtime.toFixed(2)}</td>
-                        <td class="p-3 text-center font-bold text-amber-400">${maxCt.toFixed(2)}</td>
-                        <td class="p-3 text-center font-bold text-cyan-300">${Math.round(uphVal).toLocaleString()} PCS/Hr</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            stations.forEach(st => {
+                let w1 = parseFloat(st.wt1) || 0;
+                let w2 = parseFloat(st.wt2) || 0;
+                let w3 = parseFloat(st.wt3) || 0;
+                let l = parseFloat(st.loss) || 0;
+                let ct = w1 + w2 + w3 + l;
+                totalLeadtime += ct;
+                if (ct > maxCt) maxCt = ct;
             });
-        }
+
+            let uphVal = maxCt > 0 ? (3600 / maxCt) * 0.85 : 0;
+
+            let tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-800/30 transition';
+            tr.innerHTML = `
+                <td class="p-3 font-semibold text-white">Group ${g.productGroup} - ${m.name}</td>
+                <td class="p-3 text-cyan-400 font-medium">${selectedPart}</td>
+                <td class="p-3 text-center font-bold text-slate-200">${totalLeadtime.toFixed(2)}</td>
+                <td class="p-3 text-center font-bold text-amber-400">${maxCt.toFixed(2)}</td>
+                <td class="p-3 text-center font-bold text-cyan-300">${Math.round(uphVal).toLocaleString()} PCS/Hr</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
 
         renderCapacityTable();
 
