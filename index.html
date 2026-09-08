@@ -281,46 +281,53 @@
             </div>
 
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
-            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
-                
-                <!-- STICKY CONTROL PANEL -->
-                <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-cyan-500/30 shadow-lg space-y-2">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 border-b border-bordercolor pb-1.5">
-                        <div class="flex items-center space-x-1.5">
-                            <div class="w-1 h-4 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-xs font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection)</h2>
-                        </div>
-                        <button onclick="switchTab('dashboard')" class="text-[11px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
-                        </button>
-                    </div>
+            <div id="tab-content-workprocess" class="space-y-4">
+    <!-- STICKY CONTROL PANEL (ปรับให้เล็กลงและตรึงด้านบน) -->
+    <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/30 shadow-lg space-y-1.5">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
+            <div class="flex items-center space-x-1.5">
+                <div class="w-1 h-3.5 bg-cyan-400 rounded-full"></div>
+                <h2 class="text-xs font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection)</h2>
+            </div>
+            <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
+                &larr; กลับหน้าหลัก
+            </button>
+        </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 text-xs">
-                        <!-- แถวที่ 1: Part อยู่ด้านบนเต็มความกว้าง (col-span-12) -->
-                        <div class="md:col-span-12 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
-                            <span class="text-[11px] font-medium text-slate-400 mr-1">Part:</span>
-                            <div id="partTabContainer" class="flex flex-wrap gap-1">
-                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
-                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
-                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door</button>
-                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
-                            </div>
-                        </div>
-
-                        <!-- แถวที่ 2: Group (70% หรือ md:col-span-8) อยู่ด้านล่างซ้าย -->
-                        <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
-                            <span class="text-[11px] font-semibold text-amber-400 mr-1">Group:</span>
-                            <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
-                        </div>
-
-                        <!-- แถวที่ 2: Model (30% หรือ md:col-span-4) อยู่ด้านล่างขวา -> ปรับให้แสดงสูงสุด 2 แถว และเพิ่มคอลัมน์ไปด้านข้างหากเกิน -->
-                        <div class="md:col-span-4 flex flex-col gap-1 justify-center bg-slate-950/40 p-1.5 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[11px] font-semibold text-cyan-400 mb-0.5">Model:</span>
-                            <!-- ใช้ CSS Grid แบบกำหนด Rows = 2 และ Flow เป็น Column (เพิ่มคอลัมน์ไปด้านข้างอัตโนมัติ) -->
-                            <div id="modelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1.5 overflow-x-auto pb-1 w-full"></div>
-                        </div>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
+            <!-- Part: แถวบนสุด เต็มความกว้าง -->
+            <div class="md:col-span-12 flex flex-wrap items-center gap-1 bg-slate-900/60 px-2 py-1 rounded-lg border border-bordercolor/60">
+                <span class="text-[10px] font-medium text-slate-400 mr-1">Part:</span>
+                <div id="partTabContainer" class="flex flex-wrap gap-1">
+                    <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
+                    <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
+                    <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door</button>
+                    <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
                 </div>
+            </div>
+
+            <!-- Group: ฝั่งซ้าย -->
+            <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 px-2 py-1 rounded-lg border border-bordercolor/60">
+                <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
+                <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
+            </div>
+
+            <!-- Model: ฝั่งขวา -->
+            <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 px-2 py-1 rounded-lg border border-bordercolor/40">
+                <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
+                <div id="modelCheckboxContainer" class="flex flex-wrap gap-1 max-h-12 overflow-y-auto w-full"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA (พื้นที่แสดงข้อมูลการทำงานด้านล่างแถบควบคุม) -->
+    <div id="workprocessContentArea" class="space-y-4 pt-2">
+        <!-- ใส่การ์ดข้อมูล ตาราง หรือฟอร์มอื่นๆ ของคุณต่อตรงนี้ -->
+        <div class="bg-cardbg p-4 rounded-xl border border-bordercolor shadow-md text-slate-300 text-sm">
+            <p class="text-center text-slate-400">เนื้อหาและข้อมูลการตรวจสอบจะแสดงผลในส่วนนี้...</p>
+        </div>
+    </div>
+</div>
 
                 <!-- HIGHLIGHT SECTION 1: กราฟ Line of Balance & Takt Time และ ตาราง Active Work Stations -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-md">
