@@ -66,12 +66,12 @@
                         <span class="w-2 h-2 rounded-full bg-slate-600"></span>
                         <span>1. Dashboard ภาพรวม</span>
                     </button>
-                    <button onclick="switchTab('mastermodel')" id="nav-mastermodel" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                    <button onclick="switchTab('mastermodel')" id="nav-mastermodel" class="w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
                         <span>2. Master Model & Routing</span>
                     </button>
-                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                         <span>3. Work Process & CT</span>
                     </button>
                     <button onclick="switchTab('doorparts')" id="nav-doorparts" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
@@ -184,45 +184,10 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- 3. CAPACITY & LEADTIME ANALYSIS -->
-                <section id="capacity-analysis" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">3. Capacity & Leadtime (วิเคราะห์กำลังการผลิต)</h2>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <label class="text-xs text-slate-300 font-medium">เลือกข้อมูลพาร์ท:</label>
-                            <select id="capacityPartSelect" onchange="renderCapacityTable()" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <option value="Back Plate">Back Plate</option>
-                                <option value="Bottom Plate">Bottom Plate</option>
-                                <option value="Gasket">Gasket</option>
-                                <option value="Door - Bending (RR)">Door - Bending (RR)</option>
-                                <option value="Door - Foaming (RR)">Door - Foaming (RR)</option>
-                                <option value="Door - Door Cap Assembly (RR)">Door - Door Cap Assembly (RR)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto rounded-lg border border-bordercolor/50 max-h-[350px]">
-                        <table id="tableCapacity" class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="border-b border-bordercolor text-slate-400 bg-slate-900 sticky top-0">
-                                    <th class="p-3">Product และ รุ่น</th>
-                                    <th class="p-3">Door / Part Detail</th>
-                                    <th class="p-3 text-center">Leadtime (s)</th>
-                                    <th class="p-3 text-center">Max CT (s)</th>
-                                    <th class="p-3 text-center text-cyan-300">UPH (3600 / Max CT * 85%)</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
-                        </table>
-                    </div>
-                </section>
             </div>
 
-            <!-- TAB CONTENT: MASTER MODEL & ROUTING -->
-            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full hidden">
+            <!-- NEW TAB CONTENT: MASTER MODEL & ROUTING -->
+            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardbg p-5 rounded-2xl border border-bordercolor">
                     <div class="flex items-center space-x-3">
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
@@ -256,7 +221,7 @@
             </div>
 
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
-            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
+            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full hidden">
                 <!-- STICKY CONTROL PANEL -->
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/30 shadow-lg space-y-1.5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
@@ -551,25 +516,6 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        function switchTab(tabId) {
-            document.querySelectorAll('[id^="tab-content-"]').forEach(el => el.classList.add('hidden'));
-            const target = document.getElementById(`tab-content-${tabId}`);
-            if (target) target.classList.remove('hidden');
-
-            ['dashboard', 'mastermodel', 'workprocess', 'doorparts'].forEach(id => {
-                const btn = document.getElementById(`nav-${id}`);
-                if (btn) {
-                    if (id === tabId) {
-                        btn.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                    } else {
-                        btn.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                    }
-                }
-            });
-            if(tabId === 'workprocess') { updateLobChart(); }
-            if(tabId === 'doorparts') { updateDoorLobChart(); }
-        }
-
         // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)
         let selectedPartValue = 'Back Plate'; 
         let selectedProductGroups = new Set(); 
@@ -706,7 +652,6 @@
         function saveMasterModelConfig() {
             localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
-            renderCapacityTable();
         }
 
         let processDatabase = {};
@@ -782,7 +727,6 @@
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
-            renderCapacityTable();
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -1021,65 +965,6 @@
 
         renderUnifiedTable(currentDailyData);
 
-        function renderCapacityTable() {
-            const tbody = document.querySelector('#tableCapacity tbody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const selectedPart = document.getElementById('capacityPartSelect').value;
-            let groups = currentDailyData.groups;
-
-            if (!groups || groups.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลแผนการผลิต</td></tr>`;
-                return;
-            }
-
-            groups.forEach(g => {
-                g.models.forEach(m => {
-                    let masterInfo = getMasterConfigForModel(m.name);
-                    let storageKey = '';
-                    let dbSource = processDatabase;
-                    if (selectedPart.startsWith('Door - ')) {
-                        let subPartName = selectedPart.replace('Door - ', '').replace(' (RR)', '');
-                        storageKey = `${m.name}_Door (${subPartName} - RR)`;
-                        dbSource = doorProcessDatabase;
-                    } else {
-                        storageKey = `${m.name}_${selectedPart}`;
-                        dbSource = processDatabase;
-                    }
-
-                    let stations = dbSource[storageKey] || getEmptyDefaultStations();
-                    let totalLeadtime = 0;
-                    let maxCt = 0;
-
-                    stations.forEach(st => {
-                        let w1 = parseFloat(st.wt1) || 0;
-                        let w2 = parseFloat(st.wt2) || 0;
-                        let w3 = parseFloat(st.wt3) || 0;
-                        let l = parseFloat(st.loss) || 0;
-                        let ct = w1 + w2 + w3 + l;
-                        totalLeadtime += ct;
-                        if (ct > maxCt) maxCt = ct;
-                    });
-
-                    let uphVal = maxCt > 0 ? (3600 / maxCt) * 0.85 : 0;
-
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition';
-                    tr.innerHTML = `
-                        <td class="p-3 font-semibold text-white">Group ${g.productGroup} - ${m.name} <span class="text-[10px] text-purple-300 bg-purple-900/40 px-1.5 py-0.5 rounded ml-1">${masterInfo.doorType} (${masterInfo.qtyPerSet} pcs/set)</span></td>
-                        <td class="p-3 text-cyan-400 font-medium">${selectedPart} <br><span class="text-[10px] text-slate-400 font-normal">Routing: ${masterInfo.routing}</span></td>
-                        <td class="p-3 text-center font-bold text-slate-200">${totalLeadtime.toFixed(2)}</td>
-                        <td class="p-3 text-center font-bold text-amber-400">${maxCt.toFixed(2)}</td>
-                        <td class="p-3 text-center font-bold text-cyan-300">${Math.round(uphVal).toLocaleString()} PCS/Hr</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            });
-        }
-
-        renderCapacityTable();
-
         function previewExcelData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1129,7 +1014,6 @@
                             window.tempImportedData = { days: days, groups: groups };
                             renderUnifiedTable(window.tempImportedData);
                             renderMasterModelTable();
-                            renderCapacityTable();
                             let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
                             planChart.data.labels = window.tempImportedData.days;
                             planChart.data.datasets[0].data = newCalc.totalOutputs;
@@ -1152,7 +1036,6 @@
             initGroupRadioButtons(currentDailyData);
             initDoorGroupRadioButtons(currentDailyData);
             renderMasterModelTable();
-            renderCapacityTable();
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
@@ -1200,7 +1083,6 @@
                             currentProcessData = importedStations;
                             renderProcessTableInputs();
                             updateLobChart();
-                            renderCapacityTable();
                             const editSection = document.getElementById('editProcessSection');
                             if (editSection.classList.contains('hidden')) { toggleEditModal(); }
                             alert('นำเข้าข้อมูลสำเร็จ!');
@@ -1256,7 +1138,6 @@
                             currentDoorProcessData = importedStations;
                             renderDoorProcessTableInputs();
                             updateDoorLobChart();
-                            renderCapacityTable();
                             const editSection = document.getElementById('editDoorProcessSection');
                             if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }
                             alert('นำเข้าข้อมูล Door สำเร็จ!');
@@ -1479,7 +1360,6 @@
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
             renderSavedDisplayTable();
             updateLobChart();
-            renderCapacityTable();
             toggleEditModal();
             alert(`บันทึกข้อมูลสำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
         }
@@ -1513,7 +1393,6 @@
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
-            renderCapacityTable();
             toggleDoorEditModal();
             alert(`บันทึกข้อมูล Door สำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
         }
@@ -1680,10 +1559,38 @@
             loadDoorProcessDataForCurrentSelection();
         }
 
+        function switchTab(tabId) {
+            document.getElementById('tab-content-dashboard').classList.add('hidden');
+            document.getElementById('tab-content-mastermodel').classList.add('hidden');
+            document.getElementById('tab-content-workprocess').classList.add('hidden');
+            document.getElementById('tab-content-doorparts').classList.add('hidden');
+
+            document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            document.getElementById('nav-mastermodel').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            document.getElementById('nav-workprocess').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            document.getElementById('nav-doorparts').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+
+            if (tabId === 'dashboard') {
+                document.getElementById('tab-content-dashboard').classList.remove('hidden');
+                document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+            } else if (tabId === 'mastermodel') {
+                document.getElementById('tab-content-mastermodel').classList.remove('hidden');
+                document.getElementById('nav-mastermodel').className = 'w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3';
+                renderMasterModelTable();
+            } else if (tabId === 'workprocess') {
+                document.getElementById('tab-content-workprocess').classList.remove('hidden');
+                document.getElementById('nav-workprocess').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                initGroupRadioButtons(currentDailyData);
+            } else if (tabId === 'doorparts') {
+                document.getElementById('tab-content-doorparts').classList.remove('hidden');
+                document.getElementById('nav-doorparts').className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
+                initDoorGroupRadioButtons(currentDailyData);
+            }
+        }
+
         initGroupRadioButtons(currentDailyData);
         initDoorGroupRadioButtons(currentDailyData);
         renderMasterModelTable();
-        renderCapacityTable();
     </script>
 </body>
 </html>
