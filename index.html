@@ -280,95 +280,95 @@
 
             </div>
 
-            <!-- WORK PROCESS & CYCLE TIME TAB CONTENT (Reorganized Layout: Chart & Table First + Sticky Model Selector) -->
-            <div id="tab-content-workprocess" class="p-6 space-y-6 w-full">
+            <!-- WORK PROCESS & CYCLE TIME TAB CONTENT (Reorganized Layout: Chart & Table First + Compact Sticky Model Selector) -->
+            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
                 
-                <!-- STICKY CONTROL PANEL: ปุ่มเลือก Model, Part และ Group แบบติดหนึบด้านบน ไม่ต้องเลื่อนไปมา -->
-                <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md p-4 rounded-2xl border border-cyan-500/30 shadow-xl space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-bordercolor pb-2">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-sm font-bold text-white">แถบควบคุมและเลือก Model ด่วน (Quick Selection)</h2>
+                <!-- STICKY CONTROL PANEL: ปรับขนาดตัวหนังสือ ระยะห่าง และปุ่มให้เล็กลงกะทัดรัด -->
+                <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-cyan-500/30 shadow-lg space-y-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 border-b border-bordercolor pb-1.5">
+                        <div class="flex items-center space-x-1.5">
+                            <div class="w-1 h-4 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-xs font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection)</h2>
                         </div>
-                        <button onclick="switchTab('dashboard')" class="text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-bordercolor transition">
+                        <button onclick="switchTab('dashboard')" class="text-[11px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded border border-bordercolor transition">
                             &larr; กลับหน้า Dashboard หลัก
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center text-xs">
                         <!-- 1. เลือก Part -->
-                        <div class="md:col-span-4 flex flex-wrap items-center gap-1.5">
+                        <div class="md:col-span-4 flex flex-wrap items-center gap-1">
                             <span class="text-[11px] font-medium text-slate-400 mr-1">Part:</span>
                             <div id="partTabContainer" class="flex flex-wrap gap-1">
-                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
-                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
-                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door</button>
-                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
+                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
+                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
+                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door</button>
+                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
                             </div>
                         </div>
 
                         <!-- 2. Product Group -->
-                        <div class="md:col-span-4 flex flex-wrap items-center gap-1.5">
+                        <div class="md:col-span-4 flex flex-wrap items-center gap-1">
                             <span class="text-[11px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
                         <!-- 3. Model Checkbox -->
-                        <div class="md:col-span-4 flex flex-wrap items-center gap-1.5">
+                        <div class="md:col-span-4 flex flex-wrap items-center gap-1">
                             <span class="text-[11px] font-medium text-slate-400 mr-1">Model:</span>
                             <div id="modelCheckboxContainer" class="flex flex-wrap gap-1"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- HIGHLIGHT SECTION 1: กราฟ Line of Balance & Takt Time และ ตาราง Active Work Stations (แสดงเด่นที่สุดด้านบน) -->
-                <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-md">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
+                <!-- HIGHLIGHT SECTION 1: กราฟ Line of Balance & Takt Time และ ตาราง Active Work Stations -->
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-md">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-bordercolor pb-3">
                         <div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                                    <h3 class="text-base font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="flex items-center space-x-1.5">
+                                    <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
+                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
                                 </div>
-                                <div class="text-[11px] text-slate-300 bg-slate-800/80 px-3 py-1 rounded-lg border border-bordercolor flex items-center space-x-3">
-                                    <span>Takt Time 100%: <strong id="displayTtVal" class="text-yellow-300">30.00 วินาที</strong></span>
+                                <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
+                                    <span>TT 100%: <strong id="displayTtVal" class="text-yellow-300">30.00s</strong></span>
                                     <span class="text-slate-500">|</span>
-                                    <span>Takt Time 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50 วินาที</strong></span>
+                                    <span>TT 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50s</strong></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor shrink-0">
-                            <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
-                            <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none font-bold">
-                            <span class="text-xs text-slate-400">PCS/Hr</span>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-bordercolor shrink-0 text-xs">
+                            <label class="text-[11px] text-slate-300 font-medium">UPH:</label>
+                            <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-2 py-1 w-16 text-center rounded border border-bordercolor focus:outline-none font-bold">
+                            <span class="text-[11px] text-slate-400">PCS/Hr</span>
                         </div>
                     </div>
 
                     <!-- Layout: กราฟซ้าย / ตารางขวา -->
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                         <!-- ฝั่งซ้าย: กราฟ LOB -->
-                        <div class="lg:col-span-7 lob-chart-wrapper bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 flex flex-col justify-between">
+                        <div class="lg:col-span-7 lob-chart-wrapper bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 flex flex-col justify-between">
                             <canvas id="lobChart"></canvas>
                         </div>
 
                         <!-- ฝั่งขวา: ตารางแสดงผลข้อมูล Station -->
-                        <div class="lg:col-span-5 bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 space-y-3">
-                            <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-2">
+                        <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
+                            <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
                                 <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)</span>
-                                <span id="savedDisplayStatus" class="text-[11px] text-emerald-400 font-normal">พร้อมใช้งาน</span>
+                                <span id="savedDisplayStatus" class="text-[10px] text-emerald-400 font-normal">พร้อมใช้งาน</span>
                             </h3>
-                            <div class="overflow-x-auto max-h-[430px]">
+                            <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
-                                            <th class="p-2 text-center w-20">Station</th>
-                                            <th class="p-2">Process 1</th>
-                                            <th class="p-2 text-center">WT Tot</th>
-                                            <th class="p-2 text-center">Loss</th>
-                                            <th class="p-2 text-center text-cyan-300">CT</th>
+                                            <th class="p-1.5 text-center w-16">Station</th>
+                                            <th class="p-1.5">Process 1</th>
+                                            <th class="p-1.5 text-center">WT Tot</th>
+                                            <th class="p-1.5 text-center">Loss</th>
+                                            <th class="p-1.5 text-center text-cyan-300">CT</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                    <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]">
                                         <!-- Rendered saved records -->
                                     </tbody>
                                 </table>
@@ -378,73 +378,73 @@
                 </section>
 
                 <!-- SECTION 2: เครื่องมือจัดการตาราง / โหมดแก้ไขข้อมูล Work Station -->
-                <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถว, ดาวน์โหลดแบบฟอร์ม Excel, หรือเปิดตารางแก้ไขค่า Work Station ของรุ่นที่เลือก</p>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time</h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">เพิ่มแถว, ดาวน์โหลดแบบฟอร์ม Excel, หรือเปิดตารางแก้ไขค่า Work Station ของรุ่นที่เลือก</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-1.5">
                             <!-- ปุ่มดาวน์โหลด Template -->
-                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition flex items-center space-x-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 <span>เทมเพลต Excel</span>
                             </button>
 
                             <!-- ปุ่มอัปโหลด Excel -->
-                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition flex items-center space-x-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 <span>อัปโหลดเข้าตาราง</span>
                                 <input type="file" id="importProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importProcessExcelData(event)">
                             </label>
 
-                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition flex items-center space-x-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 <span>เพิ่ม Station</span>
                             </button>
 
-                            <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                <span id="editModalBtnText">เปิดตารางแก้ไขข้อมูล Work Station</span>
+                            <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold px-3 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                <span id="editModalBtnText">เปิดตารางแก้ไข Work Station</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- ตารางกรอกข้อมูล (โหมดแก้ไข) -->
                     <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/90 p-4 rounded-xl shadow-xl">
-                        <div class="flex justify-between items-center border-b border-bordercolor pb-3">
+                        <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ</h3>
-                                <p class="text-xs text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
+                                <h3 class="text-xs font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ</h3>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    <span>บันทึกข้อมูลและแสดงผล</span>
+                                <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span>บันทึกและแสดงผล</span>
                                 </button>
-                                <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-2 rounded-lg border border-bordercolor transition">
-                                    ปิดหน้าต่างแก้ไข
+                                <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">
+                                    ปิดหน้าต่าง
                                 </button>
                             </div>
                         </div>
-                        <div class="overflow-x-auto max-h-[400px]">
+                        <div class="overflow-x-auto max-h-[380px]">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-950 sticky top-0">
-                                        <th class="p-3 w-28 text-center">Station</th>
-                                        <th class="p-3">Process 1</th>
-                                        <th class="p-3">Process 2</th>
-                                        <th class="p-3">Process 3</th>
-                                        <th class="p-3 text-center w-20">WT 1</th>
-                                        <th class="p-3 text-center w-20">WT 2</th>
-                                        <th class="p-3 text-center w-20">WT 3</th>
-                                        <th class="p-3 text-center w-20">WT Total</th>
-                                        <th class="p-3 text-center w-20">Loss</th>
-                                        <th class="p-3 text-center w-24">Cycle Time</th>
-                                        <th class="p-3 text-center w-16">ลบ</th>
+                                        <th class="p-2 w-24 text-center">Station</th>
+                                        <th class="p-2">Process 1</th>
+                                        <th class="p-2">Process 2</th>
+                                        <th class="p-2">Process 3</th>
+                                        <th class="p-2 text-center w-16">WT 1</th>
+                                        <th class="p-2 text-center w-16">WT 2</th>
+                                        <th class="p-2 text-center w-16">WT 3</th>
+                                        <th class="p-2 text-center w-16">WT Total</th>
+                                        <th class="p-2 text-center w-16">Loss</th>
+                                        <th class="p-2 text-center w-20">Cycle Time</th>
+                                        <th class="p-2 text-center w-12">ลบ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30 text-[11px]">
                                     <!-- Dynamic rows -->
                                 </tbody>
                             </table>
@@ -468,9 +468,9 @@
             selectedPartValue = partName;
             document.querySelectorAll('.part-tab-btn').forEach(btn => {
                 if (btn.getAttribute('data-part') === partName) {
-                    btn.className = 'part-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                    btn.className = 'part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500';
                 } else {
-                    btn.className = 'part-tab-btn px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                 }
             });
             loadProcessDataForCurrentSelection();
@@ -677,8 +677,8 @@
             let taktTime100 = uph > 0 ? 3600 / uph : 0;
             let taktTime85 = taktTime100 * 0.85;
 
-            document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)} วินาที`;
-            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)} วินาที`;
+            document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)}s`;
+            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;
 
             let labels = [];
             let ctData = [];
@@ -959,7 +959,7 @@
                             if (editSection.classList.contains('hidden')) {
                                 toggleEditModal();
                             }
-                            alert('นำเข้าข้อมูลสำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกข้อมูลและแสดงผล"');
+                            alert('นำเข้าข้อมูลสำเร็จ! ตรวจสอบความถูกต้องและกด "บันทึกและแสดงผล"');
                         } else {
                             alert('ไม่พบข้อมูล Station ในไฟล์ Excel');
                         }
@@ -977,10 +977,10 @@
             const btnText = document.getElementById('editModalBtnText');
             if (editSection.classList.contains('hidden')) {
                 editSection.classList.remove('hidden');
-                btnText.textContent = 'ซ่อนตารางแก้ไขข้อมูล';
+                btnText.textContent = 'ซ่อนตารางแก้ไข';
             } else {
                 editSection.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไขข้อมูล Work Station';
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
             }
         }
 
@@ -1014,17 +1014,17 @@
             currentProcessData.forEach((item, index) => {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-2 py-1.5 rounded border border-bordercolor station-input" value="${item.station || ''}"></td>
-                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p1-input" value="${item.p1 || ''}"></td>
-                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p2-input" value="${item.p2 || ''}"></td>
-                    <td class="p-2"><input type="text" class="w-full bg-slate-800 text-white px-2.5 py-1.5 rounded border border-bordercolor p3-input" value="${item.p3 || ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt1-input" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt2-input" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-cyan-400 p-1.5 rounded border border-bordercolor wt3-input" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
-                    <td class="p-2 text-center font-bold text-slate-200 wt-total-cell">—</td>
-                    <td class="p-2 text-center"><input type="number" step="0.01" class="w-16 bg-slate-800 text-center text-rose-400 p-1.5 rounded border border-bordercolor loss-input" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
-                    <td class="p-2 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
-                    <td class="p-2 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 p-1">✕</button></td>
+                    <td class="p-1.5 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-1.5 py-1 rounded border border-bordercolor station-input text-xs" value="${item.station || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p1-input text-xs" value="${item.p1 || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p2-input text-xs" value="${item.p2 || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p3-input text-xs" value="${item.p3 || ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt1-input text-xs" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt2-input text-xs" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt3-input text-xs" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200 wt-total-cell">—</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-rose-400 p-1 rounded border border-bordercolor loss-input text-xs" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
+                    <td class="p-1.5 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1">✕</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1055,7 +1055,7 @@
             displayBody.innerHTML = '';
 
             if (!currentProcessData || currentProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;
+                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;
                 return;
             }
 
@@ -1064,11 +1064,11 @@
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-semibold">${item.station || '-'}</span></td>
-                    <td class="p-2 font-medium text-white truncate max-w-[120px]">${item.p1 || '—'}</td>
-                    <td class="p-2 text-center font-bold text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
-                    <td class="p-2 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
-                    <td class="p-2 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-1.5 py-0.5 rounded text-[10px] font-semibold">${item.station || '-'}</span></td>
+                    <td class="p-1.5 font-medium text-white truncate max-w-[120px]">${item.p1 || '—'}</td>
+                    <td class="p-1.5 text-center font-bold text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
                 `;
                 displayBody.appendChild(tr);
             });
@@ -1131,9 +1131,9 @@
                     
                     if (idx === 0) {
                         selectedProductGroup = g.productGroup;
-                        btn.className = 'group-radio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
+                        btn.className = 'group-radio-btn px-2 py-1 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
                     } else {
-                        btn.className = 'group-radio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                        btn.className = 'group-radio-btn px-2 py-1 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                     }
 
                     btn.onclick = function() {
@@ -1149,9 +1149,9 @@
             selectedProductGroup = groupName;
             document.querySelectorAll('.group-radio-btn').forEach(btn => {
                 if (btn.getAttribute('data-group') === groupName) {
-                    btn.className = 'group-radio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
+                    btn.className = 'group-radio-btn px-2 py-1 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
                 } else {
-                    btn.className = 'group-radio-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'group-radio-btn px-2 py-1 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                 }
             });
             updateModelCheckboxesByGroup();
@@ -1178,7 +1178,7 @@
                 selectedModels.add(m.name);
 
                 let label = document.createElement('label');
-                label.className = 'flex items-center space-x-1 bg-slate-900/80 px-2 py-1 rounded-md border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
+                label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1.5 py-0.5 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
                 
                 let checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -1195,7 +1195,7 @@
                 };
 
                 let span = document.createElement('span');
-                span.className = 'text-[11px] font-medium text-slate-200';
+                span.className = 'text-[10px] font-medium text-slate-200';
                 span.textContent = m.name;
 
                 label.appendChild(checkbox);
