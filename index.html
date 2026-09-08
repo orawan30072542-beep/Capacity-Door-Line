@@ -412,25 +412,21 @@
                     <div class="bg-slate-900/90 p-5 rounded-xl border border-bordercolor space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
                             <div>
-                                <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
-                                <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time ($TT = 3600 / UPH$) และเส้นที่ 2 ($TT \times 85\%$) เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                                    <!-- ข้อความ Takt Time แสดงผลแบบกระชับเหนือกราฟ -->
+                                    <div class="text-[11px] text-slate-300 bg-slate-800/80 px-3 py-1 rounded-lg border border-bordercolor flex items-center space-x-3">
+                                        <span>Takt Time 100%: <strong id="displayTtVal" class="text-yellow-300">30.00 วินาที</strong></span>
+                                        <span class="text-slate-500">|</span>
+                                        <span>Takt Time 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50 วินาที</strong></span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
                             </div>
-                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
+                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor shrink-0">
                                 <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
                                 <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none font-bold">
                                 <span class="text-xs text-slate-400">PCS/Hr</span>
-                            </div>
-                        </div>
-
-                        <!-- Takt Time Summary Box -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง)</span>
-                                <div id="displayTtVal" class="text-lg font-bold text-yellow-300 mt-1">30.00 วินาที</div>
-                            </div>
-                            <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, สูตร TT * 85%)</span>
-                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">25.50 วินาที</div>
                             </div>
                         </div>
 
@@ -693,7 +689,7 @@
             let taktTime85 = taktTime100 * 0.85;
 
             document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)} วินาที`;
-            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)} วินาที (TT * 85%)`;
+            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)} วินาที`;
 
             let labels = [];
             let ctData = [];
