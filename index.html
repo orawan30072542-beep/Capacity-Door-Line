@@ -38,7 +38,7 @@
         .lob-chart-wrapper {
             position: relative;
             width: 100%;
-            height: 380px;
+            height: 480px;
         }
     </style>
 </head>
@@ -395,38 +395,9 @@
                         </div>
                     </div>
 
-                    <!-- ส่วนแสดงผลข้อมูลที่บันทึกแล้ว -->
-                    <div class="bg-slate-900/80 p-5 rounded-xl border border-bordercolor space-y-3">
-                        <h3 class="text-sm font-semibold text-cyan-400 flex items-center justify-between">
-                            <span>รายการที่บันทึกและแสดงผลปัจจุบัน (Active Work Stations)</span>
-                            <span id="savedDisplayStatus" class="text-xs text-emerald-400 font-normal">สถานะ: โหลดข้อมูลตรงตามรุ่นและพาร์ทเรียบร้อย</span>
-                        </h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-950">
-                                        <th class="p-2.5 text-center w-28">Station</th>
-                                        <th class="p-2.5">Process 1</th>
-                                        <th class="p-2.5">Process 2</th>
-                                        <th class="p-2.5">Process 3</th>
-                                        <th class="p-2.5 text-center">WT 1</th>
-                                        <th class="p-2.5 text-center">WT 2</th>
-                                        <th class="p-2.5 text-center">WT 3</th>
-                                        <th class="p-2.5 text-center">WT Total</th>
-                                        <th class="p-2.5 text-center">Loss</th>
-                                        <th class="p-2.5 text-center text-cyan-300">Cycle Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
-                                    <!-- Rendered saved records -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- NEW: Line of Balance & Takt Time Section -->
+                    <!-- NEW: Line of Balance & Takt Time Section (Layout: กราฟซ้าย / ตารางขวา) -->
                     <div class="bg-slate-900/90 p-5 rounded-xl border border-bordercolor space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
                             <div>
                                 <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
                                 <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time ($TT = 3600 / UPH$) และเส้นที่ 2 ($UPH \times 85\%$) เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
@@ -450,9 +421,38 @@
                             </div>
                         </div>
 
-                        <!-- LOB Chart Canvas -->
-                        <div class="lob-chart-wrapper bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80">
-                            <canvas id="lobChart"></canvas>
+                        <!-- Layout Grid: กราฟซ้าย (col-span-7) / ตารางขวา (col-span-5) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                            
+                            <!-- ฝั่งซ้าย: กราฟ LOB -->
+                            <div class="lg:col-span-7 lob-chart-wrapper bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 flex flex-col justify-between">
+                                <canvas id="lobChart"></canvas>
+                            </div>
+
+                            <!-- ฝั่งขวา: ตารางแสดงผลข้อมูลที่บันทึกแล้ว -->
+                            <div class="lg:col-span-5 bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 space-y-3">
+                                <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-2">
+                                    <span>Active Work Stations</span>
+                                    <span id="savedDisplayStatus" class="text-[11px] text-emerald-400 font-normal">โหลดข้อมูลสำเร็จ</span>
+                                </h3>
+                                <div class="overflow-x-auto max-h-[430px]">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
+                                                <th class="p-2 text-center w-20">Station</th>
+                                                <th class="p-2">Process 1</th>
+                                                <th class="p-2 text-center">WT Tot</th>
+                                                <th class="p-2 text-center">Loss</th>
+                                                <th class="p-2 text-center text-cyan-300">CT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                            <!-- Rendered saved records -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </section>
@@ -683,8 +683,6 @@
             let uph = parseFloat(document.getElementById('uphInput').value) || 120;
             let taktTime100 = uph > 0 ? 3600 / uph : 0;
             
-            // ปรับสูตรเส้นที่ 2 เป็น UPH * 85% แปลงเป็น Takt Time (วินาที) หรือใช้สูตรเวลาตามโจทย์
-            // เนื่องจากเส้นกราฟแกน Y เป็นหน่วยเวลา (วินาที) สูตร UPH*85% จะหมายถึงเป้าหมาย UPH ที่ลดลงเหลือ 85% -> Takt Time = 3600 / (UPH * 0.85)
             let adjustedUph85 = uph * 0.85;
             let taktTime85 = adjustedUph85 > 0 ? 3600 / adjustedUph85 : 0;
 
@@ -1076,7 +1074,7 @@
             displayBody.innerHTML = '';
 
             if (!currentProcessData || currentProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูล Work Station สำหรับรุ่นและพาร์ทนี้</td></tr>`;
+                displayBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;
                 return;
             }
 
@@ -1085,16 +1083,11 @@
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
                 tr.innerHTML = `
-                    <td class="p-2.5 text-center"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-semibold">${item.station || '-'}</span></td>
-                    <td class="p-2.5 font-medium text-white">${item.p1 || '—'}</td>
-                    <td class="p-2.5 text-slate-300">${item.p2 || '—'}</td>
-                    <td class="p-2.5 text-slate-300">${item.p3 || '—'}</td>
-                    <td class="p-2.5 text-center text-slate-300">${item.wt1 !== null && item.wt1 !== '' ? Number(item.wt1).toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center text-slate-300">${item.wt2 !== null && item.wt2 !== '' ? Number(item.wt2).toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center text-slate-300">${item.wt3 !== null && item.wt3 !== '' ? Number(item.wt3).toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center font-bold text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
-                    <td class="p-2.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
+                    <td class="p-2 text-center"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-semibold">${item.station || '-'}</span></td>
+                    <td class="p-2 font-medium text-white truncate max-w-[120px]">${item.p1 || '—'}</td>
+                    <td class="p-2 text-center font-bold text-slate-200">${wtTotal > 0 ? wtTotal.toFixed(2) : '—'}</td>
+                    <td class="p-2 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
+                    <td class="p-2 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
                 `;
                 displayBody.appendChild(tr);
             });
