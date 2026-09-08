@@ -185,15 +185,15 @@
                     </div>
                 </section>
 
-                <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) -->
+                <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) แยกตาม Group Station: Door A, Door B, Door C -->
                 <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
+                            <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process) - Group Station (Door A, Door B, Door C)</h2>
                         </div>
                         <div class="text-xs text-slate-400">
-                            แสดง Leadtime, Max CT และ Capacity คำนวณด้วยสูตร (3600/Leadtime * 85%) ของแต่ละ Door Type
+                            แสดง Leadtime, Max CT และ Capacity คำนวณด้วยสูตร (3600/Leadtime * 85%) แยกตาม Group Station
                         </div>
                     </div>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
@@ -540,6 +540,25 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
+        // Tab Switching Function
+        function switchTab(tabId) {
+            document.querySelectorAll('[id^="tab-content-"]').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-content-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            // Sidebar active state update
+            ['dashboard', 'mastermodel', 'workprocess', 'doorparts'].forEach(t => {
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    if (t === tabId) {
+                        navBtn.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                    } else {
+                        navBtn.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                    }
+                }
+            });
+        }
+
         // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)
         let selectedPartValue = 'Back Plate'; 
         let selectedProductGroups = new Set(); 
@@ -618,7 +637,7 @@
             }
         } catch (err) { console.error(err); }
 
-        // Master Model Database สำหรับเก็บชนิดชิ้นส่วนและ Routing
+        // Master Model Database สำหรับเก็บชนิดชิ้นส่วนและ Routing รวมถึง Group Station (Door A, Door B, Door C)
         let masterModelConfig = {};
         try {
             let savedMaster = localStorage.getItem('haier_master_model_config_v1');
@@ -681,6 +700,7 @@
 
         function saveMasterModelConfig() {
             localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
+            renderCapacityTable(currentDailyData);
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
         }
 
@@ -994,12 +1014,11 @@
             });
         }
 
-        // --- ปรับปรุงตาราง CAPACITY (ส่วนที่ 3 หน้า Dashboard) ---
+        // --- ปรับปรุงตาราง CAPACITY (ส่วนที่ 3 หน้า Dashboard) แยกตาม Group Station: Door A, Door B, Door C ---
         function renderCapacityTable(data) {
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
 
-            // กำหนด class table-fixed เพื่อให้ขนาดความกว้างช่องตารางเท่ากันเสมอกันทุกคอลัมน์
             tableElement.className = "w-full text-left border-collapse text-xs table-fixed";
 
             const headerRow = tableElement.querySelector('thead tr');
@@ -1008,19 +1027,20 @@
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Model</th>`;
-            doorTypes.forEach(dt => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${dt}</th>`;
+            const groupStations = ['Door A', 'Door B', 'Door C'];
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Model</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Assigned Station</th>`;
+            groupStations.forEach(st => {
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${st}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
             if (!data || !data.groups) return;
 
-            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
-
             data.groups.forEach(g => {
                 g.models.forEach((m, mIndex) => {
+                    let config = getMasterConfigForModel(m.name);
+                    let assignedStation = config.station || 'Door A';
+
                     let tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
@@ -1029,55 +1049,54 @@
                         html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center" rowspan="${g.models.length}">${g.productGroup}</td>`;
                     }
                     html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${m.name}</td>`;
+                    html += `<td class="p-3 font-bold text-amber-400 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${assignedStation}</td>`;
 
-                    doorTypes.forEach(dt => {
-                        let totalWT = 0;
-                        let maxCT = 0;
+                    groupStations.forEach(st => {
+                        if (assignedStation === st) {
+                            let storageKey = `${m.name}_Back Plate`;
+                            let stationsData = processDatabase[storageKey] || getEmptyDefaultStations();
+                            let totalWT = 0;
+                            let maxCT = 0;
 
-                        subParts.forEach(sp => {
-                            let storageKey = `${m.name}_Door (${sp} - ${dt})`;
-                            let stations = doorProcessDatabase[storageKey];
-                            if (stations && Array.isArray(stations)) {
-                                stations.forEach(st => {
-                                    let w1 = parseFloat(st.wt1) || 0;
-                                    let w2 = parseFloat(st.wt2) || 0;
-                                    let w3 = parseFloat(st.wt3) || 0;
-                                    let l = parseFloat(st.loss) || 0;
-                                    let ct = w1 + w2 + w3 + l;
+                            stationsData.forEach(stItem => {
+                                let w1 = parseFloat(stItem.wt1) || 0;
+                                let w2 = parseFloat(stItem.wt2) || 0;
+                                let w3 = parseFloat(stItem.wt3) || 0;
+                                let l = parseFloat(stItem.loss) || 0;
+                                let ct = w1 + w2 + w3 + l;
 
-                                    totalWT += ct;
-                                    if (ct > maxCT) maxCT = ct;
-                                });
-                            }
-                        });
+                                totalWT += ct;
+                                if (ct > maxCT) maxCT = ct;
+                            });
 
-                        let leadTime = totalWT;
-                        // คำนวณ Capacity ตามสูตร (3600 / Leadtime * 85%)
-                        let capacity = leadTime > 0 ? (3600 / leadTime) * 0.85 : 0;
+                            let leadTime = totalWT;
+                            let capacity = leadTime > 0 ? (3600 / leadTime) * 0.85 : 0;
 
-                        let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(2)}s` : '-';
-                        let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(2)}s` : '-';
-                        let capStr = capacity > 0 ? `${Math.round(capacity).toLocaleString()}` : '-';
+                            let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(2)}s` : '-';
+                            let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(2)}s` : '-';
+                            let capStr = capacity > 0 ? `${Math.round(capacity).toLocaleString()}` : '-';
 
-                        // แสดงผล 3 แถวให้ตรงกันในทุกช่อง: Leadtime -> Max CT -> Capacity
-                        html += `
-                            <td class="p-2 border border-bordercolor/40 bg-slate-900/20 align-middle">
-                                <div class="flex flex-col gap-1 text-center">
-                                    <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
-                                        <span class="text-[10px] text-slate-400 block leading-tight">Leadtime</span>
-                                        <span class="text-xs font-bold text-cyan-400">${leadTimeStr}</span>
+                            html += `
+                                <td class="p-2 border border-bordercolor/40 bg-slate-900/20 align-middle">
+                                    <div class="flex flex-col gap-1 text-center">
+                                        <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
+                                            <span class="text-[10px] text-slate-400 block leading-tight">Leadtime</span>
+                                            <span class="text-xs font-bold text-cyan-400">${leadTimeStr}</span>
+                                        </div>
+                                        <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
+                                            <span class="text-[10px] text-slate-400 block leading-tight">Max CT</span>
+                                            <span class="text-xs font-bold text-amber-400">${maxCtStr}</span>
+                                        </div>
+                                        <div class="bg-blue-950/60 p-1.5 rounded border border-blue-500/40">
+                                            <span class="text-[10px] text-cyan-300 block leading-tight">Capacity</span>
+                                            <span class="text-xs font-bold text-emerald-400">${capStr} ${capacity > 0 ? '<span class="text-[9px] font-normal text-slate-400">PCS/Hr</span>' : ''}</span>
+                                        </div>
                                     </div>
-                                    <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
-                                        <span class="text-[10px] text-slate-400 block leading-tight">Max CT</span>
-                                        <span class="text-xs font-bold text-amber-400">${maxCtStr}</span>
-                                    </div>
-                                    <div class="bg-blue-950/60 p-1.5 rounded border border-blue-500/40">
-                                        <span class="text-[10px] text-cyan-300 block leading-tight">Capacity</span>
-                                        <span class="text-xs font-bold text-emerald-400">${capStr} ${capacity > 0 ? '<span class="text-[9px] font-normal text-slate-400">PCS/Hr</span>' : ''}</span>
-                                    </div>
-                                </div>
-                            </td>
-                        `;
+                                </td>
+                            `;
+                        } else {
+                            html += `<td class="p-2 border border-bordercolor/40 bg-slate-900/10 align-middle text-center text-slate-600">—</td>`;
+                        }
                     });
 
                     tr.innerHTML = html;
@@ -1485,6 +1504,7 @@
             currentProcessData = updatedList;
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
             renderSavedDisplayTable();
+            renderCapacityTable(currentDailyData);
             updateLobChart();
             toggleEditModal();
             alert(`บันทึกข้อมูลสำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
@@ -1686,35 +1706,10 @@
             loadDoorProcessDataForCurrentSelection();
         }
 
-        function switchTab(tabId) {
-            document.getElementById('tab-content-dashboard').classList.add('hidden');
-            document.getElementById('tab-content-mastermodel').classList.add('hidden');
-            document.getElementById('tab-content-workprocess').classList.add('hidden');
-            document.getElementById('tab-content-doorparts').classList.add('hidden');
-
-            document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            document.getElementById('nav-mastermodel').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            document.getElementById('nav-workprocess').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            document.getElementById('nav-doorparts').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-
-            if (tabId === 'dashboard') {
-                document.getElementById('tab-content-dashboard').classList.remove('hidden');
-                document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                renderCapacityTable(currentDailyData);
-            } else if (tabId === 'mastermodel') {
-                document.getElementById('tab-content-mastermodel').classList.remove('hidden');
-                document.getElementById('nav-mastermodel').className = 'w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3';
-                renderMasterModelTable();
-            } else if (tabId === 'workprocess') {
-                document.getElementById('tab-content-workprocess').classList.remove('hidden');
-                document.getElementById('nav-workprocess').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                initGroupRadioButtons(currentDailyData);
-            } else if (tabId === 'doorparts') {
-                document.getElementById('tab-content-doorparts').classList.remove('hidden');
-                document.getElementById('nav-doorparts').className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
-                initDoorGroupRadioButtons(currentDailyData);
-            }
-        }
+        // Initialize UI components on load
+        initGroupRadioButtons(currentDailyData);
+        initDoorGroupRadioButtons(currentDailyData);
+        renderMasterModelTable();
     </script>
 </body>
 </html>
