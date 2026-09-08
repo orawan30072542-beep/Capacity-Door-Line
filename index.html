@@ -66,13 +66,17 @@
                         <span class="w-2 h-2 rounded-full bg-slate-600"></span>
                         <span>1. Dashboard ภาพรวม</span>
                     </button>
-                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>2. Work Process & Cycle Time</span>
+                    <button onclick="switchTab('mastermodel')" id="nav-mastermodel" class="w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                        <span>2. Master Model & Routing</span>
+                    </button>
+                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span>3. Work Process & CT</span>
                     </button>
                     <button onclick="switchTab('doorparts')" id="nav-doorparts" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        <span>3. Door Part Quick Selection</span>
+                        <span>4. Door Part Quick Selection</span>
                     </button>
                 </nav>
             </div>
@@ -180,45 +184,44 @@
                         </div>
                     </div>
                 </section>
+            </div>
 
-                <!-- 3. CAPACITY & LEADTIME ANALYSIS -->
-                <section id="capacity-analysis" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">3. Capacity & Leadtime (วิเคราะห์กำลังการผลิต)</h2>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <label class="text-xs text-slate-300 font-medium">เลือกข้อมูลพาร์ท:</label>
-                            <select id="capacityPartSelect" onchange="renderCapacityTable()" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <option value="Back Plate">Back Plate</option>
-                                <option value="Bottom Plate">Bottom Plate</option>
-                                <option value="Gasket">Gasket</option>
-                                <option value="Door - Bending (RR)">Door - Bending (RR)</option>
-                                <option value="Door - Foaming (RR)">Door - Foaming (RR)</option>
-                                <option value="Door - Door Cap Assembly (RR)">Door - Door Cap Assembly (RR)</option>
-                            </select>
+            <!-- NEW TAB CONTENT: MASTER MODEL & ROUTING -->
+            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardbg p-5 rounded-2xl border border-bordercolor">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">Master Model & Component Routing</h2>
+                            <p class="text-xs text-slate-400">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) และเส้นทางกระบวนการผลิต (Routing Lines) ของแต่ละรุ่น</p>
                         </div>
                     </div>
-                    <div class="overflow-x-auto rounded-lg border border-bordercolor/50 max-h-[350px]">
-                        <table id="tableCapacity" class="w-full text-left border-collapse text-xs">
+                    <button onclick="saveMasterModelConfig()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>บันทึกการตั้งค่า Master Model</span>
+                    </button>
+                </div>
+
+                <div class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
+                    <div class="overflow-x-auto rounded-lg border border-bordercolor/50">
+                        <table id="tableMasterModel" class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr class="border-b border-bordercolor text-slate-400 bg-slate-900 sticky top-0">
-                                    <th class="p-3">Product และ รุ่น</th>
-                                    <th class="p-3">Door / Part Detail</th>
-                                    <th class="p-3 text-center">Leadtime (s)</th>
-                                    <th class="p-3 text-center">Max CT (s)</th>
-                                    <th class="p-3 text-center text-cyan-300">UPH (3600 / Max CT * 85%)</th>
+                                <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
+                                    <th class="p-3">Group</th>
+                                    <th class="p-3">Model Name</th>
+                                    <th class="p-3 text-center">Door Type / Sub-Component</th>
+                                    <th class="p-3">Assigned Routing Process & Lines</th>
+                                    <th class="p-3 text-center">Qty / Set</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
                         </table>
                     </div>
-                </section>
+                </div>
             </div>
 
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
-            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
+            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full hidden">
                 <!-- STICKY CONTROL PANEL -->
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/30 shadow-lg space-y-1.5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
@@ -356,7 +359,7 @@
                 </section>
             </div>
 
-            <!-- NEW TAB CONTENT: DOOR PART QUICK SELECTION & ANALYSIS -->
+            <!-- TAB CONTENT: DOOR PART QUICK SELECTION & ANALYSIS -->
             <div id="tab-content-doorparts" class="p-6 space-y-5 w-full hidden">
                 <!-- STICKY CONTROL PANEL FOR DOOR -->
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-amber-500/30 shadow-lg space-y-1.5">
@@ -515,13 +518,13 @@
 
         // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)
         let selectedPartValue = 'Back Plate'; 
-        let selectedProductGroups = new Set(); // เปลี่ยนเป็น Set รองรับหลาย Group
+        let selectedProductGroups = new Set(); 
         let selectedModels = new Set(); 
 
-        // State สำหรับส่วนพาร์ท Door (Door Parts Tab - แยกข้อมูลออกอิสระ)
+        // State สำหรับส่วนพาร์ท Door (Door Parts Tab)
         let selectedDoorSubPart = 'Bending';
         let selectedDoorType = 'RR';
-        let selectedDoorProductGroups = new Set(); // เปลี่ยนเป็น Set รองรับหลาย Group
+        let selectedDoorProductGroups = new Set(); 
         let selectedDoorModels = new Set();
 
         function selectPartTab(partName) {
@@ -536,7 +539,6 @@
             loadProcessDataForCurrentSelection();
         }
 
-        // Functions สำหรับ Door Part Tab
         function selectDoorSubPart(subPartName) {
             selectedDoorSubPart = subPartName;
             document.querySelectorAll('.door-sub-btn').forEach(btn => {
@@ -590,11 +592,68 @@
                     currentDailyData = parsed;
                 }
             }
-        } catch (err) {
-            console.error(err);
+        } catch (err) { console.error(err); }
+
+        // Master Model Database สำหรับเก็บชนิดชิ้นส่วนและ Routing
+        let masterModelConfig = {};
+        try {
+            let savedMaster = localStorage.getItem('haier_master_model_config_v1');
+            if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
+        } catch (e) { console.error(e); }
+
+        function getMasterConfigForModel(modelName) {
+            if (masterModelConfig[modelName]) return masterModelConfig[modelName];
+            if (modelName.includes('C')) {
+                return { doorType: 'Glass', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 };
+            } else {
+                return { doorType: 'Metal', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
+            }
         }
 
-        // Database สำหรับพาร์ททั่วไป
+        function renderMasterModelTable() {
+            const tbody = document.querySelector('#tableMasterModel tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!currentDailyData || !currentDailyData.groups) return;
+
+            currentDailyData.groups.forEach(g => {
+                g.models.forEach(m => {
+                    let config = getMasterConfigForModel(m.name);
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition';
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-white">Group ${g.productGroup}</td>
+                        <td class="p-3 font-bold text-purple-400">${m.name}</td>
+                        <td class="p-3 text-center">
+                            <select onchange="updateMasterModelField('${m.name}', 'doorType', this.value)" class="bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none">
+                                <option value="Glass" ${config.doorType === 'Glass' ? 'selected' : ''}>Glass (กระจก)</option>
+                                <option value="Metal" ${config.doorType === 'Metal' ? 'selected' : ''}>Metal (โลหะ)</option>
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor">
+                        </td>
+                        <td class="p-3 text-center">
+                            <input type="number" min="1" value="${config.qtyPerSet}" onchange="updateMasterModelField('${m.name}', 'qtyPerSet', parseInt(this.value) || 1)" class="w-16 bg-slate-800 text-center text-amber-400 text-xs px-2 py-1 rounded border border-bordercolor">
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function updateMasterModelField(modelName, field, value) {
+            if (!masterModelConfig[modelName]) {
+                masterModelConfig[modelName] = getMasterConfigForModel(modelName);
+            }
+            masterModelConfig[modelName][field] = value;
+        }
+
+        function saveMasterModelConfig() {
+            localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
+            alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
+        }
+
         let processDatabase = {};
         try {
             let savedDB = localStorage.getItem('haier_process_db_v7');
@@ -602,7 +661,6 @@
         } catch (e) { console.error(e); }
         let currentProcessData = [];
 
-        // Database แยกอิสระสำหรับ Door Part
         let doorProcessDatabase = {};
         try {
             let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');
@@ -639,7 +697,6 @@
             updateLobChart();
         }
 
-        // โหลดข้อมูลเฉพาะของ Door Part
         function loadDoorProcessDataForCurrentSelection() {
             let modelsArray = Array.from(selectedDoorModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
@@ -670,7 +727,6 @@
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
-            renderCapacityTable();
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -714,7 +770,6 @@
             }
         });
 
-        // Chart สำหรับพาร์ททั่วไป
         const ctxLob = document.getElementById('lobChart').getContext('2d');
         let lobChart = new Chart(ctxLob, {
             type: 'bar',
@@ -737,7 +792,6 @@
             }
         });
 
-        // Chart แยกสำหรับ Door Part
         const ctxDoorLob = document.getElementById('doorLobChart').getContext('2d');
         let doorLobChart = new Chart(ctxDoorLob, {
             type: 'bar',
@@ -911,64 +965,9 @@
 
         renderUnifiedTable(currentDailyData);
 
-        // Render Capacity Table function
         function renderCapacityTable() {
-            const tbody = document.querySelector('#tableCapacity tbody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const selectedPart = document.getElementById('capacityPartSelect').value;
-            let groups = currentDailyData.groups;
-
-            if (!groups || groups.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลแผนการผลิต</td></tr>`;
-                return;
-            }
-
-            groups.forEach(g => {
-                g.models.forEach(m => {
-                    let storageKey = '';
-                    let dbSource = processDatabase;
-                    if (selectedPart.startsWith('Door - ')) {
-                        let subPartName = selectedPart.replace('Door - ', '').replace(' (RR)', '');
-                        storageKey = `${m.name}_Door (${subPartName} - RR)`;
-                        dbSource = doorProcessDatabase;
-                    } else {
-                        storageKey = `${m.name}_${selectedPart}`;
-                        dbSource = processDatabase;
-                    }
-
-                    let stations = dbSource[storageKey] || getEmptyDefaultStations();
-                    let totalLeadtime = 0;
-                    let maxCt = 0;
-
-                    stations.forEach(st => {
-                        let w1 = parseFloat(st.wt1) || 0;
-                        let w2 = parseFloat(st.wt2) || 0;
-                        let w3 = parseFloat(st.wt3) || 0;
-                        let l = parseFloat(st.loss) || 0;
-                        let ct = w1 + w2 + w3 + l;
-                        totalLeadtime += ct;
-                        if (ct > maxCt) maxCt = ct;
-                    });
-
-                    let uphVal = maxCt > 0 ? (3600 / maxCt) * 0.85 : 0;
-
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition';
-                    tr.innerHTML = `
-                        <td class="p-3 font-semibold text-white">Group ${g.productGroup} - ${m.name}</td>
-                        <td class="p-3 text-cyan-400 font-medium">${selectedPart}</td>
-                        <td class="p-3 text-center font-bold text-slate-200">${totalLeadtime.toFixed(2)}</td>
-                        <td class="p-3 text-center font-bold text-amber-400">${maxCt.toFixed(2)}</td>
-                        <td class="p-3 text-center font-bold text-cyan-300">${Math.round(uphVal).toLocaleString()} PCS/Hr</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            });
+            // Capacity table section has been removed.
         }
-
-        renderCapacityTable();
 
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -1018,7 +1017,7 @@
                         if (groups.length > 0) {
                             window.tempImportedData = { days: days, groups: groups };
                             renderUnifiedTable(window.tempImportedData);
-                            renderCapacityTable();
+                            renderMasterModelTable();
                             let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
                             planChart.data.labels = window.tempImportedData.days;
                             planChart.data.datasets[0].data = newCalc.totalOutputs;
@@ -1040,11 +1039,10 @@
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
             initGroupRadioButtons(currentDailyData);
             initDoorGroupRadioButtons(currentDailyData);
-            renderCapacityTable();
+            renderMasterModelTable();
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
-        // Template & Import สำหรับพาร์ททั่วไป
         function downloadProcessTemplate() {
             let templateData = [
                 ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
@@ -1089,7 +1087,6 @@
                             currentProcessData = importedStations;
                             renderProcessTableInputs();
                             updateLobChart();
-                            renderCapacityTable();
                             const editSection = document.getElementById('editProcessSection');
                             if (editSection.classList.contains('hidden')) { toggleEditModal(); }
                             alert('นำเข้าข้อมูลสำเร็จ!');
@@ -1101,7 +1098,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // Template & Import สำหรับ Door Part
         function downloadDoorProcessTemplate() {
             let templateData = [
                 ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
@@ -1146,7 +1142,6 @@
                             currentDoorProcessData = importedStations;
                             renderDoorProcessTableInputs();
                             updateDoorLobChart();
-                            renderCapacityTable();
                             const editSection = document.getElementById('editDoorProcessSection');
                             if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }
                             alert('นำเข้าข้อมูล Door สำเร็จ!');
@@ -1359,15 +1354,18 @@
 
             let modelsArray = Array.from(selectedModels);
             if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ'); return; }
-            let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
-            processDatabase[storageKey] = updatedList;
+            
+            modelsArray.forEach(modelName => {
+                let storageKey = `${modelName}_${selectedPartValue}`;
+                processDatabase[storageKey] = JSON.parse(JSON.stringify(updatedList));
+            });
+
             currentProcessData = updatedList;
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
             renderSavedDisplayTable();
             updateLobChart();
-            renderCapacityTable();
             toggleEditModal();
-            alert('บันทึกข้อมูลสำเร็จ!');
+            alert(`บันทึกข้อมูลสำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
         }
 
         function saveDoorProcessAndStationData() {
@@ -1389,15 +1387,18 @@
             let modelsArray = Array.from(selectedDoorModels);
             if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ (Door)'); return; }
             let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
-            let storageKey = `${modelsArray[0]}_${effectivePart}`;
-            doorProcessDatabase[storageKey] = updatedList;
+            
+            modelsArray.forEach(modelName => {
+                let storageKey = `${modelName}_${effectivePart}`;
+                doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(updatedList));
+            });
+
             currentDoorProcessData = updatedList;
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
-            renderCapacityTable();
             toggleDoorEditModal();
-            alert('บันทึกข้อมูล Door สำเร็จ!');
+            alert(`บันทึกข้อมูล Door สำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
         }
 
         function initGroupRadioButtons(data) {
@@ -1411,7 +1412,7 @@
                     btn.type = 'button';
                     btn.setAttribute('data-group', g.productGroup);
                     btn.textContent = `Grp ${g.productGroup}`;
-                    let isSelected = (idx === 0); // เริ่มต้นเลือกกลุ่มแรกไว้ก่อน
+                    let isSelected = (idx === 0);
                     if (isSelected) {
                         selectedProductGroups.add(g.productGroup);
                         btn.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
@@ -1425,179 +1426,10 @@
             updateModelCheckboxesByGroup();
         }
 
-        // Init Group สำหรับ Door Part รองรับหลายกลุ่ม
         function initDoorGroupRadioButtons(data) {
             const container = document.getElementById('doorGroupRadioContainer');
             if (!container) return;
             container.innerHTML = '';
-            selectedDoorProductGroups.clear();
-            if (data && data.groups && data.groups.length > 0) {
-                data.groups.forEach((g, idx) => {
-                    let btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.setAttribute('data-door-group', g.productGroup);
-                    btn.textContent = `Grp ${g.productGroup}`;
-                    let isSelected = (idx === 0); // เริ่มต้นเลือกกลุ่มแรกไว้ก่อน
-                    if (isSelected) {
-                        selectedDoorProductGroups.add(g.productGroup);
-                        btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';
-                    } else {
-                        btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                    }
-                    btn.onclick = () => toggleDoorProductGroup(g.productGroup, btn);
-                    container.appendChild(btn);
-                });
-            }
-            updateDoorModelCheckboxesByGroup();
-        }
-
-        function toggleProductGroup(groupName, btnElement) {
-            if (selectedProductGroups.has(groupName)) {
-                if (selectedProductGroups.size > 1) {
-                    selectedProductGroups.delete(groupName);
-                    btnElement.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                } else {
-                    alert('ต้องเลือก Group อย่างน้อย 1 รายการ');
-                    return;
-                }
-            } else {
-                selectedProductGroups.add(groupName);
-                btnElement.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
-            }
-            updateModelCheckboxesByGroup();
-        }
-
-        function toggleDoorProductGroup(groupName, btnElement) {
-            if (selectedDoorProductGroups.has(groupName)) {
-                if (selectedDoorProductGroups.size > 1) {
-                    selectedDoorProductGroups.delete(groupName);
-                    btnElement.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                } else {
-                    alert('ต้องเลือก Group อย่างน้อย 1 รายการ (Door)');
-                    return;
-                }
-            } else {
-                selectedDoorProductGroups.add(groupName);
-                btnElement.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';
-            }
-            updateDoorModelCheckboxesByGroup();
-        }
-
-        function updateModelCheckboxesByGroup() {
-            const container = document.getElementById('modelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedModels.clear();
-
-            let targetGroups = currentDailyData?.groups?.filter(g => selectedProductGroups.has(g.productGroup)) || [];
-            if (targetGroups.length === 0) {
-                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;
-                loadProcessDataForCurrentSelection();
-                return;
-            }
-
-            targetGroups.forEach(targetGroup => {
-                if (targetGroup.models) {
-                    targetGroup.models.forEach((m) => {
-                        selectedModels.add(m.name);
-                        let label = document.createElement('label');
-                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';
-                        let checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = true;
-                        checkbox.value = m.name;
-                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0 w-3 h-3 shrink-0';
-                        checkbox.onchange = function() {
-                            if (checkbox.checked) { selectedModels.add(m.name); } else { selectedModels.delete(m.name); }
-                            loadProcessDataForCurrentSelection();
-                        };
-                        let span = document.createElement('span');
-                        span.className = 'text-[10px] font-medium text-slate-200 truncate';
-                        span.textContent = m.name;
-                        label.appendChild(checkbox);
-                        label.appendChild(span);
-                        container.appendChild(label);
-                    });
-                }
-            });
-            loadProcessDataForCurrentSelection();
-        }
-
-        function updateDoorModelCheckboxesByGroup() {
-            const container = document.getElementById('doorModelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedDoorModels.clear();
-
-            let targetGroups = currentDailyData?.groups?.filter(g => selectedDoorProductGroups.has(g.productGroup)) || [];
-            if (targetGroups.length === 0) {
-                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;
-                loadDoorProcessDataForCurrentSelection();
-                return;
-            }
-
-            targetGroups.forEach(targetGroup => {
-                if (targetGroup.models) {
-                    targetGroup.models.forEach((m) => {
-                        selectedDoorModels.add(m.name);
-                        let label = document.createElement('label');
-                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';
-                        let checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = true;
-                        checkbox.value = m.name;
-                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-amber-600 focus:ring-0 w-3 h-3 shrink-0';
-                        checkbox.onchange = function() {
-                            if (checkbox.checked) { selectedDoorModels.add(m.name); } else { selectedDoorModels.delete(m.name); }
-                            loadDoorProcessDataForCurrentSelection();
-                        };
-                        let span = document.createElement('span');
-                        span.className = 'text-[10px] font-medium text-slate-200 truncate';
-                        span.textContent = m.name;
-                        label.appendChild(checkbox);
-                        label.appendChild(span);
-                        container.appendChild(label);
-                    });
-                }
-            });
-            loadDoorProcessDataForCurrentSelection();
-        }
-
-        initGroupRadioButtons(currentDailyData);
-        initDoorGroupRadioButtons(currentDailyData);
-
-        function switchTab(tabName) {
-            const dashboardTab = document.getElementById('tab-content-dashboard');
-            const workProcessTab = document.getElementById('tab-content-workprocess');
-            const doorPartsTab = document.getElementById('tab-content-doorparts');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navWorkProcess = document.getElementById('nav-workprocess');
-            const navDoorParts = document.getElementById('nav-doorparts');
-            const headerTitle = document.getElementById('headerTitle');
-
-            dashboardTab.classList.add('hidden');
-            workProcessTab.classList.add('hidden');
-            doorPartsTab.classList.add('hidden');
-            navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-
-            if (tabName === 'dashboard') {
-                dashboardTab.classList.remove('hidden');
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-                renderCapacityTable();
-            } else if (tabName === 'workprocess') {
-                workProcessTab.classList.remove('hidden');
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-                updateLobChart();
-            } else if (tabName === 'doorparts') {
-                doorPartsTab.classList.remove('hidden');
-                navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Door Part Quick Selection & Analysis';
-                updateDoorLobChart();
-            }
         }
     </script>
 </body>
