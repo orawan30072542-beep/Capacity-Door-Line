@@ -62,12 +62,12 @@
                 </div>
                 <!-- Navigation -->
                 <nav class="p-4 space-y-2">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                         <span>1. Dashboard ภาพรวม</span>
                     </button>
-                    <button onclick="switchTab('mastermodel')" id="nav-mastermodel" class="w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                    <button onclick="switchTab('mastermodel')" id="nav-mastermodel" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
                         <span>2. Master Model & Routing</span>
                     </button>
                     <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
@@ -111,7 +111,7 @@
             </header>
 
             <!-- Dashboard Body Content -->
-            <div id="tab-content-dashboard" class="p-6 space-y-6 w-full hidden">
+            <div id="tab-content-dashboard" class="p-6 space-y-6 w-full">
                 <!-- 1. OVERVIEW SECTION -->
                 <section id="overview" class="space-y-4">
                     <div class="flex items-center space-x-2">
@@ -184,10 +184,33 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) -->
+                <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
+                        </div>
+                        <div class="text-xs text-slate-400">
+                            แสดงเวลาการทำงานรวม (Working Time) จากข้อมูล Work Process ของแต่ละ Door Type
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                        <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableCapacity" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-400"></tr>
+                                </thead>
+                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
 
             <!-- NEW TAB CONTENT: MASTER MODEL & ROUTING -->
-            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full">
+            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardbg p-5 rounded-2xl border border-bordercolor">
                     <div class="flex items-center space-x-3">
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
@@ -727,6 +750,7 @@
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
+            renderCapacityTable(currentDailyData);
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -963,7 +987,67 @@
             });
         }
 
+        function renderCapacityTable(data) {
+            const tableElement = document.getElementById('tableCapacity');
+            if (!tableElement) return;
+            const headerRow = tableElement.querySelector('thead tr');
+            const tbody = tableElement.querySelector('tbody');
+
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            doorTypes.forEach(dt => {
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${dt}</th>`;
+            });
+            headerRow.innerHTML = headerHtml;
+
+            if (!data || !data.groups) return;
+
+            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+
+            data.groups.forEach(g => {
+                g.models.forEach((m, mIndex) => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                    let html = '';
+                    if (mIndex === 0) {
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
+                    }
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+
+                    doorTypes.forEach(dt => {
+                        let totalWT = 0;
+                        subParts.forEach(sp => {
+                            let storageKey = `${m.name}_Door (${sp} - ${dt})`;
+                            let stations = doorProcessDatabase[storageKey];
+                            if (stations && Array.isArray(stations)) {
+                                stations.forEach(st => {
+                                    let w1 = parseFloat(st.wt1) || 0;
+                                    let w2 = parseFloat(st.wt2) || 0;
+                                    let w3 = parseFloat(st.wt3) || 0;
+                                    totalWT += (w1 + w2 + w3);
+                                });
+                            }
+                        });
+
+                        let displayVal = totalWT > 0 ? `${totalWT.toFixed(2)}s` : '-';
+                        html += `
+                            <td class="p-2 text-center border-l border-bordercolor/30">
+                                <div class="text-cyan-400 font-medium text-xs">${displayVal}</div>
+                            </td>
+                        `;
+                    });
+
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
         renderUnifiedTable(currentDailyData);
+        renderCapacityTable(currentDailyData);
 
         function previewExcelData(event) {
             const file = event.target.files[0];
@@ -1013,6 +1097,7 @@
                         if (groups.length > 0) {
                             window.tempImportedData = { days: days, groups: groups };
                             renderUnifiedTable(window.tempImportedData);
+                            renderCapacityTable(window.tempImportedData);
                             renderMasterModelTable();
                             let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
                             planChart.data.labels = window.tempImportedData.days;
@@ -1036,6 +1121,7 @@
             initGroupRadioButtons(currentDailyData);
             initDoorGroupRadioButtons(currentDailyData);
             renderMasterModelTable();
+            renderCapacityTable(currentDailyData);
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
@@ -1392,6 +1478,7 @@
             currentDoorProcessData = updatedList;
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
             renderDoorSavedDisplayTable();
+            renderCapacityTable(currentDailyData);
             updateDoorLobChart();
             toggleDoorEditModal();
             alert(`บันทึกข้อมูล Door สำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
@@ -1573,6 +1660,7 @@
             if (tabId === 'dashboard') {
                 document.getElementById('tab-content-dashboard').classList.remove('hidden');
                 document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                renderCapacityTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
                 document.getElementById('tab-content-mastermodel').classList.remove('hidden');
                 document.getElementById('nav-mastermodel').className = 'w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3';
@@ -1591,6 +1679,7 @@
         initGroupRadioButtons(currentDailyData);
         initDoorGroupRadioButtons(currentDailyData);
         renderMasterModelTable();
+        renderCapacityTable(currentDailyData);
     </script>
 </body>
 </html>
