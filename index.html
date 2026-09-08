@@ -296,20 +296,26 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
-                        <!-- แถวที่ 1: Part (เพิ่มตัวเลือก RL, RR, FL, FR, VEG, FB ตามต้องการ) -->
-                        <div class="md:col-span-12 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-medium text-slate-400 mr-1">Part:</span>
-                            <div id="partTabContainer" class="flex flex-wrap gap-1">
-                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
-                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
-                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door</button>
-                                <button type="button" onclick="selectPartTab('RL')" data-part="RL" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RL</button>
-                                <button type="button" onclick="selectPartTab('RR')" data-part="RR" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RR</button>
-                                <button type="button" onclick="selectPartTab('FL')" data-part="FL" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FL</button>
-                                <button type="button" onclick="selectPartTab('FR')" data-part="FR" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
-                                <button type="button" onclick="selectPartTab('VEG')" data-part="VEG" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">VEG</button>
-                                <button type="button" onclick="selectPartTab('FB')" data-part="FB" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FB</button>
-                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
+                        <!-- แถวที่ 1: Part (รวม Door และมีตัวเลือกย่อยเฉพาะเมื่อเลือก Door) -->
+                        <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
+                            <div class="flex flex-wrap items-center gap-1">
+                                <span class="text-[10px] font-medium text-slate-400 mr-1">Part:</span>
+                                <div id="partTabContainer" class="flex flex-wrap gap-1">
+                                    <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
+                                    <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
+                                    <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door</button>
+                                    <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
+                                </div>
+                            </div>
+                            <!-- ตัวเลือกย่อยเฉพาะของ Door (จะแสดงเฉพาะเมื่อเลือกพาร์ท Door เท่านั้น) -->
+                            <div id="doorSubPartContainer" class="hidden flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40 pl-6">
+                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Sub-Type:</span>
+                                <button type="button" onclick="selectDoorSubPart('RL')" data-subpart="RL" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">RL</button>
+                                <button type="button" onclick="selectDoorSubPart('RR')" data-subpart="RR" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RR</button>
+                                <button type="button" onclick="selectDoorSubPart('FL')" data-subpart="FL" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FL</button>
+                                <button type="button" onclick="selectDoorSubPart('FR')" data-subpart="FR" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
+                                <button type="button" onclick="selectDoorSubPart('VEG')" data-subpart="VEG" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">VEG</button>
+                                <button type="button" onclick="selectDoorSubPart('FB')" data-subpart="FB" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FB</button>
                             </div>
                         </div>
 
@@ -467,16 +473,39 @@
         Chart.defaults.borderColor = '#1e293b';
 
         let selectedPartValue = 'Back Plate'; 
+        let selectedDoorSubPart = 'RL'; // ค่าเริ่มต้นเมื่อเลือก Door
         let selectedProductGroup = ''; 
         let selectedModels = new Set(); 
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
+            const doorSubContainer = document.getElementById('doorSubPartContainer');
+            
             document.querySelectorAll('.part-tab-btn').forEach(btn => {
                 if (btn.getAttribute('data-part') === partName) {
                     btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500';
                 } else {
                     btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                }
+            });
+
+            // จัดการแสดงผลตัวเลือกย่อยเฉพาะเมื่อเลือก Door
+            if (partName === 'Door') {
+                doorSubContainer.classList.remove('hidden');
+            } else {
+                doorSubContainer.classList.add('hidden');
+            }
+
+            loadProcessDataForCurrentSelection();
+        }
+
+        function selectDoorSubPart(subPartName) {
+            selectedDoorSubPart = subPartName;
+            document.querySelectorAll('.door-sub-btn').forEach(btn => {
+                if (btn.getAttribute('data-subpart') === subPartName) {
+                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500';
+                } else {
+                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                 }
             });
             loadProcessDataForCurrentSelection();
@@ -517,7 +546,7 @@
 
         let processDatabase = {};
         try {
-            let savedDB = localStorage.getItem('haier_process_db_v4');
+            let savedDB = localStorage.getItem('haier_process_db_v5');
             if (savedDB) {
                 processDatabase = JSON.parse(savedDB);
             }
@@ -539,14 +568,17 @@
         function loadProcessDataForCurrentSelection() {
             let modelsArray = Array.from(selectedModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${selectedPartValue}` : 'default';
+            
+            // หากเลือก Door จะใช้ key แยกตามประเภทย่อยด้วย
+            let effectivePart = selectedPartValue === 'Door' ? `Door (${selectedDoorSubPart})` : selectedPartValue;
+            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${effectivePart}` : 'default';
 
             const editModelTag = document.getElementById('editModelNameTag');
             const editPartTag = document.getElementById('editPartNameTag');
             const displayActiveModelTag = document.getElementById('displayActiveModelTag');
             
             if (editModelTag) editModelTag.textContent = modelKey;
-            if (editPartTag) editPartTag.textContent = selectedPartValue;
+            if (editPartTag) editPartTag.textContent = effectivePart;
             if (displayActiveModelTag) displayActiveModelTag.textContent = modelKey;
 
             if (processDatabase[storageKey] && Array.isArray(processDatabase[storageKey])) {
@@ -1111,11 +1143,12 @@
                 return;
             }
 
-            let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
+            let effectivePart = selectedPartValue === 'Door' ? `Door (${selectedDoorSubPart})` : selectedPartValue;
+            let storageKey = `${modelsArray[0]}_${effectivePart}`;
             processDatabase[storageKey] = updatedList;
             currentProcessData = updatedList;
 
-            localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
+            localStorage.setItem('haier_process_db_v5', JSON.stringify(processDatabase));
 
             renderSavedDisplayTable();
             updateLobChart();
