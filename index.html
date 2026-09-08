@@ -296,7 +296,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
-                        <!-- แถวที่ 1: Part (รวม Door และมีตัวเลือกย่อยเฉพาะเมื่อเลือก Door) -->
+                        <!-- แถวที่ 1: Part (รวม Door และมีตัวเลือกย่อย Bending, Foaming เฉพาะเมื่อเลือก Door) -->
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
                                 <span class="text-[10px] font-medium text-slate-400 mr-1">Part:</span>
@@ -307,15 +307,11 @@
                                     <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
                                 </div>
                             </div>
-                            <!-- ตัวเลือกย่อยเฉพาะของ Door (จะแสดงเฉพาะเมื่อเลือกพาร์ท Door เท่านั้น) -->
+                            <!-- ตัวเลือกย่อยเฉพาะของ Door (Bending / Foaming) จะแสดงเฉพาะเมื่อเลือกพาร์ท Door เท่านั้น -->
                             <div id="doorSubPartContainer" class="hidden flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40 pl-6">
-                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Sub-Type:</span>
-                                <button type="button" onclick="selectDoorSubPart('RL')" data-subpart="RL" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">RL</button>
-                                <button type="button" onclick="selectDoorSubPart('RR')" data-subpart="RR" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RR</button>
-                                <button type="button" onclick="selectDoorSubPart('FL')" data-subpart="FL" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FL</button>
-                                <button type="button" onclick="selectDoorSubPart('FR')" data-subpart="FR" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
-                                <button type="button" onclick="selectDoorSubPart('VEG')" data-subpart="VEG" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">VEG</button>
-                                <button type="button" onclick="selectDoorSubPart('FB')" data-subpart="FB" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FB</button>
+                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
+                                <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
+                                <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
                             </div>
                         </div>
 
@@ -473,7 +469,7 @@
         Chart.defaults.borderColor = '#1e293b';
 
         let selectedPartValue = 'Back Plate'; 
-        let selectedDoorSubPart = 'RL'; // ค่าเริ่มต้นเมื่อเลือก Door
+        let selectedDoorSubPart = 'Bending'; // เปลี่ยนค่าเริ่มต้นของ Door เป็น Bending
         let selectedProductGroup = ''; 
         let selectedModels = new Set(); 
 
@@ -489,7 +485,7 @@
                 }
             });
 
-            // จัดการแสดงผลตัวเลือกย่อยเฉพาะเมื่อเลือก Door
+            // แสดงหรือซ่อนตัวเลือกย่อยเฉพาะเมื่อเลือกพาร์ท Door
             if (partName === 'Door') {
                 doorSubContainer.classList.remove('hidden');
             } else {
@@ -546,7 +542,7 @@
 
         let processDatabase = {};
         try {
-            let savedDB = localStorage.getItem('haier_process_db_v5');
+            let savedDB = localStorage.getItem('haier_process_db_v6');
             if (savedDB) {
                 processDatabase = JSON.parse(savedDB);
             }
@@ -569,7 +565,7 @@
             let modelsArray = Array.from(selectedModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
             
-            // หากเลือก Door จะใช้ key แยกตามประเภทย่อยด้วย
+            // หากเลือก Door จะใช้พาร์ทแยกตาม Bending และ Foaming
             let effectivePart = selectedPartValue === 'Door' ? `Door (${selectedDoorSubPart})` : selectedPartValue;
             let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${effectivePart}` : 'default';
 
@@ -1148,7 +1144,7 @@
             processDatabase[storageKey] = updatedList;
             currentProcessData = updatedList;
 
-            localStorage.setItem('haier_process_db_v5', JSON.stringify(processDatabase));
+            localStorage.setItem('haier_process_db_v6', JSON.stringify(processDatabase));
 
             renderSavedDisplayTable();
             updateLobChart();
