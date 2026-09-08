@@ -35,6 +35,11 @@
             width: 100%;
             height: 320px;
         }
+        .lob-chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 380px;
+        }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 antialiased">
@@ -418,6 +423,42 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- NEW: Line of Balance & Takt Time Section -->
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-bordercolor space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                                <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time ($TT = 3600 / UPH$) และเปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
+                                <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
+                                <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none font-bold">
+                                <span class="text-xs text-slate-400">PCS/Hr</span>
+                            </div>
+                        </div>
+
+                        <!-- Takt Time Summary Box -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
+                                <span class="text-[11px] text-slate-400">UPH ปัจจุบัน</span>
+                                <div id="displayUphVal" class="text-lg font-bold text-white mt-1">120 PCS</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
+                                <span class="text-[11px] text-slate-400">Takt Time (TT = 3600 / UPH)</span>
+                                <div id="displayTtVal" class="text-lg font-bold text-cyan-400 mt-1">30.00 วินาที</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
+                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2)</span>
+                                <div id="displayTt85Val" class="text-lg font-bold text-rose-400 mt-1">25.50 วินาที</div>
+                            </div>
+                        </div>
+
+                        <!-- LOB Chart Canvas -->
+                        <div class="lob-chart-wrapper bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80">
+                            <canvas id="lobChart"></canvas>
+                        </div>
+                    </div>
                 </section>
             </div>
         </main>
@@ -491,7 +532,10 @@
 
         function getEmptyDefaultStations() {
             return [
-                { station: 'STA01', p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null }
+                { station: 'STA01', p1: 'Feeding', p2: 'Pressing', p3: '', wt1: 12.5, wt2: 8.0, wt3: null, loss: 2.0 },
+                { station: 'STA02', p1: 'Welding', p2: 'Inspection', p3: '', wt1: 15.0, wt2: 5.0, wt3: null, loss: 1.5 },
+                { station: 'STA03', p1: 'Coating', p2: '', p3: '', wt1: 20.0, wt2: null, wt3: null, loss: 2.0 },
+                { station: 'STA04', p1: 'Assembly', p2: 'Packing', p3: '', wt1: 18.0, wt2: 6.0, wt3: null, loss: 1.0 }
             ];
         }
 
@@ -513,6 +557,7 @@
 
             renderProcessTableInputs();
             renderSavedDisplayTable();
+            updateLobChart();
         }
 
         let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
@@ -565,6 +610,112 @@
                 }
             }
         });
+
+        // ==========================================
+        // LINE OF BALANCE (LOB) & TAKT TIME CHART SETUP
+        // ==========================================
+        const ctxLob = document.getElementById('lobChart').getContext('2d');
+        let lobChart = new Chart(ctxLob, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Cycle Time (CT)',
+                        data: [],
+                        backgroundColor: '#0066FF',
+                        borderRadius: 4,
+                        order: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Takt Time (TT = 3600/UPH) [เส้นที่ 1]',
+                        data: [],
+                        borderColor: '#ef4444',
+                        borderDash: [6, 6],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        order: 1
+                    },
+                    {
+                        type: 'line',
+                        label: 'Takt Time 85% [เส้นที่ 2]',
+                        data: [],
+                        borderColor: '#f97316',
+                        borderDash: [3, 3],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(2) + ' วินาที';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#1e293b' },
+                        title: { display: true, text: 'Time (Seconds)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        title: { display: true, text: 'Work Stations' }
+                    }
+                }
+            }
+        });
+
+        function updateLobChart() {
+            let uph = parseFloat(document.getElementById('uphInput').value) || 120;
+            let taktTime = uph > 0 ? 3600 / uph : 0;
+            let taktTime85 = taktTime * 0.85;
+
+            document.getElementById('displayUphVal').textContent = `${uph.toLocaleString()} PCS`;
+            document.getElementById('displayTtVal').textContent = `${taktTime.toFixed(2)} วินาที`;
+            document.getElementById('displayTt85Val').textContent = `${taktTime85.toFixed(2)} วินาที`;
+
+            let labels = [];
+            let ctData = [];
+            let ttLine1 = [];
+            let ttLine2 = [];
+
+            if (currentProcessData && currentProcessData.length > 0) {
+                currentProcessData.forEach(item => {
+                    let { cycleTime } = calculateRowTotals(item);
+                    labels.push(item.station || 'STA');
+                    ctData.push(cycleTime);
+                    ttLine1.push(taktTime);
+                    ttLine2.push(taktTime85);
+                });
+            }
+
+            lobChart.data.labels = labels;
+            lobChart.data.datasets[0].data = ctData;
+            lobChart.data.datasets[1].data = ttLine1;
+            lobChart.data.datasets[1].label = `Takt Time (${taktTime.toFixed(2)}s) [เส้นที่ 1]`;
+            lobChart.data.datasets[2].data = ttLine2;
+            lobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s) [เส้นที่ 2]`;
+            lobChart.update();
+        }
 
         function formatExcelDate(val) {
             let num = Number(val);
@@ -814,6 +965,7 @@
                         if (importedStations.length > 0) {
                             currentProcessData = importedStations;
                             renderProcessTableInputs();
+                            updateLobChart();
                             
                             const editSection = document.getElementById('editProcessSection');
                             if (editSection.classList.contains('hidden')) {
@@ -847,11 +999,13 @@
         function addNewStationRow() {
             currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
             renderProcessTableInputs();
+            updateLobChart();
         }
 
         function removeStationRow(index) {
             currentProcessData.splice(index, 1);
             renderProcessTableInputs();
+            updateLobChart();
         }
 
         function calculateRowTotals(item) {
@@ -903,7 +1057,21 @@
             });
         }
 
-        document.getElementById('processTableBody')?.addEventListener('input', updateInputRowCalculations);
+        document.getElementById('processTableBody')?.addEventListener('input', () => {
+            updateInputRowCalculations();
+            // Live update temporary values to chart while typing
+            let rows = document.querySelectorAll('#processTableBody tr');
+            let tempStations = [];
+            rows.forEach((row) => {
+                tempStations.push({
+                    station: row.querySelector('.station-input').value.trim(),
+                    wt1: row.querySelector('.wt1-input').value,
+                    wt2: row.querySelector('.wt2-input').value,
+                    wt3: row.querySelector('.wt3-input').value,
+                    loss: row.querySelector('.loss-input').value
+                });
+            });
+        });
 
         function renderSavedDisplayTable() {
             const displayBody = document.getElementById('displaySavedTableBody');
@@ -973,6 +1141,7 @@
             localStorage.setItem('haier_process_db_v4', JSON.stringify(processDatabase));
 
             renderSavedDisplayTable();
+            updateLobChart();
             toggleEditModal();
             alert(`บันทึกข้อมูลสำหรับ Model: ${modelsArray.join(', ')} (${selectedPartValue}) สำเร็จ!`);
         }
@@ -1087,6 +1256,7 @@
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
                 headerTitle.textContent = 'Work Process & Cycle Time Analysis';
+                updateLobChart();
             }
         }
     </script>
