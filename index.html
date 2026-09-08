@@ -439,18 +439,14 @@
                         </div>
 
                         <!-- Takt Time Summary Box -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">UPH ปัจจุบัน</span>
-                                <div id="displayUphVal" class="text-lg font-bold text-white mt-1">120 PCS</div>
+                                <span class="text-[11px] text-slate-400">Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง)</span>
+                                <div id="displayTtVal" class="text-lg font-bold text-yellow-300 mt-1">30.00 วินาที</div>
                             </div>
                             <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time (TT = 3600 / UPH)</span>
-                                <div id="displayTtVal" class="text-lg font-bold text-cyan-400 mt-1">30.00 วินาที</div>
-                            </div>
-                            <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2)</span>
-                                <div id="displayTt85Val" class="text-lg font-bold text-rose-400 mt-1">25.50 วินาที</div>
+                                <span class="text-[11px] text-slate-400">Takt Time 100% (เส้นที่ 2: สีแดงสว่างแบบปะ)</span>
+                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">30.00 วินาที</div>
                             </div>
                         </div>
 
@@ -630,21 +626,20 @@
                     },
                     {
                         type: 'line',
-                        label: 'Takt Time (TT = 3600/UPH) [เส้นที่ 1]',
+                        label: 'Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง)',
                         data: [],
-                        borderColor: '#ef4444',
-                        borderDash: [6, 6],
-                        borderWidth: 2,
+                        borderColor: '#facc15', // เหลืองสว่าง (yellow-400)
+                        borderWidth: 3,
                         pointRadius: 0,
                         order: 1
                     },
                     {
                         type: 'line',
-                        label: 'Takt Time 85% [เส้นที่ 2]',
+                        label: 'Takt Time 100% (เส้นที่ 2: สีแดงสว่างแบบปะ)',
                         data: [],
-                        borderColor: '#f97316',
-                        borderDash: [3, 3],
-                        borderWidth: 2,
+                        borderColor: '#fb7185', // แดงสว่าง (rose-400)
+                        borderDash: [6, 6],
+                        borderWidth: 3,
                         pointRadius: 0,
                         order: 1
                     }
@@ -687,11 +682,9 @@
         function updateLobChart() {
             let uph = parseFloat(document.getElementById('uphInput').value) || 120;
             let taktTime = uph > 0 ? 3600 / uph : 0;
-            let taktTime85 = taktTime * 0.85;
 
-            document.getElementById('displayUphVal').textContent = `${uph.toLocaleString()} PCS`;
             document.getElementById('displayTtVal').textContent = `${taktTime.toFixed(2)} วินาที`;
-            document.getElementById('displayTt85Val').textContent = `${taktTime85.toFixed(2)} วินาที`;
+            document.getElementById('displayTtRedVal').textContent = `${taktTime.toFixed(2)} วินาที`;
 
             let labels = [];
             let ctData = [];
@@ -704,16 +697,16 @@
                     labels.push(item.station || 'STA');
                     ctData.push(cycleTime);
                     ttLine1.push(taktTime);
-                    ttLine2.push(taktTime85);
+                    ttLine2.push(taktTime);
                 });
             }
 
             lobChart.data.labels = labels;
             lobChart.data.datasets[0].data = ctData;
             lobChart.data.datasets[1].data = ttLine1;
-            lobChart.data.datasets[1].label = `Takt Time (${taktTime.toFixed(2)}s) [เส้นที่ 1]`;
+            lobChart.data.datasets[1].label = `Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง - ${taktTime.toFixed(2)}s)`;
             lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s) [เส้นที่ 2]`;
+            lobChart.data.datasets[2].label = `Takt Time 100% (เส้นที่ 2: สีแดงสว่างแบบปะ - ${taktTime.toFixed(2)}s)`;
             lobChart.update();
         }
 
@@ -1059,7 +1052,6 @@
 
         document.getElementById('processTableBody')?.addEventListener('input', () => {
             updateInputRowCalculations();
-            // Live update temporary values to chart while typing
             let rows = document.querySelectorAll('#processTableBody tr');
             let tempStations = [];
             rows.forEach((row) => {
