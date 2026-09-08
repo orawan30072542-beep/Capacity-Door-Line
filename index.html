@@ -687,8 +687,65 @@
 
         function saveMasterModelConfig() {
             localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
-            alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
+            
+            // อัปเดตข้อมูล Group และ Model ของหน้า Work Station ให้เชื่อมโยงอัตโนมัติทันที
+            initGroupRadioButtons(currentDailyData);
+            initDoorGroupRadioButtons(currentDailyData);
             renderCapacityTable();
+
+            // แจ้งเตือนและสลับหน้าจอไปที่ Work Station โดยอัตโนมัติ
+            alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว! ระบบกำลังพาไปหน้า Work Station เพื่อเตรียมกรอกข้อมูลกระบวนการผลิต');
+            
+            // สลับไปที่แท็บ Work Process & CT โดยอัตโนมัติ
+            switchTab('workprocess');
+        }
+
+        function switchTab(tabName) {
+            const dashboardTab = document.getElementById('tab-content-dashboard');
+            const masterModelTab = document.getElementById('tab-content-mastermodel');
+            const workProcessTab = document.getElementById('tab-content-workprocess');
+            const doorPartsTab = document.getElementById('tab-content-doorparts');
+
+            const navDashboard = document.getElementById('nav-dashboard');
+            const navMasterModel = document.getElementById('nav-mastermodel');
+            const navWorkProcess = document.getElementById('nav-workprocess');
+            const navDoorParts = document.getElementById('nav-doorparts');
+
+            // ซ่อนทุก Tab
+            dashboardTab.classList.add('hidden');
+            masterModelTab.classList.add('hidden');
+            workProcessTab.classList.add('hidden');
+            doorPartsTab.classList.add('hidden');
+
+            // รีเซ็ตสี Navbar ทั้งหมด
+            navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            navMasterModel.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+
+            // เปิดแสดง Tab ที่เลือก
+            if (tabName === 'dashboard') {
+                dashboardTab.classList.remove('hidden');
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                document.getElementById('headerTitle').textContent = 'Haier Manufacturing Intelligence Dashboard';
+            } else if (tabName === 'mastermodel') {
+                masterModelTab.classList.remove('hidden');
+                navMasterModel.className = 'w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3';
+                document.getElementById('headerTitle').textContent = 'Master Model & Component Routing Management';
+                renderMasterModelTable();
+            } else if (tabName === 'workprocess') {
+                workProcessTab.classList.remove('hidden');
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                document.getElementById('headerTitle').textContent = 'Work Process & Cycle Time Analysis';
+                loadProcessDataForCurrentSelection();
+                updateLobChart();
+            } else if (tabName === 'doorparts') {
+                doorPartsTab.classList.remove('hidden');
+                navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
+                document.getElementById('headerTitle').textContent = 'Door Part Quick Selection & Analysis';
+                loadDoorProcessDataForCurrentSelection();
+                updateDoorLobChart();
+            }
         }
 
         let processDatabase = {};
