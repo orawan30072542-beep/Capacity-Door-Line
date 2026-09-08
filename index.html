@@ -180,6 +180,41 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- 3. CAPACITY & LEADTIME ANALYSIS -->
+                <section id="capacity-analysis" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <h2 class="text-lg font-bold text-white">3. Capacity & Leadtime (วิเคราะห์กำลังการผลิต)</h2>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs text-slate-300 font-medium">เลือกข้อมูลพาร์ท:</label>
+                            <select id="capacityPartSelect" onchange="renderCapacityTable()" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-bordercolor focus:outline-none">
+                                <option value="Back Plate">Back Plate</option>
+                                <option value="Bottom Plate">Bottom Plate</option>
+                                <option value="Gasket">Gasket</option>
+                                <option value="Door - Bending (RR)">Door - Bending (RR)</option>
+                                <option value="Door - Foaming (RR)">Door - Foaming (RR)</option>
+                                <option value="Door - Door Cap Assembly (RR)">Door - Door Cap Assembly (RR)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-lg border border-bordercolor/50 max-h-[350px]">
+                        <table id="tableCapacity" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-bordercolor text-slate-400 bg-slate-900 sticky top-0">
+                                    <th class="p-3">Product และ รุ่น</th>
+                                    <th class="p-3">Door / Part Detail</th>
+                                    <th class="p-3 text-center">Leadtime (s)</th>
+                                    <th class="p-3 text-center">Max CT (s)</th>
+                                    <th class="p-3 text-center text-cyan-300">UPH (3600 / Max CT * 85%)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
 
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
@@ -635,6 +670,7 @@
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
+            renderCapacityTable();
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -875,6 +911,65 @@
 
         renderUnifiedTable(currentDailyData);
 
+        // Render Capacity Table function
+        function renderCapacityTable() {
+            const tbody = document.querySelector('#tableCapacity tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const selectedPart = document.getElementById('capacityPartSelect').value;
+            let groups = currentDailyData.groups;
+
+            if (!groups || groups.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลแผนการผลิต</td></tr>`;
+                return;
+            }
+
+            groups.forEach(g => {
+                g.models.forEach(m => {
+                    let storageKey = '';
+                    let dbSource = processDatabase;
+                    if (selectedPart.startsWith('Door - ')) {
+                        let subPartName = selectedPart.replace('Door - ', '').replace(' (RR)', '');
+                        storageKey = `${m.name}_Door (${subPartName} - RR)`;
+                        dbSource = doorProcessDatabase;
+                    } else {
+                        storageKey = `${m.name}_${selectedPart}`;
+                        dbSource = processDatabase;
+                    }
+
+                    let stations = dbSource[storageKey] || getEmptyDefaultStations();
+                    let totalLeadtime = 0;
+                    let maxCt = 0;
+
+                    stations.forEach(st => {
+                        let w1 = parseFloat(st.wt1) || 0;
+                        let w2 = parseFloat(st.wt2) || 0;
+                        let w3 = parseFloat(st.wt3) || 0;
+                        let l = parseFloat(st.loss) || 0;
+                        let ct = w1 + w2 + w3 + l;
+                        totalLeadtime += ct;
+                        if (ct > maxCt) maxCt = ct;
+                    });
+
+                    let uphVal = maxCt > 0 ? (3600 / maxCt) * 0.85 : 0;
+
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition';
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-white">Group ${g.productGroup} - ${m.name}</td>
+                        <td class="p-3 text-cyan-400 font-medium">${selectedPart}</td>
+                        <td class="p-3 text-center font-bold text-slate-200">${totalLeadtime.toFixed(2)}</td>
+                        <td class="p-3 text-center font-bold text-amber-400">${maxCt.toFixed(2)}</td>
+                        <td class="p-3 text-center font-bold text-cyan-300">${Math.round(uphVal).toLocaleString()} PCS/Hr</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        renderCapacityTable();
+
         function previewExcelData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -923,6 +1018,7 @@
                         if (groups.length > 0) {
                             window.tempImportedData = { days: days, groups: groups };
                             renderUnifiedTable(window.tempImportedData);
+                            renderCapacityTable();
                             let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
                             planChart.data.labels = window.tempImportedData.days;
                             planChart.data.datasets[0].data = newCalc.totalOutputs;
@@ -944,6 +1040,7 @@
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
             initGroupRadioButtons(currentDailyData);
             initDoorGroupRadioButtons(currentDailyData);
+            renderCapacityTable();
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
@@ -992,6 +1089,7 @@
                             currentProcessData = importedStations;
                             renderProcessTableInputs();
                             updateLobChart();
+                            renderCapacityTable();
                             const editSection = document.getElementById('editProcessSection');
                             if (editSection.classList.contains('hidden')) { toggleEditModal(); }
                             alert('นำเข้าข้อมูลสำเร็จ!');
@@ -1048,6 +1146,7 @@
                             currentDoorProcessData = importedStations;
                             renderDoorProcessTableInputs();
                             updateDoorLobChart();
+                            renderCapacityTable();
                             const editSection = document.getElementById('editDoorProcessSection');
                             if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }
                             alert('นำเข้าข้อมูล Door สำเร็จ!');
@@ -1266,6 +1365,7 @@
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
             renderSavedDisplayTable();
             updateLobChart();
+            renderCapacityTable();
             toggleEditModal();
             alert('บันทึกข้อมูลสำเร็จ!');
         }
@@ -1295,6 +1395,7 @@
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
+            renderCapacityTable();
             toggleDoorEditModal();
             alert('บันทึกข้อมูล Door สำเร็จ!');
         }
@@ -1485,6 +1586,7 @@
                 dashboardTab.classList.remove('hidden');
                 navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
                 headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
+                renderCapacityTable();
             } else if (tabName === 'workprocess') {
                 workProcessTab.classList.remove('hidden');
                 navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
