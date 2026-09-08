@@ -198,9 +198,10 @@
                                 <option value="Back Plate">Back Plate</option>
                                 <option value="Bottom Plate">Bottom Plate</option>
                                 <option value="Gasket">Gasket</option>
-                                <option value="Door - Bending (RR)">Door - Bending (RR)</option>
-                                <option value="Door - Foaming (RR)">Door - Foaming (RR)</option>
-                                <option value="Door - Door Cap Assembly (RR)">Door - Door Cap Assembly (RR)</option>
+                                <option value="Door - Bending">Door - Bending</option>
+                                <option value="Door - Frame">Door - Frame</option>
+                                <option value="Door - Glass">Door - Glass</option>
+                                <option value="Door - Foaming">Door - Foaming</option>
                             </select>
                         </div>
                     </div>
@@ -221,8 +222,8 @@
                 </section>
             </div>
 
-            <!-- NEW TAB CONTENT: MASTER MODEL & ROUTING -->
-            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full">
+            <!-- MASTER MODEL & ROUTING TAB CONTENT -->
+            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardbg p-5 rounded-2xl border border-bordercolor">
                     <div class="flex items-center space-x-3">
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
@@ -412,21 +413,10 @@
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
                                 <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
-                                <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
-                                <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Cap Assembly')" data-subpart="Door Cap Assembly" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Cap Assembly</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Liner')" data-subpart="Door Liner" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Liner</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Frame')" data-subpart="Door Frame" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Frame</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Glass')" data-subpart="Door Glass" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Glass</button>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40">
-                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:</span>
-                                <button type="button" onclick="selectDoorType('RR')" data-doortype="RR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500">RR</button>
-                                <button type="button" onclick="selectDoorType('RL')" data-doortype="RL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RL</button>
-                                <button type="button" onclick="selectDoorType('FR')" data-doortype="FR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
-                                <button type="button" onclick="selectDoorType('FL')" data-doortype="FL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FL</button>
-                                <button type="button" onclick="selectDoorType('VEG')" data-doortype="VEG" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">VEG</button>
-                                <button type="button" onclick="selectDoorType('FB')" data-doortype="FB" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FB</button>
+                                <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2.5 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
+                                <button type="button" onclick="selectDoorSubPart('Frame')" data-subpart="Frame" class="door-sub-btn px-2.5 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Frame</button>
+                                <button type="button" onclick="selectDoorSubPart('Glass')" data-subpart="Glass" class="door-sub-btn px-2.5 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Glass</button>
+                                <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2.5 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
                             </div>
                         </div>
 
@@ -436,7 +426,7 @@
                             <div id="doorGroupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model (กรองตาม Door Type อัตโนมัติ):</span>
                             <div id="doorModelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -513,7 +503,7 @@
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
                                 <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span></p>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span></p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveDoorProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
@@ -556,11 +546,27 @@
         let selectedProductGroups = new Set(); 
         let selectedModels = new Set(); 
 
-        // State สำหรับส่วนพาร์ท Door (Door Parts Tab)
+        // State สำหรับส่วนพาร์ท Door (Door Parts Tab - รองรับ Bending, Frame, Glass, Foaming)
         let selectedDoorSubPart = 'Bending';
-        let selectedDoorType = 'RR';
         let selectedDoorProductGroups = new Set(); 
         let selectedDoorModels = new Set();
+
+        function switchTab(tabName) {
+            ['dashboard', 'mastermodel', 'workprocess', 'doorparts'].forEach(t => {
+                const el = document.getElementById(`tab-content-${t}`);
+                if (el) el.classList.add('hidden');
+                const nav = document.getElementById(`nav-${t}`);
+                if (nav) {
+                    nav.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+                }
+            });
+            const targetEl = document.getElementById(`tab-content-${tabName}`);
+            if (targetEl) targetEl.classList.remove('hidden');
+            const targetNav = document.getElementById(`nav-${tabName}`);
+            if (targetNav) {
+                targetNav.className = 'w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3';
+            }
+        }
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
@@ -578,24 +584,12 @@
             selectedDoorSubPart = subPartName;
             document.querySelectorAll('.door-sub-btn').forEach(btn => {
                 if (btn.getAttribute('data-subpart') === subPartName) {
-                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500';
+                    btn.className = 'door-sub-btn px-2.5 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500';
                 } else {
-                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'door-sub-btn px-2.5 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                 }
             });
-            loadDoorProcessDataForCurrentSelection();
-        }
-
-        function selectDoorType(typeName) {
-            selectedDoorType = typeName;
-            document.querySelectorAll('.door-type-btn').forEach(btn => {
-                if (btn.getAttribute('data-doortype') === typeName) {
-                    btn.className = 'door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500';
-                } else {
-                    btn.className = 'door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                }
-            });
-            loadDoorProcessDataForCurrentSelection();
+            updateDoorModelCheckboxesByGroup();
         }
 
         let defaultDailyPlanData = {
@@ -638,7 +632,6 @@
 
         function getMasterConfigForModel(modelName) {
             if (masterModelConfig[modelName]) return masterModelConfig[modelName];
-            // ค่าเริ่มต้นตัวอย่างตามโจทย์ (Glass -> Line 1 (Frame) -> Line 2 (Glass), Metal -> Line 3 (Press) -> Line 4 (Bending))
             if (modelName.includes('C')) {
                 return { doorType: 'Glass', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 };
             } else {
@@ -700,7 +693,7 @@
 
         let doorProcessDatabase = {};
         try {
-            let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');
+            let savedDoorDB = localStorage.getItem('haier_door_process_db_v2');
             if (savedDoorDB) { doorProcessDatabase = JSON.parse(savedDoorDB); }
         } catch (e) { console.error(e); }
         let currentDoorProcessData = [];
@@ -737,12 +730,11 @@
         function loadDoorProcessDataForCurrentSelection() {
             let modelsArray = Array.from(selectedDoorModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let effectivePart = `Door (${selectedDoorSubPart})`;
             let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${effectivePart}` : 'door_default';
 
             document.getElementById('editDoorModelNameTag').textContent = modelKey;
             document.getElementById('editDoorSubPartTag').textContent = selectedDoorSubPart;
-            document.getElementById('editDoorTypeTag').textContent = selectedDoorType;
             document.getElementById('displayDoorActiveModelTag').textContent = modelKey;
 
             if (doorProcessDatabase[storageKey] && Array.isArray(doorProcessDatabase[storageKey])) {
@@ -1022,8 +1014,8 @@
                     let storageKey = '';
                     let dbSource = processDatabase;
                     if (selectedPart.startsWith('Door - ')) {
-                        let subPartName = selectedPart.replace('Door - ', '').replace(' (RR)', '');
-                        storageKey = `${m.name}_Door (${subPartName} - RR)`;
+                        let subPartName = selectedPart.replace('Door - ', '');
+                        storageKey = `${m.name}_Door (${subPartName})`;
                         dbSource = doorProcessDatabase;
                     } else {
                         storageKey = `${m.name}_${selectedPart}`;
@@ -1197,8 +1189,8 @@
         function downloadDoorProcessTemplate() {
             let templateData = [
                 ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA01", "Bending-Feed", "Forming", "", 10.0, 5.0, "", 1.0],
-                ["STA02", "Welding", "Check", "", 12.0, 4.0, "", 1.0]
+                ["STA01", "Process-Feed", "Forming", "", 10.0, 5.0, "", 1.0],
+                ["STA02", "Check", "Assembly", "", 12.0, 4.0, "", 1.0]
             ];
             let ws = XLSX.utils.aoa_to_sheet(templateData);
             let wb = XLSX.utils.book_new();
@@ -1484,7 +1476,7 @@
 
             let modelsArray = Array.from(selectedDoorModels);
             if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ (Door)'); return; }
-            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let effectivePart = `Door (${selectedDoorSubPart})`;
             
             modelsArray.forEach(modelName => {
                 let storageKey = `${modelName}_${effectivePart}`;
@@ -1492,7 +1484,7 @@
             });
 
             currentDoorProcessData = updatedList;
-            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            localStorage.setItem('haier_door_process_db_v2', JSON.stringify(doorProcessDatabase));
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
             renderCapacityTable();
@@ -1630,7 +1622,7 @@
 
             let targetGroups = currentDailyData?.groups?.filter(g => selectedDoorProductGroups.has(g.productGroup)) || [];
             if (targetGroups.length === 0) {
-                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;
+                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model ตามเงื่อนไข</span>`;
                 loadDoorProcessDataForCurrentSelection();
                 return;
             }
@@ -1638,76 +1630,53 @@
             targetGroups.forEach(targetGroup => {
                 if (targetGroup.models) {
                     targetGroup.models.forEach((m) => {
-                        selectedDoorModels.add(m.name);
-                        let label = document.createElement('label');
-                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';
-                        let checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = true;
-                        checkbox.value = m.name;
-                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-amber-600 focus:ring-0 w-3 h-3 shrink-0';
-                        checkbox.onchange = function() {
-                            if (checkbox.checked) { selectedDoorModels.add(m.name); } else { selectedDoorModels.delete(m.name); }
-                            loadDoorProcessDataForCurrentSelection();
-                        };
-                        let span = document.createElement('span');
-                        span.className = 'text-[10px] font-medium text-slate-200 truncate';
-                        span.textContent = m.name;
-                        label.appendChild(checkbox);
-                        label.appendChild(span);
-                        container.appendChild(label);
+                        let masterInfo = getMasterConfigForModel(m.name);
+                        let dType = masterInfo.doorType; // 'Metal' หรือ 'Glass'
+
+                        // เงื่อนไขการกรอง: Metal โชว์เฉพาะ Bending, Glass โชว์เฉพาะ Frame และ Glass (ส่วน Foaming โชว์ได้ทั้งหมด)
+                        let showModel = false;
+                        if (selectedDoorSubPart === 'Bending') {
+                            if (dType === 'Metal') showModel = true;
+                        } else if (selectedDoorSubPart === 'Frame' || selectedDoorSubPart === 'Glass') {
+                            if (dType === 'Glass') showModel = true;
+                        } else if (selectedDoorSubPart === 'Foaming') {
+                            showModel = true; // โฟมมิ่งรองรับทุกประเภท
+                        }
+
+                        if (showModel) {
+                            selectedDoorModels.add(m.name);
+                            let label = document.createElement('label');
+                            label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';
+                            let checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.checked = true;
+                            checkbox.value = m.name;
+                            checkbox.className = 'rounded bg-slate-800 border-bordercolor text-amber-600 focus:ring-0 w-3 h-3 shrink-0';
+                            checkbox.onchange = function() {
+                                if (checkbox.checked) { selectedDoorModels.add(m.name); } else { selectedDoorModels.delete(m.name); }
+                                loadDoorProcessDataForCurrentSelection();
+                            };
+                            let span = document.createElement('span');
+                            span.className = 'text-[10px] font-medium text-slate-200 truncate';
+                            span.textContent = `${m.name} (${dType})`;
+                            label.appendChild(checkbox);
+                            label.appendChild(span);
+                            container.appendChild(label);
+                        }
                     });
                 }
             });
+
+            if (selectedDoorModels.size === 0) {
+                container.innerHTML = `<span class="text-[10px] text-amber-400">ไม่มีรุ่นที่ตรงกับสถานี ${selectedDoorSubPart} นี้</span>`;
+            }
+
             loadDoorProcessDataForCurrentSelection();
         }
 
         initGroupRadioButtons(currentDailyData);
         initDoorGroupRadioButtons(currentDailyData);
         renderMasterModelTable();
-
-        function switchTab(tabName) {
-            const dashboardTab = document.getElementById('tab-content-dashboard');
-            const masterModelTab = document.getElementById('tab-content-mastermodel');
-            const workProcessTab = document.getElementById('tab-content-workprocess');
-            const doorPartsTab = document.getElementById('tab-content-doorparts');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navMasterModel = document.getElementById('nav-mastermodel');
-            const navWorkProcess = document.getElementById('nav-workprocess');
-            const navDoorParts = document.getElementById('nav-doorparts');
-            const headerTitle = document.getElementById('headerTitle');
-
-            dashboardTab.classList.add('hidden');
-            masterModelTab.classList.add('hidden');
-            workProcessTab.classList.add('hidden');
-            doorPartsTab.classList.add('hidden');
-            navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navMasterModel.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-
-            if (tabName === 'dashboard') {
-                dashboardTab.classList.remove('hidden');
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-                renderCapacityTable();
-            } else if (tabName === 'mastermodel') {
-                masterModelTab.classList.remove('hidden');
-                navMasterModel.className = 'w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Master Model & Component Routing Configuration';
-                renderMasterModelTable();
-            } else if (tabName === 'workprocess') {
-                workProcessTab.classList.remove('hidden');
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-                updateLobChart();
-            } else if (tabName === 'doorparts') {
-                doorPartsTab.classList.remove('hidden');
-                navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Door Part Quick Selection & Analysis';
-                updateDoorLobChart();
-            }
-        }
     </script>
 </body>
 </html>
