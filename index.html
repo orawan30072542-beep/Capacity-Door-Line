@@ -111,9 +111,13 @@
                 <!-- 1. OVERVIEW SECTION -->
                 <section id="overview" class="space-y-4">
                     <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-lg font-bold text-white">1. ภาพรวมการผลิต (Overview)</h2>
-                    </div>
+    <label class="text-xs text-slate-300 font-medium">เลือกข้อมูลพาร์ท:</label>
+    <select id="capacityPartSelect" onchange="renderCapacityTable()" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-bordercolor focus:outline-none">
+        <option value="Back Plate">Back Plate</option>
+        <option value="Bottom Plate">Bottom Plate</option>
+        <option value="Door">Door</option>
+    </select>
+</div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
                             <p class="text-xs text-slate-400 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)</p>
@@ -913,17 +917,17 @@
 
         // Render Capacity Table function
         function renderCapacityTable() {
-            const tbody = document.querySelector('#tableCapacity tbody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
+    const tbody = document.querySelector('#tableCapacity tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-            const selectedPart = document.getElementById('capacityPartSelect').value;
-            let groups = currentDailyData.groups;
+    const selectedPart = document.getElementById('capacityPartSelect').value;
+    let groups = currentDailyData.groups;
 
-            if (!groups || groups.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลแผนการผลิต</td></tr>`;
-                return;
-            }
+    if (!groups || groups.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลแผนการผลิต</td></tr>`;
+        return;
+    }
 
             groups.forEach(g => {
                 g.models.forEach(m => {
