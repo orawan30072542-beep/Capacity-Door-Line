@@ -193,12 +193,12 @@
                             <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
                         <div class="text-xs text-slate-400">
-                            แสดงเวลาการทำงานรวม (Working Time) จากข้อมูล Work Process ของแต่ละ Door Type
+                            แสดง Leadtime, Max CT และ Capacity คำนวณด้วยสูตร (3600/Leadtime * 85%) ของแต่ละ Door Type
                         </div>
                     </div>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
-                        <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableCapacity" class="w-full text-left border-collapse text-xs">
+                        <div class="max-h-[420px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableCapacity" class="w-full text-left border-collapse text-xs table-fixed">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400"></tr>
                                 </thead>
@@ -987,9 +987,14 @@
             });
         }
 
+        // --- ปรับปรุงตาราง CAPACITY (ส่วนที่ 3 หน้า Dashboard) ---
         function renderCapacityTable(data) {
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
+
+            // กำหนด class table-fixed เพื่อให้ขนาดความกว้างช่องตารางเท่ากันเสมอกันทุกคอลัมน์
+            tableElement.className = "w-full text-left border-collapse text-xs table-fixed";
+
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
 
@@ -997,9 +1002,9 @@
             tbody.innerHTML = '';
 
             const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Model</th>`;
             doorTypes.forEach(dt => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${dt}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${dt}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
@@ -1012,13 +1017,16 @@
                     let tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
+
                     if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center" rowspan="${g.models.length}">${g.productGroup}</td>`;
                     }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${m.name}</td>`;
 
                     doorTypes.forEach(dt => {
                         let totalWT = 0;
+                        let maxCT = 0;
+
                         subParts.forEach(sp => {
                             let storageKey = `${m.name}_Door (${sp} - ${dt})`;
                             let stations = doorProcessDatabase[storageKey];
@@ -1027,15 +1035,40 @@
                                     let w1 = parseFloat(st.wt1) || 0;
                                     let w2 = parseFloat(st.wt2) || 0;
                                     let w3 = parseFloat(st.wt3) || 0;
-                                    totalWT += (w1 + w2 + w3);
+                                    let l = parseFloat(st.loss) || 0;
+                                    let ct = w1 + w2 + w3 + l;
+
+                                    totalWT += ct;
+                                    if (ct > maxCT) maxCT = ct;
                                 });
                             }
                         });
 
-                        let displayVal = totalWT > 0 ? `${totalWT.toFixed(2)}s` : '-';
+                        let leadTime = totalWT;
+                        // คำนวณ Capacity ตามสูตร (3600 / Leadtime * 85%)
+                        let capacity = leadTime > 0 ? (3600 / leadTime) * 0.85 : 0;
+
+                        let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(2)}s` : '-';
+                        let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(2)}s` : '-';
+                        let capStr = capacity > 0 ? `${Math.round(capacity).toLocaleString()}` : '-';
+
+                        // แสดงผล 3 แถวให้ตรงกันในทุกช่อง: Leadtime -> Max CT -> Capacity
                         html += `
-                            <td class="p-2 text-center border-l border-bordercolor/30">
-                                <div class="text-cyan-400 font-medium text-xs">${displayVal}</div>
+                            <td class="p-2 border border-bordercolor/40 bg-slate-900/20 align-middle">
+                                <div class="flex flex-col gap-1 text-center">
+                                    <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
+                                        <span class="text-[10px] text-slate-400 block leading-tight">Leadtime</span>
+                                        <span class="text-xs font-bold text-cyan-400">${leadTimeStr}</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
+                                        <span class="text-[10px] text-slate-400 block leading-tight">Max CT</span>
+                                        <span class="text-xs font-bold text-amber-400">${maxCtStr}</span>
+                                    </div>
+                                    <div class="bg-blue-950/60 p-1.5 rounded border border-blue-500/40">
+                                        <span class="text-[10px] text-cyan-300 block leading-tight">Capacity</span>
+                                        <span class="text-xs font-bold text-emerald-400">${capStr} ${capacity > 0 ? '<span class="text-[9px] font-normal text-slate-400">PCS/Hr</span>' : ''}</span>
+                                    </div>
+                                </div>
                             </td>
                         `;
                     });
@@ -1675,11 +1708,6 @@
                 initDoorGroupRadioButtons(currentDailyData);
             }
         }
-
-        initGroupRadioButtons(currentDailyData);
-        initDoorGroupRadioButtons(currentDailyData);
-        renderMasterModelTable();
-        renderCapacityTable(currentDailyData);
     </script>
 </body>
 </html>
