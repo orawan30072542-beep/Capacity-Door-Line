@@ -400,7 +400,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
                             <div>
                                 <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
-                                <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time ($TT = 3600 / UPH$) และเส้นที่ 2 ($TT \times 85\%$) เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
+                                <p class="text-xs text-slate-400">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time และเส้นเปรียบเทียบ 85% กับ Cycle Time แต่ละสถานี</p>
                             </div>
                             <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor">
                                 <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
@@ -412,12 +412,12 @@
                         <!-- Takt Time Summary Box -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง)</span>
+                                <span class="text-[11px] text-slate-400">Takt Time 100%</span>
                                 <div id="displayTtVal" class="text-lg font-bold text-yellow-300 mt-1">30.00 วินาที</div>
                             </div>
                             <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, สูตร TT * 85%)</span>
-                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">25.50 วินาที</div>
+                                <span class="text-[11px] text-slate-400">Takt Time 85% (สูตร TT * 85%)</span>
+                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">25.50 วินาที (TT * 85%)</div>
                             </div>
                         </div>
 
@@ -626,18 +626,18 @@
                     },
                     {
                         type: 'line',
-                        label: 'Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง)',
+                        label: 'Takt Time 100%',
                         data: [],
-                        borderColor: '#facc15', // เหลืองสว่าง (yellow-400)
+                        borderColor: '#facc15',
                         borderWidth: 3,
                         pointRadius: 0,
                         order: 1
                     },
                     {
                         type: 'line',
-                        label: 'Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, TT * 85%)',
+                        label: 'Takt Time 85% (TT * 85%)',
                         data: [],
-                        borderColor: '#fb7185', // แดงสว่าง (rose-400)
+                        borderColor: '#fb7185',
                         borderDash: [6, 6],
                         borderWidth: 3,
                         pointRadius: 0,
@@ -682,8 +682,6 @@
         function updateLobChart() {
             let uph = parseFloat(document.getElementById('uphInput').value) || 120;
             let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            
-            // ปรับสูตรใหม่: TT * 85%
             let taktTime85 = taktTime100 * 0.85;
 
             document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)} วินาที`;
@@ -707,9 +705,9 @@
             lobChart.data.labels = labels;
             lobChart.data.datasets[0].data = ctData;
             lobChart.data.datasets[1].data = ttLine1;
-            lobChart.data.datasets[1].label = `Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง - ${taktTime100.toFixed(2)}s)`;
+            lobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
             lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, TT * 85% = ${taktTime85.toFixed(2)}s)`;
+            lobChart.data.datasets[2].label = `Takt Time 85% (TT * 85% = ${taktTime85.toFixed(2)}s)`;
             lobChart.update();
         }
 
