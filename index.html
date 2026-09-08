@@ -283,7 +283,7 @@
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
             <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
                 
-                <!-- STICKY CONTROL PANEL: Part (~15%), Group (~70%), Model (ปรับให้ใช้พื้นที่ 15% และเรียง 3 แถวในแนวตั้ง) -->
+                <!-- STICKY CONTROL PANEL: ปรับปรุงโครงสร้างใหม่ตามที่ต้องการ (Part อยู่ด้านบนสุด, Group 70% และ Model 30% อยู่ด้านล่าง) -->
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-cyan-500/30 shadow-lg space-y-2">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 border-b border-bordercolor pb-1.5">
                         <div class="flex items-center space-x-1.5">
@@ -295,9 +295,9 @@
                         </button>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center text-xs">
-                        <!-- 1. เลือก Part (col-span-2 ประมาณ 15-16%) -->
-                        <div class="md:col-span-2 flex flex-wrap items-center gap-1">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 text-xs">
+                        <!-- แถวที่ 1: Part อยู่ด้านบนเต็มความกว้าง (col-span-12) -->
+                        <div class="md:col-span-12 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <span class="text-[11px] font-medium text-slate-400 mr-1">Part:</span>
                             <div id="partTabContainer" class="flex flex-wrap gap-1">
                                 <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
@@ -307,14 +307,15 @@
                             </div>
                         </div>
 
-                        <!-- 2. Product Group ตรงกลางประมาณ 70% (col-span-8) -->
+                        <!-- แถวที่ 2: Group (70% หรือ md:col-span-8) อยู่ด้านล่างซ้าย -->
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <span class="text-[11px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
-                        <!-- 3. Model Checkbox ชิดขวา ปรับให้มีพื้นที่ประมาณ 15% (col-span-2) และจัดเรียงเป็น 3 แถวในแนวตั้ง -->
-                        <div class="md:col-span-2 flex flex-col gap-1 justify-center bg-slate-950/40 p-1.5 rounded-lg border border-bordercolor/40">
+                        <!-- แถวที่ 2: Model (30% หรือ md:col-span-4) อยู่ด้านล่างขวา จัดเรียง Checkbox แนวตั้ง -->
+                        <div class="md:col-span-4 flex flex-col gap-1 justify-center bg-slate-950/40 p-1.5 rounded-lg border border-bordercolor/40">
+                            <span class="text-[11px] font-semibold text-cyan-400 mb-0.5">Model:</span>
                             <div id="modelCheckboxContainer" class="flex flex-col gap-1 w-full"></div>
                         </div>
                     </div>
