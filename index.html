@@ -193,11 +193,13 @@
                             <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
                         <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
-                            <span class="text-xs text-slate-400 font-medium px-2">Group Station:</span>
-                            <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
-                            <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
-                            <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
-                        </div>
+                            <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
+    <span class="text-xs text-slate-400 font-medium px-2">Group Station:</span>
+    <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
+    <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
+    <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
+    <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+</div>
                     </div>
                     <div class="text-xs text-slate-400">
                         แสดงข้อมูล Leadtime, Max CT และ Capacity คำนวณด้วยสูตร (3600/Leadtime * 85%) แยกตาม Group Station (<span id="currentCapacityStationLabel" class="text-cyan-400 font-bold">Door A</span>)
@@ -690,11 +692,13 @@
                             </select>
                         </td>
                         <td class="p-3 text-center">
-                            <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
-                                <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
-                                <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
-                                <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
-                            </select>
+    <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
+        <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
+        <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
+        <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
+        <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
+    </select>
+</td>
                         </td>
                         <td class="p-3">
                             <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor">
