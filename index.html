@@ -515,14 +515,41 @@
 
         // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)
         let selectedPartValue = 'Back Plate'; 
-        let selectedProductGroups = new Set(); // เปลี่ยนเป็น Set รองรับหลาย Group
+        let selectedProductGroups = new Set(); 
         let selectedModels = new Set(); 
 
-        // State สำหรับส่วนพาร์ท Door (Door Parts Tab - แยกข้อมูลออกอิสระ)
+        // State สำหรับส่วนพาร์ท Door (Door Parts Tab)
         let selectedDoorSubPart = 'Bending';
         let selectedDoorType = 'RR';
-        let selectedDoorProductGroups = new Set(); // เปลี่ยนเป็น Set รองรับหลาย Group
+        let selectedDoorProductGroups = new Set(); 
         let selectedDoorModels = new Set();
+
+        function switchTab(tabId) {
+            document.getElementById('tab-content-dashboard').classList.add('hidden');
+            document.getElementById('tab-content-workprocess').classList.add('hidden');
+            document.getElementById('tab-content-doorparts').classList.add('hidden');
+
+            document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            document.getElementById('nav-workprocess').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            document.getElementById('nav-doorparts').className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+
+            if (tabId === 'dashboard') {
+                document.getElementById('tab-content-dashboard').classList.remove('hidden');
+                document.getElementById('nav-dashboard').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+            } else if (tabId === 'workprocess') {
+                document.getElementById('tab-content-workprocess').classList.remove('hidden');
+                document.getElementById('nav-workprocess').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                // อัปเดตและเรนเดอร์กราฟ/ตารางอัตโนมัติทันที
+                updateModelCheckboxesByGroup();
+                setTimeout(() => { lobChart.resize(); }, 50);
+            } else if (tabId === 'doorparts') {
+                document.getElementById('tab-content-doorparts').classList.remove('hidden');
+                document.getElementById('nav-doorparts').className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
+                // อัปเดตและเรนเดอร์กราฟ/ตาราง Door อัตโนมัติทันที
+                updateDoorModelCheckboxesByGroup();
+                setTimeout(() => { doorLobChart.resize(); }, 50);
+            }
+        }
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
@@ -536,7 +563,6 @@
             loadProcessDataForCurrentSelection();
         }
 
-        // Functions สำหรับ Door Part Tab
         function selectDoorSubPart(subPartName) {
             selectedDoorSubPart = subPartName;
             document.querySelectorAll('.door-sub-btn').forEach(btn => {
@@ -594,7 +620,6 @@
             console.error(err);
         }
 
-        // Database สำหรับพาร์ททั่วไป
         let processDatabase = {};
         try {
             let savedDB = localStorage.getItem('haier_process_db_v7');
@@ -602,7 +627,6 @@
         } catch (e) { console.error(e); }
         let currentProcessData = [];
 
-        // Database แยกอิสระสำหรับ Door Part
         let doorProcessDatabase = {};
         try {
             let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');
@@ -639,7 +663,6 @@
             updateLobChart();
         }
 
-        // โหลดข้อมูลเฉพาะของ Door Part
         function loadDoorProcessDataForCurrentSelection() {
             let modelsArray = Array.from(selectedDoorModels);
             let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
@@ -714,7 +737,6 @@
             }
         });
 
-        // Chart สำหรับพาร์ททั่วไป
         const ctxLob = document.getElementById('lobChart').getContext('2d');
         let lobChart = new Chart(ctxLob, {
             type: 'bar',
@@ -737,7 +759,6 @@
             }
         });
 
-        // Chart แยกสำหรับ Door Part
         const ctxDoorLob = document.getElementById('doorLobChart').getContext('2d');
         let doorLobChart = new Chart(ctxDoorLob, {
             type: 'bar',
@@ -911,7 +932,6 @@
 
         renderUnifiedTable(currentDailyData);
 
-        // Render Capacity Table function
         function renderCapacityTable() {
             const tbody = document.querySelector('#tableCapacity tbody');
             if (!tbody) return;
@@ -1044,7 +1064,6 @@
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
 
-        // Template & Import สำหรับพาร์ททั่วไป
         function downloadProcessTemplate() {
             let templateData = [
                 ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
@@ -1101,7 +1120,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // Template & Import สำหรับ Door Part
         function downloadDoorProcessTemplate() {
             let templateData = [
                 ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
@@ -1411,7 +1429,7 @@
                     btn.type = 'button';
                     btn.setAttribute('data-group', g.productGroup);
                     btn.textContent = `Grp ${g.productGroup}`;
-                    let isSelected = (idx === 0); // เริ่มต้นเลือกกลุ่มแรกไว้ก่อน
+                    let isSelected = (idx === 0); 
                     if (isSelected) {
                         selectedProductGroups.add(g.productGroup);
                         btn.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
@@ -1425,7 +1443,6 @@
             updateModelCheckboxesByGroup();
         }
 
-        // Init Group สำหรับ Door Part รองรับหลายกลุ่ม
         function initDoorGroupRadioButtons(data) {
             const container = document.getElementById('doorGroupRadioContainer');
             if (!container) return;
@@ -1437,7 +1454,7 @@
                     btn.type = 'button';
                     btn.setAttribute('data-door-group', g.productGroup);
                     btn.textContent = `Grp ${g.productGroup}`;
-                    let isSelected = (idx === 0); // เริ่มต้นเลือกกลุ่มแรกไว้ก่อน
+                    let isSelected = (idx === 0); 
                     if (isSelected) {
                         selectedDoorProductGroups.add(g.productGroup);
                         btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';
@@ -1563,42 +1580,9 @@
             loadDoorProcessDataForCurrentSelection();
         }
 
+        // เริ่มต้นสร้างปุ่มเลือกกลุ่มและโหลดข้อมูลเริ่มต้น
         initGroupRadioButtons(currentDailyData);
         initDoorGroupRadioButtons(currentDailyData);
-
-        function switchTab(tabName) {
-            const dashboardTab = document.getElementById('tab-content-dashboard');
-            const workProcessTab = document.getElementById('tab-content-workprocess');
-            const doorPartsTab = document.getElementById('tab-content-doorparts');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navWorkProcess = document.getElementById('nav-workprocess');
-            const navDoorParts = document.getElementById('nav-doorparts');
-            const headerTitle = document.getElementById('headerTitle');
-
-            dashboardTab.classList.add('hidden');
-            workProcessTab.classList.add('hidden');
-            doorPartsTab.classList.add('hidden');
-            navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-
-            if (tabName === 'dashboard') {
-                dashboardTab.classList.remove('hidden');
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-                renderCapacityTable();
-            } else if (tabName === 'workprocess') {
-                workProcessTab.classList.remove('hidden');
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-                updateLobChart();
-            } else if (tabName === 'doorparts') {
-                doorPartsTab.classList.remove('hidden');
-                navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Door Part Quick Selection & Analysis';
-                updateDoorLobChart();
-            }
-        }
     </script>
 </body>
 </html>
