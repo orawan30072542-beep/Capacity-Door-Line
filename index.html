@@ -299,7 +299,7 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Part ด้านบน / Product Group (ซ้าย - ขนาดเล็กลง) และ Model (ขวา) -->
+                    <!-- ฟอร์มเลือก Part ด้านบน / Product Group (70%) และ Model (30%) -->
                     <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
                         
                         <!-- 1. เลือกชิ้นส่วนประกอบ (Part) อยู่ด้านบนสุด -->
@@ -313,20 +313,20 @@
                             </div>
                         </div>
 
-                        <!-- 2 & 3. Product Group (ซ้าย - ขนาดเล็กลง) และ เลือกรุ่นสินค้า Model (ขวา) -->
+                        <!-- 2 & 3. Product Group (70% / col-span-8) และ เลือกรุ่นสินค้า Model (30% / col-span-4) -->
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pt-1">
                             
-                            <!-- ฝั่งซ้าย: Product Group (ขนาดเล็กลง) -->
-                            <div class="md:col-span-4 bg-slate-950/40 p-3 rounded-xl border border-bordercolor/60">
+                            <!-- ฝั่งซ้าย: Product Group (70%) -->
+                            <div class="md:col-span-8 bg-slate-950/40 p-3 rounded-xl border border-bordercolor/60">
                                 <label class="block text-xs font-medium text-slate-400 mb-2">Product Group (เลือกได้ 1):</label>
                                 <div id="groupRadioContainer" class="flex flex-wrap gap-1.5"></div>
                             </div>
 
-                            <!-- ฝั่งขวา: เลือกรุ่นสินค้า (Model) -->
-                            <div class="md:col-span-8 bg-slate-800/40 p-3 rounded-xl border border-bordercolor/60">
+                            <!-- ฝั่งขวา: เลือกรุ่นสินค้า Model (30%) -->
+                            <div class="md:col-span-4 bg-slate-800/40 p-3 rounded-xl border border-bordercolor/60">
                                 <label class="block text-xs font-medium text-slate-400 mb-1.5">
-                                    เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ): 
-                                    <span class="text-[10px] text-amber-400 font-normal">(แต่ละ Model มีขั้นตอนและเวลาต่างกัน)</span>
+                                    เลือกรุ่นสินค้า (Model): 
+                                    <span class="text-[10px] text-amber-400 font-normal">(เลือกได้หลายรายการ)</span>
                                 </label>
                                 <div id="modelCheckboxContainer" class="flex flex-wrap gap-2 mt-2"></div>
                             </div>
