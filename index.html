@@ -185,16 +185,22 @@
                     </div>
                 </section>
 
-                <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) แยกตาม Group Station: Door A, Door B, Door C -->
+                <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) พร้อมปุ่มสวิตช์ Group Station -->
                 <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process) - Group Station (Door A, Door B, Door C)</h2>
+                            <h2 class="text-lg font-bold text-white">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
-                        <div class="text-xs text-slate-400">
-                            แสดง Leadtime, Max CT และ Capacity คำนวณด้วยสูตร (3600/Leadtime * 85%) แยกตาม Group Station
+                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
+                            <span class="text-xs text-slate-400 font-medium px-2">Group Station:</span>
+                            <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
+                            <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
+                            <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                         </div>
+                    </div>
+                    <div class="text-xs text-slate-400">
+                        แสดงข้อมูล Leadtime, Max CT และ Capacity คำนวณด้วยสูตร (3600/Leadtime * 85%) แยกตาม Group Station (<span id="currentCapacityStationLabel" class="text-cyan-400 font-bold">Door A</span>)
                     </div>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[420px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -540,25 +546,6 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // Tab Switching Function
-        function switchTab(tabId) {
-            document.querySelectorAll('[id^="tab-content-"]').forEach(el => el.classList.add('hidden'));
-            const target = document.getElementById(`tab-content-${tabId}`);
-            if (target) target.classList.remove('hidden');
-
-            // Sidebar active state update
-            ['dashboard', 'mastermodel', 'workprocess', 'doorparts'].forEach(t => {
-                const navBtn = document.getElementById(`nav-${t}`);
-                if (navBtn) {
-                    if (t === tabId) {
-                        navBtn.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                    } else {
-                        navBtn.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-                    }
-                }
-            });
-        }
-
         // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)
         let selectedPartValue = 'Back Plate'; 
         let selectedProductGroups = new Set(); 
@@ -569,6 +556,39 @@
         let selectedDoorType = 'RR';
         let selectedDoorProductGroups = new Set(); 
         let selectedDoorModels = new Set();
+
+        // State สำหรับสลับ Group Station ในส่วนที่ 3 (Capacity)
+        let currentCapacityStation = 'Door A';
+
+        function switchTab(tabId) {
+            document.getElementById('tab-content-dashboard').classList.add('hidden');
+            document.getElementById('tab-content-mastermodel').classList.add('hidden');
+            document.getElementById('tab-content-workprocess').classList.add('hidden');
+            document.getElementById('tab-content-doorparts').classList.add('hidden');
+
+            document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3";
+            document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3";
+            document.getElementById('nav-workprocess').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3";
+            document.getElementById('nav-doorparts').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3";
+
+            if (tabId === 'dashboard') {
+                document.getElementById('tab-content-dashboard').classList.remove('hidden');
+                document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
+                renderCapacityTable(currentDailyData);
+            } else if (tabId === 'mastermodel') {
+                document.getElementById('tab-content-mastermodel').classList.remove('hidden');
+                document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
+                renderMasterModelTable();
+            } else if (tabId === 'workprocess') {
+                document.getElementById('tab-content-workprocess').classList.remove('hidden');
+                document.getElementById('nav-workprocess').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
+                loadProcessDataForCurrentSelection();
+            } else if (tabId === 'doorparts') {
+                document.getElementById('tab-content-doorparts').classList.remove('hidden');
+                document.getElementById('nav-doorparts').className = "w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3";
+                loadDoorProcessDataForCurrentSelection();
+            }
+        }
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
@@ -637,7 +657,7 @@
             }
         } catch (err) { console.error(err); }
 
-        // Master Model Database สำหรับเก็บชนิดชิ้นส่วนและ Routing รวมถึง Group Station (Door A, Door B, Door C)
+        // Master Model Database สำหรับเก็บชนิดชิ้นส่วนและ Routing
         let masterModelConfig = {};
         try {
             let savedMaster = localStorage.getItem('haier_master_model_config_v1');
@@ -700,7 +720,6 @@
 
         function saveMasterModelConfig() {
             localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
-            renderCapacityTable(currentDailyData);
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
         }
 
@@ -1014,7 +1033,28 @@
             });
         }
 
-        // --- ปรับปรุงตาราง CAPACITY (ส่วนที่ 3 หน้า Dashboard) แยกตาม Group Station: Door A, Door B, Door C ---
+        // ฟังก์ชันสำหรับสลับ Group Station (Door A, Door B, Door C) ในส่วนที่ 3
+        function switchCapacityStation(stationName) {
+            currentCapacityStation = stationName;
+            document.getElementById('currentCapacityStationLabel').textContent = stationName;
+            
+            // อัปเดตสถานะปุ่มสวิตช์
+            ['Door A', 'Door B', 'Door C'].forEach(st => {
+                let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
+                let btn = document.getElementById(btnId);
+                if (btn) {
+                    if (st === stationName) {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow";
+                    } else {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+                    }
+                }
+            });
+
+            renderCapacityTable(currentDailyData);
+        }
+
+        // --- ปรับปรุงตาราง CAPACITY (ส่วนที่ 3 หน้า Dashboard) แยกตาม Group Station ที่เลือก ---
         function renderCapacityTable(data) {
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
@@ -1027,76 +1067,79 @@
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            const groupStations = ['Door A', 'Door B', 'Door C'];
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Model</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Assigned Station</th>`;
-            groupStations.forEach(st => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${st}</th>`;
+            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">Model</th>`;
+            doorTypes.forEach(dt => {
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${dt}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
             if (!data || !data.groups) return;
 
+            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+
             data.groups.forEach(g => {
                 g.models.forEach((m, mIndex) => {
+                    // ตรวจสอบว่า Model นี้ตรงกับ Group Station ที่เลือกไว้ใน Master Model หรือไม่ (ถ้ายังไม่ได้ตั้งค่า ให้เช็คค่าเริ่มต้น)
                     let config = getMasterConfigForModel(m.name);
-                    let assignedStation = config.station || 'Door A';
+                    if (config.station !== currentCapacityStation) {
+                        return; // ข้าม Model ที่ไม่ได้อยู่ใน Group Station ปัจจุบัน
+                    }
 
                     let tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
 
-                    if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center" rowspan="${g.models.length}">${g.productGroup}</td>`;
-                    }
+                    html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center">${g.productGroup}</td>`;
                     html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${m.name}</td>`;
-                    html += `<td class="p-3 font-bold text-amber-400 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${assignedStation}</td>`;
 
-                    groupStations.forEach(st => {
-                        if (assignedStation === st) {
-                            let storageKey = `${m.name}_Back Plate`;
-                            let stationsData = processDatabase[storageKey] || getEmptyDefaultStations();
-                            let totalWT = 0;
-                            let maxCT = 0;
+                    doorTypes.forEach(dt => {
+                        let totalWT = 0;
+                        let maxCT = 0;
 
-                            stationsData.forEach(stItem => {
-                                let w1 = parseFloat(stItem.wt1) || 0;
-                                let w2 = parseFloat(stItem.wt2) || 0;
-                                let w3 = parseFloat(stItem.wt3) || 0;
-                                let l = parseFloat(stItem.loss) || 0;
-                                let ct = w1 + w2 + w3 + l;
+                        subParts.forEach(sp => {
+                            let storageKey = `${m.name}_Door (${sp} - ${dt})`;
+                            let stations = doorProcessDatabase[storageKey];
+                            if (stations && Array.isArray(stations)) {
+                                stations.forEach(st => {
+                                    let w1 = parseFloat(st.wt1) || 0;
+                                    let w2 = parseFloat(st.wt2) || 0;
+                                    let w3 = parseFloat(st.wt3) || 0;
+                                    let l = parseFloat(st.loss) || 0;
+                                    let ct = w1 + w2 + w3 + l;
 
-                                totalWT += ct;
-                                if (ct > maxCT) maxCT = ct;
-                            });
+                                    totalWT += ct;
+                                    if (ct > maxCT) maxCT = ct;
+                                });
+                            }
+                        });
 
-                            let leadTime = totalWT;
-                            let capacity = leadTime > 0 ? (3600 / leadTime) * 0.85 : 0;
+                        let leadTime = totalWT;
+                        // คำนวณ Capacity ตามสูตร (3600 / Leadtime * 85%)
+                        let capacity = leadTime > 0 ? (3600 / leadTime) * 0.85 : 0;
 
-                            let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(2)}s` : '-';
-                            let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(2)}s` : '-';
-                            let capStr = capacity > 0 ? `${Math.round(capacity).toLocaleString()}` : '-';
+                        let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(2)}s` : '-';
+                        let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(2)}s` : '-';
+                        let capStr = capacity > 0 ? `${Math.round(capacity).toLocaleString()}` : '-';
 
-                            html += `
-                                <td class="p-2 border border-bordercolor/40 bg-slate-900/20 align-middle">
-                                    <div class="flex flex-col gap-1 text-center">
-                                        <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
-                                            <span class="text-[10px] text-slate-400 block leading-tight">Leadtime</span>
-                                            <span class="text-xs font-bold text-cyan-400">${leadTimeStr}</span>
-                                        </div>
-                                        <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
-                                            <span class="text-[10px] text-slate-400 block leading-tight">Max CT</span>
-                                            <span class="text-xs font-bold text-amber-400">${maxCtStr}</span>
-                                        </div>
-                                        <div class="bg-blue-950/60 p-1.5 rounded border border-blue-500/40">
-                                            <span class="text-[10px] text-cyan-300 block leading-tight">Capacity</span>
-                                            <span class="text-xs font-bold text-emerald-400">${capStr} ${capacity > 0 ? '<span class="text-[9px] font-normal text-slate-400">PCS/Hr</span>' : ''}</span>
-                                        </div>
+                        html += `
+                            <td class="p-2 border border-bordercolor/40 bg-slate-900/20 align-middle">
+                                <div class="flex flex-col gap-1 text-center">
+                                    <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
+                                        <span class="text-[10px] text-slate-400 block leading-tight">Leadtime</span>
+                                        <span class="text-xs font-bold text-cyan-400">${leadTimeStr}</span>
                                     </div>
-                                </td>
-                            `;
-                        } else {
-                            html += `<td class="p-2 border border-bordercolor/40 bg-slate-900/10 align-middle text-center text-slate-600">—</td>`;
-                        }
+                                    <div class="bg-slate-800/80 p-1.5 rounded border border-bordercolor/60">
+                                        <span class="text-[10px] text-slate-400 block leading-tight">Max CT</span>
+                                        <span class="text-xs font-bold text-amber-400">${maxCtStr}</span>
+                                    </div>
+                                    <div class="bg-blue-950/60 p-1.5 rounded border border-blue-500/40">
+                                        <span class="text-[10px] text-cyan-300 block leading-tight">Capacity</span>
+                                        <span class="text-xs font-bold text-emerald-400">${capStr} ${capacity > 0 ? '<span class="text-[9px] font-normal text-slate-400">PCS/Hr</span>' : ''}</span>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
                     });
 
                     tr.innerHTML = html;
@@ -1504,7 +1547,6 @@
             currentProcessData = updatedList;
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
             renderSavedDisplayTable();
-            renderCapacityTable(currentDailyData);
             updateLobChart();
             toggleEditModal();
             alert(`บันทึกข้อมูลสำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
@@ -1674,7 +1716,7 @@
 
             let targetGroups = currentDailyData?.groups?.filter(g => selectedDoorProductGroups.has(g.productGroup)) || [];
             if (targetGroups.length === 0) {
-                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;
+                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model (Door)</span>`;
                 loadDoorProcessDataForCurrentSelection();
                 return;
             }
@@ -1706,10 +1748,8 @@
             loadDoorProcessDataForCurrentSelection();
         }
 
-        // Initialize UI components on load
         initGroupRadioButtons(currentDailyData);
         initDoorGroupRadioButtons(currentDailyData);
-        renderMasterModelTable();
     </script>
 </body>
 </html>
