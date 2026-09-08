@@ -111,33 +111,29 @@
                 <!-- 1. OVERVIEW SECTION -->
                 <section id="overview" class="space-y-4">
                     <div class="flex items-center space-x-2">
-    <label class="text-xs text-slate-300 font-medium">เลือกข้อมูลพาร์ท:</label>
-    <select id="capacityPartSelect" onchange="renderCapacityTable()" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-bordercolor focus:outline-none">
-        <option value="Back Plate">Back Plate</option>
-        <option value="Bottom Plate">Bottom Plate</option>
-        <option value="Door">Door</option>
-    </select>
-</div>
+                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                        <h2 class="text-lg font-bold text-white">1. ภาพรวมการผลิต (Overview)[cite: 8]</h2>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)</p>
-                            <h3 class="text-3xl font-bold text-white mt-2">12,500 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
-                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน</span>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)[cite: 8]</p>
+                            <h3 class="text-3xl font-bold text-white mt-2">12,500 <span class="text-sm font-normal text-slate-400">PCS</span>[cite: 8]</h3>
+                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน[cite: 8]</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)</p>
-                            <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
-                            <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%</span>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)[cite: 8]</p>
+                            <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-400">PCS</span>[cite: 8]</h3>
+                            <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%[cite: 8]</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)</p>
-                            <h3 class="text-3xl font-bold text-amber-400 mt-2">1,300 <span class="text-sm font-normal text-slate-400">PCS</span></h3>
-                            <span class="text-xs text-amber-400 font-medium mt-2 inline-block">ต้องเร่งดำเนินการตามรอบกะ</span>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)[cite: 8]</p>
+                            <h3 class="text-3xl font-bold text-amber-400 mt-2">1,300 <span class="text-sm font-normal text-slate-400">PCS</span>[cite: 8]</h3>
+                            <span class="text-xs text-amber-400 font-medium mt-2 inline-block">ต้องเร่งดำเนินการตามรอบกะ[cite: 8]</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden">
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">อัตราของเสีย (Defect Rate)</p>
-                            <h3 class="text-3xl font-bold text-rose-400 mt-2">1.4%</h3>
-                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">อยู่ในเกณฑ์ควบคุม (&lt; 2%)</span>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">อัตราของเสีย (Defect Rate)[cite: 8]</p>
+                            <h3 class="text-3xl font-bold text-rose-400 mt-2">1.4%[cite: 8]</h3>
+                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">อยู่ในเกณฑ์ควบคุม (&lt; 2%)[cite: 8]</span>
                         </div>
                     </div>
                 </section>
@@ -147,18 +143,18 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและยอดรายวัน</h2>
+                            <h2 class="text-lg font-bold text-white">2. ตารางสรุปแผนการผลิตและยอดรายวัน[cite: 8]</h2>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
-                            <span id="excelFileName" class="text-xs text-slate-400">ยังไม่ได้เลือกไฟล์</span>
+                            <span id="excelFileName" class="text-xs text-slate-400">ยังไม่ได้เลือกไฟล์[cite: 8]</span>
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-bordercolor flex items-center space-x-2 transition">
                                 <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span>เลือกไฟล์ Excel</span>
+                                <span>เลือกไฟล์ Excel[cite: 8]</span>
                                 <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="previewExcelData(event)">
                             </label>
                             <button onclick="saveDashboardData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                <span>บันทึกข้อมูล</span>
+                                <span>บันทึกข้อมูล[cite: 8]</span>
                             </button>
                         </div>
                     </div>
@@ -166,7 +162,7 @@
                         <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
                             <div class="text-[11px] text-cyan-400 mb-2 flex items-center space-x-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                                <span>กราฟแสดงยอด Order รวมรายวัน</span>
+                                <span>กราฟแสดงยอด Order รวมรายวัน[cite: 8]</span>
                             </div>
                             <div class="chart-container-wrapper">
                                 <canvas id="planChart"></canvas>
@@ -184,41 +180,6 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- 3. CAPACITY & LEADTIME ANALYSIS -->
-                <section id="capacity-analysis" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-lg font-bold text-white">3. Capacity & Leadtime (วิเคราะห์กำลังการผลิต)</h2>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <label class="text-xs text-slate-300 font-medium">เลือกข้อมูลพาร์ท:</label>
-                            <select id="capacityPartSelect" onchange="renderCapacityTable()" class="bg-slate-800 text-cyan-400 text-xs px-3 py-1.5 rounded-lg border border-bordercolor focus:outline-none">
-                                <option value="Back Plate">Back Plate</option>
-                                <option value="Bottom Plate">Bottom Plate</option>
-                                <option value="Gasket">Gasket</option>
-                                <option value="Door - Bending (RR)">Door - Bending (RR)</option>
-                                <option value="Door - Foaming (RR)">Door - Foaming (RR)</option>
-                                <option value="Door - Door Cap Assembly (RR)">Door - Door Cap Assembly (RR)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto rounded-lg border border-bordercolor/50 max-h-[350px]">
-                        <table id="tableCapacity" class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="border-b border-bordercolor text-slate-400 bg-slate-900 sticky top-0">
-                                    <th class="p-3">Product และ รุ่น</th>
-                                    <th class="p-3">Door / Part Detail</th>
-                                    <th class="p-3 text-center">Leadtime (s)</th>
-                                    <th class="p-3 text-center">Max CT (s)</th>
-                                    <th class="p-3 text-center text-cyan-300">UPH (3600 / Max CT * 85%)</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
-                        </table>
-                    </div>
-                </section>
             </div>
 
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
@@ -228,32 +189,32 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป[cite: 8]</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
+                            &larr; กลับหน้า Dashboard หลัก[cite: 8]
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-slate-400 mr-1">Part:</span>
+                                <span class="text-[10px] font-medium text-slate-400 mr-1">Part:[cite: 8]</span>
                                 <div id="partTabContainer" class="flex flex-wrap gap-1">
-                                    <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
-                                    <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
-                                    <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
+                                    <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate[cite: 8]</button>
+                                    <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate[cite: 8]</button>
+                                    <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket[cite: 8]</button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group (เลือกได้หลายกลุ่ม):</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group (เลือกได้หลายกลุ่ม):[cite: 8]</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model:[cite: 8]</span>
                             <div id="modelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -266,19 +227,19 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <div class="flex items-center space-x-1.5">
                                     <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
-                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis[cite: 8]</h3>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
-                                    <span>TT 100%: <strong id="displayTtVal" class="text-yellow-300">30.00s</strong></span>
+                                    <span>TT 100%: <strong id="displayTtVal" class="text-yellow-300">30.00s</strong>[cite: 8]</span>
                                     <span class="text-slate-500">|</span>
-                                    <span>TT 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50s</strong></span>
+                                    <span>TT 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50s</strong>[cite: 8]</span>
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-bordercolor shrink-0 text-xs">
-                            <label class="text-[11px] text-slate-300 font-medium">UPH:</label>
+                            <label class="text-[11px] text-slate-300 font-medium">UPH:[cite: 8]</label>
                             <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-2 py-1 w-16 text-center rounded border border-bordercolor focus:outline-none font-bold">
-                            <span class="text-[11px] text-slate-400">PCS/Hr</span>
+                            <span class="text-[11px] text-slate-400">PCS/Hr[cite: 8]</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -287,17 +248,17 @@
                         </div>
                         <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
                             <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
-                                <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)</span>
+                                <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)[cite: 8]</span>
                             </h3>
                             <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
-                                            <th class="p-1.5 text-center w-16">Station</th>
-                                            <th class="p-1.5">Process 1</th>
-                                            <th class="p-1.5 text-center">WT Tot</th>
-                                            <th class="p-1.5 text-center">Loss</th>
-                                            <th class="p-1.5 text-center text-cyan-300">CT</th>
+                                            <th class="p-1.5 text-center w-16">Station[cite: 8]</th>
+                                            <th class="p-1.5">Process 1[cite: 8]</th>
+                                            <th class="p-1.5 text-center">WT Tot[cite: 8]</th>
+                                            <th class="p-1.5 text-center">Loss[cite: 8]</th>
+                                            <th class="p-1.5 text-center text-cyan-300">CT[cite: 8]</th>
                                         </tr>
                                     </thead>
                                     <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]"></tbody>
@@ -311,46 +272,46 @@
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time</h3>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time[cite: 8]</h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
-                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel</button>
+                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel[cite: 8]</button>
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">
-                                <span>อัปโหลดเข้าตาราง</span>
+                                <span>อัปโหลดเข้าตาราง[cite: 8]</span>
                                 <input type="file" id="importProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importProcessExcelData(event)">
                             </label>
-                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เพิ่ม Station</button>
+                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เพิ่ม Station[cite: 8]</button>
                             <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold px-3 py-2 rounded-lg shadow transition">
-                                <span id="editModalBtnText">เปิดตารางแก้ไข Work Station</span>
+                                <span id="editModalBtnText">เปิดตารางแก้ไข Work Station[cite: 8]</span>
                             </button>
                         </div>
                     </div>
                     <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/90 p-4 rounded-xl shadow-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
-                                <h3 class="text-xs font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
+                                <h3 class="text-xs font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ[cite: 8]</h3>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span>[cite: 8]</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
-                                <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">ปิดหน้าต่าง</button>
+                                <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล[cite: 8]</button>
+                                <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">ปิดหน้าต่าง[cite: 8]</button>
                             </div>
                         </div>
                         <div class="overflow-x-auto max-h-[380px]">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-950 sticky top-0">
-                                        <th class="p-2 w-24 text-center">Station</th>
-                                        <th class="p-2">Process 1</th>
-                                        <th class="p-2">Process 2</th>
-                                        <th class="p-2">Process 3</th>
-                                        <th class="p-2 text-center w-16">WT 1</th>
-                                        <th class="p-2 text-center w-16">WT 2</th>
-                                        <th class="p-2 text-center w-16">WT 3</th>
-                                        <th class="p-2 text-center w-16">WT Total</th>
-                                        <th class="p-2 text-center w-16">Loss</th>
-                                        <th class="p-2 text-center w-20">Cycle Time</th>
-                                        <th class="p-2 text-center w-12">ลบ</th>
+                                        <th class="p-2 w-24 text-center">Station[cite: 8]</th>
+                                        <th class="p-2">Process 1[cite: 8]</th>
+                                        <th class="p-2">Process 2[cite: 8]</th>
+                                        <th class="p-2">Process 3[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT 1[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT 2[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT 3[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT Total[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">Loss[cite: 8]</th>
+                                        <th class="p-2 text-center w-20">Cycle Time[cite: 8]</th>
+                                        <th class="p-2 text-center w-12">ลบ[cite: 8]</th>
                                     </tr>
                                 </thead>
                                 <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30 text-[11px]"></tbody>
@@ -367,42 +328,42 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door[cite: 8]</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
+                            &larr; กลับหน้า Dashboard หลัก[cite: 8]
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
-                                <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
-                                <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Cap Assembly')" data-subpart="Door Cap Assembly" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Cap Assembly</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Liner')" data-subpart="Door Liner" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Liner</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Frame')" data-subpart="Door Frame" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Frame</button>
-                                <button type="button" onclick="selectDoorSubPart('Door Glass')" data-subpart="Door Glass" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Glass</button>
+                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:[cite: 8]</span>
+                                <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending[cite: 8]</button>
+                                <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming[cite: 8]</button>
+                                <button type="button" onclick="selectDoorSubPart('Door Cap Assembly')" data-subpart="Door Cap Assembly" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Cap Assembly[cite: 8]</button>
+                                <button type="button" onclick="selectDoorSubPart('Door Liner')" data-subpart="Door Liner" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Liner[cite: 8]</button>
+                                <button type="button" onclick="selectDoorSubPart('Door Frame')" data-subpart="Door Frame" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Frame[cite: 8]</button>
+                                <button type="button" onclick="selectDoorSubPart('Door Glass')" data-subpart="Door Glass" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Glass[cite: 8]</button>
                             </div>
                             <div class="flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40">
-                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:</span>
-                                <button type="button" onclick="selectDoorType('RR')" data-doortype="RR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500">RR</button>
-                                <button type="button" onclick="selectDoorType('RL')" data-doortype="RL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RL</button>
-                                <button type="button" onclick="selectDoorType('FR')" data-doortype="FR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
-                                <button type="button" onclick="selectDoorType('FL')" data-doortype="FL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FL</button>
-                                <button type="button" onclick="selectDoorType('VEG')" data-doortype="VEG" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">VEG</button>
-                                <button type="button" onclick="selectDoorType('FB')" data-doortype="FB" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FB</button>
+                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:[cite: 8]</span>
+                                <button type="button" onclick="selectDoorType('RR')" data-doortype="RR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500">RR[cite: 8]</button>
+                                <button type="button" onclick="selectDoorType('RL')" data-doortype="RL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RL[cite: 8]</button>
+                                <button type="button" onclick="selectDoorType('FR')" data-doortype="FR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR[cite: 8]</button>
+                                <button type="button" onclick="selectDoorType('FL')" data-doortype="FL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FL[cite: 8]</button>
+                                <button type="button" onclick="selectDoorType('VEG')" data-doortype="VEG" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">VEG[cite: 8]</button>
+                                <button type="button" onclick="selectDoorType('FB')" data-doortype="FB" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FB[cite: 8]</button>
                             </div>
                         </div>
 
                         <!-- Group และ Model สำหรับ Door -->
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group (เลือกได้หลายกลุ่ม):</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group (เลือกได้หลายกลุ่ม):[cite: 8]</span>
                             <div id="doorGroupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model:[cite: 8]</span>
                             <div id="doorModelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -415,19 +376,19 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <div class="flex items-center space-x-1.5">
                                     <div class="w-1.5 h-5 bg-amber-400 rounded-full"></div>
-                                    <h3 class="text-sm font-bold text-amber-400">กราฟ Line of Balance & Takt Time Analysis (Door Part)</h3>
+                                    <h3 class="text-sm font-bold text-amber-400">กราฟ Line of Balance & Takt Time Analysis (Door Part)[cite: 8]</h3>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
-                                    <span>TT 100%: <strong id="displayDoorTtVal" class="text-yellow-300">30.00s</strong></span>
+                                    <span>TT 100%: <strong id="displayDoorTtVal" class="text-yellow-300">30.00s</strong>[cite: 8]</span>
                                     <span class="text-slate-500">|</span>
-                                    <span>TT 85%: <strong id="displayDoorTtRedVal" class="text-rose-400">25.50s</strong></span>
+                                    <span>TT 85%: <strong id="displayDoorTtRedVal" class="text-rose-400">25.50s</strong>[cite: 8]</span>
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-bordercolor shrink-0 text-xs">
-                            <label class="text-[11px] text-slate-300 font-medium">UPH:</label>
+                            <label class="text-[11px] text-slate-300 font-medium">UPH:[cite: 8]</label>
                             <input type="number" id="doorUphInput" value="120" min="1" step="1" oninput="updateDoorLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-2 py-1 w-16 text-center rounded border border-bordercolor focus:outline-none font-bold">
-                            <span class="text-[11px] text-slate-400">PCS/Hr</span>
+                            <span class="text-[11px] text-slate-400">PCS/Hr[cite: 8]</span>
                         </div>
                     </div>
 
@@ -437,17 +398,17 @@
                         </div>
                         <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
                             <h3 class="text-xs font-semibold text-amber-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
-                                <span>Active Work Stations (Model: <span id="displayDoorActiveModelTag" class="text-cyan-400">-</span>)</span>
+                                <span>Active Work Stations (Model: <span id="displayDoorActiveModelTag" class="text-cyan-400">-</span>)[cite: 8]</span>
                             </h3>
                             <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
-                                            <th class="p-1.5 text-center w-16">Station</th>
-                                            <th class="p-1.5">Process 1</th>
-                                            <th class="p-1.5 text-center">WT Tot</th>
-                                            <th class="p-1.5 text-center">Loss</th>
-                                            <th class="p-1.5 text-center text-amber-300">CT</th>
+                                            <th class="p-1.5 text-center w-16">Station[cite: 8]</th>
+                                            <th class="p-1.5">Process 1[cite: 8]</th>
+                                            <th class="p-1.5 text-center">WT Tot[cite: 8]</th>
+                                            <th class="p-1.5 text-center">Loss[cite: 8]</th>
+                                            <th class="p-1.5 text-center text-amber-300">CT[cite: 8]</th>
                                         </tr>
                                     </thead>
                                     <tbody id="displayDoorSavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]"></tbody>
@@ -461,46 +422,46 @@
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time (Door Part)</h3>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time (Door Part)[cite: 8]</h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
-                            <button onclick="downloadDoorProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel</button>
+                            <button onclick="downloadDoorProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel[cite: 8]</button>
                             <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">
-                                <span>อัปโหลดเข้าตาราง</span>
+                                <span>อัปโหลดเข้าตาราง[cite: 8]</span>
                                 <input type="file" id="importDoorProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importDoorProcessExcelData(event)">
                             </label>
-                            <button onclick="addDoorNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เพิ่ม Station</button>
+                            <button onclick="addDoorNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เพิ่ม Station[cite: 8]</button>
                             <button onclick="toggleDoorEditModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-semibold px-3 py-2 rounded-lg shadow transition">
-                                <span id="editDoorModalBtnText">เปิดตารางแก้ไข Work Station (Door)</span>
+                                <span id="editDoorModalBtnText">เปิดตารางแก้ไข Work Station (Door)[cite: 8]</span>
                             </button>
                         </div>
                     </div>
                     <div id="editDoorProcessSection" class="space-y-3 hidden border border-amber-500/30 bg-slate-900/90 p-4 rounded-xl shadow-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
-                                <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span></p>
+                                <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)[cite: 8]</h3>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span>[cite: 8]</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="saveDoorProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
-                                <button onclick="toggleDoorEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">ปิดหน้าต่าง</button>
+                                <button onclick="saveDoorProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล[cite: 8]</button>
+                                <button onclick="toggleDoorEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">ปิดหน้าต่าง[cite: 8]</button>
                             </div>
                         </div>
                         <div class="overflow-x-auto max-h-[380px]">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-400 bg-slate-950 sticky top-0">
-                                        <th class="p-2 w-24 text-center">Station</th>
-                                        <th class="p-2">Process 1</th>
-                                        <th class="p-2">Process 2</th>
-                                        <th class="p-2">Process 3</th>
-                                        <th class="p-2 text-center w-16">WT 1</th>
-                                        <th class="p-2 text-center w-16">WT 2</th>
-                                        <th class="p-2 text-center w-16">WT 3</th>
-                                        <th class="p-2 text-center w-16">WT Total</th>
-                                        <th class="p-2 text-center w-16">Loss</th>
-                                        <th class="p-2 text-center w-20">Cycle Time</th>
-                                        <th class="p-2 text-center w-12">ลบ</th>
+                                        <th class="p-2 w-24 text-center">Station[cite: 8]</th>
+                                        <th class="p-2">Process 1[cite: 8]</th>
+                                        <th class="p-2">Process 2[cite: 8]</th>
+                                        <th class="p-2">Process 3[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT 1[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT 2[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT 3[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">WT Total[cite: 8]</th>
+                                        <th class="p-2 text-center w-16">Loss[cite: 8]</th>
+                                        <th class="p-2 text-center w-20">Cycle Time[cite: 8]</th>
+                                        <th class="p-2 text-center w-12">ลบ[cite: 8]</th>
                                     </tr>
                                 </thead>
                                 <tbody id="doorProcessTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30 text-[11px]"></tbody>
@@ -517,194 +478,193 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)
-        let selectedPartValue = 'Back Plate'; 
-        let selectedProductGroups = new Set(); // เปลี่ยนเป็น Set รองรับหลาย Group
-        let selectedModels = new Set(); 
+        // State สำหรับส่วนพาร์ททั่วไป (Work Process Tab)[cite: 8]
+        let selectedPartValue = 'Back Plate';[cite: 8]
+        let selectedProductGroups = new Set();[cite: 8]
+        let selectedModels = new Set();[cite: 8]
 
-        // State สำหรับส่วนพาร์ท Door (Door Parts Tab - แยกข้อมูลออกอิสระ)
-        let selectedDoorSubPart = 'Bending';
-        let selectedDoorType = 'RR';
-        let selectedDoorProductGroups = new Set(); // เปลี่ยนเป็น Set รองรับหลาย Group
-        let selectedDoorModels = new Set();
+        // State สำหรับส่วนพาร์ท Door (Door Parts Tab - แยกข้อมูลออกอิสระ)[cite: 8]
+        let selectedDoorSubPart = 'Bending';[cite: 8]
+        let selectedDoorType = 'RR';[cite: 8]
+        let selectedDoorProductGroups = new Set();[cite: 8]
+        let selectedDoorModels = new Set();[cite: 8]
 
         function selectPartTab(partName) {
-            selectedPartValue = partName;
+            selectedPartValue = partName;[cite: 8]
             document.querySelectorAll('.part-tab-btn').forEach(btn => {
                 if (btn.getAttribute('data-part') === partName) {
-                    btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                    btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500';[cite: 8]
                 } else {
-                    btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
                 }
             });
-            loadProcessDataForCurrentSelection();
+            loadProcessDataForCurrentSelection();[cite: 8]
         }
 
-        // Functions สำหรับ Door Part Tab
+        // Functions สำหรับ Door Part Tab[cite: 8]
         function selectDoorSubPart(subPartName) {
-            selectedDoorSubPart = subPartName;
+            selectedDoorSubPart = subPartName;[cite: 8]
             document.querySelectorAll('.door-sub-btn').forEach(btn => {
                 if (btn.getAttribute('data-subpart') === subPartName) {
-                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500';
+                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500';[cite: 8]
                 } else {
-                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
                 }
             });
-            loadDoorProcessDataForCurrentSelection();
+            loadDoorProcessDataForCurrentSelection();[cite: 8]
         }
 
         function selectDoorType(typeName) {
-            selectedDoorType = typeName;
+            selectedDoorType = typeName;[cite: 8]
             document.querySelectorAll('.door-type-btn').forEach(btn => {
                 if (btn.getAttribute('data-doortype') === typeName) {
-                    btn.className = 'door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500';
+                    btn.className = 'door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500';[cite: 8]
                 } else {
-                    btn.className = 'door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
                 }
             });
-            loadDoorProcessDataForCurrentSelection();
+            loadDoorProcessDataForCurrentSelection();[cite: 8]
         }
 
         let defaultDailyPlanData = {
-            days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],
+            days: ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'],[cite: 8]
             groups: [
                 {
-                    productGroup: '159',
+                    productGroup: '159',[cite: 8]
                     models: [
-                        { name: '159C', orders: [610, 610, 592, 592, 592, 0, 629, 585] },
-                        { name: '159F', orders: [210, 163, 15, 225, 0, 0, 0, 0] }
+                        { name: '159C', orders: [610, 610, 592, 592, 592, 0, 629, 585] },[cite: 8]
+                        { name: '159F', orders: [210, 163, 15, 225, 0, 0, 0, 0] }[cite: 8]
                     ]
                 },
                 {
-                    productGroup: '199',
+                    productGroup: '199',[cite: 8]
                     models: [
-                        { name: '199C', orders: [480, 480, 480, 480, 460, 0, 520, 455] },
-                        { name: '199F', orders: [0, 0, 0, 35, 260, 0, 260, 260] }
+                        { name: '199C', orders: [480, 480, 480, 480, 460, 0, 520, 455] },[cite: 8]
+                        { name: '199F', orders: [0, 0, 0, 35, 260, 0, 260, 260] }[cite: 8]
                     ]
                 }
             ]
         };
 
-        let currentDailyData = defaultDailyPlanData;
+        let currentDailyData = defaultDailyPlanData;[cite: 8]
         try {
-            let saved = localStorage.getItem('haier_daily_plan_data');
+            let saved = localStorage.getItem('haier_daily_plan_data');[cite: 8]
             if (saved) {
-                let parsed = JSON.parse(saved);
+                let parsed = JSON.parse(saved);[cite: 8]
                 if (parsed && parsed.groups && parsed.groups.length > 0) {
-                    currentDailyData = parsed;
+                    currentDailyData = parsed;[cite: 8]
                 }
             }
         } catch (err) {
-            console.error(err);
+            console.error(err);[cite: 8]
         }
 
-        // Database สำหรับพาร์ททั่วไป
-        let processDatabase = {};
+        // Database สำหรับพาร์ททั่วไป[cite: 8]
+        let processDatabase = {};[cite: 8]
         try {
-            let savedDB = localStorage.getItem('haier_process_db_v7');
-            if (savedDB) { processDatabase = JSON.parse(savedDB); }
-        } catch (e) { console.error(e); }
-        let currentProcessData = [];
+            let savedDB = localStorage.getItem('haier_process_db_v7');[cite: 8]
+            if (savedDB) { processDatabase = JSON.parse(savedDB); }[cite: 8]
+        } catch (e) { console.error(e); }[cite: 8]
+        let currentProcessData = [];[cite: 8]
 
-        // Database แยกอิสระสำหรับ Door Part
-        let doorProcessDatabase = {};
+        // Database แยกอิสระสำหรับ Door Part[cite: 8]
+        let doorProcessDatabase = {};[cite: 8]
         try {
-            let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');
-            if (savedDoorDB) { doorProcessDatabase = JSON.parse(savedDoorDB); }
-        } catch (e) { console.error(e); }
-        let currentDoorProcessData = [];
+            let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');[cite: 8]
+            if (savedDoorDB) { doorProcessDatabase = JSON.parse(savedDoorDB); }[cite: 8]
+        } catch (e) { console.error(e); }[cite: 8]
+        let currentDoorProcessData = [];[cite: 8]
 
         function getEmptyDefaultStations() {
             return [
-                { station: 'STA01', p1: 'Feeding', p2: 'Pressing', p3: '', wt1: 12.5, wt2: 8.0, wt3: null, loss: 2.0 },
-                { station: 'STA02', p1: 'Welding', p2: 'Inspection', p3: '', wt1: 15.0, wt2: 5.0, wt3: null, loss: 1.5 },
-                { station: 'STA03', p1: 'Coating', p2: '', p3: '', wt1: 20.0, wt2: null, wt3: null, loss: 2.0 },
-                { station: 'STA04', p1: 'Assembly', p2: 'Packing', p3: '', wt1: 18.0, wt2: 6.0, wt3: null, loss: 1.0 }
+                { station: 'STA01', p1: 'Feeding', p2: 'Pressing', p3: '', wt1: 12.5, wt2: 8.0, wt3: null, loss: 2.0 },[cite: 8]
+                { station: 'STA02', p1: 'Welding', p2: 'Inspection', p3: '', wt1: 15.0, wt2: 5.0, wt3: null, loss: 1.5 },[cite: 8]
+                { station: 'STA03', p1: 'Coating', p2: '', p3: '', wt1: 20.0, wt2: null, wt3: null, loss: 2.0 },[cite: 8]
+                { station: 'STA04', p1: 'Assembly', p2: 'Packing', p3: '', wt1: 18.0, wt2: 6.0, wt3: null, loss: 1.0 }[cite: 8]
             ];
         }
 
         function loadProcessDataForCurrentSelection() {
-            let modelsArray = Array.from(selectedModels);
-            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${selectedPartValue}` : 'default';
+            let modelsArray = Array.from(selectedModels);[cite: 8]
+            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';[cite: 8]
+            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${selectedPartValue}` : 'default';[cite: 8]
 
-            document.getElementById('editModelNameTag').textContent = modelKey;
-            document.getElementById('editPartNameTag').textContent = selectedPartValue;
-            document.getElementById('displayActiveModelTag').textContent = modelKey;
+            document.getElementById('editModelNameTag').textContent = modelKey;[cite: 8]
+            document.getElementById('editPartNameTag').textContent = selectedPartValue;[cite: 8]
+            document.getElementById('displayActiveModelTag').textContent = modelKey;[cite: 8]
 
             if (processDatabase[storageKey] && Array.isArray(processDatabase[storageKey])) {
-                currentProcessData = JSON.parse(JSON.stringify(processDatabase[storageKey]));
+                currentProcessData = JSON.parse(JSON.stringify(processDatabase[storageKey]));[cite: 8]
             } else {
-                currentProcessData = getEmptyDefaultStations();
+                currentProcessData = getEmptyDefaultStations();[cite: 8]
             }
 
-            renderProcessTableInputs();
-            renderSavedDisplayTable();
-            updateLobChart();
+            renderProcessTableInputs();[cite: 8]
+            renderSavedDisplayTable();[cite: 8]
+            updateLobChart();[cite: 8]
         }
 
-        // โหลดข้อมูลเฉพาะของ Door Part
+        // โหลดข้อมูลเฉพาะของ Door Part[cite: 8]
         function loadDoorProcessDataForCurrentSelection() {
-            let modelsArray = Array.from(selectedDoorModels);
-            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';
-            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
-            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${effectivePart}` : 'door_default';
+            let modelsArray = Array.from(selectedDoorModels);[cite: 8]
+            let modelKey = modelsArray.length > 0 ? modelsArray.join(', ') : '-';[cite: 8]
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;[cite: 8]
+            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${effectivePart}` : 'door_default';[cite: 8]
 
-            document.getElementById('editDoorModelNameTag').textContent = modelKey;
-            document.getElementById('editDoorSubPartTag').textContent = selectedDoorSubPart;
-            document.getElementById('editDoorTypeTag').textContent = selectedDoorType;
-            document.getElementById('displayDoorActiveModelTag').textContent = modelKey;
+            document.getElementById('editDoorModelNameTag').textContent = modelKey;[cite: 8]
+            document.getElementById('editDoorSubPartTag').textContent = selectedDoorSubPart;[cite: 8]
+            document.getElementById('editDoorTypeTag').textContent = selectedDoorType;[cite: 8]
+            document.getElementById('displayDoorActiveModelTag').textContent = modelKey;[cite: 8]
 
             if (doorProcessDatabase[storageKey] && Array.isArray(doorProcessDatabase[storageKey])) {
-                currentDoorProcessData = JSON.parse(JSON.stringify(doorProcessDatabase[storageKey]));
+                currentDoorProcessData = JSON.parse(JSON.stringify(doorProcessDatabase[storageKey]));[cite: 8]
             } else {
-                currentDoorProcessData = getEmptyDefaultStations();
+                currentDoorProcessData = getEmptyDefaultStations();[cite: 8]
             }
 
-            renderDoorProcessTableInputs();
-            renderDoorSavedDisplayTable();
-            updateDoorLobChart();
+            renderDoorProcessTableInputs();[cite: 8]
+            renderDoorSavedDisplayTable();[cite: 8]
+            updateDoorLobChart();[cite: 8]
         }
 
-        let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
-        document.getElementById('shiftHoursInput').value = savedShiftHours;
+        let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';[cite: 8]
+        document.getElementById('shiftHoursInput').value = savedShiftHours;[cite: 8]
 
         function saveShiftHours() {
-            let hours = document.getElementById('shiftHoursInput').value;
-            localStorage.setItem('haier_shift_hours', hours);
-            alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
-            renderUnifiedTable(currentDailyData);
-            renderCapacityTable();
+            let hours = document.getElementById('shiftHoursInput').value;[cite: 8]
+            localStorage.setItem('haier_shift_hours', hours);[cite: 8]
+            alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);[cite: 8]
+            renderUnifiedTable(currentDailyData);[cite: 8]
         }
 
         function calculateTotalOrders(groupsData, days) {
-            let totalOutputs = new Array(days.length).fill(0);
+            let totalOutputs = new Array(days.length).fill(0);[cite: 8]
             if (groupsData && Array.isArray(groupsData)) {
                 groupsData.forEach(g => {
                     if (g.models && Array.isArray(g.models)) {
                         g.models.forEach(m => {
                             for (let i = 0; i < days.length; i++) {
-                                totalOutputs[i] += Number(m.orders[i]) || 0;
+                                totalOutputs[i] += Number(m.orders[i]) || 0;[cite: 8]
                             }
                         });
                     }
                 });
             }
-            return { totalOutputs };
+            return { totalOutputs };[cite: 8]
         }
 
-        const ctxPlan = document.getElementById('planChart').getContext('2d');
-        let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
+        const ctxPlan = document.getElementById('planChart').getContext('2d');[cite: 8]
+        let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);[cite: 8]
 
         let planChart = new Chart(ctxPlan, {
             type: 'bar',
             data: {
-                labels: currentDailyData.days,
+                labels: currentDailyData.days,[cite: 8]
                 datasets: [{
-                    label: 'Total Order (ยอดสั่งผลิตรวม)',
-                    data: initialCalc.totalOutputs,
-                    backgroundColor: '#00F0FF',
-                    borderRadius: 4
+                    label: 'Total Order (ยอดสั่งผลิตรวม)',[cite: 8]
+                    data: initialCalc.totalOutputs,[cite: 8]
+                    backgroundColor: '#00F0FF',[cite: 8]
+                    borderRadius: 4[cite: 8]
                 }]
             },
             options: {
@@ -718,16 +678,16 @@
             }
         });
 
-        // Chart สำหรับพาร์ททั่วไป
-        const ctxLob = document.getElementById('lobChart').getContext('2d');
+        // Chart สำหรับพาร์ททั่วไป[cite: 8]
+        const ctxLob = document.getElementById('lobChart').getContext('2d');[cite: 8]
         let lobChart = new Chart(ctxLob, {
             type: 'bar',
             data: {
                 labels: [],
                 datasets: [
-                    { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#0066FF', borderRadius: 4, order: 2 },
-                    { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
-                    { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
+                    { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#0066FF', borderRadius: 4, order: 2 },[cite: 8]
+                    { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },[cite: 8]
+                    { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }[cite: 8]
                 ]
             },
             options: {
@@ -741,16 +701,16 @@
             }
         });
 
-        // Chart แยกสำหรับ Door Part
-        const ctxDoorLob = document.getElementById('doorLobChart').getContext('2d');
+        // Chart แยกสำหรับ Door Part[cite: 8]
+        const ctxDoorLob = document.getElementById('doorLobChart').getContext('2d');[cite: 8]
         let doorLobChart = new Chart(ctxDoorLob, {
             type: 'bar',
             data: {
                 labels: [],
                 datasets: [
-                    { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#d97706', borderRadius: 4, order: 2 },
-                    { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
-                    { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
+                    { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#d97706', borderRadius: 4, order: 2 },[cite: 8]
+                    { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },[cite: 8]
+                    { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }[cite: 8]
                 ]
             },
             options: {
@@ -765,12 +725,12 @@
         });
 
         function updateLobChart() {
-            let uph = parseFloat(document.getElementById('uphInput').value) || 120;
-            let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            let taktTime85 = taktTime100 * 0.85;
+            let uph = parseFloat(document.getElementById('uphInput').value) || 120;[cite: 8]
+            let taktTime100 = uph > 0 ? 3600 / uph : 0;[cite: 8]
+            let taktTime85 = taktTime100 * 0.85;[cite: 8]
 
-            document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)}s`;
-            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;
+            document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)}s`;[cite: 8]
+            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;[cite: 8]
 
             let labels = [];
             let ctData = [];
@@ -779,35 +739,35 @@
 
             if (currentProcessData && currentProcessData.length > 0) {
                 currentProcessData.forEach(item => {
-                    let w1 = parseFloat(item.wt1) || 0;
-                    let w2 = parseFloat(item.wt2) || 0;
-                    let w3 = parseFloat(item.wt3) || 0;
-                    let l = parseFloat(item.loss) || 0;
-                    let ct = Number((w1 + w2 + w3 + l).toFixed(2));
+                    let w1 = parseFloat(item.wt1) || 0;[cite: 8]
+                    let w2 = parseFloat(item.wt2) || 0;[cite: 8]
+                    let w3 = parseFloat(item.wt3) || 0;[cite: 8]
+                    let l = parseFloat(item.loss) || 0;[cite: 8]
+                    let ct = Number((w1 + w2 + w3 + l).toFixed(2));[cite: 8]
 
-                    labels.push(item.station || 'STA');
-                    ctData.push(ct);
-                    ttLine1.push(taktTime100);
-                    ttLine2.push(taktTime85);
+                    labels.push(item.station || 'STA');[cite: 8]
+                    ctData.push(ct);[cite: 8]
+                    ttLine1.push(taktTime100);[cite: 8]
+                    ttLine2.push(taktTime85);[cite: 8]
                 });
             }
 
-            lobChart.data.labels = labels;
-            lobChart.data.datasets[0].data = ctData;
-            lobChart.data.datasets[1].data = ttLine1;
-            lobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
-            lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;
-            lobChart.update();
+            lobChart.data.labels = labels;[cite: 8]
+            lobChart.data.datasets[0].data = ctData;[cite: 8]
+            lobChart.data.datasets[1].data = ttLine1;[cite: 8]
+            lobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;[cite: 8]
+            lobChart.data.datasets[2].data = ttLine2;[cite: 8]
+            lobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;[cite: 8]
+            lobChart.update();[cite: 8]
         }
 
         function updateDoorLobChart() {
-            let uph = parseFloat(document.getElementById('doorUphInput').value) || 120;
-            let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            let taktTime85 = taktTime100 * 0.85;
+            let uph = parseFloat(document.getElementById('doorUphInput').value) || 120;[cite: 8]
+            let taktTime100 = uph > 0 ? 3600 / uph : 0;[cite: 8]
+            let taktTime85 = taktTime100 * 0.85;[cite: 8]
 
-            document.getElementById('displayDoorTtVal').textContent = `${taktTime100.toFixed(2)}s`;
-            document.getElementById('displayDoorTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;
+            document.getElementById('displayDoorTtVal').textContent = `${taktTime100.toFixed(2)}s`;[cite: 8]
+            document.getElementById('displayDoorTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;[cite: 8]
 
             let labels = [];
             let ctData = [];
@@ -816,65 +776,65 @@
 
             if (currentDoorProcessData && currentDoorProcessData.length > 0) {
                 currentDoorProcessData.forEach(item => {
-                    let w1 = parseFloat(item.wt1) || 0;
-                    let w2 = parseFloat(item.wt2) || 0;
-                    let w3 = parseFloat(item.wt3) || 0;
-                    let l = parseFloat(item.loss) || 0;
-                    let ct = Number((w1 + w2 + w3 + l).toFixed(2));
+                    let w1 = parseFloat(item.wt1) || 0;[cite: 8]
+                    let w2 = parseFloat(item.wt2) || 0;[cite: 8]
+                    let w3 = parseFloat(item.wt3) || 0;[cite: 8]
+                    let l = parseFloat(item.loss) || 0;[cite: 8]
+                    let ct = Number((w1 + w2 + w3 + l).toFixed(2));[cite: 8]
 
-                    labels.push(item.station || 'STA');
-                    ctData.push(ct);
-                    ttLine1.push(taktTime100);
-                    ttLine2.push(taktTime85);
+                    labels.push(item.station || 'STA');[cite: 8]
+                    ctData.push(ct);[cite: 8]
+                    ttLine1.push(taktTime100);[cite: 8]
+                    ttLine2.push(taktTime85);[cite: 8]
                 });
             }
 
-            doorLobChart.data.labels = labels;
-            doorLobChart.data.datasets[0].data = ctData;
-            doorLobChart.data.datasets[1].data = ttLine1;
-            doorLobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
-            doorLobChart.data.datasets[2].data = ttLine2;
-            doorLobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;
-            doorLobChart.update();
+            doorLobChart.data.labels = labels;[cite: 8]
+            doorLobChart.data.datasets[0].data = ctData;[cite: 8]
+            doorLobChart.data.datasets[1].data = ttLine1;[cite: 8]
+            doorLobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;[cite: 8]
+            doorLobChart.data.datasets[2].data = ttLine2;[cite: 8]
+            doorLobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;[cite: 8]
+            doorLobChart.update();[cite: 8]
         }
 
         function formatExcelDate(val) {
-            let num = Number(val);
+            let num = Number(val);[cite: 8]
             if (!isNaN(num) && num > 30000) {
-                let utc_days = Math.floor(num - 25569);
-                let dateInfo = new Date(utc_days * 86400 * 1000);
-                return `${dateInfo.getUTCMonth() + 1}/${dateInfo.getUTCDate()}`;
+                let utc_days = Math.floor(num - 25569);[cite: 8]
+                let dateInfo = new Date(utc_days * 86400 * 1000);[cite: 8]
+                return `${dateInfo.getUTCMonth() + 1}/${dateInfo.getUTCDate()}`;[cite: 8]
             }
-            return String(val).trim();
+            return String(val).trim();[cite: 8]
         }
 
         function renderUnifiedTable(data) {
-            const tableElement = document.getElementById('tablePlanOrder');
-            if(!tableElement) return;
-            const headerRow = tableElement.querySelector('thead tr');
-            const tbody = tableElement.querySelector('tbody');
+            const tableElement = document.getElementById('tablePlanOrder');[cite: 8]
+            if(!tableElement) return;[cite: 8]
+            const headerRow = tableElement.querySelector('thead tr');[cite: 8]
+            const tbody = tableElement.querySelector('tbody');[cite: 8]
 
-            headerRow.innerHTML = '';
-            tbody.innerHTML = '';
+            headerRow.innerHTML = '';[cite: 8]
+            tbody.innerHTML = '';[cite: 8]
 
-            let days = data.days;
-            let groups = data.groups;
-            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+            let days = data.days;[cite: 8]
+            let groups = data.groups;[cite: 8]
+            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;[cite: 8]
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;[cite: 8]
             days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;[cite: 8]
             });
-            headerRow.innerHTML = headerHtml;
+            headerRow.innerHTML = headerHtml;[cite: 8]
 
-            let calc = calculateTotalOrders(groups, days);
+            let calc = calculateTotalOrders(groups, days);[cite: 8]
 
-            let totalTr = document.createElement('tr');
-            totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
+            let totalTr = document.createElement('tr');[cite: 8]
+            totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';[cite: 8]
+            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;[cite: 8]
             for (let i = 0; i < days.length; i++) {
-                let dayTotal = calc.totalOutputs[i];
-                let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
+                let dayTotal = calc.totalOutputs[i];[cite: 8]
+                let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;[cite: 8]
                 totalHtml += `
                     <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
                         <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
@@ -882,24 +842,24 @@
                     </td>
                 `;
             }
-            totalTr.innerHTML = totalHtml;
-            tbody.appendChild(totalTr);
+            totalTr.innerHTML = totalHtml;[cite: 8]
+            tbody.appendChild(totalTr);[cite: 8]
 
-            if (!groups || groups.length === 0) return;
+            if (!groups || groups.length === 0) return;[cite: 8]
 
             groups.forEach(g => {
                 g.models.forEach((m, mIndex) => {
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                    let html = '';
+                    let tr = document.createElement('tr');[cite: 8]
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';[cite: 8]
+                    let html = '';[cite: 8]
                     if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;[cite: 8]
                     }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;[cite: 8]
                     for (let i = 0; i < days.length; i++) {
-                        let orderVal = Number(m.orders[i]) || 0;
-                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
-                        let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
+                        let orderVal = Number(m.orders[i]) || 0;[cite: 8]
+                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';[cite: 8]
+                        let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';[cite: 8]
                         html += `
                             <td class="p-2 text-center border-l border-bordercolor/30">
                                 <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
@@ -907,317 +867,252 @@
                             </td>
                         `;
                     }
-                    tr.innerHTML = html;
-                    tbody.appendChild(tr);
+                    tr.innerHTML = html;[cite: 8]
+                    tbody.appendChild(tr);[cite: 8]
                 });
             });
         }
 
-        renderUnifiedTable(currentDailyData);
-
-        // Render Capacity Table function
-        function renderCapacityTable() {
-    const tbody = document.querySelector('#tableCapacity tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const selectedPart = document.getElementById('capacityPartSelect').value;
-    let groups = currentDailyData.groups;
-
-    if (!groups || groups.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูลแผนการผลิต</td></tr>`;
-        return;
-    }
-
-    groups.forEach(g => {
-        g.models.forEach(m => {
-            let storageKey = '';
-            let dbSource = processDatabase;
-
-            if (selectedPart === 'Door') {
-                dbSource = doorProcessDatabase;
-                // ค้นหา Key ของ Door สำหรับ Model นี้ในฐานข้อมูล Door (เช่น Door (Bending - RR) หรือคีย์แรกที่พบ)
-                let foundKey = Object.keys(doorProcessDatabase).find(k => k.startsWith(`${m.name}_Door`));
-                storageKey = foundKey || `${m.name}_Door (Bending - RR)`;
-            } else {
-                storageKey = `${m.name}_${selectedPart}`;
-                dbSource = processDatabase;
-            }
-
-            let stations = dbSource[storageKey] || getEmptyDefaultStations();
-            let totalLeadtime = 0;
-            let maxCt = 0;
-
-            stations.forEach(st => {
-                let w1 = parseFloat(st.wt1) || 0;
-                let w2 = parseFloat(st.wt2) || 0;
-                let w3 = parseFloat(st.wt3) || 0;
-                let l = parseFloat(st.loss) || 0;
-                let ct = w1 + w2 + w3 + l;
-                totalLeadtime += ct;
-                if (ct > maxCt) maxCt = ct;
-            });
-
-            let uphVal = maxCt > 0 ? (3600 / maxCt) * 0.85 : 0;
-
-            let tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/30 transition';
-            tr.innerHTML = `
-                <td class="p-3 font-semibold text-white">Group ${g.productGroup} - ${m.name}</td>
-                <td class="p-3 text-cyan-400 font-medium">${selectedPart}</td>
-                <td class="p-3 text-center font-bold text-slate-200">${totalLeadtime.toFixed(2)}</td>
-                <td class="p-3 text-center font-bold text-amber-400">${maxCt.toFixed(2)}</td>
-                <td class="p-3 text-center font-bold text-cyan-300">${Math.round(uphVal).toLocaleString()} PCS/Hr</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    });
-}
-
-        renderCapacityTable();
+        renderUnifiedTable(currentDailyData);[cite: 8]
 
         function previewExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
-            const reader = new FileReader();
+            const file = event.target.files[0];[cite: 8]
+            if (!file) return;[cite: 8]
+            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;[cite: 8]
+            const reader = new FileReader();[cite: 8]
             reader.onload = function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const data = new Uint8Array(e.target.result);[cite: 8]
+                    const workbook = XLSX.read(data, { type: 'array' });[cite: 8]
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];[cite: 8]
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });[cite: 8]
 
                     if (excelJson.length > 1) {
-                        let headerRow = excelJson[0];
-                        let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
-                        let days = rawDays.map(d => formatExcelDate(d));
-                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
+                        let headerRow = excelJson[0];[cite: 8]
+                        let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');[cite: 8]
+                        let days = rawDays.map(d => formatExcelDate(d));[cite: 8]
+                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];[cite: 8]
 
-                        let groupMap = {};
-                        let groupOrderList = [];
-                        let currentProductGroup = 'Other';
+                        let groupMap = {};[cite: 8]
+                        let groupOrderList = [];[cite: 8]
+                        let currentProductGroup = 'Other';[cite: 8]
 
                         for (let i = 1; i < excelJson.length; i++) {
-                            let row = excelJson[i];
-                            if (!row || row.length === 0) continue;
-                            let prodCell = row[0];
+                            let row = excelJson[i];[cite: 8]
+                            if (!row || row.length === 0) continue;[cite: 8]
+                            let prodCell = row[0];[cite: 8]
                             if (prodCell !== undefined && String(prodCell).trim() !== '') {
-                                currentProductGroup = String(prodCell).trim();
+                                currentProductGroup = String(prodCell).trim();[cite: 8]
                             }
-                            let modelName = String(row[1] || '').trim();
+                            let modelName = String(row[1] || '').trim();[cite: 8]
                             if (modelName !== '') {
-                                let orders = row.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+                                let orders = row.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));[cite: 8]
                                 if (!groupMap[currentProductGroup]) {
-                                    groupMap[currentProductGroup] = [];
-                                    groupOrderList.push(currentProductGroup);
+                                    groupMap[currentProductGroup] = [];[cite: 8]
+                                    groupOrderList.push(currentProductGroup);[cite: 8]
                                 }
-                                groupMap[currentProductGroup].push({ name: modelName, orders: orders });
+                                groupMap[currentProductGroup].push({ name: modelName, orders: orders });[cite: 8]
                             }
                         }
 
-                        let groups = [];
+                        let groups = [];[cite: 8]
                         groupOrderList.forEach(gName => {
-                            groups.push({ productGroup: gName, models: groupMap[gName] });
+                            groups.push({ productGroup: gName, models: groupMap[gName] });[cite: 8]
                         });
 
                         if (groups.length > 0) {
-                            window.tempImportedData = { days: days, groups: groups };
-                            renderUnifiedTable(window.tempImportedData);
-                            renderCapacityTable();
-                            let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
-                            planChart.data.labels = window.tempImportedData.days;
-                            planChart.data.datasets[0].data = newCalc.totalOutputs;
-                            planChart.update();
-                            alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล"');
+                            window.tempImportedData = { days: days, groups: groups };[cite: 8]
+                            renderUnifiedTable(window.tempImportedData);[cite: 8]
+                            let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);[cite: 8]
+                            planChart.data.labels = window.tempImportedData.days;[cite: 8]
+                            planChart.data.datasets[0].data = newCalc.totalOutputs;[cite: 8]
+                            planChart.update();[cite: 8]
+                            alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล"');[cite: 8]
                         }
                     }
-                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }[cite: 8]
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(file);[cite: 8]
         }
 
         function saveDashboardData() {
             if (!window.tempImportedData) {
-                alert('กรุณาเลือกไฟล์ Excel ใหม่ก่อนบันทึกข้อมูล');
+                alert('กรุณาเลือกไฟล์ Excel ใหม่ก่อนบันทึกข้อมูล');[cite: 8]
                 return;
             }
-            currentDailyData = window.tempImportedData;
-            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            initGroupRadioButtons(currentDailyData);
-            initDoorGroupRadioButtons(currentDailyData);
-            renderCapacityTable();
-            alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
+            currentDailyData = window.tempImportedData;[cite: 8]
+            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));[cite: 8]
+            initGroupRadioButtons(currentDailyData);[cite: 8]
+            initDoorGroupRadioButtons(currentDailyData);[cite: 8]
+            alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');[cite: 8]
         }
 
-        // Template & Import สำหรับพาร์ททั่วไป
+        // Template & Import สำหรับพาร์ททั่วไป[cite: 8]
         function downloadProcessTemplate() {
             let templateData = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA01", "Feeding", "Pressing", "", 12.5, 8.0, "", 2.0],
-                ["STA02", "Welding", "Inspection", "", 15.0, 5.0, "", 1.5]
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],[cite: 8]
+                ["STA01", "Feeding", "Pressing", "", 12.5, 8.0, "", 2.0],[cite: 8]
+                ["STA02", "Welding", "Inspection", "", 15.0, 5.0, "", 1.5][cite: 8]
             ];
-            let ws = XLSX.utils.aoa_to_sheet(templateData);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
-            XLSX.writeFile(wb, "Work_Process_Template.xlsx");
+            let ws = XLSX.utils.aoa_to_sheet(templateData);[cite: 8]
+            let wb = XLSX.utils.book_new();[cite: 8]
+            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");[cite: 8]
+            XLSX.writeFile(wb, "Work_Process_Template.xlsx");[cite: 8]
         }
 
         function importProcessExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
+            const file = event.target.files[0];[cite: 8]
+            if (!file) return;[cite: 8]
+            const reader = new FileReader();[cite: 8]
             reader.onload = function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const data = new Uint8Array(e.target.result);[cite: 8]
+                    const workbook = XLSX.read(data, { type: 'array' });[cite: 8]
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];[cite: 8]
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });[cite: 8]
                     if (excelJson.length > 1) {
-                        let importedStations = [];
+                        let importedStations = [];[cite: 8]
                         for (let i = 1; i < excelJson.length; i++) {
-                            let row = excelJson[i];
-                            if (!row || row.length === 0) continue;
-                            let station = String(row[0] || '').trim();
-                            if (!station) continue;
+                            let row = excelJson[i];[cite: 8]
+                            if (!row || row.length === 0) continue;[cite: 8]
+                            let station = String(row[0] || '').trim();[cite: 8]
+                            if (!station) continue;[cite: 8]
                             importedStations.push({
                                 station: station,
-                                p1: String(row[1] || '').trim(),
-                                p2: String(row[2] || '').trim(),
-                                p3: String(row[3] || '').trim(),
-                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
-                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
-                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
-                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
+                                p1: String(row[1] || '').trim(),[cite: 8]
+                                p2: String(row[2] || '').trim(),[cite: 8]
+                                p3: String(row[3] || '').trim(),[cite: 8]
+                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,[cite: 8]
+                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,[cite: 8]
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,[cite: 8]
+                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null[cite: 8]
                             });
                         }
                         if (importedStations.length > 0) {
-                            currentProcessData = importedStations;
-                            renderProcessTableInputs();
-                            updateLobChart();
-                            renderCapacityTable();
-                            const editSection = document.getElementById('editProcessSection');
-                            if (editSection.classList.contains('hidden')) { toggleEditModal(); }
-                            alert('นำเข้าข้อมูลสำเร็จ!');
+                            currentProcessData = importedStations;[cite: 8]
+                            renderProcessTableInputs();[cite: 8]
+                            updateLobChart();[cite: 8]
+                            const editSection = document.getElementById('editProcessSection');[cite: 8]
+                            if (editSection.classList.contains('hidden')) { toggleEditModal(); }[cite: 8]
+                            alert('นำเข้าข้อมูลสำเร็จ!');[cite: 8]
                         }
                     }
-                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
-                event.target.value = '';
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }[cite: 8]
+                event.target.value = '';[cite: 8]
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(file);[cite: 8]
         }
 
-        // Template & Import สำหรับ Door Part
+        // Template & Import สำหรับ Door Part[cite: 8]
         function downloadDoorProcessTemplate() {
             let templateData = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA01", "Bending-Feed", "Forming", "", 10.0, 5.0, "", 1.0],
-                ["STA02", "Welding", "Check", "", 12.0, 4.0, "", 1.0]
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],[cite: 8]
+                ["STA01", "Bending-Feed", "Forming", "", 10.0, 5.0, "", 1.0],[cite: 8]
+                ["STA02", "Welding", "Check", "", 12.0, 4.0, "", 1.0][cite: 8]
             ];
-            let ws = XLSX.utils.aoa_to_sheet(templateData);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "DoorProcessTemplate");
-            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
+            let ws = XLSX.utils.aoa_to_sheet(templateData);[cite: 8]
+            let wb = XLSX.utils.book_new();[cite: 8]
+            XLSX.utils.book_append_sheet(wb, ws, "DoorProcessTemplate");[cite: 8]
+            XLSX.writeFile(wb, "Door_Process_Template.xlsx");[cite: 8]
         }
 
         function importDoorProcessExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
+            const file = event.target.files[0];[cite: 8]
+            if (!file) return;[cite: 8]
+            const reader = new FileReader();[cite: 8]
             reader.onload = function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const data = new Uint8Array(e.target.result);[cite: 8]
+                    const workbook = XLSX.read(data, { type: 'array' });[cite: 8]
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];[cite: 8]
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });[cite: 8]
                     if (excelJson.length > 1) {
-                        let importedStations = [];
+                        let importedStations = [];[cite: 8]
                         for (let i = 1; i < excelJson.length; i++) {
-                            let row = excelJson[i];
-                            if (!row || row.length === 0) continue;
-                            let station = String(row[0] || '').trim();
-                            if (!station) continue;
+                            let row = excelJson[i];[cite: 8]
+                            if (!row || row.length === 0) continue;[cite: 8]
+                            let station = String(row[0] || '').trim();[cite: 8]
+                            if (!station) continue;[cite: 8]
                             importedStations.push({
                                 station: station,
-                                p1: String(row[1] || '').trim(),
-                                p2: String(row[2] || '').trim(),
-                                p3: String(row[3] || '').trim(),
-                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
-                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
-                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
-                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
+                                p1: String(row[1] || '').trim(),[cite: 8]
+                                p2: String(row[2] || '').trim(),[cite: 8]
+                                p3: String(row[3] || '').trim(),[cite: 8]
+                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,[cite: 8]
+                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,[cite: 8]
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,[cite: 8]
+                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null[cite: 8]
                             });
                         }
                         if (importedStations.length > 0) {
-                            currentDoorProcessData = importedStations;
-                            renderDoorProcessTableInputs();
-                            updateDoorLobChart();
-                            renderCapacityTable();
-                            const editSection = document.getElementById('editDoorProcessSection');
-                            if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }
-                            alert('นำเข้าข้อมูล Door สำเร็จ!');
+                            currentDoorProcessData = importedStations;[cite: 8]
+                            renderDoorProcessTableInputs();[cite: 8]
+                            updateDoorLobChart();[cite: 8]
+                            const editSection = document.getElementById('editDoorProcessSection');[cite: 8]
+                            if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }[cite: 8]
+                            alert('นำเข้าข้อมูล Door สำเร็จ!');[cite: 8]
                         }
                     }
-                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
-                event.target.value = '';
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }[cite: 8]
+                event.target.value = '';[cite: 8]
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(file);[cite: 8]
         }
 
         function toggleEditModal() {
-            const editSection = document.getElementById('editProcessSection');
-            const btnText = document.getElementById('editModalBtnText');
+            const editSection = document.getElementById('editProcessSection');[cite: 8]
+            const btnText = document.getElementById('editModalBtnText');[cite: 8]
             if (editSection.classList.contains('hidden')) {
-                editSection.classList.remove('hidden');
-                btnText.textContent = 'ซ่อนตารางแก้ไข';
+                editSection.classList.remove('hidden');[cite: 8]
+                btnText.textContent = 'ซ่อนตารางแก้ไข';[cite: 8]
             } else {
-                editSection.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
+                editSection.classList.add('hidden');[cite: 8]
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station';[cite: 8]
             }
         }
 
         function toggleDoorEditModal() {
-            const editSection = document.getElementById('editDoorProcessSection');
-            const btnText = document.getElementById('editDoorModalBtnText');
+            const editSection = document.getElementById('editDoorProcessSection');[cite: 8]
+            const btnText = document.getElementById('editDoorModalBtnText');[cite: 8]
             if (editSection.classList.contains('hidden')) {
-                editSection.classList.remove('hidden');
-                btnText.textContent = 'ซ่อนตารางแก้ไข (Door)';
+                editSection.classList.remove('hidden');[cite: 8]
+                btnText.textContent = 'ซ่อนตารางแก้ไข (Door)';[cite: 8]
             } else {
-                editSection.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
+                editSection.classList.add('hidden');[cite: 8]
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';[cite: 8]
             }
         }
 
         function addNewStationRow() {
-            currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
-            renderProcessTableInputs();
-            updateLobChart();
+            currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });[cite: 8]
+            renderProcessTableInputs();[cite: 8]
+            updateLobChart();[cite: 8]
         }
 
         function removeStationRow(index) {
-            currentProcessData.splice(index, 1);
-            renderProcessTableInputs();
-            updateLobChart();
+            currentProcessData.splice(index, 1);[cite: 8]
+            renderProcessTableInputs();[cite: 8]
+            updateLobChart();[cite: 8]
         }
 
         function addDoorNewStationRow() {
-            currentDoorProcessData.push({ station: `STA0${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
-            renderDoorProcessTableInputs();
-            updateDoorLobChart();
+            currentDoorProcessData.push({ station: `STA0${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });[cite: 8]
+            renderDoorProcessTableInputs();[cite: 8]
+            updateDoorLobChart();[cite: 8]
         }
 
         function removeDoorStationRow(index) {
-            currentDoorProcessData.splice(index, 1);
-            renderDoorProcessTableInputs();
-            updateDoorLobChart();
+            currentDoorProcessData.splice(index, 1);[cite: 8]
+            renderDoorProcessTableInputs();[cite: 8]
+            updateDoorLobChart();[cite: 8]
         }
 
         function renderProcessTableInputs() {
-            const tbody = document.getElementById('processTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('processTableBody');[cite: 8]
+            if (!tbody) return;[cite: 8]
+            tbody.innerHTML = '';[cite: 8]
             currentProcessData.forEach((item, index) => {
-                let tr = document.createElement('tr');
+                let tr = document.createElement('tr');[cite: 8]
                 tr.innerHTML = `
                     <td class="p-1.5 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-1.5 py-1 rounded border border-bordercolor station-input text-xs" value="${item.station || ''}"></td>
                     <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p1-input text-xs" value="${item.p1 || ''}"></td>
@@ -1231,17 +1126,17 @@
                     <td class="p-1.5 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
                     <td class="p-1.5 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1">✕</button></td>
                 `;
-                tbody.appendChild(tr);
+                tbody.appendChild(tr);[cite: 8]
             });
-            updateInputRowCalculations();
+            updateInputRowCalculations();[cite: 8]
         }
 
         function renderDoorProcessTableInputs() {
-            const tbody = document.getElementById('doorProcessTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('doorProcessTableBody');[cite: 8]
+            if (!tbody) return;[cite: 8]
+            tbody.innerHTML = '';[cite: 8]
             currentDoorProcessData.forEach((item, index) => {
-                let tr = document.createElement('tr');
+                let tr = document.createElement('tr');[cite: 8]
                 tr.innerHTML = `
                     <td class="p-1.5 text-center"><input type="text" class="w-full bg-slate-800 text-center text-amber-300 font-semibold px-1.5 py-1 rounded border border-bordercolor door-station-input text-xs" value="${item.station || ''}"></td>
                     <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor door-p1-input text-xs" value="${item.p1 || ''}"></td>
@@ -1255,59 +1150,59 @@
                     <td class="p-1.5 text-center font-bold text-amber-400 door-cycle-time-cell">—</td>
                     <td class="p-1.5 text-center"><button type="button" onclick="removeDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1">✕</button></td>
                 `;
-                tbody.appendChild(tr);
+                tbody.appendChild(tr);[cite: 8]
             });
-            updateDoorInputRowCalculations();
+            updateDoorInputRowCalculations();[cite: 8]
         }
 
         function updateInputRowCalculations() {
-            const rows = document.querySelectorAll('#processTableBody tr');
+            const rows = document.querySelectorAll('#processTableBody tr');[cite: 8]
             rows.forEach((row) => {
-                let w1 = parseFloat(row.querySelector('.wt1-input').value) || 0;
-                let w2 = parseFloat(row.querySelector('.wt2-input').value) || 0;
-                let w3 = parseFloat(row.querySelector('.wt3-input').value) || 0;
-                let l = parseFloat(row.querySelector('.loss-input').value) || 0;
-                let wtTotal = w1 + w2 + w3;
-                let ct = wtTotal + l;
-                row.querySelector('.wt-total-cell').textContent = wtTotal > 0 ? wtTotal.toFixed(2) : '—';
-                row.querySelector('.cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
+                let w1 = parseFloat(row.querySelector('.wt1-input').value) || 0;[cite: 8]
+                let w2 = parseFloat(row.querySelector('.wt2-input').value) || 0;[cite: 8]
+                let w3 = parseFloat(row.querySelector('.wt3-input').value) || 0;[cite: 8]
+                let l = parseFloat(row.querySelector('.loss-input').value) || 0;[cite: 8]
+                let wtTotal = w1 + w2 + w3;[cite: 8]
+                let ct = wtTotal + l;[cite: 8]
+                row.querySelector('.wt-total-cell').textContent = wtTotal > 0 ? wtTotal.toFixed(2) : '—';[cite: 8]
+                row.querySelector('.cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';[cite: 8]
             });
         }
 
         function updateDoorInputRowCalculations() {
-            const rows = document.querySelectorAll('#doorProcessTableBody tr');
+            const rows = document.querySelectorAll('#doorProcessTableBody tr');[cite: 8]
             rows.forEach((row) => {
-                let w1 = parseFloat(row.querySelector('.door-wt1-input').value) || 0;
-                let w2 = parseFloat(row.querySelector('.door-wt2-input').value) || 0;
-                let w3 = parseFloat(row.querySelector('.door-wt3-input').value) || 0;
-                let l = parseFloat(row.querySelector('.door-loss-input').value) || 0;
-                let wtTotal = w1 + w2 + w3;
-                let ct = wtTotal + l;
-                row.querySelector('.door-wt-total-cell').textContent = wtTotal > 0 ? wtTotal.toFixed(2) : '—';
-                row.querySelector('.door-cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
+                let w1 = parseFloat(row.querySelector('.door-wt1-input').value) || 0;[cite: 8]
+                let w2 = parseFloat(row.querySelector('.door-wt2-input').value) || 0;[cite: 8]
+                let w3 = parseFloat(row.querySelector('.door-wt3-input').value) || 0;[cite: 8]
+                let l = parseFloat(row.querySelector('.door-loss-input').value) || 0;[cite: 8]
+                let wtTotal = w1 + w2 + w3;[cite: 8]
+                let ct = wtTotal + l;[cite: 8]
+                row.querySelector('.door-wt-total-cell').textContent = wtTotal > 0 ? wtTotal.toFixed(2) : '—';[cite: 8]
+                row.querySelector('.door-cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';[cite: 8]
             });
         }
 
-        document.getElementById('processTableBody')?.addEventListener('input', updateInputRowCalculations);
-        document.getElementById('doorProcessTableBody')?.addEventListener('input', updateDoorInputRowCalculations);
+        document.getElementById('processTableBody')?.addEventListener('input', updateInputRowCalculations);[cite: 8]
+        document.getElementById('doorProcessTableBody')?.addEventListener('input', updateDoorInputRowCalculations);[cite: 8]
 
         function renderSavedDisplayTable() {
-            const displayBody = document.getElementById('displaySavedTableBody');
-            if (!displayBody) return;
-            displayBody.innerHTML = '';
+            const displayBody = document.getElementById('displaySavedTableBody');[cite: 8]
+            if (!displayBody) return;[cite: 8]
+            displayBody.innerHTML = '';[cite: 8]
             if (!currentProcessData || currentProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;
+                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;[cite: 8]
                 return;
             }
             currentProcessData.forEach((item) => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTotal = w1 + w2 + w3;
-                let cycleTime = wtTotal + l;
-                let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition';
+                let w1 = parseFloat(item.wt1) || 0;[cite: 8]
+                let w2 = parseFloat(item.wt2) || 0;[cite: 8]
+                let w3 = parseFloat(item.wt3) || 0;[cite: 8]
+                let l = parseFloat(item.loss) || 0;[cite: 8]
+                let wtTotal = w1 + w2 + w3;[cite: 8]
+                let cycleTime = wtTotal + l;[cite: 8]
+                let tr = document.createElement('tr');[cite: 8]
+                tr.className = 'hover:bg-slate-800/30 transition';[cite: 8]
                 tr.innerHTML = `
                     <td class="p-1.5 text-center"><span class="bg-blue-600/20 text-cyan-300 border border-blue-500/30 px-1.5 py-0.5 rounded text-[10px] font-semibold">${item.station || '-'}</span></td>
                     <td class="p-1.5 font-medium text-white truncate max-w-[120px]">${item.p1 || '—'}</td>
@@ -1315,27 +1210,27 @@
                     <td class="p-1.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
                     <td class="p-1.5 text-center font-bold text-cyan-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
                 `;
-                displayBody.appendChild(tr);
+                displayBody.appendChild(tr);[cite: 8]
             });
         }
 
         function renderDoorSavedDisplayTable() {
-            const displayBody = document.getElementById('displayDoorSavedTableBody');
-            if (!displayBody) return;
-            displayBody.innerHTML = '';
+            const displayBody = document.getElementById('displayDoorSavedTableBody');[cite: 8]
+            if (!displayBody) return;[cite: 8]
+            displayBody.innerHTML = '';[cite: 8]
             if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station (Door)</td></tr>`;
+                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station (Door)</td></tr>`;[cite: 8]
                 return;
             }
             currentDoorProcessData.forEach((item) => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTotal = w1 + w2 + w3;
-                let cycleTime = wtTotal + l;
-                let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition';
+                let w1 = parseFloat(item.wt1) || 0;[cite: 8]
+                let w2 = parseFloat(item.wt2) || 0;[cite: 8]
+                let w3 = parseFloat(item.wt3) || 0;[cite: 8]
+                let l = parseFloat(item.loss) || 0;[cite: 8]
+                let wtTotal = w1 + w2 + w3;[cite: 8]
+                let cycleTime = wtTotal + l;[cite: 8]
+                let tr = document.createElement('tr');[cite: 8]
+                tr.className = 'hover:bg-slate-800/30 transition';[cite: 8]
                 tr.innerHTML = `
                     <td class="p-1.5 text-center"><span class="bg-amber-600/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[10px] font-semibold">${item.station || '-'}</span></td>
                     <td class="p-1.5 font-medium text-white truncate max-w-[120px]">${item.p1 || '—'}</td>
@@ -1343,276 +1238,270 @@
                     <td class="p-1.5 text-center text-rose-400">${item.loss !== null && item.loss !== '' && parseFloat(item.loss) > 0 ? Number(item.loss).toFixed(2) : '—'}</td>
                     <td class="p-1.5 text-center font-bold text-amber-400">${cycleTime > 0 ? cycleTime.toFixed(2) : '—'}</td>
                 `;
-                displayBody.appendChild(tr);
+                displayBody.appendChild(tr);[cite: 8]
             });
         }
 
-       function saveProcessAndStationData() {
-    let rows = document.querySelectorAll('#processTableBody tr');
-    let updatedList = [];
-    rows.forEach((row) => {
-        updatedList.push({
-            station: row.querySelector('.station-input').value.trim(),
-            p1: row.querySelector('.p1-input').value.trim(),
-            p2: row.querySelector('.p2-input').value.trim(),
-            p3: row.querySelector('.p3-input').value.trim(),
-            wt1: row.querySelector('.wt1-input').value !== '' ? parseFloat(row.querySelector('.wt1-input').value) : null,
-            wt2: row.querySelector('.wt2-input').value !== '' ? parseFloat(row.querySelector('.wt2-input').value) : null,
-            wt3: row.querySelector('.wt3-input').value !== '' ? parseFloat(row.querySelector('.wt3-input').value) : null,
-            loss: row.querySelector('.loss-input').value !== '' ? parseFloat(row.querySelector('.loss-input').value) : null
-        });
-    });
-
-    let modelsArray = Array.from(selectedModels);
-    if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ'); return; }
-    
-    // วนลูปบันทึกข้อมูลให้ครบทุก Model ที่ติ๊กเลือกไว้
-    modelsArray.forEach(modelName => {
-        let storageKey = `${modelName}_${selectedPartValue}`;
-        processDatabase[storageKey] = JSON.parse(JSON.stringify(updatedList));
-    });
-
-    currentProcessData = updatedList;
-    localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
-    renderSavedDisplayTable();
-    updateLobChart();
-    renderCapacityTable();
-    toggleEditModal();
-    alert(`บันทึกข้อมูลสำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
-}
-
-// ฟังก์ชันบันทึกข้อมูล Process ของ Door (รองรับการบันทึกหลาย Model พร้อมกัน)
-function saveDoorProcessAndStationData() {
-    let rows = document.querySelectorAll('#doorProcessTableBody tr');
-    let updatedList = [];
-    rows.forEach((row) => {
-        updatedList.push({
-            station: row.querySelector('.door-station-input').value.trim(),
-            p1: row.querySelector('.door-p1-input').value.trim(),
-            p2: row.querySelector('.door-p2-input').value.trim(),
-            p3: row.querySelector('.door-p3-input').value.trim(),
-            wt1: row.querySelector('.door-wt1-input').value !== '' ? parseFloat(row.querySelector('.door-wt1-input').value) : null,
-            wt2: row.querySelector('.door-wt2-input').value !== '' ? parseFloat(row.querySelector('.door-wt2-input').value) : null,
-            wt3: row.querySelector('.door-wt3-input').value !== '' ? parseFloat(row.querySelector('.door-wt3-input').value) : null,
-            loss: row.querySelector('.door-loss-input').value !== '' ? parseFloat(row.querySelector('.door-loss-input').value) : null
-        });
-    });
-
-    let modelsArray = Array.from(selectedDoorModels);
-    if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ (Door)'); return; }
-    let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
-    
-    // วนลูปบันทึกข้อมูล Door ให้ครบทุก Model ที่ติ๊กเลือกไว้
-    modelsArray.forEach(modelName => {
-        let storageKey = `${modelName}_${effectivePart}`;
-        doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(updatedList));
-    });
-
-    currentDoorProcessData = updatedList;
-    localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
-    renderDoorSavedDisplayTable();
-    updateDoorLobChart();
-    renderCapacityTable();
-    toggleDoorEditModal();
-    alert(`บันทึกข้อมูล Door สำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);
-}
-        function initGroupRadioButtons(data) {
-            const container = document.getElementById('groupRadioContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedProductGroups.clear();
-            if (data && data.groups && data.groups.length > 0) {
-                data.groups.forEach((g, idx) => {
-                    let btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.setAttribute('data-group', g.productGroup);
-                    btn.textContent = `Grp ${g.productGroup}`;
-                    let isSelected = (idx === 0); // เริ่มต้นเลือกกลุ่มแรกไว้ก่อน
-                    if (isSelected) {
-                        selectedProductGroups.add(g.productGroup);
-                        btn.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
-                    } else {
-                        btn.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
-                    }
-                    btn.onclick = () => toggleProductGroup(g.productGroup, btn);
-                    container.appendChild(btn);
+        function saveProcessAndStationData() {
+            let rows = document.querySelectorAll('#processTableBody tr');[cite: 8]
+            let updatedList = [];[cite: 8]
+            rows.forEach((row) => {
+                updatedList.push({
+                    station: row.querySelector('.station-input').value.trim(),[cite: 8]
+                    p1: row.querySelector('.p1-input').value.trim(),[cite: 8]
+                    p2: row.querySelector('.p2-input').value.trim(),[cite: 8]
+                    p3: row.querySelector('.p3-input').value.trim(),[cite: 8]
+                    wt1: row.querySelector('.wt1-input').value !== '' ? parseFloat(row.querySelector('.wt1-input').value) : null,[cite: 8]
+                    wt2: row.querySelector('.wt2-input').value !== '' ? parseFloat(row.querySelector('.wt2-input').value) : null,[cite: 8]
+                    wt3: row.querySelector('.wt3-input').value !== '' ? parseFloat(row.querySelector('.wt3-input').value) : null,[cite: 8]
+                    loss: row.querySelector('.loss-input').value !== '' ? parseFloat(row.querySelector('.loss-input').value) : null[cite: 8]
                 });
-            }
-            updateModelCheckboxesByGroup();
+            });
+
+            let modelsArray = Array.from(selectedModels);[cite: 8]
+            if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ'); return; }[cite: 8]
+            
+            modelsArray.forEach(modelName => {
+                let storageKey = `${modelName}_${selectedPartValue}`;[cite: 8]
+                processDatabase[storageKey] = JSON.parse(JSON.stringify(updatedList));[cite: 8]
+            });
+
+            currentProcessData = updatedList;[cite: 8]
+            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));[cite: 8]
+            renderSavedDisplayTable();[cite: 8]
+            updateLobChart();[cite: 8]
+            toggleEditModal();[cite: 8]
+            alert(`บันทึกข้อมูลสำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);[cite: 8]
         }
 
-        // Init Group สำหรับ Door Part รองรับหลายกลุ่ม
-        function initDoorGroupRadioButtons(data) {
-            const container = document.getElementById('doorGroupRadioContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedDoorProductGroups.clear();
+        function saveDoorProcessAndStationData() {
+            let rows = document.querySelectorAll('#doorProcessTableBody tr');[cite: 8]
+            let updatedList = [];[cite: 8]
+            rows.forEach((row) => {
+                updatedList.push({
+                    station: row.querySelector('.door-station-input').value.trim(),[cite: 8]
+                    p1: row.querySelector('.door-p1-input').value.trim(),[cite: 8]
+                    p2: row.querySelector('.door-p2-input').value.trim(),[cite: 8]
+                    p3: row.querySelector('.door-p3-input').value.trim(),[cite: 8]
+                    wt1: row.querySelector('.door-wt1-input').value !== '' ? parseFloat(row.querySelector('.door-wt1-input').value) : null,[cite: 8]
+                    wt2: row.querySelector('.door-wt2-input').value !== '' ? parseFloat(row.querySelector('.door-wt2-input').value) : null,[cite: 8]
+                    wt3: row.querySelector('.door-wt3-input').value !== '' ? parseFloat(row.querySelector('.door-wt3-input').value) : null,[cite: 8]
+                    loss: row.querySelector('.door-loss-input').value !== '' ? parseFloat(row.querySelector('.door-loss-input').value) : null[cite: 8]
+                });
+            });
+
+            let modelsArray = Array.from(selectedDoorModels);[cite: 8]
+            if (modelsArray.length === 0) { alert('กรุณาเลือก Model อย่างน้อย 1 รายการ (Door)'); return; }[cite: 8]
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;[cite: 8]
+            
+            modelsArray.forEach(modelName => {
+                let storageKey = `${modelName}_${effectivePart}`;[cite: 8]
+                doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(updatedList));[cite: 8]
+            });
+
+            currentDoorProcessData = updatedList;[cite: 8]
+            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));[cite: 8]
+            renderDoorSavedDisplayTable();[cite: 8]
+            updateDoorLobChart();[cite: 8]
+            toggleDoorEditModal();[cite: 8]
+            alert(`บันทึกข้อมูล Door สำเร็จสำหรับ ${modelsArray.length} Model ที่เลือก!`);[cite: 8]
+        }
+
+        function initGroupRadioButtons(data) {
+            const container = document.getElementById('groupRadioContainer');[cite: 8]
+            if (!container) return;[cite: 8]
+            container.innerHTML = '';[cite: 8]
+            selectedProductGroups.clear();[cite: 8]
             if (data && data.groups && data.groups.length > 0) {
                 data.groups.forEach((g, idx) => {
-                    let btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.setAttribute('data-door-group', g.productGroup);
-                    btn.textContent = `Grp ${g.productGroup}`;
-                    let isSelected = (idx === 0); // เริ่มต้นเลือกกลุ่มแรกไว้ก่อน
+                    let btn = document.createElement('button');[cite: 8]
+                    btn.type = 'button';[cite: 8]
+                    btn.setAttribute('data-group', g.productGroup);[cite: 8]
+                    btn.textContent = `Grp ${g.productGroup}`;[cite: 8]
+                    let isSelected = (idx === 0);[cite: 8]
                     if (isSelected) {
-                        selectedDoorProductGroups.add(g.productGroup);
-                        btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';
+                        selectedProductGroups.add(g.productGroup);[cite: 8]
+                        btn.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';[cite: 8]
                     } else {
-                        btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                        btn.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
                     }
-                    btn.onclick = () => toggleDoorProductGroup(g.productGroup, btn);
-                    container.appendChild(btn);
+                    btn.onclick = () => toggleProductGroup(g.productGroup, btn);[cite: 8]
+                    container.appendChild(btn);[cite: 8]
                 });
             }
-            updateDoorModelCheckboxesByGroup();
+            updateModelCheckboxesByGroup();[cite: 8]
+        }
+
+        function initDoorGroupRadioButtons(data) {
+            const container = document.getElementById('doorGroupRadioContainer');[cite: 8]
+            if (!container) return;[cite: 8]
+            container.innerHTML = '';[cite: 8]
+            selectedDoorProductGroups.clear();[cite: 8]
+            if (data && data.groups && data.groups.length > 0) {
+                data.groups.forEach((g, idx) => {
+                    let btn = document.createElement('button');[cite: 8]
+                    btn.type = 'button';[cite: 8]
+                    btn.setAttribute('data-door-group', g.productGroup);[cite: 8]
+                    btn.textContent = `Grp ${g.productGroup}`;[cite: 8]
+                    let isSelected = (idx === 0);[cite: 8]
+                    if (isSelected) {
+                        selectedDoorProductGroups.add(g.productGroup);[cite: 8]
+                        btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';[cite: 8]
+                    } else {
+                        btn.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
+                    }
+                    btn.onclick = () => toggleDoorProductGroup(g.productGroup, btn);[cite: 8]
+                    container.appendChild(btn);[cite: 8]
+                });
+            }
+            updateDoorModelCheckboxesByGroup();[cite: 8]
         }
 
         function toggleProductGroup(groupName, btnElement) {
             if (selectedProductGroups.has(groupName)) {
                 if (selectedProductGroups.size > 1) {
-                    selectedProductGroups.delete(groupName);
-                    btnElement.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    selectedProductGroups.delete(groupName);[cite: 8]
+                    btnElement.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
                 } else {
-                    alert('ต้องเลือก Group อย่างน้อย 1 รายการ');
+                    alert('ต้องเลือก Group อย่างน้อย 1 รายการ');[cite: 8]
                     return;
                 }
             } else {
-                selectedProductGroups.add(groupName);
-                btnElement.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';
+                selectedProductGroups.add(groupName);[cite: 8]
+                btnElement.className = 'group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-blue-600 text-white shadow border border-blue-500';[cite: 8]
             }
-            updateModelCheckboxesByGroup();
+            updateModelCheckboxesByGroup();[cite: 8]
         }
 
         function toggleDoorProductGroup(groupName, btnElement) {
             if (selectedDoorProductGroups.has(groupName)) {
                 if (selectedDoorProductGroups.size > 1) {
-                    selectedDoorProductGroups.delete(groupName);
-                    btnElement.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    selectedDoorProductGroups.delete(groupName);[cite: 8]
+                    btnElement.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';[cite: 8]
                 } else {
-                    alert('ต้องเลือก Group อย่างน้อย 1 รายการ (Door)');
+                    alert('ต้องเลือก Group อย่างน้อย 1 รายการ (Door)');[cite: 8]
                     return;
                 }
             } else {
-                selectedDoorProductGroups.add(groupName);
-                btnElement.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';
+                selectedDoorProductGroups.add(groupName);[cite: 8]
+                btnElement.className = 'door-group-radio-btn px-2.5 py-0.5 rounded text-[10px] font-semibold transition bg-amber-600 text-white shadow border border-amber-500';[cite: 8]
             }
-            updateDoorModelCheckboxesByGroup();
+            updateDoorModelCheckboxesByGroup();[cite: 8]
         }
 
         function updateModelCheckboxesByGroup() {
-            const container = document.getElementById('modelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedModels.clear();
+            const container = document.getElementById('modelCheckboxContainer');[cite: 8]
+            if (!container) return;[cite: 8]
+            container.innerHTML = '';[cite: 8]
+            selectedModels.clear();[cite: 8]
 
-            let targetGroups = currentDailyData?.groups?.filter(g => selectedProductGroups.has(g.productGroup)) || [];
+            let targetGroups = currentDailyData?.groups?.filter(g => selectedProductGroups.has(g.productGroup)) || [];[cite: 8]
             if (targetGroups.length === 0) {
-                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;
-                loadProcessDataForCurrentSelection();
+                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;[cite: 8]
+                loadProcessDataForCurrentSelection();[cite: 8]
                 return;
             }
 
             targetGroups.forEach(targetGroup => {
                 if (targetGroup.models) {
                     targetGroup.models.forEach((m) => {
-                        selectedModels.add(m.name);
-                        let label = document.createElement('label');
-                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';
-                        let checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = true;
-                        checkbox.value = m.name;
-                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0 w-3 h-3 shrink-0';
+                        selectedModels.add(m.name);[cite: 8]
+                        let label = document.createElement('label');[cite: 8]
+                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';[cite: 8]
+                        let checkbox = document.createElement('input');[cite: 8]
+                        checkbox.type = 'checkbox';[cite: 8]
+                        checkbox.checked = true;[cite: 8]
+                        checkbox.value = m.name;[cite: 8]
+                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-blue-600 focus:ring-0 w-3 h-3 shrink-0';[cite: 8]
                         checkbox.onchange = function() {
-                            if (checkbox.checked) { selectedModels.add(m.name); } else { selectedModels.delete(m.name); }
-                            loadProcessDataForCurrentSelection();
+                            if (checkbox.checked) { selectedModels.add(m.name); } else { selectedModels.delete(m.name); }[cite: 8]
+                            loadProcessDataForCurrentSelection();[cite: 8]
                         };
-                        let span = document.createElement('span');
-                        span.className = 'text-[10px] font-medium text-slate-200 truncate';
-                        span.textContent = m.name;
-                        label.appendChild(checkbox);
-                        label.appendChild(span);
-                        container.appendChild(label);
+                        let span = document.createElement('span');[cite: 8]
+                        span.className = 'text-[10px] font-medium text-slate-200 truncate';[cite: 8]
+                        span.textContent = m.name;[cite: 8]
+                        label.appendChild(checkbox);[cite: 8]
+                        label.appendChild(span);[cite: 8]
+                        container.appendChild(label);[cite: 8]
                     });
                 }
             });
-            loadProcessDataForCurrentSelection();
+            loadProcessDataForCurrentSelection();[cite: 8]
         }
 
         function updateDoorModelCheckboxesByGroup() {
-            const container = document.getElementById('doorModelCheckboxContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            selectedDoorModels.clear();
+            const container = document.getElementById('doorModelCheckboxContainer');[cite: 8]
+            if (!container) return;[cite: 8]
+            container.innerHTML = '';[cite: 8]
+            selectedDoorModels.clear();[cite: 8]
 
-            let targetGroups = currentDailyData?.groups?.filter(g => selectedDoorProductGroups.has(g.productGroup)) || [];
+            let targetGroups = currentDailyData?.groups?.filter(g => selectedDoorProductGroups.has(g.productGroup)) || [];[cite: 8]
             if (targetGroups.length === 0) {
-                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;
-                loadDoorProcessDataForCurrentSelection();
+                container.innerHTML = `<span class="text-[10px] text-slate-500">ไม่พบ Model</span>`;[cite: 8]
+                loadDoorProcessDataForCurrentSelection();[cite: 8]
                 return;
             }
 
             targetGroups.forEach(targetGroup => {
                 if (targetGroup.models) {
                     targetGroup.models.forEach((m) => {
-                        selectedDoorModels.add(m.name);
-                        let label = document.createElement('label');
-                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';
-                        let checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.checked = true;
-                        checkbox.value = m.name;
-                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-amber-600 focus:ring-0 w-3 h-3 shrink-0';
+                        selectedDoorModels.add(m.name);[cite: 8]
+                        let label = document.createElement('label');[cite: 8]
+                        label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1 py-0 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full whitespace-nowrap';[cite: 8]
+                        let checkbox = document.createElement('input');[cite: 8]
+                        checkbox.type = 'checkbox';[cite: 8]
+                        checkbox.checked = true;[cite: 8]
+                        checkbox.value = m.name;[cite: 8]
+                        checkbox.className = 'rounded bg-slate-800 border-bordercolor text-amber-600 focus:ring-0 w-3 h-3 shrink-0';[cite: 8]
                         checkbox.onchange = function() {
-                            if (checkbox.checked) { selectedDoorModels.add(m.name); } else { selectedDoorModels.delete(m.name); }
-                            loadDoorProcessDataForCurrentSelection();
+                            if (checkbox.checked) { selectedDoorModels.add(m.name); } else { selectedDoorModels.delete(m.name); }[cite: 8]
+                            loadDoorProcessDataForCurrentSelection();[cite: 8]
                         };
-                        let span = document.createElement('span');
-                        span.className = 'text-[10px] font-medium text-slate-200 truncate';
-                        span.textContent = m.name;
-                        label.appendChild(checkbox);
-                        label.appendChild(span);
-                        container.appendChild(label);
+                        let span = document.createElement('span');[cite: 8]
+                        span.className = 'text-[10px] font-medium text-slate-200 truncate';[cite: 8]
+                        span.textContent = m.name;[cite: 8]
+                        label.appendChild(checkbox);[cite: 8]
+                        label.appendChild(span);[cite: 8]
+                        container.appendChild(label);[cite: 8]
                     });
                 }
             });
-            loadDoorProcessDataForCurrentSelection();
+            loadDoorProcessDataForCurrentSelection();[cite: 8]
         }
 
-        initGroupRadioButtons(currentDailyData);
-        initDoorGroupRadioButtons(currentDailyData);
+        initGroupRadioButtons(currentDailyData);[cite: 8]
+        initDoorGroupRadioButtons(currentDailyData);[cite: 8]
 
         function switchTab(tabName) {
-            const dashboardTab = document.getElementById('tab-content-dashboard');
-            const workProcessTab = document.getElementById('tab-content-workprocess');
-            const doorPartsTab = document.getElementById('tab-content-doorparts');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navWorkProcess = document.getElementById('nav-workprocess');
-            const navDoorParts = document.getElementById('nav-doorparts');
-            const headerTitle = document.getElementById('headerTitle');
+            const dashboardTab = document.getElementById('tab-content-dashboard');[cite: 8]
+            const workProcessTab = document.getElementById('tab-content-workprocess');[cite: 8]
+            const doorPartsTab = document.getElementById('tab-content-doorparts');[cite: 8]
+            const navDashboard = document.getElementById('nav-dashboard');[cite: 8]
+            const navWorkProcess = document.getElementById('nav-workprocess');[cite: 8]
+            const navDoorParts = document.getElementById('nav-doorparts');[cite: 8]
+            const headerTitle = document.getElementById('headerTitle');[cite: 8]
 
-            dashboardTab.classList.add('hidden');
-            workProcessTab.classList.add('hidden');
-            doorPartsTab.classList.add('hidden');
-            navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
-            navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';
+            dashboardTab.classList.add('hidden');[cite: 8]
+            workProcessTab.classList.add('hidden');[cite: 8]
+            doorPartsTab.classList.add('hidden');[cite: 8]
+            navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';[cite: 8]
+            navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';[cite: 8]
+            navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3';[cite: 8]
 
             if (tabName === 'dashboard') {
-                dashboardTab.classList.remove('hidden');
-                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';
-                renderCapacityTable();
+                dashboardTab.classList.remove('hidden');[cite: 8]
+                navDashboard.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';[cite: 8]
+                headerTitle.textContent = 'Haier Manufacturing Intelligence Dashboard';[cite: 8]
             } else if (tabName === 'workprocess') {
-                workProcessTab.classList.remove('hidden');
-                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Work Process & Cycle Time Analysis';
-                updateLobChart();
+                workProcessTab.classList.remove('hidden');[cite: 8]
+                navWorkProcess.className = 'w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3';[cite: 8]
+                headerTitle.textContent = 'Work Process & Cycle Time Analysis';[cite: 8]
+                updateLobChart();[cite: 8]
             } else if (tabName === 'doorparts') {
-                doorPartsTab.classList.remove('hidden');
-                navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';
-                headerTitle.textContent = 'Door Part Quick Selection & Analysis';
-                updateDoorLobChart();
+                doorPartsTab.classList.remove('hidden');[cite: 8]
+                navDoorParts.className = 'w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3';[cite: 8]
+                headerTitle.textContent = 'Door Part Quick Selection & Analysis';[cite: 8]
+                updateDoorLobChart();[cite: 8]
             }
         }
     </script>
