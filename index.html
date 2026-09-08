@@ -283,7 +283,7 @@
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
             <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
                 
-                <!-- STICKY CONTROL PANEL: ปรับสัดส่วนให้ Model ขยับมาด้านข้างและขยายพื้นที่ให้กว้างขึ้น -->
+                <!-- STICKY CONTROL PANEL: ปรับสัดส่วนใหม่ ขยับ Model ไปขวาเต็มที่ (col-span-8) เพื่อเพิ่มพื้นที่ให้ Group (col-span-2) -->
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-cyan-500/30 shadow-lg space-y-2">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 border-b border-bordercolor pb-1.5">
                         <div class="flex items-center space-x-1.5">
@@ -296,8 +296,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center text-xs">
-                        <!-- 1. เลือก Part (กระชับพื้นที่) -->
-                        <div class="md:col-span-3 flex flex-wrap items-center gap-1">
+                        <!-- 1. เลือก Part (col-span-2) -->
+                        <div class="md:col-span-2 flex flex-wrap items-center gap-1">
                             <span class="text-[11px] font-medium text-slate-400 mr-1">Part:</span>
                             <div id="partTabContainer" class="flex flex-wrap gap-1">
                                 <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-1 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
@@ -307,14 +307,14 @@
                             </div>
                         </div>
 
-                        <!-- 2. Product Group (กระชับพื้นที่) -->
+                        <!-- 2. Product Group (ขยายพื้นที่ให้กว้างขึ้นเป็น col-span-2 ให้มีที่วางปุ่ม Group สบายๆ) -->
                         <div class="md:col-span-2 flex flex-wrap items-center gap-1">
                             <span class="text-[11px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
-                        <!-- 3. Model Checkbox (ขยายพื้นที่ให้กว้างขึ้นและย้ายมาด้านข้างเต็มที่) -->
-                        <div class="md:col-span-7 flex flex-wrap items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
+                        <!-- 3. Model Checkbox (ขยับมาชิดขวาและขยายพื้นที่ให้กว้างที่สุด col-span-8) -->
+                        <div class="md:col-span-8 flex flex-wrap items-center gap-1.5 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <span class="text-[11px] font-medium text-cyan-400 mr-1">Model:</span>
                             <div id="modelCheckboxContainer" class="flex flex-wrap gap-1.5"></div>
                         </div>
