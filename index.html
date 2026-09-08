@@ -283,7 +283,7 @@
             <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
             <div id="tab-content-workprocess" class="p-6 space-y-5 w-full">
                 
-                <!-- STICKY CONTROL PANEL: จัดสัดส่วน Group ตรงกลางประมาณ 80% (col-span-9), Part (col-span-2) และ Model (col-span-1) -->
+                <!-- STICKY CONTROL PANEL: Group ~80% (col-span-9), Part ~15% (col-span-2), Model ~5% (col-span-1 เรียง 3 แถวในแนวตั้ง) -->
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-cyan-500/30 shadow-lg space-y-2">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 border-b border-bordercolor pb-1.5">
                         <div class="flex items-center space-x-1.5">
@@ -313,10 +313,9 @@
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
-                        <!-- 3. Model Checkbox ชิดขวาพื้นที่ย่อย (col-span-1 ประมาณ 5%) -->
-                        <div class="md:col-span-1 flex flex-wrap items-center gap-1.5 justify-end">
-                            <span class="text-[11px] font-medium text-cyan-400 mr-1 hidden">Model:</span>
-                            <div id="modelCheckboxContainer" class="flex flex-wrap gap-1"></div>
+                        <!-- 3. Model Checkbox ชิดขวาพื้นที่ย่อย (col-span-1 ประมาณ 5% - จัดเรียงเป็น 3 แถวในแนวตั้ง) -->
+                        <div class="md:col-span-1 flex flex-col gap-1 justify-center">
+                            <div id="modelCheckboxContainer" class="flex flex-col gap-1 w-full"></div>
                         </div>
                     </div>
                 </div>
@@ -1178,7 +1177,7 @@
                 selectedModels.add(m.name);
 
                 let label = document.createElement('label');
-                label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1.5 py-0.5 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
+                label.className = 'flex items-center space-x-1 bg-slate-900/80 px-1.5 py-0.5 rounded border border-bordercolor cursor-pointer hover:bg-slate-900 transition w-full';
                 
                 let checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -1195,7 +1194,7 @@
                 };
 
                 let span = document.createElement('span');
-                span.className = 'text-[10px] font-medium text-slate-200';
+                span.className = 'text-[10px] font-medium text-slate-200 truncate';
                 span.textContent = m.name;
 
                 label.appendChild(checkbox);
