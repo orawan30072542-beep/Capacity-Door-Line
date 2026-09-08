@@ -291,7 +291,7 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <div>
                                 <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือก Product Group (เลือกได้ 1 กลุ่ม), เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ), และเลือกชิ้นส่วนประกอบ (Part)</p>
+                                <p class="text-xs text-slate-400">เลือกชิ้นส่วนประกอบ (Part), เลือก Product Group (เลือกได้ 1 กลุ่ม), และเลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ)</p>
                             </div>
                         </div>
                         <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
@@ -299,19 +299,11 @@
                         </button>
                     </div>
 
-                    <!-- ฟอร์มเลือก Product Group และ Model และ Part -->
+                    <!-- ฟอร์มเลือก Part ด้านบน / Product Group (ซ้าย - ขนาดเล็กลง) และ Model (ขวา) -->
                     <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือก Product Group (เลือกได้ 1 กลุ่ม):</label>
-                            <div id="groupRadioContainer" class="flex flex-wrap gap-2"></div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ): <span class="text-[10px] text-amber-400 font-normal">(แต่ละ Model มีขั้นตอนและเวลาต่างกัน)</span></label>
-                            <div id="modelCheckboxContainer" class="flex flex-wrap gap-2 bg-slate-800/50 p-3 rounded-lg border border-bordercolor/60"></div>
-                        </div>
-
-                        <div>
+                        
+                        <!-- 1. เลือกชิ้นส่วนประกอบ (Part) อยู่ด้านบนสุด -->
+                        <div class="border-b border-bordercolor pb-3">
                             <label class="block text-xs font-medium text-slate-400 mb-2">เลือกชิ้นส่วนประกอบ (Part):</label>
                             <div id="partTabContainer" class="flex flex-wrap gap-2">
                                 <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500">1. Back Plate</button>
@@ -320,6 +312,27 @@
                                 <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">4. Gasket</button>
                             </div>
                         </div>
+
+                        <!-- 2 & 3. Product Group (ซ้าย - ขนาดเล็กลง) และ เลือกรุ่นสินค้า Model (ขวา) -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pt-1">
+                            
+                            <!-- ฝั่งซ้าย: Product Group (ขนาดเล็กลง) -->
+                            <div class="md:col-span-4 bg-slate-950/40 p-3 rounded-xl border border-bordercolor/60">
+                                <label class="block text-xs font-medium text-slate-400 mb-2">Product Group (เลือกได้ 1):</label>
+                                <div id="groupRadioContainer" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+
+                            <!-- ฝั่งขวา: เลือกรุ่นสินค้า (Model) -->
+                            <div class="md:col-span-8 bg-slate-800/40 p-3 rounded-xl border border-bordercolor/60">
+                                <label class="block text-xs font-medium text-slate-400 mb-1.5">
+                                    เลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ): 
+                                    <span class="text-[10px] text-amber-400 font-normal">(แต่ละ Model มีขั้นตอนและเวลาต่างกัน)</span>
+                                </label>
+                                <div id="modelCheckboxContainer" class="flex flex-wrap gap-2 mt-2"></div>
+                            </div>
+
+                        </div>
+
                     </div>
 
                     <!-- แถบเครื่องมือจัดการตาราง -->
@@ -395,7 +408,7 @@
                         </div>
                     </div>
 
-                    <!-- NEW: Line of Balance & Takt Time Section (Layout: กราฟซ้าย / ตารางขวา) -->
+                    <!-- Line of Balance & Takt Time Section -->
                     <div class="bg-slate-900/90 p-5 rounded-xl border border-bordercolor space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
                             <div>
@@ -421,7 +434,7 @@
                             </div>
                         </div>
 
-                        <!-- Layout Grid: กราฟซ้าย (col-span-7) / ตารางขวา (col-span-5) -->
+                        <!-- Layout Grid: กราฟซ้าย / ตารางขวา -->
                         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                             
                             <!-- ฝั่งซ้าย: กราฟ LOB -->
@@ -607,9 +620,7 @@
             }
         });
 
-        // ==========================================
         // LINE OF BALANCE (LOB) & TAKT TIME CHART SETUP
-        // ==========================================
         const ctxLob = document.getElementById('lobChart').getContext('2d');
         let lobChart = new Chart(ctxLob, {
             type: 'bar',
@@ -628,7 +639,7 @@
                         type: 'line',
                         label: 'Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง)',
                         data: [],
-                        borderColor: '#facc15', // เหลืองสว่าง (yellow-400)
+                        borderColor: '#facc15',
                         borderWidth: 3,
                         pointRadius: 0,
                         order: 1
@@ -637,7 +648,7 @@
                         type: 'line',
                         label: 'Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ, TT * 85%)',
                         data: [],
-                        borderColor: '#fb7185', // แดงสว่าง (rose-400)
+                        borderColor: '#fb7185',
                         borderDash: [6, 6],
                         borderWidth: 3,
                         pointRadius: 0,
@@ -682,8 +693,6 @@
         function updateLobChart() {
             let uph = parseFloat(document.getElementById('uphInput').value) || 120;
             let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            
-            // ปรับสูตรใหม่: TT * 85%
             let taktTime85 = taktTime100 * 0.85;
 
             document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)} วินาที`;
@@ -1150,9 +1159,9 @@
                     
                     if (idx === 0) {
                         selectedProductGroup = g.productGroup;
-                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                        btn.className = 'group-radio-btn px-3 py-1.5 rounded-lg text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
                     } else {
-                        btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                        btn.className = 'group-radio-btn px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                     }
 
                     btn.onclick = function() {
@@ -1168,9 +1177,9 @@
             selectedProductGroup = groupName;
             document.querySelectorAll('.group-radio-btn').forEach(btn => {
                 if (btn.getAttribute('data-group') === groupName) {
-                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
+                    btn.className = 'group-radio-btn px-3 py-1.5 rounded-lg text-xs font-medium transition bg-blue-600 text-white shadow border border-blue-500';
                 } else {
-                    btn.className = 'group-radio-btn px-4 py-2 rounded-xl text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
+                    btn.className = 'group-radio-btn px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor';
                 }
             });
             updateModelCheckboxesByGroup();
@@ -1197,7 +1206,7 @@
                 selectedModels.add(m.name);
 
                 let label = document.createElement('label');
-                label.className = 'flex items-center space-x-2 bg-slate-900/60 px-3 py-2 rounded-lg border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
+                label.className = 'flex items-center space-x-2 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-bordercolor cursor-pointer hover:bg-slate-900 transition';
                 
                 let checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
