@@ -445,8 +445,8 @@
                                 <div id="displayTtVal" class="text-lg font-bold text-yellow-300 mt-1">30.00 วินาที</div>
                             </div>
                             <div class="bg-slate-800/50 p-3 rounded-lg border border-bordercolor text-center">
-                                <span class="text-[11px] text-slate-400">Takt Time 100% (เส้นที่ 2: สีแดงสว่างแบบปะ)</span>
-                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">30.00 วินาที</div>
+                                <span class="text-[11px] text-slate-400">Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ)</span>
+                                <div id="displayTtRedVal" class="text-lg font-bold text-rose-400 mt-1">35.29 วินาที</div>
                             </div>
                         </div>
 
@@ -635,7 +635,7 @@
                     },
                     {
                         type: 'line',
-                        label: 'Takt Time 100% (เส้นที่ 2: สีแดงสว่างแบบปะ)',
+                        label: 'Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ)',
                         data: [],
                         borderColor: '#fb7185', // แดงสว่าง (rose-400)
                         borderDash: [6, 6],
@@ -681,10 +681,11 @@
 
         function updateLobChart() {
             let uph = parseFloat(document.getElementById('uphInput').value) || 120;
-            let taktTime = uph > 0 ? 3600 / uph : 0;
+            let taktTime100 = uph > 0 ? 3600 / uph : 0;
+            let taktTime85 = uph > 0 ? (3600 / uph) / 0.85 : 0;
 
-            document.getElementById('displayTtVal').textContent = `${taktTime.toFixed(2)} วินาที`;
-            document.getElementById('displayTtRedVal').textContent = `${taktTime.toFixed(2)} วินาที`;
+            document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)} วินาที`;
+            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)} วินาที`;
 
             let labels = [];
             let ctData = [];
@@ -696,17 +697,17 @@
                     let { cycleTime } = calculateRowTotals(item);
                     labels.push(item.station || 'STA');
                     ctData.push(cycleTime);
-                    ttLine1.push(taktTime);
-                    ttLine2.push(taktTime);
+                    ttLine1.push(taktTime100);
+                    ttLine2.push(taktTime85);
                 });
             }
 
             lobChart.data.labels = labels;
             lobChart.data.datasets[0].data = ctData;
             lobChart.data.datasets[1].data = ttLine1;
-            lobChart.data.datasets[1].label = `Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง - ${taktTime.toFixed(2)}s)`;
+            lobChart.data.datasets[1].label = `Takt Time 100% (เส้นที่ 1: สีเหลืองสว่าง - ${taktTime100.toFixed(2)}s)`;
             lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 100% (เส้นที่ 2: สีแดงสว่างแบบปะ - ${taktTime.toFixed(2)}s)`;
+            lobChart.data.datasets[2].label = `Takt Time 85% (เส้นที่ 2: สีแดงสว่างแบบปะ - ${taktTime85.toFixed(2)}s)`;
             lobChart.update();
         }
 
