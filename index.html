@@ -60,15 +60,15 @@
                         <p class="text-xs text-cyan-400 font-medium">Smart Door Line</p>
                     </div>
                 </div>
-                <!-- Navigation -->
+                <!-- Navigation (ย้าย Work Process มาไว้อันดับ 1) -->
                 <nav class="p-4 space-y-2">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
+                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span>1. Dashboard ภาพรวม</span>
+                        <span>1. Work Process & Cycle Time</span>
                     </button>
-                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-slate-600"></span>
-                        <span>2. Work Process & Cycle Time</span>
+                        <span>2. Dashboard ภาพรวม</span>
                     </button>
                 </nav>
             </div>
@@ -88,7 +88,7 @@
             <header class="bg-cardbg/80 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20 w-full">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white md:hidden">H</div>
-                    <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white">Haier Manufacturing Intelligence Dashboard</h1>
+                    <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white">Work Process & Cycle Time Analysis</h1>
                 </div>
 
                 <!-- ส่วนกรอกชั่วโมงการทำงาน -->
@@ -102,8 +102,191 @@
                 </div>
             </header>
 
-            <!-- Dashboard Body Content -->
-            <div id="tab-content-dashboard" class="p-6 space-y-6 w-full">
+            <!-- Work Process & Cycle Time Tab Content (ตั้งเป็นค่าเริ่มต้น แสดงขึ้นมาก่อน) -->
+            <div id="tab-content-workprocess" class="p-6 space-y-6 w-full">
+                <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                            <div>
+                                <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
+                                <p class="text-xs text-slate-400">เลือกชิ้นส่วนประกอบ (Part), เลือก Product Group (เลือกได้ 1 กลุ่ม), และเลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ)</p>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
+                            ดู Dashboard ภาพรวม &rarr;
+                        </button>
+                    </div>
+
+                    <!-- ฟอร์มเลือก Part ด้านบน / Product Group และ Model -->
+                    <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
+                        
+                        <!-- 1. เลือกชิ้นส่วนประกอบ (Part) -->
+                        <div class="border-b border-bordercolor pb-3">
+                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือกชิ้นส่วนประกอบ (Part):</label>
+                            <div id="partTabContainer" class="flex flex-wrap gap-2">
+                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">1. Back Plate</button>
+                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">2. Bottom Plate</button>
+                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">3. Door</button>
+                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">4. Gasket</button>
+                            </div>
+                        </div>
+
+                        <!-- 2 & 3. Product Group และ Model -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pt-1">
+                            
+                            <!-- ฝั่งซ้าย: Product Group (col-span-10) -->
+                            <div class="md:col-span-10 bg-slate-950/40 p-3 rounded-xl border border-bordercolor/60">
+                                <label class="block text-xs font-semibold text-amber-400 mb-2">Product Group (เลือกได้ 1):</label>
+                                <div id="groupRadioContainer" class="flex flex-wrap gap-2"></div>
+                            </div>
+
+                            <!-- ฝั่งขวา: เลือกรุ่นสินค้า Model (col-span-2) -->
+                            <div class="md:col-span-2 bg-slate-800/40 p-3 rounded-xl border border-bordercolor/60">
+                                <label class="block text-[10px] font-medium text-slate-400 mb-1">
+                                    เลือกรุ่นสินค้า (Model): 
+                                    <span class="text-[9px] text-amber-400 font-normal">(เลือกได้หลาย)</span>
+                                </label>
+                                <div id="modelCheckboxContainer" class="flex flex-wrap gap-1.5 mt-1.5"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- แถบเครื่องมือจัดการตาราง -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                        <div>
+                            <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- ปุ่มดาวน์โหลด Template -->
+                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>ดาวน์โหลดเทมเพลต Excel</span>
+                            </button>
+
+                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
+                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span>อัปโหลดเข้าตาราง</span>
+                                <input type="file" id="importProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importProcessExcelData(event)">
+                            </label>
+
+                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span>เพิ่ม Station</span>
+                            </button>
+
+                            <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                <span id="editModalBtnText">เปิดตารางแก้ไขข้อมูล Work Station</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ตารางกรอกข้อมูล (โหมดแก้ไข) -->
+                    <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/80 p-4 rounded-xl">
+                        <div class="flex justify-between items-center border-b border-bordercolor pb-3">
+                            <div>
+                                <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
+                                <p class="text-xs text-slate-300 mt-0.5">กำลังแก้ไขข้อมูลของ Model ที่เลือก: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span>บันทึกข้อมูลและแสดงผล</span>
+                                </button>
+                                <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-2 rounded-lg border border-bordercolor transition">
+                                    ปิดหน้าต่างแก้ไข
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto max-h-[400px]">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-950 sticky top-0">
+                                        <th class="p-3 w-28 text-center">Station</th>
+                                        <th class="p-3">Process 1</th>
+                                        <th class="p-3">Process 2</th>
+                                        <th class="p-3">Process 3</th>
+                                        <th class="p-3 text-center w-20">WT 1</th>
+                                        <th class="p-3 text-center w-20">WT 2</th>
+                                        <th class="p-3 text-center w-20">WT 3</th>
+                                        <th class="p-3 text-center w-20">WT Total</th>
+                                        <th class="p-3 text-center w-20">Loss</th>
+                                        <th class="p-3 text-center w-24">Cycle Time</th>
+                                        <th class="p-3 text-center w-16">ลบ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Line of Balance & Takt Time Section -->
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-bordercolor space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                                    <div class="text-[11px] text-slate-300 bg-slate-800/80 px-3 py-1 rounded-lg border border-bordercolor flex items-center space-x-3">
+                                        <span>Takt Time 100%: <strong id="displayTtVal" class="text-yellow-300">30.00 วินาที</strong></span>
+                                        <span class="text-slate-500">|</span>
+                                        <span>Takt Time 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50 วินาที</strong></span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor shrink-0">
+                                <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
+                                <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none font-bold">
+                                <span class="text-xs text-slate-400">PCS/Hr</span>
+                            </div>
+                        </div>
+
+                        <!-- Layout Grid: กราฟซ้าย / ตารางขวา -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                            
+                            <!-- ฝั่งซ้าย: กราฟ LOB -->
+                            <div class="lg:col-span-7 lob-chart-wrapper bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 flex flex-col justify-between">
+                                <canvas id="lobChart"></canvas>
+                            </div>
+
+                            <!-- ฝั่งขวา: ตารางแสดงผลข้อมูลที่บันทึกแล้ว -->
+                            <div class="lg:col-span-5 bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 space-y-3">
+                                <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-2">
+                                    <span>Active Work Stations</span>
+                                    <span id="savedDisplayStatus" class="text-[11px] text-emerald-400 font-normal">โหลดข้อมูลสำเร็จ</span>
+                                </h3>
+                                <div class="overflow-x-auto max-h-[430px]">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
+                                                <th class="p-2 text-center w-20">Station</th>
+                                                <th class="p-2">Process 1</th>
+                                                <th class="p-2 text-center">WT Tot</th>
+                                                <th class="p-2 text-center">Loss</th>
+                                                <th class="p-2 text-center text-cyan-300">CT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
+                                            <!-- Rendered saved records -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Dashboard Tab Content (ซ่อนไว้ก่อน เปิดดูได้เมื่อคลิกเมนูด้านซ้าย) -->
+            <div id="tab-content-dashboard" class="p-6 space-y-6 hidden w-full">
 
                 <!-- 1. OVERVIEW SECTION -->
                 <section id="overview" class="space-y-4">
@@ -283,189 +466,6 @@
 
             </div>
 
-            <!-- Work Process & Cycle Time Tab Content (Hidden by default) -->
-            <div id="tab-content-workprocess" class="p-6 space-y-6 hidden w-full">
-                <section class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <div>
-                                <h2 class="text-lg font-bold text-white">กำหนดกระบวนการทำงานและ Cycle Time (Work Stations & Cycle Time)</h2>
-                                <p class="text-xs text-slate-400">เลือกชิ้นส่วนประกอบ (Part), เลือก Product Group (เลือกได้ 1 กลุ่ม), และเลือกรุ่นสินค้า (Model - เลือกได้หลายรายการ)</p>
-                            </div>
-                        </div>
-                        <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-xl border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
-                        </button>
-                    </div>
-
-                    <!-- ฟอร์มเลือก Part ด้านบน / Product Group และ Model -->
-                    <div class="bg-slate-900/50 p-4 rounded-xl border border-bordercolor space-y-4">
-                        
-                        <!-- 1. เลือกชิ้นส่วนประกอบ (Part) -->
-                        <div class="border-b border-bordercolor pb-3">
-                            <label class="block text-xs font-medium text-slate-400 mb-2">เลือกชิ้นส่วนประกอบ (Part):</label>
-                            <div id="partTabContainer" class="flex flex-wrap gap-2">
-                                <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">1. Back Plate</button>
-                                <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">2. Bottom Plate</button>
-                                <button type="button" onclick="selectPartTab('Door')" data-part="Door" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">3. Door</button>
-                                <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-4 py-2 rounded-xl text-[11px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">4. Gasket</button>
-                            </div>
-                        </div>
-
-                        <!-- 2 & 3. Product Group และ Model -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pt-1">
-                            
-                            <!-- ฝั่งซ้าย: Product Group (col-span-10) -->
-                            <div class="md:col-span-10 bg-slate-950/40 p-3 rounded-xl border border-bordercolor/60">
-                                <label class="block text-xs font-semibold text-amber-400 mb-2">Product Group (เลือกได้ 1):</label>
-                                <div id="groupRadioContainer" class="flex flex-wrap gap-2"></div>
-                            </div>
-
-                            <!-- ฝั่งขวา: เลือกรุ่นสินค้า Model (col-span-2) -->
-                            <div class="md:col-span-2 bg-slate-800/40 p-3 rounded-xl border border-bordercolor/60">
-                                <label class="block text-[10px] font-medium text-slate-400 mb-1">
-                                    เลือกรุ่นสินค้า (Model): 
-                                    <span class="text-[9px] text-amber-400 font-normal">(เลือกได้หลาย)</span>
-                                </label>
-                                <div id="modelCheckboxContainer" class="flex flex-wrap gap-1.5 mt-1.5"></div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- แถบเครื่องมือจัดการตาราง (ย้ายมาไว้ข้างบน Line of Balance & Takt Time เรียบร้อยแล้ว) -->
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
-                        <div>
-                            <h3 class="text-sm font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงาน</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">เพิ่มแถวข้อมูลเอง, ดาวน์โหลดแบบฟอร์ม Excel, หรืออัปโหลดไฟล์เพื่อกรอกข้อมูลอัตโนมัติ</p>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <!-- ปุ่มดาวน์โหลด Template -->
-                            <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span>ดาวน์โหลดเทมเพลต Excel</span>
-                            </button>
-
-                            <!-- ปุ่มอัปโหลด Excel เข้าตาราง -->
-                            <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span>อัปโหลดเข้าตาราง</span>
-                                <input type="file" id="importProcessFileInput" accept=".xlsx, .xls" class="hidden" onchange="importProcessExcelData(event)">
-                            </label>
-
-                            <button onclick="addNewStationRow()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2.5 rounded-xl border border-bordercolor transition flex items-center space-x-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                <span>เพิ่ม Station</span>
-                            </button>
-
-                            <button onclick="toggleEditModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                <span id="editModalBtnText">เปิดตารางแก้ไขข้อมูล Work Station</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- ตารางกรอกข้อมูล (โหมดแก้ไข) -->
-                    <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/80 p-4 rounded-xl">
-                        <div class="flex justify-between items-center border-b border-bordercolor pb-3">
-                            <div>
-                                <h3 class="text-sm font-semibold text-cyan-400">ตารางกำหนดชื่อกระบวนการทำงาน, Work Station และ Cycle Time (โหมดแก้ไข)</h3>
-                                <p class="text-xs text-slate-300 mt-0.5">กำลังแก้ไขข้อมูลของ Model ที่เลือก: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    <span>บันทึกข้อมูลและแสดงผล</span>
-                                </button>
-                                <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-2 rounded-lg border border-bordercolor transition">
-                                    ปิดหน้าต่างแก้ไข
-                                </button>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto max-h-[400px]">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="border-b border-bordercolor text-slate-400 bg-slate-950 sticky top-0">
-                                        <th class="p-3 w-28 text-center">Station</th>
-                                        <th class="p-3">Process 1</th>
-                                        <th class="p-3">Process 2</th>
-                                        <th class="p-3">Process 3</th>
-                                        <th class="p-3 text-center w-20">WT 1</th>
-                                        <th class="p-3 text-center w-20">WT 2</th>
-                                        <th class="p-3 text-center w-20">WT 3</th>
-                                        <th class="p-3 text-center w-20">WT Total</th>
-                                        <th class="p-3 text-center w-20">Loss</th>
-                                        <th class="p-3 text-center w-24">Cycle Time</th>
-                                        <th class="p-3 text-center w-16">ลบ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30">
-                                    <!-- Dynamic rows -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Line of Balance & Takt Time Section -->
-                    <div class="bg-slate-900/90 p-5 rounded-xl border border-bordercolor space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-bordercolor pb-4">
-                            <div>
-                                <div class="flex flex-wrap items-center gap-3">
-                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
-                                    <!-- ข้อความ Takt Time แสดงผลแบบกระชับเหนือกราฟ -->
-                                    <div class="text-[11px] text-slate-300 bg-slate-800/80 px-3 py-1 rounded-lg border border-bordercolor flex items-center space-x-3">
-                                        <span>Takt Time 100%: <strong id="displayTtVal" class="text-yellow-300">30.00 วินาที</strong></span>
-                                        <span class="text-slate-500">|</span>
-                                        <span>Takt Time 85%: <strong id="displayTtRedVal" class="text-rose-400">25.50 วินาที</strong></span>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-slate-400 mt-1">กรอกยอดผลิตรายชั่วโมง (UPH) เพื่อคำนวณ Takt Time เปรียบเทียบกับ Cycle Time แต่ละสถานี</p>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-bordercolor shrink-0">
-                                <label class="text-xs text-slate-300 font-medium">ยอดผลิตรายชั่วโมง (UPH):</label>
-                                <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-3 py-1.5 w-20 text-center rounded border border-bordercolor focus:outline-none font-bold">
-                                <span class="text-xs text-slate-400">PCS/Hr</span>
-                            </div>
-                        </div>
-
-                        <!-- Layout Grid: กราฟซ้าย / ตารางขวา -->
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                            
-                            <!-- ฝั่งซ้าย: กราฟ LOB -->
-                            <div class="lg:col-span-7 lob-chart-wrapper bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 flex flex-col justify-between">
-                                <canvas id="lobChart"></canvas>
-                            </div>
-
-                            <!-- ฝั่งขวา: ตารางแสดงผลข้อมูลที่บันทึกแล้ว -->
-                            <div class="lg:col-span-5 bg-slate-950/60 p-4 rounded-xl border border-bordercolor/80 space-y-3">
-                                <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-2">
-                                    <span>Active Work Stations</span>
-                                    <span id="savedDisplayStatus" class="text-[11px] text-emerald-400 font-normal">โหลดข้อมูลสำเร็จ</span>
-                                </h3>
-                                <div class="overflow-x-auto max-h-[430px]">
-                                    <table class="w-full text-left border-collapse text-xs">
-                                        <thead>
-                                            <tr class="border-b border-bordercolor text-slate-400 bg-slate-900">
-                                                <th class="p-2 text-center w-20">Station</th>
-                                                <th class="p-2">Process 1</th>
-                                                <th class="p-2 text-center">WT Tot</th>
-                                                <th class="p-2 text-center">Loss</th>
-                                                <th class="p-2 text-center text-cyan-300">CT</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300">
-                                            <!-- Rendered saved records -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </section>
-            </div>
         </main>
     </div>
 
