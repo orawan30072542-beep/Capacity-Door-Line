@@ -203,7 +203,7 @@
                         </div>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม UPH แถวบนสุด
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -899,6 +899,81 @@
             return [];
         }
 
+        function getModelMaxCT(modelName) {
+            let maxCT = 0;
+            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            
+            doorTypes.forEach(dt => {
+                subParts.forEach(sp => {
+                    let storageKey = `${modelName}_Door (${sp} - ${dt})`;
+                    let stations = doorProcessDatabase[storageKey];
+                    if (stations && Array.isArray(stations) && stations.length > 0) {
+                        stations.forEach(st => {
+                            let w1 = parseFloat(st.wt1) || 0;
+                            let w2 = parseFloat(st.wt2) || 0;
+                            let w3 = parseFloat(st.wt3) || 0;
+                            let l = parseFloat(st.loss) || 0;
+                            let ct = w1 + w2 + w3 + l;
+                            if (ct > maxCT) maxCT = ct;
+                        });
+                    }
+                });
+            });
+
+            ['Back Plate', 'Bottom Plate', 'Gasket'].forEach(part => {
+                let storageKey = `${modelName}_${part}`;
+                let stations = processDatabase[storageKey];
+                if (stations && Array.isArray(stations) && stations.length > 0) {
+                    stations.forEach(st => {
+                        let w1 = parseFloat(st.wt1) || 0;
+                        let w2 = parseFloat(st.wt2) || 0;
+                        let w3 = parseFloat(st.wt3) || 0;
+                        let l = parseFloat(st.loss) || 0;
+                        let ct = w1 + w2 + w3 + l;
+                        if (ct > maxCT) maxCT = ct;
+                    });
+                }
+            });
+
+            return maxCT > 0 ? maxCT : 30;
+        }
+
+        function getDayCapacityMetrics(groups, days, dayIndex, summaryStation, hours) {
+            let totalQty = 0;
+            let maxCTValues = [];
+
+            groups.forEach(g => {
+                g.models.forEach(m => {
+                    let config = getMasterConfigForModel(m.name);
+                    if (summaryStation !== 'All' && config.station !== summaryStation) return;
+                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+                    let orderVal = Number(m.orders[dayIndex]) || 0;
+                    let required = orderVal * qtyPerSet;
+                    if (required > 0) {
+                        totalQty += required;
+                        let ct = getModelMaxCT(m.name);
+                        maxCTValues.push(ct);
+                    }
+                });
+            });
+
+            let uphPlan = hours > 0 ? totalQty / hours : 0;
+            let uphPlan85 = uphPlan * 0.85;
+
+            let effectiveMaxCT = maxCTValues.length > 0 ? Math.max(...maxCTValues) : 30;
+            let uphActMaxCT = effectiveMaxCT > 0 ? 3600 / effectiveMaxCT : 0;
+            let uphActMaxCT85 = uphActMaxCT * 0.85;
+
+            return {
+                totalQty,
+                uphPlan,
+                uphPlan85,
+                uphActMaxCT,
+                uphActMaxCT85
+            };
+        }
+
         function loadProcessDataForCurrentSelection() {
             let modelKey = selectedModel ? selectedModel : '-';
             let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
@@ -1220,33 +1295,26 @@
             });
             headerRow.innerHTML = headerHtml;
 
-            let totalRequiredOutputs = new Array(days.length).fill(0);
             let filteredRowsCount = 0;
-
-            // 1. Render Top Summary Row First
             groups.forEach(g => {
                 g.models.forEach((m) => {
                     let config = getMasterConfigForModel(m.name);
                     if (currentSummaryStation !== 'All' && config.station !== currentSummaryStation) return;
-                    let qtyPerSet = Number(config.qtyPerSet) || 1;
                     filteredRowsCount++;
-                    for (let i = 0; i < days.length; i++) {
-                        let orderVal = Number(m.orders[i]) || 0;
-                        totalRequiredOutputs[i] += (orderVal * qtyPerSet);
-                    }
                 });
             });
 
+            // 1. Render Top Summary Row First with Capacity (UPH Plan & UPH ACT Max CT)
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
             for (let i = 0; i < days.length; i++) {
-                let dayTotal = totalRequiredOutputs[i];
-                let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
+                let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
                 topTotalHtml += `
-                    <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95">
-                        <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
-                        <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()} UPH</div>
+                    <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
+                        <div class="text-amber-400 text-xs font-bold mb-1">${metrics.totalQty.toLocaleString()} PCS</div>
+                        <div class="text-cyan-300 font-medium">UPH Plan: ${Math.round(metrics.uphPlan)} ┃ ${Math.round(metrics.uphPlan85)}</div>
+                        <div class="text-emerald-300 font-medium">UPH ACT: ${Math.round(metrics.uphActMaxCT)} ┃ ${Math.round(metrics.uphActMaxCT85)}</div>
                     </td>
                 `;
             }
@@ -1680,14 +1748,15 @@
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt1-input text-xs" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt2-input text-xs" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt3-input text-xs" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
-                    <td class="p-1.5 text-center font-bold text-slate-200 wt-total-cell">—</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300 wt-total-cell">-</td>
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-rose-400 p-1 rounded border border-bordercolor loss-input text-xs" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
-                    <td class="p-1.5 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
-                    <td class="p-1.5 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1 py-0.5 rounded bg-rose-950/40 border border-rose-900/50">ลบ</button></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300 ct-cell">-</td>
+                    <td class="p-1.5 text-center"><button onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-0.5 rounded bg-slate-800">&times;</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-            setupProcessInputListeners();
+            attachProcessInputListeners();
+            calculateProcessTableTotals();
         }
 
         function renderDoorProcessTableInputs() {
@@ -1704,89 +1773,94 @@
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor door-wt1-input text-xs" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor door-wt2-input text-xs" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor door-wt3-input text-xs" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
-                    <td class="p-1.5 text-center font-bold text-slate-200 door-wt-total-cell">—</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300 door-wt-total-cell">-</td>
                     <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-rose-400 p-1 rounded border border-bordercolor door-loss-input text-xs" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
-                    <td class="p-1.5 text-center font-bold text-amber-400 door-cycle-time-cell">—</td>
-                    <td class="p-1.5 text-center"><button type="button" onclick="removeDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1 py-0.5 rounded bg-rose-950/40 border border-rose-900/50">ลบ</button></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300 door-ct-cell">-</td>
+                    <td class="p-1.5 text-center"><button onclick="removeDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-0.5 rounded bg-slate-800">&times;</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-            setupDoorProcessInputListeners();
+            attachDoorProcessInputListeners();
+            calculateDoorProcessTableTotals();
         }
 
-        function setupProcessInputListeners() {
+        function attachProcessInputListeners() {
             const rows = document.querySelectorAll('#processTableBody tr');
-            rows.forEach((row, index) => {
-                const inputs = row.querySelectorAll('input');
+            rows.forEach((tr, index) => {
+                const inputs = tr.querySelectorAll('input');
                 inputs.forEach(input => {
                     input.oninput = () => {
-                        currentProcessData[index].station = row.querySelector('.station-input').value;
-                        currentProcessData[index].p1 = row.querySelector('.p1-input').value;
-                        currentProcessData[index].p2 = row.querySelector('.p2-input').value;
-                        currentProcessData[index].p3 = row.querySelector('.p3-input').value;
-                        currentProcessData[index].wt1 = parseFloat(row.querySelector('.wt1-input').value) || null;
-                        currentProcessData[index].wt2 = parseFloat(row.querySelector('.wt2-input').value) || null;
-                        currentProcessData[index].wt3 = parseFloat(row.querySelector('.wt3-input').value) || null;
-                        currentProcessData[index].loss = parseFloat(row.querySelector('.loss-input').value) || null;
+                        currentProcessData[index].station = tr.querySelector('.station-input').value;
+                        currentProcessData[index].p1 = tr.querySelector('.p1-input').value;
+                        currentProcessData[index].p2 = tr.querySelector('.p2-input').value;
+                        currentProcessData[index].p3 = tr.querySelector('.p3-input').value;
+                        currentProcessData[index].wt1 = tr.querySelector('.wt1-input').value !== '' ? parseFloat(tr.querySelector('.wt1-input').value) : null;
+                        currentProcessData[index].wt2 = tr.querySelector('.wt2-input').value !== '' ? parseFloat(tr.querySelector('.wt2-input').value) : null;
+                        currentProcessData[index].wt3 = tr.querySelector('.wt3-input').value !== '' ? parseFloat(tr.querySelector('.wt3-input').value) : null;
+                        currentProcessData[index].loss = tr.querySelector('.loss-input').value !== '' ? parseFloat(tr.querySelector('.loss-input').value) : null;
 
-                        let w1 = currentProcessData[index].wt1 || 0;
-                        let w2 = currentProcessData[index].wt2 || 0;
-                        let w3 = currentProcessData[index].wt3 || 0;
-                        let l = currentProcessData[index].loss || 0;
-                        let wtTot = w1 + w2 + w3;
-                        let ct = wtTot + l;
-
-                        row.querySelector('.wt-total-cell').textContent = wtTot > 0 ? wtTot.toFixed(2) : '—';
-                        row.querySelector('.cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
+                        calculateProcessTableTotals();
+                        renderSavedDisplayTable();
                         updateLobChart();
                     };
                 });
-                let w1 = currentProcessData[index].wt1 || 0;
-                let w2 = currentProcessData[index].wt2 || 0;
-                let w3 = currentProcessData[index].wt3 || 0;
-                let l = currentProcessData[index].loss || 0;
-                let wtTot = w1 + w2 + w3;
-                let ct = wtTot + l;
-                row.querySelector('.wt-total-cell').textContent = wtTot > 0 ? wtTot.toFixed(2) : '—';
-                row.querySelector('.cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
             });
         }
 
-        function setupDoorProcessInputListeners() {
+        function attachDoorProcessInputListeners() {
             const rows = document.querySelectorAll('#doorProcessTableBody tr');
-            rows.forEach((row, index) => {
-                const inputs = row.querySelectorAll('input');
+            rows.forEach((tr, index) => {
+                const inputs = tr.querySelectorAll('input');
                 inputs.forEach(input => {
                     input.oninput = () => {
-                        currentDoorProcessData[index].station = row.querySelector('.door-station-input').value;
-                        currentDoorProcessData[index].p1 = row.querySelector('.door-p1-input').value;
-                        currentDoorProcessData[index].p2 = row.querySelector('.door-p2-input').value;
-                        currentDoorProcessData[index].p3 = row.querySelector('.door-p3-input').value;
-                        currentDoorProcessData[index].wt1 = parseFloat(row.querySelector('.door-wt1-input').value) || null;
-                        currentDoorProcessData[index].wt2 = parseFloat(row.querySelector('.door-wt2-input').value) || null;
-                        currentDoorProcessData[index].wt3 = parseFloat(row.querySelector('.door-wt3-input').value) || null;
-                        currentDoorProcessData[index].loss = parseFloat(row.querySelector('.door-loss-input').value) || null;
+                        currentDoorProcessData[index].station = tr.querySelector('.door-station-input').value;
+                        currentDoorProcessData[index].p1 = tr.querySelector('.door-p1-input').value;
+                        currentDoorProcessData[index].p2 = tr.querySelector('.door-p2-input').value;
+                        currentDoorProcessData[index].p3 = tr.querySelector('.door-p3-input').value;
+                        currentDoorProcessData[index].wt1 = tr.querySelector('.door-wt1-input').value !== '' ? parseFloat(tr.querySelector('.door-wt1-input').value) : null;
+                        currentDoorProcessData[index].wt2 = tr.querySelector('.door-wt2-input').value !== '' ? parseFloat(tr.querySelector('.door-wt2-input').value) : null;
+                        currentDoorProcessData[index].wt3 = tr.querySelector('.door-wt3-input').value !== '' ? parseFloat(tr.querySelector('.door-wt3-input').value) : null;
+                        currentDoorProcessData[index].loss = tr.querySelector('.door-loss-input').value !== '' ? parseFloat(tr.querySelector('.door-loss-input').value) : null;
 
-                        let w1 = currentDoorProcessData[index].wt1 || 0;
-                        let w2 = currentDoorProcessData[index].wt2 || 0;
-                        let w3 = currentDoorProcessData[index].wt3 || 0;
-                        let l = currentDoorProcessData[index].loss || 0;
-                        let wtTot = w1 + w2 + w3;
-                        let ct = wtTot + l;
-
-                        row.querySelector('.door-wt-total-cell').textContent = wtTot > 0 ? wtTot.toFixed(2) : '—';
-                        row.querySelector('.door-cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
+                        calculateDoorProcessTableTotals();
+                        renderDoorSavedDisplayTable();
                         updateDoorLobChart();
                     };
                 });
-                let w1 = currentDoorProcessData[index].wt1 || 0;
-                let w2 = currentDoorProcessData[index].wt2 || 0;
-                let w3 = currentDoorProcessData[index].wt3 || 0;
-                let l = currentDoorProcessData[index].loss || 0;
+            });
+        }
+
+        function calculateProcessTableTotals() {
+            const rows = document.querySelectorAll('#processTableBody tr');
+            rows.forEach((tr, index) => {
+                let item = currentProcessData[index];
+                if (!item) return;
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
                 let ct = wtTot + l;
-                row.querySelector('.door-wt-total-cell').textContent = wtTot > 0 ? wtTot.toFixed(2) : '—';
-                row.querySelector('.door-cycle-time-cell').textContent = ct > 0 ? ct.toFixed(2) : '—';
+
+                tr.querySelector('.wt-total-cell').textContent = wtTot > 0 ? wtTot.toFixed(2) : '-';
+                tr.querySelector('.ct-cell').textContent = ct > 0 ? ct.toFixed(2) : '-';
+            });
+        }
+
+        function calculateDoorProcessTableTotals() {
+            const rows = document.querySelectorAll('#doorProcessTableBody tr');
+            rows.forEach((tr, index) => {
+                let item = currentDoorProcessData[index];
+                if (!item) return;
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                tr.querySelector('.door-wt-total-cell').textContent = wtTot > 0 ? wtTot.toFixed(2) : '-';
+                tr.querySelector('.door-ct-cell').textContent = ct > 0 ? ct.toFixed(2) : '-';
             });
         }
 
@@ -1795,7 +1869,7 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             if (!currentProcessData || currentProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Work Station</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการ</td></tr>`;
                 return;
             }
             currentProcessData.forEach(item => {
@@ -1805,13 +1879,14 @@
                 let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
                 let ct = wtTot + l;
+
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
+                    <td class="p-1.5 text-center font-semibold text-cyan-300">${item.station || '-'}</td>
                     <td class="p-1.5">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center">${wtTot > 0 ? wtTot.toFixed(2) : '-'}</td>
+                    <td class="p-1.5 text-center font-medium text-amber-300">${wtTot > 0 ? wtTot.toFixed(2) : '-'}</td>
                     <td class="p-1.5 text-center text-rose-400">${l > 0 ? l.toFixed(2) : '-'}</td>
-                    <td class="p-1.5 text-center font-bold text-cyan-400">${ct > 0 ? ct.toFixed(2) : '-'}</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct > 0 ? ct.toFixed(2) : '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1822,7 +1897,7 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Work Station (Door)</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการ Door</td></tr>`;
                 return;
             }
             currentDoorProcessData.forEach(item => {
@@ -1832,13 +1907,14 @@
                 let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
                 let ct = wtTot + l;
+
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station || '-'}</td>
+                    <td class="p-1.5 text-center font-semibold text-amber-300">${item.station || '-'}</td>
                     <td class="p-1.5">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center">${wtTot > 0 ? wtTot.toFixed(2) : '-'}</td>
+                    <td class="p-1.5 text-center font-medium text-amber-300">${wtTot > 0 ? wtTot.toFixed(2) : '-'}</td>
                     <td class="p-1.5 text-center text-rose-400">${l > 0 ? l.toFixed(2) : '-'}</td>
-                    <td class="p-1.5 text-center font-bold text-amber-400">${ct > 0 ? ct.toFixed(2) : '-'}</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${ct > 0 ? ct.toFixed(2) : '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
