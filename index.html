@@ -1445,7 +1445,7 @@
 
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
                 if (isSunday(day)) {
@@ -1454,9 +1454,7 @@
                     let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
                     topTotalHtml += `
                         <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
-                            <div class="text-amber-400 text-xs font-bold mb-1">${metrics.totalQty.toLocaleString()} PCS</div>
-                            <div class="text-cyan-300 font-medium">P: ${Math.round(metrics.uphPlan)} ┃ A: ${Math.round(metrics.uphPlan85)}</div>
-                            <div class="text-emerald-300 font-medium">P: ${Math.round(metrics.uphActMaxCT)} ┃ A: ${Math.round(metrics.uphActMaxCT85)}</div>
+                            <div class="text-amber-400 text-xs font-bold">${Math.round(metrics.totalQty).toLocaleString()} PCS</div>
                         </td>
                     `;
                 }
