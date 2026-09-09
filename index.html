@@ -244,7 +244,7 @@
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
                         <div class="max-h-[380px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableCapacity" class="style="width: 2.5cm;" text-left border-collapse text-[11px] table-fixed">
+                            <table id="tableCapacity" class="w-full text-left border-collapse text-[11px] table-fixed">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300"></tr>
                                 </thead>
@@ -1551,7 +1551,7 @@
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
 
-            tableElement.className = "style="width: 2.5cm;" text-left border-collapse text-[11px] table-fixed";
+            tableElement.className = "w-full text-left border-collapse text-[11px] table-fixed";
 
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
