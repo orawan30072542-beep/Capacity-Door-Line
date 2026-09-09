@@ -1329,10 +1329,11 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
-            days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
-            });
+            llet headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+days.forEach(day => {
+    // เพิ่ม min-w-[70px] หรือ min-w-[80px] เพื่อขยายช่องวันที่ให้กว้างขึ้น
+    headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 min-w-[80px]">${day}</th>`;
+});
             headerRow.innerHTML = headerHtml;
 
             let calc = calculateTotalOrders(groups, days);
@@ -1422,8 +1423,8 @@
 
             let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
-            });
+    headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 min-w-[80px]">${day}</th>`;
+});
             headerRow.innerHTML = headerHtml;
 
             let filteredRowsCount = 0;
