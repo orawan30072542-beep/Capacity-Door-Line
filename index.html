@@ -42,16 +42,16 @@
         }
     </style>
 </head>
-<body class="bg-darkbg text-slate-100 antialiased"> 
+<body class="bg-darkbg text-slate-100 antialiased">[cite: 13]
 
     <!-- Container -->
-    <div class="flex h-screen overflow-hidden w-full"> 
+    <div class="flex h-screen overflow-hidden w-full">[cite: 13]
         
         <!-- Sidebar Menu -->
-        <aside class="w-64 bg-[#070D1F] border-r border-bordercolor hidden md:flex flex-col justify-between shrink-0"> 
+        <aside class="w-64 bg-[#070D1F] border-r border-bordercolor hidden md:flex flex-col justify-between shrink-0">[cite: 13]
             <div>
                 <!-- Brand / Logo Area -->
-                <div class="p-6 border-b border-bordercolor flex items-center space-x-3"> 
+                <div class="p-6 border-b border-bordercolor flex items-center space-x-3">[cite: 13]
                     <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
@@ -61,7 +61,7 @@
                     </div>
                 </div>
                 <!-- Navigation -->
-                <nav class="p-4 space-y-2"> 
+                <nav class="p-4 space-y-2">[cite: 13]
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                         <span>1. Dashboard ภาพรวม</span>
@@ -80,7 +80,7 @@
                     </button>
                 </nav>
             </div>
-            <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-300 flex items-center justify-between"> 
+            <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-300 flex items-center justify-between">[cite: 13]
                 <span>System Status</span>
                 <span class="flex items-center space-x-1.5 text-emerald-400 font-medium">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
@@ -90,10 +90,10 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-y-auto w-full"> 
+        <main class="flex-1 flex flex-col overflow-y-auto w-full">[cite: 13]
             
             <!-- Top Header -->
-            <header class="bg-cardbg/85 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-30 w-full"> 
+            <header class="bg-cardbg/85 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-30 w-full">[cite: 13]
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white md:hidden">H</div>
                     <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white tracking-wide">Haier Manufacturing Intelligence Dashboard</h1>
@@ -111,9 +111,9 @@
             </header>
 
             <!-- Dashboard Body Content -->
-            <div id="tab-content-dashboard" class="p-6 space-y-6 w-full"> 
+            <div id="tab-content-dashboard" class="p-6 space-y-6 w-full">[cite: 13]
                 <!-- 1. OVERVIEW SECTION -->
-                <section id="overview" class="space-y-4"> 
+                <section id="overview" class="space-y-4">[cite: 13]
                     <div class="flex items-center space-x-2">
                         <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                         <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">1. ภาพรวมการผลิต (Overview)</h2>
@@ -143,7 +143,7 @@
                 </section>
 
                 <!-- 2. ORDER รายวันและ UPH -->
-                <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6 shadow-sm"> 
+                <section id="plan-order" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-6 shadow-sm">[cite: 13]
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
@@ -185,24 +185,14 @@
                     </div>
                 </section>
 
-                <!-- 2.5 รวมออเดอร์รายวันที่ต้องผลิต แยกตาม Group Station -->
+                <!-- 2.5 รวมออเดอร์รายวันที่ต้องทำ -->
                 <section id="daily-order-summary" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต แยกตาม Group Station (คูณจำนวนประตูต่อ Set)</h2>
-                        </div>
-                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
-                            <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
-                            <button onclick="switchDailySummaryStation('All')" id="summary-btn-all" class="summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">ทั้งหมด (All)</button>
-                            <button onclick="switchDailySummaryStation('Door A')" id="summary-btn-door-a" class="summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door A</button>
-                            <button onclick="switchDailySummaryStation('Door B')" id="summary-btn-door-b" class="summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
-                            <button onclick="switchDailySummaryStation('Door C')" id="summary-btn-door-c" class="summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
-                            <button onclick="switchDailySummaryStation('Door Glass')" id="summary-btn-door-glass" class="summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
-                        </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
+                        <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงยอดรวมชิ้นงานที่ต้องผลิตจริงรายวัน แยกตามสถานีงาน (Group Station) ที่กำหนดใน Master Model & Routing โดยนำยอดออเดอร์คูณด้วยจำนวนประตูต่อ Set อัตโนมัติ
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -216,8 +206,8 @@
                     </div>
                 </section>
 
-                <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) -->
-                <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm"> 
+                <!-- 3. CAPACITY จากเวลาการทำงาน -->
+                <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm">[cite: 13]
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
@@ -250,8 +240,8 @@
                 </section>
             </div>
 
-            <!-- NEW TAB CONTENT: MASTER MODEL & ROUTING -->
-            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full hidden"> 
+            <!-- MASTER MODEL & ROUTING TAB -->
+            <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full hidden">[cite: 13]
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
                     <div class="flex items-center space-x-3">
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
@@ -285,9 +275,8 @@
                 </div>
             </div>
 
-            <!-- WORK PROCESS & CYCLE TIME TAB CONTENT -->
-            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full hidden"> 
-                <!-- STICKY CONTROL PANEL -->
+            <!-- WORK PROCESS & CYCLE TIME TAB -->
+            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full hidden">[cite: 13]
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/30 shadow-lg space-y-1.5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
@@ -312,7 +301,7 @@
                         </div>
 
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group (เลือกได้เพียงกลุ่มเดียว):</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
@@ -323,7 +312,6 @@
                     </div>
                 </div>
 
-                <!-- HIGHLIGHT SECTION 1 -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-bordercolor pb-3">
                         <div>
@@ -371,7 +359,6 @@
                     </div>
                 </section>
 
-                <!-- SECTION 2 -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
@@ -424,9 +411,8 @@
                 </section>
             </div>
 
-            <!-- TAB CONTENT: DOOR PART QUICK SELECTION & ANALYSIS -->
-            <div id="tab-content-doorparts" class="p-6 space-y-5 w-full hidden"> 
-                <!-- STICKY CONTROL PANEL FOR DOOR -->
+            <!-- DOOR PART QUICK SELECTION TAB -->
+            <div id="tab-content-doorparts" class="p-6 space-y-5 w-full hidden">[cite: 13]
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-amber-500/30 shadow-lg space-y-1.5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
@@ -460,9 +446,8 @@
                             </div>
                         </div>
 
-                        <!-- Group และ Model สำหรับ Door -->
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group (เลือกได้เพียงกลุ่มเดียว):</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="doorGroupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
@@ -472,7 +457,6 @@
                     </div>
                 </div>
 
-                <!-- LOB CHART & ACTIVE WORK STATIONS FOR DOOR -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-bordercolor pb-3">
                         <div>
@@ -521,7 +505,6 @@
                     </div>
                 </section>
 
-                <!-- MANAGEMENT & EDIT SECTION FOR DOOR -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
@@ -591,7 +574,6 @@
         let selectedDoorModel = '';
 
         let currentCapacityStation = 'Door A';
-        let currentDailySummaryStation = 'All';
 
         function switchTab(tabId) {
             document.getElementById('tab-content-dashboard').classList.add('hidden');
@@ -888,11 +870,22 @@
         }
 
         let processDatabase = {};
+        try {
+            let savedDB = localStorage.getItem('haier_process_db_v7');
+            if (savedDB) { processDatabase = JSON.parse(savedDB); }
+        } catch (e) { console.error(e); }
         let currentProcessData = [];
+
         let doorProcessDatabase = {};
+        try {
+            let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');
+            if (savedDoorDB) { doorProcessDatabase = JSON.parse(savedDoorDB); }
+        } catch (e) { console.error(e); }
         let currentDoorProcessData = [];
 
-        function getEmptyDefaultStations() { return []; }
+        function getEmptyDefaultStations() {
+            return [];
+        }
 
         function loadProcessDataForCurrentSelection() {
             let modelKey = selectedModel ? selectedModel : '-';
@@ -943,7 +936,6 @@
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
             renderCapacityTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -1105,6 +1097,16 @@
             doorLobChart.update();
         }
 
+        function formatExcelDate(val) {
+            let num = Number(val);
+            if (!isNaN(num) && num > 30000) {
+                let utc_days = Math.floor(num - 25569);
+                let dateInfo = new Date(utc_days * 86400 * 1000);
+                return `${dateInfo.getUTCMonth() + 1}/${dateInfo.getUTCDate()}`;
+            }
+            return String(val).trim();
+        }
+
         function renderUnifiedTable(data) {
             const tableElement = document.getElementById('tablePlanOrder');
             if(!tableElement) return;
@@ -1170,26 +1172,6 @@
             });
         }
 
-        // ฟังก์ชันสลับการกรองสถานีในส่วนยอดรวมออเดอร์รายวัน
-        function switchDailySummaryStation(stationName) {
-            currentDailySummaryStation = stationName;
-            document.querySelectorAll('.summary-station-btn').forEach(btn => {
-                btn.className = 'summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700';
-            });
-            let activeBtnId = 'summary-btn-all';
-            if (stationName === 'Door A') activeBtnId = 'summary-btn-door-a';
-            else if (stationName === 'Door B') activeBtnId = 'summary-btn-door-b';
-            else if (stationName === 'Door C') activeBtnId = 'summary-btn-door-c';
-            else if (stationName === 'Door Glass') activeBtnId = 'summary-btn-door-glass';
-
-            let activeBtn = document.getElementById(activeBtnId);
-            if (activeBtn) {
-                activeBtn.className = 'summary-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow';
-            }
-            renderDailyOrderSummaryTable(currentDailyData);
-        }
-
-        // ฟังก์ชันสร้างตารางยอดรวมออเดอร์รายวันที่ต้องผลิต แยกตาม Group Station
         function renderDailyOrderSummaryTable(data) {
             const tableElement = document.getElementById('tableDailyOrderSummary');
             if (!tableElement) return;
@@ -1201,47 +1183,37 @@
 
             let days = data.days;
             let groups = data.groups;
-            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Group Station</th><th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-20 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
             let totalRequiredOutputs = new Array(days.length).fill(0);
-            let rowCount = 0;
 
             groups.forEach(g => {
-                g.models.forEach(m => {
+                g.models.forEach((m, mIndex) => {
                     let config = getMasterConfigForModel(m.name);
-                    let station = config.station || 'Door A';
                     let qtyPerSet = Number(config.qtyPerSet) || 1;
-
-                    // กรองตาม Group Station ที่เลือก
-                    if (currentDailySummaryStation !== 'All' && station !== currentDailySummaryStation) {
-                        return;
-                    }
-                    rowCount++;
 
                     let tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                    let html = `
-                        <td class="p-3 font-semibold text-amber-400 bg-slate-900/60">${station}</td>
-                        <td class="p-3 font-semibold text-white bg-slate-900/40">Group ${g.productGroup}</td>
-                        <td class="p-3 font-medium text-slate-200">${m.name}</td>
-                        <td class="p-3 text-center text-cyan-400 font-bold">${qtyPerSet}</td>
-                    `;
+                    let html = '';
+                    if (mIndex === 0) {
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
+                    }
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 text-center text-amber-400 font-bold bg-slate-900/40">${qtyPerSet}</td>`;
 
                     for (let i = 0; i < days.length; i++) {
                         let orderVal = Number(m.orders[i]) || 0;
-                        let requiredVal = orderVal * qtyPerSet;
-                        totalRequiredOutputs[i] += requiredVal;
-
-                        let displayVal = requiredVal > 0 ? requiredVal.toLocaleString() : '-';
+                        let requiredParts = orderVal * qtyPerSet;
+                        totalRequiredOutputs[i] += requiredParts;
+                        let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
                         html += `
                             <td class="p-2 text-center border-l border-bordercolor/30">
-                                <div class="text-cyan-400 font-medium text-xs">${displayVal}</div>
+                                <div class="text-cyan-400 font-semibold text-xs">${displayVal}</div>
                             </td>
                         `;
                     }
@@ -1250,187 +1222,577 @@
                 });
             });
 
-            if (rowCount === 0) {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="${days.length + 4}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลในสถานี ${currentDailySummaryStation}</td>`;
-                tbody.appendChild(tr);
-            } else {
-                // แถวสรุปผลรวม (TOTAL REQUIRED)
-                let totalTr = document.createElement('tr');
-                totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 border-t-2 border-bordercolor';
-                let totalHtml = `<td class="p-3" colspan="4">TOTAL REQUIRED (${currentDailySummaryStation})</td>`;
-                for (let i = 0; i < days.length; i++) {
-                    let dayReqTotal = totalRequiredOutputs[i];
-                    totalHtml += `
-                        <td class="p-2 text-center border-l border-bordercolor/40">
-                            <div class="text-amber-400 text-sm font-bold">${dayReqTotal.toLocaleString()}</div>
-                        </td>
-                    `;
-                }
-                totalTr.innerHTML = totalHtml;
-                tbody.appendChild(totalTr);
+            let totalTr = document.createElement('tr');
+            totalTr.className = 'bg-amber-950/80 font-bold text-amber-300 border-t-2 border-bordercolor';
+            let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Required Parts</td><td class="p-3 text-center">—</td>`;
+            for (let i = 0; i < days.length; i++) {
+                totalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 text-amber-400 text-sm font-bold">${totalRequiredOutputs[i].toLocaleString()}</td>`;
             }
+            totalTr.innerHTML = totalHtml;
+            tbody.appendChild(totalTr);
         }
 
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
-            document.querySelectorAll('.cap-station-btn').forEach(btn => {
-                btn.className = 'cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700';
-            });
-            let activeBtnId = 'cap-btn-door-a';
-            if (stationName === 'Door B') activeBtnId = 'cap-btn-door-b';
-            else if (stationName === 'Door C') activeBtnId = 'cap-btn-door-c';
-            else if (stationName === 'Door Glass') activeBtnId = 'cap-btn-door-glass';
-
-            let activeBtn = document.getElementById(activeBtnId);
-            if (activeBtn) {
-                activeBtn.className = 'cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow';
-            }
             document.getElementById('currentCapacityStationLabel').textContent = stationName;
+            
+            ['Door A', 'Door B', 'Door C', 'Door Glass'].forEach(st => {
+                let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
+                let btn = document.getElementById(btnId);
+                if (btn) {
+                    if (st === stationName) {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow";
+                    } else {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+                    }
+                }
+            });
+
             renderCapacityTable(currentDailyData);
         }
 
         function renderCapacityTable(data) {
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
+
+            tableElement.className = "w-full text-left border-collapse text-[11px] table-fixed";
+
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
 
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            let days = data.days;
-            let groups = data.groups;
-            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
-            let totalSecondsPerDay = hours * 3600;
-
-            let headerHtml = `<th class="p-2 font-medium w-36 text-slate-300 bg-slate-900 sticky top-0 z-30">Model / Description</th>`;
-            days.forEach(day => {
-                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
+            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            let headerHtml = `<th class="p-2 font-medium w-24 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Group</th><th class="p-2 font-medium w-24 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Model</th>`;
+            doorTypes.forEach(dt => {
+                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${dt}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
-            let stationModels = [];
-            groups.forEach(g => {
-                g.models.forEach(m => {
+            if (!data || !data.groups) return;
+
+            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+
+            data.groups.forEach(g => {
+                g.models.forEach((m) => {
                     let config = getMasterConfigForModel(m.name);
-                    if (config.station === currentCapacityStation) {
-                        stationModels.push(m);
-                    }
-                });
-            });
-
-            if (stationModels.length === 0) {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="${days.length + 1}" class="p-4 text-center text-slate-400">ไม่พบ Model ในสถานี ${currentCapacityStation} (สามารถกำหนดได้ที่เมนู Master Model & Routing)</td>`;
-                tbody.appendChild(tr);
-                return;
-            }
-
-            stationModels.forEach(m => {
-                let config = getMasterConfigForModel(m.name);
-                let qtyPerSet = Number(config.qtyPerSet) || 1;
-
-                let storageKey = `${m.name}_Back Plate`;
-                let procData = processDatabase[storageKey] || [
-                    { station: 'STA 1', wt1: 15, wt2: 10, wt3: 0, loss: 2, cycleTime: 27 },
-                    { station: 'STA 2', wt1: 20, wt2: 5, wt3: 0, loss: 3, cycleTime: 28 }
-                ];
-
-                let maxCt = 0;
-                procData.forEach(p => {
-                    let ct = parseFloat(p.cycleTime) || (parseFloat(p.wt1 || 0) + parseFloat(p.wt2 || 0) + parseFloat(p.wt3 || 0) + parseFloat(p.loss || 0));
-                    if (ct > maxCt) maxCt = ct;
-                });
-
-                let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                let html = `<td class="p-2 font-semibold text-white bg-slate-900/40">${m.name} <span class="text-[10px] text-cyan-400 font-normal">(${maxCt}s/ct)</span></td>`;
-
-                for (let i = 0; i < days.length; i++) {
-                    let order = Number(m.orders[i]) || 0;
-                    let requiredPieces = order * qtyPerSet;
-                    let requiredTimeSec = requiredPieces * maxCt;
-                    let capacityRatio = totalSecondsPerDay > 0 ? (requiredTimeSec / totalSecondsPerDay) * 100 : 0;
-
-                    let badgeColor = 'text-emerald-400 bg-emerald-950/40 border-emerald-500/30';
-                    if (capacityRatio > 100) {
-                        badgeColor = 'text-rose-400 bg-rose-950/40 border-rose-500/30';
-                    } else if (capacityRatio > 85) {
-                        badgeColor = 'text-amber-400 bg-amber-950/40 border-amber-500/30';
+                    if (config.station !== currentCapacityStation) {
+                        return; 
                     }
 
-                    html += `
-                        <td class="p-1.5 text-center border-l border-bordercolor/30">
-                            <div class="inline-block px-1.5 py-0.5 rounded border ${badgeColor} text-[10px] font-bold">
-                                ${capacityRatio.toFixed(1)}%
-                            </div>
-                            <div class="text-[9px] text-slate-400 mt-0.5">${requiredPieces.toLocaleString()} pcs</div>
-                        </td>
-                    `;
-                }
-                tr.innerHTML = html;
-                tbody.appendChild(tr);
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                    let html = '';
+
+                    html += `<td class="p-2 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center">${g.productGroup}</td>`;
+                    html += `<td class="p-2 font-medium text-slate-200 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${m.name}</td>`;
+
+                    doorTypes.forEach(dt => {
+                        let totalWT = 0;
+                        let maxCT = 0;
+
+                        subParts.forEach(sp => {
+                            let storageKey = `${m.name}_Door (${sp} - ${dt})`;
+                            let stations = doorProcessDatabase[storageKey];
+                            if (stations && Array.isArray(stations) && stations.length > 0) {
+                                stations.forEach(st => {
+                                    let w1 = parseFloat(st.wt1) || 0;
+                                    let w2 = parseFloat(st.wt2) || 0;
+                                    let w3 = parseFloat(st.wt3) || 0;
+                                    let l = parseFloat(st.loss) || 0;
+                                    let ct = w1 + w2 + w3 + l;
+
+                                    totalWT += ct;
+                                    if (ct > maxCT) maxCT = ct;
+                                });
+                            }
+                        });
+
+                        let leadTime = totalWT;
+                        let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(1)}s` : '-';
+                        let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(1)}s` : '-';
+
+                        html += `
+                            <td class="p-1.5 border border-bordercolor/40 bg-slate-900/20 align-middle text-center">
+                                <div class="space-y-0.5 text-[10px]">
+                                    <div class="text-slate-300">LT: <span class="font-bold text-cyan-400">${leadTimeStr}</span></div>
+                                    <div class="text-slate-300">CT: <span class="font-bold text-amber-400">${maxCtStr}</span></div>
+                                </div>
+                            </td>
+                        `;
+                    });
+
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
             });
         }
 
-        // ฟังก์ชันจำลอง / บันทึกข้อมูล Dashboard
-        function saveDashboardData() {
-            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            alert('บันทึกข้อมูลตารางแผนการผลิตเรียบร้อยแล้ว!');
-            renderUnifiedTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
-            renderCapacityTable(currentDailyData);
-        }
+        renderUnifiedTable(currentDailyData);
+        renderDailyOrderSummaryTable(currentDailyData);
+        renderCapacityTable(currentDailyData);
+        initSelectors();
 
         function previewExcelData(event) {
-            let file = event.target.files[0];
+            const file = event.target.files[0];
             if (!file) return;
-            document.getElementById('excelFileName').textContent = file.name;
-
-            let reader = new FileReader();
+            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
+            const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    let data = new Uint8Array(e.target.result);
-                    let workbook = XLSX.read(data, {type: 'array'});
-                    let firstSheetName = workbook.SheetNames[0];
-                    let worksheet = workbook.Sheets[firstSheetName];
-                    let json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                    if (json && json.length > 1) {
-                        alert('อัปโหลดและอ่านไฟล์ Excel สำเร็จ!');
+                    if (excelJson.length > 1) {
+                        let headerRow = excelJson[0];
+                        let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
+                        let days = rawDays.map(d => formatExcelDate(d));
+                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
+
+                        let groupMap = {};
+                        let groupOrderList = [];
+                        let currentProductGroup = 'Other';
+
+                        for (let i = 1; i < excelJson.length; i++) {
+                            let row = excelJson[i];
+                            if (!row || row.length === 0) continue;
+                            let prodCell = row[0];
+                            if (prodCell !== undefined && String(prodCell).trim() !== '') {
+                                currentProductGroup = String(prodCell).trim();
+                            }
+                            let modelName = String(row[1] || '').trim();
+                            if (modelName !== '') {
+                                let orders = row.slice(2, 2 + days.length).map(val => Math.round(Number(val) || 0));
+                                if (!groupMap[currentProductGroup]) {
+                                    groupMap[currentProductGroup] = [];
+                                    groupOrderList.push(currentProductGroup);
+                                }
+                                groupMap[currentProductGroup].push({ name: modelName, orders: orders });
+                            }
+                        }
+
+                        let groups = [];
+                        groupOrderList.forEach(gName => {
+                            groups.push({ productGroup: gName, models: groupMap[gName] });
+                        });
+
+                        if (groups.length > 0) {
+                            window.tempImportedData = { days: days, groups: groups };
+                            renderUnifiedTable(window.tempImportedData);
+                            renderDailyOrderSummaryTable(window.tempImportedData);
+                            renderCapacityTable(window.tempImportedData);
+                            renderMasterModelTable();
+                            let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
+                            planChart.data.labels = window.tempImportedData.days;
+                            planChart.data.datasets[0].data = newCalc.totalOutputs;
+                            planChart.update();
+                            alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล"');
+                        }
                     }
-                } catch (err) {
-                    console.error(err);
-                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel');
-                }
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // ฟังก์ชันจัดการตาราง Process (จำลองโครงสร้างพื้นฐาน)
-        function renderProcessTableInputs() {}
-        function renderSavedDisplayTable() {}
-        function renderDoorProcessTableInputs() {}
-        function renderDoorSavedDisplayTable() {}
-        function downloadProcessTemplate() {}
-        function importProcessExcelData() {}
-        function addNewStationRow() {}
-        function toggleEditModal() {}
-        function saveProcessAndStationData() {}
-        function downloadDoorProcessTemplate() {}
-        function importDoorProcessExcelData() {}
-        function addDoorNewStationRow() {}
-        function toggleDoorEditModal() {}
-        function saveDoorProcessAndStationData() {}
-
-        // เริ่มต้นการทำงานระบบ
-        window.onload = function() {
+        function saveDashboardData() {
+            if (!window.tempImportedData) {
+                alert('กรุณาเลือกไฟล์ Excel ใหม่ก่อนบันทึกข้อมูล');
+                return;
+            }
+            currentDailyData = window.tempImportedData;
+            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
             initSelectors();
-            renderUnifiedTable(currentDailyData);
+            renderMasterModelTable();
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
-        };
+            alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
+        }
+
+        function downloadProcessTemplate() {
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["STA01", "Feeding", "Pressing", "", 12.5, 8.0, "", 2.0],
+                ["STA02", "Welding", "Inspection", "", 15.0, 5.0, "", 1.5]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
+            XLSX.writeFile(wb, "Work_Process_Template.xlsx");
+        }
+
+        function importProcessExcelData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (excelJson.length > 1) {
+                        let importedStations = [];
+                        for (let i = 1; i < excelJson.length; i++) {
+                            let row = excelJson[i];
+                            if (!row || row.length === 0) continue;
+                            let station = String(row[0] || '').trim();
+                            if (!station) continue;
+                            importedStations.push({
+                                station: station,
+                                p1: String(row[1] || '').trim(),
+                                p2: String(row[2] || '').trim(),
+                                p3: String(row[3] || '').trim(),
+                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
+                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
+                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
+                            });
+                        }
+                        if (importedStations.length > 0) {
+                            currentProcessData = importedStations;
+                            renderProcessTableInputs();
+                            updateLobChart();
+                            const editSection = document.getElementById('editProcessSection');
+                            if (editSection.classList.contains('hidden')) { toggleEditModal(); }
+                            alert('นำเข้าข้อมูลสำเร็จ!');
+                        }
+                    }
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
+                event.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadDoorProcessTemplate() {
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["STA01", "Bending-Feed", "Forming", "", 10.0, 5.0, "", 1.0],
+                ["STA02", "Welding", "Check", "", 12.0, 4.0, "", 1.0]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "DoorProcessTemplate");
+            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
+        }
+
+        function importDoorProcessExcelData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (excelJson.length > 1) {
+                        let importedStations = [];
+                        for (let i = 1; i < excelJson.length; i++) {
+                            let row = excelJson[i];
+                            if (!row || row.length === 0) continue;
+                            let station = String(row[0] || '').trim();
+                            if (!station) continue;
+                            importedStations.push({
+                                station: station,
+                                p1: String(row[1] || '').trim(),
+                                p2: String(row[2] || '').trim(),
+                                p3: String(row[3] || '').trim(),
+                                wt1: row[4] !== undefined && row[4] !== '' ? Number(row[4]) : null,
+                                wt2: row[5] !== undefined && row[5] !== '' ? Number(row[5]) : null,
+                                wt3: row[6] !== undefined && row[6] !== '' ? Number(row[6]) : null,
+                                loss: row[7] !== undefined && row[7] !== '' ? Number(row[7]) : null
+                            });
+                        }
+                        if (importedStations.length > 0) {
+                            currentDoorProcessData = importedStations;
+                            renderDoorProcessTableInputs();
+                            updateDoorLobChart();
+                            const editSection = document.getElementById('editDoorProcessSection');
+                            if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }
+                            alert('นำเข้าข้อมูล Door สำเร็จ!');
+                        }
+                    }
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
+                event.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function toggleEditModal() {
+            const editSection = document.getElementById('editProcessSection');
+            const btnText = document.getElementById('editModalBtnText');
+            if (editSection.classList.contains('hidden')) {
+                editSection.classList.remove('hidden');
+                btnText.textContent = 'ซ่อนตารางแก้ไข';
+            } else {
+                editSection.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
+            }
+        }
+
+        function toggleDoorEditModal() {
+            const editSection = document.getElementById('editDoorProcessSection');
+            const btnText = document.getElementById('editDoorModalBtnText');
+            if (editSection.classList.contains('hidden')) {
+                editSection.classList.remove('hidden');
+                btnText.textContent = 'ซ่อนตารางแก้ไข (Door)';
+            } else {
+                editSection.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
+            }
+        }
+
+        function addNewStationRow() {
+            currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
+            renderProcessTableInputs();
+            updateLobChart();
+        }
+
+        function removeStationRow(index) {
+            currentProcessData.splice(index, 1);
+            renderProcessTableInputs();
+            updateLobChart();
+        }
+
+        function addDoorNewStationRow() {
+            currentDoorProcessData.push({ station: `STA0${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
+            renderDoorProcessTableInputs();
+            updateDoorLobChart();
+        }
+
+        function removeDoorStationRow(index) {
+            currentDoorProcessData.splice(index, 1);
+            renderDoorProcessTableInputs();
+            updateDoorLobChart();
+        }
+
+        function saveProcessAndStationData() {
+            if (!selectedModel) {
+                alert('กรุณาเลือก Model');
+                return;
+            }
+            let storageKey = `${selectedModel}_${selectedPartValue}`;
+            processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
+            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            renderSavedDisplayTable();
+            updateLobChart();
+            renderCapacityTable(currentDailyData);
+            alert('บันทึกข้อมูลกระบวนการทำงานสำเร็จ!');
+        }
+
+        function saveDoorProcessAndStationData() {
+            if (!selectedDoorModel) {
+                alert('กรุณาเลือก Model');
+                return;
+            }
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let storageKey = `${selectedDoorModel}_${effectivePart}`;
+            doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
+            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+            renderCapacityTable(currentDailyData);
+            alert('บันทึกข้อมูลกระบวนการทำงาน Door สำเร็จ!');
+        }
+
+        function renderProcessTableInputs() {
+            const tbody = document.getElementById('processTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            currentProcessData.forEach((item, index) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center"><input type="text" class="w-full bg-slate-800 text-center text-cyan-300 font-semibold px-1.5 py-1 rounded border border-bordercolor station-input text-xs" value="${item.station || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p1-input text-xs" value="${item.p1 || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p2-input text-xs" value="${item.p2 || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor p3-input text-xs" value="${item.p3 || ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt1-input text-xs" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt2-input text-xs" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-cyan-400 p-1 rounded border border-bordercolor wt3-input text-xs" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200 wt-total-cell">—</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-rose-400 p-1 rounded border border-bordercolor loss-input text-xs" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400 cycle-time-cell">—</td>
+                    <td class="p-1.5 text-center"><button type="button" onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1">✕</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateInputRowCalculations();
+        }
+
+        function renderDoorProcessTableInputs() {
+            const tbody = document.getElementById('doorProcessTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            currentDoorProcessData.forEach((item, index) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center"><input type="text" class="w-full bg-slate-800 text-center text-amber-300 font-semibold px-1.5 py-1 rounded border border-bordercolor door-station-input text-xs" value="${item.station || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor door-p1-input text-xs" value="${item.p1 || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor door-p2-input text-xs" value="${item.p2 || ''}"></td>
+                    <td class="p-1.5"><input type="text" class="w-full bg-slate-800 text-white px-2 py-1 rounded border border-bordercolor door-p3-input text-xs" value="${item.p3 || ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-amber-400 p-1 rounded border border-bordercolor door-wt1-input text-xs" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-amber-400 p-1 rounded border border-bordercolor door-wt2-input text-xs" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-amber-400 p-1 rounded border border-bordercolor door-wt3-input text-xs" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200 door-wt-total-cell">—</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.01" class="w-14 bg-slate-800 text-center text-rose-400 p-1 rounded border border-bordercolor door-loss-input text-xs" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400 door-cycle-time-cell">—</td>
+                    <td class="p-1.5 text-center"><button type="button" onclick="removeDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 px-1">✕</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateDoorInputRowCalculations();
+        }
+
+        function updateInputRowCalculations() {
+            const rows = document.querySelectorAll('#processTableBody tr');
+            rows.forEach((tr, index) => {
+                const sInput = tr.querySelector('.station-input');
+                const p1Input = tr.querySelector('.p1-input');
+                const p2Input = tr.querySelector('.p2-input');
+                const p3Input = tr.querySelector('.p3-input');
+                const wt1Input = tr.querySelector('.wt1-input');
+                const wt2Input = tr.querySelector('.wt2-input');
+                const wt3Input = tr.querySelector('.wt3-input');
+                const wtTotalCell = tr.querySelector('.wt-total-cell');
+                const lossInput = tr.querySelector('.loss-input');
+                const ctCell = tr.querySelector('.cycle-time-cell');
+
+                const updateRow = () => {
+                    let w1 = parseFloat(wt1Input.value) || 0;
+                    let w2 = parseFloat(wt2Input.value) || 0;
+                    let w3 = parseFloat(wt3Input.value) || 0;
+                    let l = parseFloat(lossInput.value) || 0;
+                    let total = w1 + w2 + w3;
+                    let ct = total + l;
+
+                    wtTotalCell.textContent = total > 0 ? total.toFixed(2) : '—';
+                    ctCell.textContent = ct > 0 ? ct.toFixed(2) : '—';
+
+                    currentProcessData[index] = {
+                        station: sInput.value,
+                        p1: p1Input.value,
+                        p2: p2Input.value,
+                        p3: p3Input.value,
+                        wt1: wt1Input.value !== '' ? parseFloat(wt1Input.value) : null,
+                        wt2: wt2Input.value !== '' ? parseFloat(wt2Input.value) : null,
+                        wt3: wt3Input.value !== '' ? parseFloat(wt3Input.value) : null,
+                        loss: lossInput.value !== '' ? parseFloat(lossInput.value) : null
+                    };
+                    updateLobChart();
+                };
+
+                [sInput, p1Input, p2Input, p3Input, wt1Input, wt2Input, wt3Input, lossInput].forEach(input => {
+                    input.addEventListener('input', updateRow);
+                });
+
+                updateRow();
+            });
+        }
+
+        function updateDoorInputRowCalculations() {
+            const rows = document.querySelectorAll('#doorProcessTableBody tr');
+            rows.forEach((tr, index) => {
+                const sInput = tr.querySelector('.door-station-input');
+                const p1Input = tr.querySelector('.door-p1-input');
+                const p2Input = tr.querySelector('.door-p2-input');
+                const p3Input = tr.querySelector('.door-p3-input');
+                const wt1Input = tr.querySelector('.door-wt1-input');
+                const wt2Input = tr.querySelector('.door-wt2-input');
+                const wt3Input = tr.querySelector('.door-wt3-input');
+                const wtTotalCell = tr.querySelector('.door-wt-total-cell');
+                const lossInput = tr.querySelector('.door-loss-input');
+                const ctCell = tr.querySelector('.door-cycle-time-cell');
+
+                const updateRow = () => {
+                    let w1 = parseFloat(wt1Input.value) || 0;
+                    let w2 = parseFloat(wt2Input.value) || 0;
+                    let w3 = parseFloat(wt3Input.value) || 0;
+                    let l = parseFloat(lossInput.value) || 0;
+                    let total = w1 + w2 + w3;
+                    let ct = total + l;
+
+                    wtTotalCell.textContent = total > 0 ? total.toFixed(2) : '—';
+                    ctCell.textContent = ct > 0 ? ct.toFixed(2) : '—';
+
+                    currentDoorProcessData[index] = {
+                        station: sInput.value,
+                        p1: p1Input.value,
+                        p2: p2Input.value,
+                        p3: p3Input.value,
+                        wt1: wt1Input.value !== '' ? parseFloat(wt1Input.value) : null,
+                        wt2: wt2Input.value !== '' ? parseFloat(wt2Input.value) : null,
+                        wt3: wt3Input.value !== '' ? parseFloat(wt3Input.value) : null,
+                        loss: lossInput.value !== '' ? parseFloat(lossInput.value) : null
+                    };
+                    updateDoorLobChart();
+                };
+
+                [sInput, p1Input, p2Input, p3Input, wt1Input, wt2Input, wt3Input, lossInput].forEach(input => {
+                    input.addEventListener('input', updateRow);
+                });
+
+                updateRow();
+            });
+        }
+
+        function renderSavedDisplayTable() {
+            const tbody = document.getElementById('displaySavedTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!currentProcessData || currentProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;
+                return;
+            }
+            currentProcessData.forEach(item => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let total = w1 + w2 + w3;
+                let ct = total + l;
+                let tr = document.createElement('tr');
+                tr.className = 'border-b border-bordercolor/30 hover:bg-slate-900/30';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
+                    <td class="p-1.5 text-white">${item.p1 || '-'}</td>
+                    <td class="p-1.5 text-center">${total > 0 ? total.toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center text-rose-400">${l > 0 ? l.toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct > 0 ? ct.toFixed(2) : '—'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDoorSavedDisplayTable() {
+            const tbody = document.getElementById('displayDoorSavedTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station (Door)</td></tr>`;
+                return;
+            }
+            currentDoorProcessData.forEach(item => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let total = w1 + w2 + w3;
+                let ct = total + l;
+                let tr = document.createElement('tr');
+                tr.className = 'border-b border-bordercolor/30 hover:bg-slate-900/30';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station || '-'}</td>
+                    <td class="p-1.5 text-white">${item.p1 || '-'}</td>
+                    <td class="p-1.5 text-center">${total > 0 ? total.toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center text-rose-400">${l > 0 ? l.toFixed(2) : '—'}</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${ct > 0 ? ct.toFixed(2) : '—'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
     </script>
 </body>
 </html>
