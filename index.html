@@ -1067,8 +1067,8 @@
                         multiplier = Number(config.qtyPerSet) || 1;
                     }
 
-                    let orderVal = Number(m.orders[dayIndex]) || 0;
-                    let required = orderVal * multiplier;
+                    let orderVal = Math.round(Number(m.orders[dayIndex]) || 0);
+                    let required = Math.round(orderVal * multiplier);
                     if (required > 0) {
                         totalQty += required;
                         let ct = getModelMaxCT(m.name);
@@ -1085,7 +1085,7 @@
             let uphActMaxCT85 = uphActMaxCT * 0.85;
 
             return {
-                totalQty,
+                totalQty: Math.round(totalQty),
                 uphPlan,
                 uphPlan85,
                 uphActMaxCT,
@@ -1153,7 +1153,7 @@
                         g.models.forEach(m => {
                             for (let i = 0; i < days.length; i++) {
                                 if (!isSunday(days[i])) {
-                                    totalOutputs[i] += Number(m.orders[i]) || 0;
+                                    totalOutputs[i] += Math.round(Number(m.orders[i]) || 0);
                                 }
                             }
                         });
@@ -1345,7 +1345,7 @@
                 if (isSunday(day)) {
                     totalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
                 } else {
-                    let dayTotal = calc.totalOutputs[i];
+                    let dayTotal = Math.round(calc.totalOutputs[i]);
                     let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
                     totalHtml += `
                         <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
@@ -1374,7 +1374,7 @@
                         if (isSunday(day)) {
                             html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
                         } else {
-                            let orderVal = Number(m.orders[i]) || 0;
+                            let orderVal = Math.round(Number(m.orders[i]) || 0);
                             let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
                             let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
                             html += `
@@ -1510,8 +1510,8 @@
                         if (isSunday(day)) {
                             html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
                         } else {
-                            let orderVal = Number(m.orders[i]) || 0;
-                            let requiredParts = orderVal * multiplier;
+                            let orderVal = Math.round(Number(m.orders[i]) || 0);
+                            let requiredParts = Math.round(orderVal * multiplier);
                             let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
                             let modelUphInt = requiredParts > 0 && hours > 0 ? Math.round(requiredParts / hours) : '-';
                             html += `
@@ -1662,7 +1662,7 @@
                         if (!groupsMap[gName]) groupsMap[gName] = [];
                         let orders = [];
                         for (let j = 2; j < 2 + days.length; j++) {
-                            orders.push(Number(row[j]) || 0);
+                            orders.push(Math.round(Number(row[j]) || 0));
                         }
                         groupsMap[gName].push({ name: mName, orders: orders });
                     }
@@ -1788,28 +1788,16 @@
                 let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/30 hover:bg-slate-900/40';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
                     <td class="p-1.5 text-center font-bold text-cyan-300">${item.station}</td>
-                    <td class="p-1.5 text-slate-200">${item.p1}</td>
-                    <td class="p-1.5 text-center font-semibold text-amber-300">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 truncate max-w-[120px]">${item.p1}</td>
+                    <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
                     <td class="p-1.5 text-center text-rose-300">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-emerald-400">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function toggleEditModal() {
-            let sec = document.getElementById('editProcessSection');
-            let btnText = document.getElementById('editModalBtnText');
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station';
-            } else {
-                sec.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
-            }
         }
 
         function renderDoorProcessTableInputs() {
@@ -1819,8 +1807,8 @@
 
             if (currentDoorProcessData.length === 0) {
                 currentDoorProcessData = [
-                    { station: 'STA D10', p1: 'Door Setup', p2: '-', p3: '-', wt1: 12, wt2: 0, wt3: 0, loss: 2 },
-                    { station: 'STA D20', p1: 'Door Assembly', p2: 'Check', p3: '-', wt1: 18, wt2: 4, wt3: 0, loss: 2 }
+                    { station: 'STA 10', p1: 'Door Setup', p2: '-', p3: '-', wt1: 12, wt2: 0, wt3: 0, loss: 1 },
+                    { station: 'STA 20', p1: 'Door Process', p2: '-', p3: '-', wt1: 18, wt2: 0, wt3: 0, loss: 2 }
                 ];
             }
 
@@ -1868,7 +1856,7 @@
         }
 
         function addDoorNewStationRow() {
-            currentDoorProcessData.push({ station: `STA D${ (currentDoorProcessData.length + 1) * 10 }`, p1: 'New Process', p2: '-', p3: '-', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
+            currentDoorProcessData.push({ station: `STA ${ (currentDoorProcessData.length + 1) * 10 }`, p1: 'New Door Process', p2: '-', p3: '-', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
             renderDoorProcessTableInputs();
         }
 
@@ -1886,7 +1874,7 @@
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
-            alert('บันทึกข้อมูล Work Process & CT (Door) สำเร็จ!');
+            alert('บันทึกข้อมูล Work Process & CT (Door Part) สำเร็จ!');
             toggleDoorEditModal();
         }
 
@@ -1896,7 +1884,7 @@
             tbody.innerHTML = '';
 
             if (currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการทำงาน</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการทำงาน (Door)</td></tr>`;
                 return;
             }
 
@@ -1909,16 +1897,28 @@
                 let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/30 hover:bg-slate-900/40';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station}</td>
-                    <td class="p-1.5 text-slate-200">${item.p1}</td>
-                    <td class="p-1.5 text-center font-semibold text-amber-300">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station}</td>
+                    <td class="p-1.5 truncate max-w-[120px]">${item.p1}</td>
+                    <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
                     <td class="p-1.5 text-center text-rose-300">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-emerald-400">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function toggleEditModal() {
+            let sec = document.getElementById('editProcessSection');
+            let btnText = document.getElementById('editModalBtnText');
+            if (sec.classList.contains('hidden')) {
+                sec.classList.remove('hidden');
+                btnText.textContent = 'ปิดตารางแก้ไข Work Station';
+            } else {
+                sec.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
+            }
         }
 
         function toggleDoorEditModal() {
@@ -1934,15 +1934,27 @@
         }
 
         function downloadProcessTemplate() {
-            let wsData = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA 10", "Feeding", "-", "-", 15, 0, 0, 2],
-                ["STA 20", "Assembly", "Check", "-", 20, 5, 0, 3]
-            ];
             let wb = XLSX.utils.book_new();
+            let wsData = [
+                ['Station', 'Process 1', 'Process 2', 'Process 3', 'WT 1', 'WT 2', 'WT 3', 'Loss', 'Cycle Time'],
+                ['STA 10', 'Setup', '-', '-', 10, 0, 0, 1, 11],
+                ['STA 20', 'Assembly', '-', '-', 15, 0, 0, 2, 17]
+            ];
             let ws = XLSX.utils.aoa_to_sheet(wsData);
-            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
             XLSX.writeFile(wb, "Process_Template.xlsx");
+        }
+
+        function downloadDoorProcessTemplate() {
+            let wb = XLSX.utils.book_new();
+            let wsData = [
+                ['Station', 'Process 1', 'Process 2', 'Process 3', 'WT 1', 'WT 2', 'WT 3', 'Loss', 'Cycle Time'],
+                ['STA 10', 'Door Setup', '-', '-', 12, 0, 0, 1, 13],
+                ['STA 20', 'Door Process', '-', '-', 18, 0, 0, 2, 20]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "Door_Template");
+            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
         }
 
         function importProcessExcelData(event) {
@@ -1952,47 +1964,32 @@
             reader.onload = function(e) {
                 let data = new Uint8Array(e.target.result);
                 let workbook = XLSX.read(data, { type: 'array' });
-                let worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                let json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                if (json.length > 1) {
-                    let imported = [];
-                    for (let i = 1; i < json.length; i++) {
-                        let row = json[i];
-                        if (!row || row.length === 0) continue;
-                        imported.push({
-                            station: String(row[0] || `STA ${i*10}`),
-                            p1: String(row[1] || '-'),
-                            p2: String(row[2] || '-'),
-                            p3: String(row[3] || '-'),
-                            wt1: parseFloat(row[4]) || 0,
-                            wt2: parseFloat(row[5]) || 0,
-                            wt3: parseFloat(row[6]) || 0,
-                            loss: parseFloat(row[7]) || 0
+                let sheet = workbook.Sheets[workbook.SheetNames[0]];
+                let json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                let newStations = [];
+                for (let i = 1; i < json.length; i++) {
+                    let r = json[i];
+                    if (r && r.length > 0 && r[0]) {
+                        newStations.push({
+                            station: String(r[0] || `STA ${i*10}`),
+                            p1: String(r[1] || '-'),
+                            p2: String(r[2] || '-'),
+                            p3: String(r[3] || '-'),
+                            wt1: parseFloat(r[4]) || 0,
+                            wt2: parseFloat(r[5]) || 0,
+                            wt3: parseFloat(r[6]) || 0,
+                            loss: parseFloat(r[7]) || 0
                         });
                     }
-                    if (imported.length > 0) {
-                        currentProcessData = imported;
-                        renderProcessTableInputs();
-                        renderSavedDisplayTable();
-                        updateLobChart();
-                        alert('นำเข้าข้อมูล Work Process จาก Excel สำเร็จ!');
-                    }
+                }
+                if (newStations.length > 0) {
+                    currentProcessData = newStations;
+                    renderProcessTableInputs();
+                    alert('นำเข้าข้อมูลสำเร็จ! กดปุ่ม "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
                 }
             };
             reader.readAsArrayBuffer(file);
-        }
-
-        function downloadDoorProcessTemplate() {
-            let wsData = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA D10", "Door Setup", "-", "-", 12, 0, 0, 2],
-                ["STA D20", "Door Assembly", "Check", "-", 18, 4, 0, 2]
-            ];
-            let wb = XLSX.utils.book_new();
-            let ws = XLSX.utils.aoa_to_sheet(wsData);
-            XLSX.utils.book_append_sheet(wb, ws, "DoorProcessTemplate");
-            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
         }
 
         function importDoorProcessExcelData(event) {
@@ -2002,47 +1999,40 @@
             reader.onload = function(e) {
                 let data = new Uint8Array(e.target.result);
                 let workbook = XLSX.read(data, { type: 'array' });
-                let worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                let json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                if (json.length > 1) {
-                    let imported = [];
-                    for (let i = 1; i < json.length; i++) {
-                        let row = json[i];
-                        if (!row || row.length === 0) continue;
-                        imported.push({
-                            station: String(row[0] || `STA D${i*10}`),
-                            p1: String(row[1] || '-'),
-                            p2: String(row[2] || '-'),
-                            p3: String(row[3] || '-'),
-                            wt1: parseFloat(row[4]) || 0,
-                            wt2: parseFloat(row[5]) || 0,
-                            wt3: parseFloat(row[6]) || 0,
-                            loss: parseFloat(row[7]) || 0
+                let sheet = workbook.Sheets[workbook.SheetNames[0]];
+                let json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                
+                let newStations = [];
+                for (let i = 1; i < json.length; i++) {
+                    let r = json[i];
+                    if (r && r.length > 0 && r[0]) {
+                        newStations.push({
+                            station: String(r[0] || `STA ${i*10}`),
+                            p1: String(r[1] || '-'),
+                            p2: String(r[2] || '-'),
+                            p3: String(r[3] || '-'),
+                            wt1: parseFloat(r[4]) || 0,
+                            wt2: parseFloat(r[5]) || 0,
+                            wt3: parseFloat(r[6]) || 0,
+                            loss: parseFloat(r[7]) || 0
                         });
                     }
-                    if (imported.length > 0) {
-                        currentDoorProcessData = imported;
-                        renderDoorProcessTableInputs();
-                        renderDoorSavedDisplayTable();
-                        updateDoorLobChart();
-                        alert('นำเข้าข้อมูล Work Process (Door) จาก Excel สำเร็จ!');
-                    }
+                }
+                if (newStations.length > 0) {
+                    currentDoorProcessData = newStations;
+                    renderDoorProcessTableInputs();
+                    alert('นำเข้าข้อมูล (Door) สำเร็จ! กดปุ่ม "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // Initialize App on Load
-        window.onload = function() {
-            initSelectors();
-            renderUnifiedTable(currentDailyData);
-            renderMasterModelTable();
-            renderCapacityTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
-            loadProcessDataForCurrentSelection();
-            loadDoorProcessDataForCurrentSelection();
-        };
+        // Initialize on load
+        initSelectors();
+        renderUnifiedTable(currentDailyData);
+        renderMasterModelTable();
+        renderCapacityTable(currentDailyData);
+        renderDailyOrderSummaryTable(currentDailyData);
     </script>
 </body>
 </html>
