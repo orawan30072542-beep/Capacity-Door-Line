@@ -1636,67 +1636,73 @@
 
         function saveProcessAndStationData() {
             const rows = document.querySelectorAll('#processTableBody tr');
-            let updatedStations = [];
+            let newStations = [];
             rows.forEach(row => {
                 let station = row.querySelector('.station-input').value.trim();
                 if (!station) return;
-                updatedStations.push({
-                    station: station,
-                    p1: row.querySelector('.p1-input').value.trim(),
-                    p2: row.querySelector('.p2-input').value.trim(),
-                    p3: row.querySelector('.p3-input').value.trim(),
-                    wt1: row.querySelector('.wt1-input').value !== '' ? parseFloat(row.querySelector('.wt1-input').value) : null,
-                    wt2: row.querySelector('.wt2-input').value !== '' ? parseFloat(row.querySelector('.wt2-input').value) : null,
-                    wt3: row.querySelector('.wt3-input').value !== '' ? parseFloat(row.querySelector('.wt3-input').value) : null,
-                    loss: row.querySelector('.loss-input').value !== '' ? parseFloat(row.querySelector('.loss-input').value) : null
-                });
+                let p1 = row.querySelector('.p1-input').value.trim();
+                let p2 = row.querySelector('.p2-input').value.trim();
+                let p3 = row.querySelector('.p3-input').value.trim();
+                let wt1 = row.querySelector('.wt1-input').value !== '' ? parseFloat(row.querySelector('.wt1-input').value) : null;
+                let wt2 = row.querySelector('.wt2-input').value !== '' ? parseFloat(row.querySelector('.wt2-input').value) : null;
+                let wt3 = row.querySelector('.wt3-input').value !== '' ? parseFloat(row.querySelector('.wt3-input').value) : null;
+                let loss = row.querySelector('.loss-input').value !== '' ? parseFloat(row.querySelector('.loss-input').value) : null;
+
+                newStations.push({ station, p1, p2, p3, wt1, wt2, wt3, loss });
             });
 
-            let modelsArray = Array.from(selectedModels);
-            if (modelsArray.length > 0) {
-                let storageKey = `${modelsArray[0]}_${selectedPartValue}`;
-                processDatabase[storageKey] = updatedStations;
-                localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            if (newStations.length === 0) {
+                alert('กรุณากรอกข้อมูล Station อย่างน้อย 1 รายการ');
+                return;
             }
 
-            currentProcessData = updatedStations;
+            let modelsArray = Array.from(selectedModels);
+            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${selectedPartValue}` : 'default';
+            processDatabase[storageKey] = newStations;
+            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+
+            currentProcessData = newStations;
             renderSavedDisplayTable();
             updateLobChart();
+            renderCapacityTable(currentDailyData);
             toggleEditModal();
-            alert('บันทึกข้อมูลและอัปเดตกราฟสำเร็จ!');
+            alert('บันทึกข้อมูล Work Process & Cycle Time เรียบร้อยแล้ว!');
         }
 
         function saveDoorProcessAndStationData() {
             const rows = document.querySelectorAll('#doorProcessTableBody tr');
-            let updatedStations = [];
+            let newStations = [];
             rows.forEach(row => {
                 let station = row.querySelector('.door-station-input').value.trim();
                 if (!station) return;
-                updatedStations.push({
-                    station: station,
-                    p1: row.querySelector('.door-p1-input').value.trim(),
-                    p2: row.querySelector('.door-p2-input').value.trim(),
-                    p3: row.querySelector('.door-p3-input').value.trim(),
-                    wt1: row.querySelector('.door-wt1-input').value !== '' ? parseFloat(row.querySelector('.door-wt1-input').value) : null,
-                    wt2: row.querySelector('.door-wt2-input').value !== '' ? parseFloat(row.querySelector('.door-wt2-input').value) : null,
-                    wt3: row.querySelector('.door-wt3-input').value !== '' ? parseFloat(row.querySelector('.door-wt3-input').value) : null,
-                    loss: row.querySelector('.door-loss-input').value !== '' ? parseFloat(row.querySelector('.door-loss-input').value) : null
-                });
+                let p1 = row.querySelector('.door-p1-input').value.trim();
+                let p2 = row.querySelector('.door-p2-input').value.trim();
+                let p3 = row.querySelector('.door-p3-input').value.trim();
+                let wt1 = row.querySelector('.door-wt1-input').value !== '' ? parseFloat(row.querySelector('.door-wt1-input').value) : null;
+                let wt2 = row.querySelector('.door-wt2-input').value !== '' ? parseFloat(row.querySelector('.door-wt2-input').value) : null;
+                let wt3 = row.querySelector('.door-wt3-input').value !== '' ? parseFloat(row.querySelector('.door-wt3-input').value) : null;
+                let loss = row.querySelector('.door-loss-input').value !== '' ? parseFloat(row.querySelector('.door-loss-input').value) : null;
+
+                newStations.push({ station, p1, p2, p3, wt1, wt2, wt3, loss });
             });
 
-            let modelsArray = Array.from(selectedDoorModels);
-            if (modelsArray.length > 0) {
-                let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
-                let storageKey = `${modelsArray[0]}_${effectivePart}`;
-                doorProcessDatabase[storageKey] = updatedStations;
-                localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            if (newStations.length === 0) {
+                alert('กรุณากรอกข้อมูล Station อย่างน้อย 1 รายการ');
+                return;
             }
 
-            currentDoorProcessData = updatedStations;
+            let modelsArray = Array.from(selectedDoorModels);
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let storageKey = modelsArray.length > 0 ? `${modelsArray[0]}_${effectivePart}` : 'door_default';
+            doorProcessDatabase[storageKey] = newStations;
+            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+
+            currentDoorProcessData = newStations;
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
+            renderCapacityTable(currentDailyData);
             toggleDoorEditModal();
-            alert('บันทึกข้อมูล Door และอัปเดตกราฟสำเร็จ!');
+            alert('บันทึกข้อมูล Door Process & Cycle Time เรียบร้อยแล้ว!');
         }
     </script>
 </body>
