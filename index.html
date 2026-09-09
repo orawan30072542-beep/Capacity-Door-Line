@@ -258,7 +258,7 @@
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Master Model & Component Routing</h2>
-                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น</p>
+                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงานหลัก, สถานี Back Plate, สถานี Bottom Plate และเส้นทางกระบวนการผลิต</p>
                         </div>
                     </div>
                     <button onclick="saveMasterModelConfig()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
@@ -275,7 +275,9 @@
                                     <th class="p-3">Group</th>
                                     <th class="p-3">Model Name</th>
                                     <th class="p-3 text-center">Door Type / Component</th>
-                                    <th class="p-3 text-center">สถานีงานหลัก (Station)</th>
+                                    <th class="p-3 text-center">สถานีงานหลัก</th>
+                                    <th class="p-3 text-center">สถานี Back Plate</th>
+                                    <th class="p-3 text-center">สถานี Bottom Plate</th>
                                     <th class="p-3">Assigned Routing Process & Lines</th>
                                     <th class="p-3 text-center">Qty / Set</th>
                                 </tr>
@@ -832,16 +834,16 @@
 
         let masterModelConfig = {};
         try {
-            let savedMaster = localStorage.getItem('haier_master_model_config_v1');
+            let savedMaster = localStorage.getItem('haier_master_model_config_v2');
             if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
         } catch (e) { console.error(e); }
 
         function getMasterConfigForModel(modelName) {
             if (masterModelConfig[modelName]) return masterModelConfig[modelName];
             if (modelName.includes('C')) {
-                return { doorType: 'Glass', station: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 };
+                return { doorType: 'Glass', station: 'Door A', backPlateStation: 'Door A', bottomPlateStation: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 };
             } else {
-                return { doorType: 'Metal', station: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
+                return { doorType: 'Metal', station: 'Door B', backPlateStation: 'Door B', bottomPlateStation: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
             }
         }
 
@@ -873,6 +875,22 @@
                                 <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
                             </select>
                         </td>
+                        <td class="p-3 text-center">
+                            <select onchange="updateMasterModelField('${m.name}', 'backPlateStation', this.value)" class="bg-slate-800 text-blue-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
+                                <option value="Door A" ${config.backPlateStation === 'Door A' ? 'selected' : ''}>Door A</option>
+                                <option value="Door B" ${config.backPlateStation === 'Door B' ? 'selected' : ''}>Door B</option>
+                                <option value="Door C" ${config.backPlateStation === 'Door C' ? 'selected' : ''}>Door C</option>
+                                <option value="Door Glass" ${config.backPlateStation === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
+                            </select>
+                        </td>
+                        <td class="p-3 text-center">
+                            <select onchange="updateMasterModelField('${m.name}', 'bottomPlateStation', this.value)" class="bg-slate-800 text-emerald-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
+                                <option value="Door A" ${config.bottomPlateStation === 'Door A' ? 'selected' : ''}>Door A</option>
+                                <option value="Door B" ${config.bottomPlateStation === 'Door B' ? 'selected' : ''}>Door B</option>
+                                <option value="Door C" ${config.bottomPlateStation === 'Door C' ? 'selected' : ''}>Door C</option>
+                                <option value="Door Glass" ${config.bottomPlateStation === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
+                            </select>
+                        </td>
                         <td class="p-3">
                             <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor">
                         </td>
@@ -893,7 +911,7 @@
         }
 
         function saveMasterModelConfig() {
-            localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
+            localStorage.setItem('haier_master_model_config_v2', JSON.stringify(masterModelConfig));
             renderDailyOrderSummaryTable(currentDailyData);
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
         }
@@ -1336,7 +1354,6 @@
                 });
             });
 
-            // 1. Render Top Summary Row First with Capacity (UPH Plan & UPH ACT Max CT)
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
             let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
@@ -1365,7 +1382,6 @@
                 return;
             }
 
-            // 2. Render Model Rows
             groups.forEach(g => {
                 let validModelsInGroup = g.models.filter(m => {
                     let config = getMasterConfigForModel(m.name);
@@ -1543,8 +1559,6 @@
                             }
                             let modelName = String(row[1] || '').trim();
                             if (modelName !== '') {
-                                let orders = row.slice(2, 2 + days.length).map(val => isSunday(days[val_index]) ? 0 : Math.round(Number(val) || 0)); // wait, let's map cleanly
-                                // let's map orders correctly:
                                 let rowOrders = [];
                                 for(let dIdx = 0; dIdx < days.length; dIdx++) {
                                     let cellVal = row[2 + dIdx];
@@ -1640,13 +1654,9 @@
                             currentProcessData = importedStations;
                             renderProcessTableInputs();
                             updateLobChart();
-                            const editSection = document.getElementById('editProcessSection');
-                            if (editSection.classList.contains('hidden')) { toggleEditModal(); }
-                            alert('นำเข้าข้อมูลสำเร็จ!');
                         }
                     }
                 } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
-                event.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         }
@@ -1695,63 +1705,49 @@
                             currentDoorProcessData = importedStations;
                             renderDoorProcessTableInputs();
                             updateDoorLobChart();
-                            const editSection = document.getElementById('editDoorProcessSection');
-                            if (editSection.classList.contains('hidden')) { toggleDoorEditModal(); }
-                            alert('นำเข้าข้อมูล Door สำเร็จ!');
                         }
                     }
                 } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
-                event.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function toggleEditModal() {
-            const editSection = document.getElementById('editProcessSection');
-            const btnText = document.getElementById('editModalBtnText');
-            if (editSection.classList.contains('hidden')) {
-                editSection.classList.remove('hidden');
-                btnText.textContent = 'ซ่อนตารางแก้ไข';
-            } else {
-                editSection.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
-            }
-        }
-
-        function toggleDoorEditModal() {
-            const editSection = document.getElementById('editDoorProcessSection');
-            const btnText = document.getElementById('editDoorModalBtnText');
-            if (editSection.classList.contains('hidden')) {
-                editSection.classList.remove('hidden');
-                btnText.textContent = 'ซ่อนตารางแก้ไข (Door)';
-            } else {
-                editSection.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
-            }
-        }
-
         function addNewStationRow() {
-            currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
+            currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: 0, wt2: 0, wt3: 0, loss: 0 });
             renderProcessTableInputs();
-            updateLobChart();
-        }
-
-        function removeStationRow(index) {
-            currentProcessData.splice(index, 1);
-            renderProcessTableInputs();
+            renderSavedDisplayTable();
             updateLobChart();
         }
 
         function addDoorNewStationRow() {
-            currentDoorProcessData.push({ station: `STA0${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
+            currentDoorProcessData.push({ station: `STA0${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: 0, wt2: 0, wt3: 0, loss: 0 });
             renderDoorProcessTableInputs();
+            renderDoorSavedDisplayTable();
             updateDoorLobChart();
         }
 
-        function removeDoorStationRow(index) {
+        function deleteStationRow(index) {
+            currentProcessData.splice(index, 1);
+            renderProcessTableInputs();
+            renderSavedDisplayTable();
+            updateLobChart();
+        }
+
+        function deleteDoorStationRow(index) {
             currentDoorProcessData.splice(index, 1);
             renderDoorProcessTableInputs();
+            renderDoorSavedDisplayTable();
             updateDoorLobChart();
+        }
+
+        function toggleEditModal() {
+            const section = document.getElementById('editProcessSection');
+            section.classList.toggle('hidden');
+        }
+
+        function toggleDoorEditModal() {
+            const section = document.getElementById('editDoorProcessSection');
+            section.classList.toggle('hidden');
         }
 
         function renderProcessTableInputs() {
@@ -1769,65 +1765,39 @@
                 let tr = document.createElement('tr');
                 tr.className = 'border-b border-bordercolor/40';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" value="${item.station || ''}" onchange="currentProcessData[${index}].station = this.value" class="w-20 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p1 || ''}" onchange="currentProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p2 || ''}" onchange="currentProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p3 || ''}" onchange="currentProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt1 !== null ? item.wt1 : ''}" oninput="updateProcessInputVal(${index}, 'wt1', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt2 !== null ? item.wt2 : ''}" oninput="updateProcessInputVal(${index}, 'wt2', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt3 !== null ? item.wt3 : ''}" oninput="updateProcessInputVal(${index}, 'wt3', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-cyan-300">${wtTot.toFixed(1)}</td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.loss !== null ? item.loss : ''}" oninput="updateProcessInputVal(${index}, 'loss', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-amber-400">${ct.toFixed(1)}</td>
-                    <td class="p-2 text-center"><button onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-950/40 rounded border border-rose-900/40">&times;</button></td>
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" onchange="currentProcessData[${index}].station = this.value" class="w-20 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="currentProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="currentProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="currentProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt1 !== null ? item.wt1 : ''}" oninput="updateProcessRowCalc(${index})" id="p_wt1_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt2 !== null ? item.wt2 : ''}" oninput="updateProcessRowCalc(${index})" id="p_wt2_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt3 !== null ? item.wt3 : ''}" oninput="updateProcessRowCalc(${index})" id="p_wt3_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400" id="p_wttot_${index}">${wtTot.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.loss !== null ? item.loss : ''}" oninput="updateProcessRowCalc(${index})" id="p_loss_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400" id="p_ct_${index}">${ct.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><button onclick="deleteStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">&times;</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function updateProcessInputVal(index, field, val) {
-            currentProcessData[index][field] = val !== '' ? Number(val) : null;
-            renderProcessTableInputs();
+        function updateProcessRowCalc(index) {
+            let w1 = parseFloat(document.getElementById(`p_wt1_${index}`).value) || 0;
+            let w2 = parseFloat(document.getElementById(`p_wt2_${index}`).value) || 0;
+            let w3 = parseFloat(document.getElementById(`p_wt3_${index}`).value) || 0;
+            let loss = parseFloat(document.getElementById(`p_loss_${index}`).value) || 0;
+
+            currentProcessData[index].wt1 = w1;
+            currentProcessData[index].wt2 = w2;
+            currentProcessData[index].wt3 = w3;
+            currentProcessData[index].loss = loss;
+
+            let wtTot = w1 + w2 + w3;
+            let ct = wtTot + loss;
+
+            document.getElementById(`p_wttot_${index}`).textContent = wtTot.toFixed(1);
+            document.getElementById(`p_ct_${index}`).textContent = ct.toFixed(1);
             updateLobChart();
-        }
-
-        function saveProcessAndStationData() {
-            let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
-            processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
-            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
-            renderSavedDisplayTable();
-            renderCapacityTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
-            alert('บันทึกข้อมูล Work Process & Cycle Time เรียบร้อยแล้ว!');
-        }
-
-        function renderSavedDisplayTable() {
-            const tbody = document.getElementById('displaySavedTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            if (!currentProcessData || currentProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Station</td></tr>`;
-                return;
-            }
-            currentProcessData.forEach(item => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTot = w1 + w2 + w3;
-                let ct = wtTot + l;
-
-                let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40 hover:bg-slate-900/40';
-                tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
-                    <td class="p-1.5 truncate max-w-[120px]">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center font-semibold text-slate-200">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-rose-400">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         function renderDoorProcessTableInputs() {
@@ -1845,37 +1815,68 @@
                 let tr = document.createElement('tr');
                 tr.className = 'border-b border-bordercolor/40';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" value="${item.station || ''}" onchange="currentDoorProcessData[${index}].station = this.value" class="w-20 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p1 || ''}" onchange="currentDoorProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p2 || ''}" onchange="currentDoorProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p3 || ''}" onchange="currentDoorProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt1 !== null ? item.wt1 : ''}" oninput="updateDoorProcessInputVal(${index}, 'wt1', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt2 !== null ? item.wt2 : ''}" oninput="updateDoorProcessInputVal(${index}, 'wt2', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt3 !== null ? item.wt3 : ''}" oninput="updateDoorProcessInputVal(${index}, 'wt3', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-cyan-300">${wtTot.toFixed(1)}</td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.loss !== null ? item.loss : ''}" oninput="updateDoorProcessInputVal(${index}, 'loss', this.value)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-amber-400">${ct.toFixed(1)}</td>
-                    <td class="p-2 text-center"><button onclick="removeDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-950/40 rounded border border-rose-900/40">&times;</button></td>
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" onchange="currentDoorProcessData[${index}].station = this.value" class="w-20 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="currentDoorProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="currentDoorProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="currentDoorProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt1 !== null ? item.wt1 : ''}" oninput="updateDoorProcessRowCalc(${index})" id="dp_wt1_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt2 !== null ? item.wt2 : ''}" oninput="updateDoorProcessRowCalc(${index})" id="dp_wt2_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt3 !== null ? item.wt3 : ''}" oninput="updateDoorProcessRowCalc(${index})" id="dp_wt3_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400" id="dp_wttot_${index}">${wtTot.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.loss !== null ? item.loss : ''}" oninput="updateDoorProcessRowCalc(${index})" id="dp_loss_${index}" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400" id="dp_ct_${index}">${ct.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><button onclick="deleteDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">&times;</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function updateDoorProcessInputVal(index, field, val) {
-            currentDoorProcessData[index][field] = val !== '' ? Number(val) : null;
-            renderDoorProcessTableInputs();
+        function updateDoorProcessRowCalc(index) {
+            let w1 = parseFloat(document.getElementById(`dp_wt1_${index}`).value) || 0;
+            let w2 = parseFloat(document.getElementById(`dp_wt2_${index}`).value) || 0;
+            let w3 = parseFloat(document.getElementById(`dp_wt3_${index}`).value) || 0;
+            let loss = parseFloat(document.getElementById(`dp_loss_${index}`).value) || 0;
+
+            currentDoorProcessData[index].wt1 = w1;
+            currentDoorProcessData[index].wt2 = w2;
+            currentDoorProcessData[index].wt3 = w3;
+            currentDoorProcessData[index].loss = loss;
+
+            let wtTot = w1 + w2 + w3;
+            let ct = wtTot + loss;
+
+            document.getElementById(`dp_wttot_${index}`).textContent = wtTot.toFixed(1);
+            document.getElementById(`dp_ct_${index}`).textContent = ct.toFixed(1);
             updateDoorLobChart();
         }
 
-        function saveDoorProcessAndStationData() {
-            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
-            let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
-            doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
-            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
-            renderDoorSavedDisplayTable();
-            renderCapacityTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
-            alert('บันทึกข้อมูล Door Work Process & Cycle Time เรียบร้อยแล้ว!');
+        function renderSavedDisplayTable() {
+            const tbody = document.getElementById('displaySavedTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!currentProcessData || currentProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station</td></tr>`;
+                return;
+            }
+            currentProcessData.forEach(item => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'border-b border-bordercolor/30';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
+                    <td class="p-1.5">${item.p1 || '-'}</td>
+                    <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${ct.toFixed(1)}s</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         function renderDoorSavedDisplayTable() {
@@ -1883,7 +1884,7 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Station</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Work Station (Door)</td></tr>`;
                 return;
             }
             currentDoorProcessData.forEach(item => {
@@ -1895,17 +1896,39 @@
                 let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40 hover:bg-slate-900/40';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
                     <td class="p-1.5 text-center font-bold text-amber-300">${item.station || '-'}</td>
-                    <td class="p-1.5 truncate max-w-[120px]">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center font-semibold text-slate-200">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-rose-400">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5">${item.p1 || '-'}</td>
+                    <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
+
+        function saveProcessAndStationData() {
+            let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
+            processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
+            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            renderSavedDisplayTable();
+            updateLobChart();
+            toggleEditModal();
+            alert('บันทึกข้อมูล Work Station & Cycle Time เรียบร้อยแล้ว!');
+        }
+
+        function saveDoorProcessAndStationData() {
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
+            doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
+            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+            toggleDoorEditModal();
+            alert('บันทึกข้อมูล Work Station & Cycle Time (Door Part) เรียบร้อยแล้ว!');
+        }
     </script>
 </body>
 </html>
+```[cite: 15]
