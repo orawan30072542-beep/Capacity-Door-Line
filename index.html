@@ -116,26 +116,26 @@
                 <section id="overview" class="space-y-4"> 
                     <div class="flex items-center space-x-2">
                         <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">1. ภาพรวมการผลิต (Overview)</h2>
+                        <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">1. ภาพรวมการผลิต (Overview)[cite: 16]</h2>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)</p>
+                            <p class="text-xs text-slate-300 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)[cite: 16]</p>
                             <h3 class="text-3xl font-bold text-white mt-2">12,500 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
                             <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)</p>
+                            <p class="text-xs text-slate-300 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)[cite: 16]</p>
                             <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
                             <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)</p>
+                            <p class="text-xs text-slate-300 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)[cite: 16]</p>
                             <h3 class="text-3xl font-bold text-amber-400 mt-2">1,300 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
                             <span class="text-xs text-amber-400 font-medium mt-2 inline-block">ต้องเร่งดำเนินการตามรอบกะ</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">อัตราของเสีย (Defect Rate)</p>
+                            <p class="text-xs text-slate-300 font-medium tracking-wide">อัตราของเสีย (Defect Rate)[cite: 16]</p>
                             <h3 class="text-3xl font-bold text-rose-400 mt-2">1.4%</h3>
                             <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">อยู่ในเกณฑ์ควบคุม (&lt; 2%)</span>
                         </div>
@@ -147,7 +147,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">2. ตารางสรุปแผนการผลิตและยอดรายวัน</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">2. ตารางสรุปแผนการผลิตและยอดรายวัน[cite: 16]</h2>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
                             <span id="excelFileName" class="text-xs text-slate-300">ยังไม่ได้เลือกไฟล์</span>
@@ -166,7 +166,7 @@
                         <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
                             <div class="text-xs text-cyan-400 mb-2 font-medium flex items-center space-x-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                                <span>กราฟแสดงยอด Order รวมรายวัน</span>
+                                <span>กราฟแสดงยอด Order รวมรายวัน[cite: 16]</span>
                             </div>
                             <div class="chart-container-wrapper">
                                 <canvas id="planChart"></canvas>
@@ -190,7 +190,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)[cite: 16]</h2>
                         </div>
                         <!-- Group Station Filter Buttons -->
                         <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
@@ -200,12 +200,14 @@
                             <button onclick="switchSummaryStation('Door B')" id="sum-btn-door-b" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchSummaryStation('Door C')" id="sum-btn-door-c" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchSummaryStation('Door Glass')" id="sum-btn-door-glass" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
-                            <button onclick="switchSummaryStation('Back Plate')" id="sum-btn-back-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
-                            <button onclick="switchSummaryStation('Bottom Plate')" id="sum-btn-bottom-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
+                            <button onclick="switchSummaryStation('Back Plate Line#1')" id="sum-btn-back-plate-line-1" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate L1</button>
+                            <button onclick="switchSummaryStation('Back Plate Line#2')" id="sum-btn-back-plate-line-2" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate L2</button>
+                            <button onclick="switchSummaryStation('Bottom Plate Line#1')" id="sum-btn-bottom-plate-line-1" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate L1</button>
+                            <button onclick="switchSummaryStation('Bottom Plate Line#2')" id="sum-btn-bottom-plate-line-2" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate L2</button>
                         </div>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด[cite: 16]
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -224,7 +226,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)[cite: 16]</h2>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
                             <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
@@ -232,8 +234,10 @@
                             <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
-                            <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
-                            <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
+                            <button onclick="switchCapacityStation('Back Plate Line#1')" id="cap-btn-back-plate-line-1" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate L1</button>
+                            <button onclick="switchCapacityStation('Back Plate Line#2')" id="cap-btn-back-plate-line-2" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate L2</button>
+                            <button onclick="switchCapacityStation('Bottom Plate Line#1')" id="cap-btn-bottom-plate-line-1" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate L1</button>
+                            <button onclick="switchCapacityStation('Bottom Plate Line#2')" id="cap-btn-bottom-plate-line-2" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate L2</button>
                         </div>
                     </div>
                     
@@ -261,8 +265,8 @@
                     <div class="flex items-center space-x-3">
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
                         <div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Master Model & Component Routing</h2>
-                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น แบ่งเป็น Group หลักต่างๆ รวมถึง Back Plate และ Bottom Plate</p>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Master Model & Component Routing[cite: 16]</h2>
+                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น แบ่งเป็น Group หลัก รวมถึงแยก Back Plate และ Bottom Plate เป็น Line#1 และ Line#2[cite: 16]</p>
                         </div>
                     </div>
                     <button onclick="saveMasterModelConfig()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
@@ -278,7 +282,7 @@
                                 <tr class="border-b border-bordercolor text-slate-300 bg-slate-900">
                                     <th class="p-3 w-32">Model & Group</th>
                                     <th class="p-3 w-1/2">Group 1: Door Component Routing</th>
-                                    <th class="p-3 w-1/2">Group 2: Back Plate, Bottom, Welding & Gasket</th>
+                                    <th class="p-3 w-1/2">Group 2: Back Plate, Bottom (Line#1/Line#2), Welding & Gasket</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
@@ -293,17 +297,17 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป[cite: 16]</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
+                            &larr; กลับหน้า Dashboard หลัก[cite: 16]
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-slate-300 mr-1">Part:</span>
+                                <span class="text-[10px] font-medium text-slate-300 mr-1">Part:[cite: 16]</span>
                                 <div id="partTabContainer" class="flex flex-wrap gap-1">
                                     <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
                                     <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
@@ -313,12 +317,12 @@
                         </div>
 
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:[cite: 16]</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model:[cite: 16]</span>
                             <div id="modelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -330,7 +334,7 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <div class="flex items-center space-x-1.5">
                                     <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
-                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis[cite: 16]</h3>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
                                     <span>TT 100%: <strong id="displayTtVal" class="text-yellow-300">30.00s</strong></span>
@@ -340,9 +344,9 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-bordercolor shrink-0 text-xs">
-                            <label class="text-[11px] text-slate-300 font-medium">UPH:</label>
+                            <label class="text-[11px] text-slate-300 font-medium">UPH:[cite: 16]</label>
                             <input type="number" id="uphInput" value="120" min="1" step="1" oninput="updateLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-2 py-1 w-16 text-center rounded border border-bordercolor focus:outline-none font-bold">
-                            <span class="text-[11px] text-slate-300">PCS/Hr</span>
+                            <span class="text-[11px] text-slate-300">PCS/Hr[cite: 16]</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -351,17 +355,17 @@
                         </div>
                         <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
                             <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
-                                <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)</span>
+                                <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)[cite: 16]</span>
                             </h3>
                             <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-300 bg-slate-900">
-                                            <th class="p-1.5 text-center w-16">Station</th>
-                                            <th class="p-1.5">Process 1</th>
-                                            <th class="p-1.5 text-center">WT Tot</th>
-                                            <th class="p-1.5 text-center">Loss</th>
-                                            <th class="p-1.5 text-center text-cyan-300">CT</th>
+                                            <th class="p-1.5 text-center w-16">Station[cite: 16]</th>
+                                            <th class="p-1.5">Process 1[cite: 16]</th>
+                                            <th class="p-1.5 text-center">WT Tot[cite: 16]</th>
+                                            <th class="p-1.5 text-center">Loss[cite: 16]</th>
+                                            <th class="p-1.5 text-center text-cyan-300">CT[cite: 16]</th>
                                         </tr>
                                     </thead>
                                     <tbody id="displaySavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]"></tbody>
@@ -374,7 +378,7 @@
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time</h3>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time[cite: 16]</h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel</button>
@@ -391,8 +395,8 @@
                     <div id="editProcessSection" class="space-y-3 hidden border border-blue-500/30 bg-slate-900/90 p-4 rounded-xl shadow-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
-                                <h3 class="text-xs font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
+                                <h3 class="text-xs font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ[cite: 16]</h3>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span>[cite: 16]</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
@@ -403,17 +407,17 @@
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-950 sticky top-0">
-                                        <th class="p-2 w-24 text-center">Station</th>
-                                        <th class="p-2">Process 1</th>
-                                        <th class="p-2">Process 2</th>
-                                        <th class="p-2">Process 3</th>
-                                        <th class="p-2 text-center w-16">WT 1</th>
-                                        <th class="p-2 text-center w-16">WT 2</th>
-                                        <th class="p-2 text-center w-16">WT 3</th>
-                                        <th class="p-2 text-center w-16">WT Total</th>
-                                        <th class="p-2 text-center w-16">Loss</th>
-                                        <th class="p-2 text-center w-20">Cycle Time</th>
-                                        <th class="p-2 text-center w-12">ลบ</th>
+                                        <th class="p-2 w-24 text-center">Station[cite: 16]</th>
+                                        <th class="p-2">Process 1[cite: 16]</th>
+                                        <th class="p-2">Process 2[cite: 16]</th>
+                                        <th class="p-2">Process 3[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT 1[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT 2[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT 3[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT Total[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">Loss[cite: 16]</th>
+                                        <th class="p-2 text-center w-20">Cycle Time[cite: 16]</th>
+                                        <th class="p-2 text-center w-12">ลบ[cite: 16]</th>
                                     </tr>
                                 </thead>
                                 <tbody id="processTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30 text-[11px]"></tbody>
@@ -429,17 +433,17 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door[cite: 16]</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
+                            &larr; กลับหน้า Dashboard หลัก[cite: 16]
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
+                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:[cite: 16]</span>
                                 <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
                                 <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
                                 <button type="button" onclick="selectDoorSubPart('Door Cap Assembly')" data-subpart="Door Cap Assembly" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Cap Assembly</button>
@@ -448,7 +452,7 @@
                                 <button type="button" onclick="selectDoorSubPart('Door Glass')" data-subpart="Door Glass" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Glass</button>
                             </div>
                             <div class="flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40">
-                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:</span>
+                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:[cite: 16]</span>
                                 <button type="button" onclick="selectDoorType('RR')" data-doortype="RR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500">RR</button>
                                 <button type="button" onclick="selectDoorType('RL')" data-doortype="RL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RL</button>
                                 <button type="button" onclick="selectDoorType('FR')" data-doortype="FR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
@@ -459,11 +463,11 @@
                         </div>
 
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:[cite: 16]</span>
                             <div id="doorGroupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model:[cite: 16]</span>
                             <div id="doorModelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -475,7 +479,7 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <div class="flex items-center space-x-1.5">
                                     <div class="w-1.5 h-5 bg-amber-400 rounded-full"></div>
-                                    <h3 class="text-sm font-bold text-amber-400">กราฟ Line of Balance & Takt Time Analysis (Door Part)</h3>
+                                    <h3 class="text-sm font-bold text-amber-400">กราฟ Line of Balance & Takt Time Analysis (Door Part)[cite: 16]</h3>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
                                     <span>TT 100%: <strong id="displayDoorTtVal" class="text-yellow-300">30.00s</strong></span>
@@ -485,9 +489,9 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-bordercolor shrink-0 text-xs">
-                            <label class="text-[11px] text-slate-300 font-medium">UPH:</label>
+                            <label class="text-[11px] text-slate-300 font-medium">UPH:[cite: 16]</label>
                             <input type="number" id="doorUphInput" value="120" min="1" step="1" oninput="updateDoorLobChart()" class="bg-slate-900 text-cyan-400 text-xs px-2 py-1 w-16 text-center rounded border border-bordercolor focus:outline-none font-bold">
-                            <span class="text-[11px] text-slate-300">PCS/Hr</span>
+                            <span class="text-[11px] text-slate-300">PCS/Hr[cite: 16]</span>
                         </div>
                     </div>
 
@@ -497,17 +501,17 @@
                         </div>
                         <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
                             <h3 class="text-xs font-semibold text-amber-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
-                                <span>Active Work Stations (Model: <span id="displayDoorActiveModelTag" class="text-cyan-400">-</span>)</span>
+                                <span>Active Work Stations (Model: <span id="displayDoorActiveModelTag" class="text-cyan-400">-</span>)[cite: 16]</span>
                             </h3>
                             <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-300 bg-slate-900">
-                                            <th class="p-1.5 text-center w-16">Station</th>
-                                            <th class="p-1.5">Process 1</th>
-                                            <th class="p-1.5 text-center">WT Tot</th>
-                                            <th class="p-1.5 text-center">Loss</th>
-                                            <th class="p-1.5 text-center text-amber-300">CT</th>
+                                            <th class="p-1.5 text-center w-16">Station[cite: 16]</th>
+                                            <th class="p-1.5">Process 1[cite: 16]</th>
+                                            <th class="p-1.5 text-center">WT Tot[cite: 16]</th>
+                                            <th class="p-1.5 text-center">Loss[cite: 16]</th>
+                                            <th class="p-1.5 text-center text-amber-300">CT[cite: 16]</th>
                                         </tr>
                                     </thead>
                                     <tbody id="displayDoorSavedTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]"></tbody>
@@ -520,7 +524,7 @@
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time (Door Part)</h3>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time (Door Part)[cite: 16]</h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button onclick="downloadDoorProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel</button>
@@ -537,8 +541,8 @@
                     <div id="editDoorProcessSection" class="space-y-3 hidden border border-amber-500/30 bg-slate-900/90 p-4 rounded-xl shadow-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
-                                <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span></p>
+                                <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)[cite: 16]</h3>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span>[cite: 16]</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveDoorProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
@@ -549,17 +553,17 @@
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-950 sticky top-0">
-                                        <th class="p-2 w-24 text-center">Station</th>
-                                        <th class="p-2">Process 1</th>
-                                        <th class="p-2">Process 2</th>
-                                        <th class="p-2">Process 3</th>
-                                        <th class="p-2 text-center w-16">WT 1</th>
-                                        <th class="p-2 text-center w-16">WT 2</th>
-                                        <th class="p-2 text-center w-16">WT 3</th>
-                                        <th class="p-2 text-center w-16">WT Total</th>
-                                        <th class="p-2 text-center w-16">Loss</th>
-                                        <th class="p-2 text-center w-20">Cycle Time</th>
-                                        <th class="p-2 text-center w-12">ลบ</th>
+                                        <th class="p-2 w-24 text-center">Station[cite: 16]</th>
+                                        <th class="p-2">Process 1[cite: 16]</th>
+                                        <th class="p-2">Process 2[cite: 16]</th>
+                                        <th class="p-2">Process 3[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT 1[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT 2[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT 3[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">WT Total[cite: 16]</th>
+                                        <th class="p-2 text-center w-16">Loss[cite: 16]</th>
+                                        <th class="p-2 text-center w-20">Cycle Time[cite: 16]</th>
+                                        <th class="p-2 text-center w-12">ลบ[cite: 16]</th>
                                     </tr>
                                 </thead>
                                 <tbody id="doorProcessTableBody" class="divide-y divide-bordercolor/50 text-slate-300 bg-slate-900/30 text-[11px]"></tbody>
@@ -833,7 +837,7 @@
 
         let masterModelConfig = {};
         try {
-            let savedMaster = localStorage.getItem('haier_master_model_config_v2');
+            let savedMaster = localStorage.getItem('haier_master_model_config_v3');
             if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
         } catch (e) { console.error(e); }
 
@@ -889,81 +893,76 @@
                             <div class="font-bold text-purple-400 text-sm mt-0.5">${m.name}</div>
                         </td>
                         <td class="p-3 space-y-2 bg-slate-900/40">
-                            <div class="text-[11px] font-bold text-cyan-400 border-b border-bordercolor/60 pb-1">1. Door Component Group</div>
+                            <div class="text-[11px] font-bold text-cyan-400 border-b border-bordercolor/60 pb-1">1. Door Component Group[cite: 16]</div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="text-[10px] text-slate-400 block">Door Type / Component</label>
+                                    <label class="text-[10px] text-slate-400 block">Door Type / Component[cite: 16]</label>
                                     <select onchange="updateMasterModelField('${m.name}', 'doorType', this.value)" class="w-full bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
                                         <option value="Glass" ${config.doorType === 'Glass' ? 'selected' : ''}>Glass (กระจก)</option>
                                         <option value="Metal" ${config.doorType === 'Metal' ? 'selected' : ''}>Metal (โลหะ)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[10px] text-slate-400 block">Station</label>
+                                    <label class="text-[10px] text-slate-400 block">Station[cite: 16]</label>
                                     <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 font-semibold">
                                         <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
                                         <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
                                         <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
                                         <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
-                                        <option value="Back Plate" ${config.station === 'Back Plate' ? 'selected' : ''}>Back Plate</option>
-                                        <option value="Bottom Plate" ${config.station === 'Bottom Plate' ? 'selected' : ''}>Bottom Plate</option>
+                                        <option value="Back Plate Line#1" ${config.station === 'Back Plate Line#1' ? 'selected' : ''}>Back Plate Line#1</option>
+                                        <option value="Back Plate Line#2" ${config.station === 'Back Plate Line#2' ? 'selected' : ''}>Back Plate Line#2</option>
+                                        <option value="Bottom Plate Line#1" ${config.station === 'Bottom Plate Line#1' ? 'selected' : ''}>Bottom Plate Line#1</option>
+                                        <option value="Bottom Plate Line#2" ${config.station === 'Bottom Plate Line#2' ? 'selected' : ''}>Bottom Plate Line#2</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 block">Assigned Routing Process & Lines (อัปอัตโนมัติ)</label>
+                                <label class="text-[10px] text-slate-400 block">Assigned Routing Process & Lines (อัปอัตโนมัติ)[cite: 16]</label>
                                 <input type="text" id="routing_${m.name}" value="${config.routing}" readonly class="w-full bg-slate-800/80 text-cyan-400 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 cursor-not-allowed">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 block">Qty / Set</label>
+                                <label class="text-[10px] text-slate-400 block">Qty / Set[cite: 16]</label>
                                 <input type="number" min="1" value="${config.qtyPerSet}" onchange="updateMasterModelField('${m.name}', 'qtyPerSet', parseInt(this.value) || 1)" class="w-20 bg-slate-800 text-center text-amber-400 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
                             </div>
                         </td>
                         <td class="p-3 space-y-2 bg-slate-900/20">
-                            <div class="text-[11px] font-bold text-amber-400 border-b border-bordercolor/60 pb-1">2. Other Components Group</div>
+                            <div class="text-[11px] font-bold text-amber-400 border-b border-bordercolor/60 pb-1">2. Back Plate & Bottom Plate (Line#1 / Line#2)[cite: 16]</div>
                             
                             <!-- Back Plate -->
                             <div class="bg-slate-800/40 p-2 rounded border border-bordercolor/50 space-y-1">
-                                <span class="text-[11px] font-semibold text-slate-200 block">Back Plate:</span>
+                                <span class="text-[11px] font-semibold text-slate-200 block">Back Plate:[cite: 16]</span>
                                 <div class="flex items-center space-x-2">
                                     <select onchange="updateMasterModelField('${m.name}', 'backPlateSource', this.value); renderMasterModelTable();" class="bg-slate-800 text-xs text-slate-200 px-2 py-1 rounded border border-bordercolor">
                                         <option value="ผลิตเอง" ${config.backPlateSource === 'ผลิตเอง' ? 'selected' : ''}>ผลิตเอง</option>
                                         <option value="ร้านนอก" ${config.backPlateSource === 'ร้านนอก' ? 'selected' : ''}>ร้านนอก</option>
                                     </select>
                                     ${config.backPlateSource === 'ผลิตเอง' ? `
-                                    <select onchange="updateMasterModelField('${m.name}', 'backPlateLine', this.value)" class="bg-slate-800 text-xs text-cyan-300 px-2 py-1 rounded border border-bordercolor">
+                                    <select onchange="updateMasterModelField('${m.name}', 'backPlateLine', this.value); updateMasterModelField('${m.name}', 'station', 'Back Plate ' + this.value);" class="bg-slate-800 text-xs text-cyan-300 px-2 py-1 rounded border border-bordercolor">
                                         <option value="Line#1" ${config.backPlateLine === 'Line#1' ? 'selected' : ''}>Line#1</option>
                                         <option value="Line#2" ${config.backPlateLine === 'Line#2' ? 'selected' : ''}>Line#2</option>
                                     </select>` : ''}
                                 </div>
                             </div>
 
-                            <!-- Bottom & Welding -->
+                            <!-- Bottom Plate -->
                             <div class="bg-slate-800/40 p-2 rounded border border-bordercolor/50 space-y-1">
-                                <span class="text-[11px] font-semibold text-slate-200 block">Bottom & Welding:</span>
+                                <span class="text-[11px] font-semibold text-slate-200 block">Bottom Plate:[cite: 16]</span>
                                 <div class="flex items-center space-x-2">
                                     <select onchange="updateMasterModelField('${m.name}', 'bottomSource', this.value); renderMasterModelTable();" class="bg-slate-800 text-xs text-slate-200 px-2 py-1 rounded border border-bordercolor">
                                         <option value="ผลิตเอง" ${config.bottomSource === 'ผลิตเอง' ? 'selected' : ''}>ผลิตเอง</option>
                                         <option value="ร้านนอก" ${config.bottomSource === 'ร้านนอก' ? 'selected' : ''}>ร้านนอก</option>
                                     </select>
                                     ${config.bottomSource === 'ผลิตเอง' ? `
-                                    <select onchange="updateMasterModelField('${m.name}', 'bottomLine', this.value)" class="bg-slate-800 text-xs text-cyan-300 px-2 py-1 rounded border border-bordercolor">
+                                    <select onchange="updateMasterModelField('${m.name}', 'bottomLine', this.value);" class="bg-slate-800 text-xs text-cyan-300 px-2 py-1 rounded border border-bordercolor">
                                         <option value="Line#1" ${config.bottomLine === 'Line#1' ? 'selected' : ''}>Line#1</option>
                                         <option value="Line#2" ${config.bottomLine === 'Line#2' ? 'selected' : ''}>Line#2</option>
                                     </select>` : ''}
-                                </div>
-                                <div class="flex items-center space-x-2 pt-1">
-                                    <label class="text-[10px] text-slate-300">Welding:</label>
-                                    <select onchange="updateMasterModelField('${m.name}', 'welding', this.value === 'true')" class="bg-slate-800 text-xs text-amber-300 px-2 py-1 rounded border border-bordercolor">
-                                        <option value="true" ${config.welding ? 'selected' : ''}>เลือก (Yes)</option>
-                                        <option value="false" ${!config.welding ? 'selected' : ''}>ไม่เลือก (No)</option>
-                                    </select>
                                 </div>
                             </div>
 
                             <!-- Gasket -->
                             <div class="bg-slate-800/40 p-2 rounded border border-bordercolor/50 flex items-center justify-between">
-                                <span class="text-[11px] font-semibold text-slate-200">Gasket:</span>
+                                <span class="text-[11px] font-semibold text-slate-200">Gasket:[cite: 16]</span>
                                 <select onchange="updateMasterModelField('${m.name}', 'gasket', this.value === 'true')" class="bg-slate-800 text-xs text-amber-300 px-2 py-1 rounded border border-bordercolor">
                                     <option value="true" ${config.gasket ? 'selected' : ''}>เลือก (Yes)</option>
                                     <option value="false" ${!config.gasket ? 'selected' : ''}>ไม่เลือก (No)</option>
@@ -988,34 +987,36 @@
                 } else if (value === 'Metal') {
                     masterModelConfig[modelName]['routing'] = 'Line 3 (Press Machine) → Line 4 (Bending)';
                 }
-                renderMasterModelTable();
             }
 
             renderDailyOrderSummaryTable(currentDailyData);
         }
 
         function saveMasterModelConfig() {
-            localStorage.setItem('haier_master_model_config_v2', JSON.stringify(masterModelConfig));
+            localStorage.setItem('haier_master_model_config_v3', JSON.stringify(masterModelConfig));
             renderDailyOrderSummaryTable(currentDailyData);
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
         }
 
         let processDatabase = {};
         try {
-            let savedDB = localStorage.getItem('haier_process_db_v7');
+            let savedDB = localStorage.getItem('haier_process_db_v8');
             if (savedDB) { processDatabase = JSON.parse(savedDB); }
         } catch (e) { console.error(e); }
         let currentProcessData = [];
 
         let doorProcessDatabase = {};
         try {
-            let savedDoorDB = localStorage.getItem('haier_door_process_db_v1');
+            let savedDoorDB = localStorage.getItem('haier_door_process_db_v2');
             if (savedDoorDB) { doorProcessDatabase = JSON.parse(savedDoorDB); }
         } catch (e) { console.error(e); }
         let currentDoorProcessData = [];
 
         function getEmptyDefaultStations() {
-            return [];
+            return [
+                { station: 'STA 10', p1: 'Cutting', p2: '', p3: '', wt1: 10, wt2: 0, wt3: 0, loss: 2 },
+                { station: 'STA 20', p1: 'Bending', p2: '', p3: '', wt1: 12, wt2: 0, wt3: 0, loss: 1 }
+            ];
         }
 
         function getModelMaxCT(modelName) {
@@ -1109,9 +1110,9 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-2 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Group / Model</th><th class="p-2 font-medium w-20 text-center text-slate-300 bg-slate-900 sticky top-0 z-30">Max CT (s)</th>`;
+            let headerHtml = `<th class="p-2 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Group / Model[cite: 16]</th><th class="p-2 font-medium w-20 text-center text-slate-300 bg-slate-900 sticky top-0 z-30">Max CT (s)[cite: 16]</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
+                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}[cite: 16]</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
@@ -1127,7 +1128,7 @@
 
             if (filteredModels.length === 0) {
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="${days.length + 2}" class="p-4 text-center text-slate-400">ไม่พบโมเดลที่กำหนดให้ใช้สถานี: ${currentCapacityStation}</td>`;
+                tr.innerHTML = `<td colspan="${days.length + 2}" class="p-4 text-center text-slate-400">ไม่พบโมเดลที่กำหนดให้ใช้สถานี: ${currentCapacityStation}[cite: 16]</td>`;
                 tbody.appendChild(tr);
                 return;
             }
@@ -1136,7 +1137,7 @@
                 let maxCT = getModelMaxCT(item.model.name);
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                let html = `<td class="p-2 font-semibold text-white bg-slate-900/40">Grp ${item.group} - ${item.model.name}</td><td class="p-2 text-center text-cyan-400 font-bold">${maxCT.toFixed(1)}s</td>`;
+                let html = `<td class="p-2 font-semibold text-white bg-slate-900/40">Grp ${item.group} - ${item.model.name}[cite: 16]</td><td class="p-2 text-center text-cyan-400 font-bold">${maxCT.toFixed(1)}s[cite: 16]</td>`;
 
                 for (let i = 0; i < days.length; i++) {
                     let day = days[i];
@@ -1156,8 +1157,8 @@
 
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
-            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
-                let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
+            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate Line#1', 'Back Plate Line#2', 'Bottom Plate Line#1', 'Bottom Plate Line#2'].forEach(st => {
+                let btnId = 'cap-btn-' + st.toLowerCase().replace(/[\s#]+/g, '-');
                 let btn = document.getElementById(btnId);
                 if (btn) {
                     if (st === stationName) {
@@ -1173,8 +1174,8 @@
 
         function switchSummaryStation(stationName) {
             currentSummaryStation = stationName;
-            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
-                let btnId = 'sum-btn-' + (st === 'All' ? 'all' : st.toLowerCase().replace(' ', '-'));
+            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate Line#1', 'Back Plate Line#2', 'Bottom Plate Line#1', 'Bottom Plate Line#2'].forEach(st => {
+                let btnId = 'sum-btn-' + (st === 'All' ? 'all' : st.toLowerCase().replace(/[\s#]+/g, '-'));
                 let btn = document.getElementById(btnId);
                 if (btn) {
                     if (st === stationName) {
@@ -1200,9 +1201,9 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group[cite: 16]</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model[cite: 16]</th><th class="p-3 font-medium text-center w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set[cite: 16]</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}[cite: 16]</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
@@ -1217,7 +1218,7 @@
 
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})[cite: 16]</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity[cite: 16]</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
                 if (isSunday(day)) {
@@ -1238,7 +1239,7 @@
 
             if (filteredRowsCount === 0) {
                 let emptyTr = document.createElement('tr');
-                emptyTr.innerHTML = `<td colspan="${days.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลโมเดลสำหรับ Group Station: ${currentSummaryStation}</td>`;
+                emptyTr.innerHTML = `<td colspan="${days.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลโมเดลสำหรับ Group Station: ${currentSummaryStation}[cite: 16]</td>`;
                 tbody.appendChild(emptyTr);
                 return;
             }
@@ -1259,10 +1260,10 @@
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
                     if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}[cite: 16]</td>`;
                     }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name} <span class="text-[10px] text-cyan-400">(${config.station})</span></td>`;
-                    html += `<td class="p-3 text-center text-amber-400 font-bold">${qtyPerSet}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name} <span class="text-[10px] text-cyan-400">(${config.station})[cite: 16]</span></td>`;
+                    html += `<td class="p-3 text-center text-amber-400 font-bold">${qtyPerSet}[cite: 16]</td>`;
 
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
@@ -1327,7 +1328,6 @@
             let hours = document.getElementById('shiftHoursInput').value;
             localStorage.setItem('haier_shift_hours', hours);
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
-            renderUnifiedTable(currentDailyData);
             renderCapacityTable(currentDailyData);
             renderDailyOrderSummaryTable(currentDailyData);
         }
@@ -1495,9 +1495,9 @@
 
         function renderSavedDisplayTable() {
             const tbody = document.getElementById('displaySavedTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            if(!currentProcessData || currentProcessData.length === 0) {
+            if (!currentProcessData || currentProcessData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการ</td></tr>`;
                 return;
             }
@@ -1508,10 +1508,11 @@
                 let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
                 let ct = wtTot + l;
+
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-semibold text-cyan-400">${item.station || '-'}</td>
-                    <td class="p-1.5">${item.process1 || '-'}</td>
+                    <td class="p-1.5 text-center font-bold text-white">${item.station || '-'}</td>
+                    <td class="p-1.5">${item.p1 || '-'}</td>
                     <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
                     <td class="p-1.5 text-center text-rose-400">${l.toFixed(1)}s</td>
                     <td class="p-1.5 text-center font-bold text-cyan-300">${ct.toFixed(1)}s</td>
@@ -1522,9 +1523,9 @@
 
         function renderDoorSavedDisplayTable() {
             const tbody = document.getElementById('displayDoorSavedTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            if(!currentDoorProcessData || currentDoorProcessData.length === 0) {
+            if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการ Door</td></tr>`;
                 return;
             }
@@ -1535,10 +1536,11 @@
                 let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
                 let ct = wtTot + l;
+
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-semibold text-amber-400">${item.station || '-'}</td>
-                    <td class="p-1.5">${item.process1 || '-'}</td>
+                    <td class="p-1.5 text-center font-bold text-white">${item.station || '-'}</td>
+                    <td class="p-1.5">${item.p1 || '-'}</td>
                     <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
                     <td class="p-1.5 text-center text-rose-400">${l.toFixed(1)}s</td>
                     <td class="p-1.5 text-center font-bold text-amber-300">${ct.toFixed(1)}s</td>
@@ -1547,26 +1549,287 @@
             });
         }
 
-        function renderProcessTableInputs() {}
-        function renderDoorProcessTableInputs() {}
-        function addNewStationRow() {}
-        function addDoorNewStationRow() {}
-        function toggleEditModal() {}
-        function toggleDoorEditModal() {}
-        function saveProcessAndStationData() {}
-        function saveDoorProcessAndStationData() {}
-        function downloadProcessTemplate() {}
-        function downloadDoorProcessTemplate() {}
-        function importProcessExcelData() {}
-        function importDoorProcessExcelData() {}
-        function previewExcelData() {}
-        function saveDashboardData() {}
+        function renderProcessTableInputs() {
+            const tbody = document.getElementById('processTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            currentProcessData.forEach((item, index) => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'border-b border-bordercolor/40';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" onchange="currentProcessData[${index}].station = this.value" class="w-20 bg-slate-800 text-center text-white text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="currentProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="currentProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="currentProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w1}" onchange="currentProcessData[${index}].wt1 = parseFloat(this.value)||0; renderProcessTableInputs();" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w2}" onchange="currentProcessData[${index}].wt2 = parseFloat(this.value)||0; renderProcessTableInputs();" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w3}" onchange="currentProcessData[${index}].wt3 = parseFloat(this.value)||0; renderProcessTableInputs();" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${l}" onchange="currentProcessData[${index}].loss = parseFloat(this.value)||0; renderProcessTableInputs();" class="w-14 bg-slate-800 text-center text-rose-400 text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><button onclick="currentProcessData.splice(${index}, 1); renderProcessTableInputs();" class="bg-rose-600/80 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">ลบ</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDoorProcessTableInputs() {
+            const tbody = document.getElementById('doorProcessTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            currentDoorProcessData.forEach((item, index) => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'border-b border-bordercolor/40';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" onchange="currentDoorProcessData[${index}].station = this.value" class="w-20 bg-slate-800 text-center text-white text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="currentDoorProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="currentDoorProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="currentDoorProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w1}" onchange="currentDoorProcessData[${index}].wt1 = parseFloat(this.value)||0; renderDoorProcessTableInputs();" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w2}" onchange="currentDoorProcessData[${index}].wt2 = parseFloat(this.value)||0; renderDoorProcessTableInputs();" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w3}" onchange="currentDoorProcessData[${index}].wt3 = parseFloat(this.value)||0; renderDoorProcessTableInputs();" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${l}" onchange="currentDoorProcessData[${index}].loss = parseFloat(this.value)||0; renderDoorProcessTableInputs();" class="w-14 bg-slate-800 text-center text-rose-400 text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><button onclick="currentDoorProcessData.splice(${index}, 1); renderDoorProcessTableInputs();" class="bg-rose-600/80 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">ลบ</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleEditModal() {
+            let sec = document.getElementById('editProcessSection');
+            sec.classList.toggle('hidden');
+        }
+
+        function toggleDoorEditModal() {
+            let sec = document.getElementById('editDoorProcessSection');
+            sec.classList.toggle('hidden');
+        }
+
+        function addNewStationRow() {
+            currentProcessData.push({ station: 'STA ' + ((currentProcessData.length + 1) * 10), p1: '', p2: '', p3: '', wt1: 0, wt2: 0, wt3: 0, loss: 0 });
+            renderProcessTableInputs();
+        }
+
+        function addDoorNewStationRow() {
+            currentDoorProcessData.push({ station: 'STA ' + ((currentDoorProcessData.length + 1) * 10), p1: '', p2: '', p3: '', wt1: 0, wt2: 0, wt3: 0, loss: 0 });
+            renderDoorProcessTableInputs();
+        }
+
+        function saveProcessAndStationData() {
+            let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
+            processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
+            localStorage.setItem('haier_process_db_v8', JSON.stringify(processDatabase));
+            renderSavedDisplayTable();
+            updateLobChart();
+            toggleEditModal();
+            alert('บันทึกข้อมูล Work Process & CT เรียบร้อยแล้ว!');
+        }
+
+        function saveDoorProcessAndStationData() {
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
+            doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
+            localStorage.setItem('haier_door_process_db_v2', JSON.stringify(doorProcessDatabase));
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+            toggleDoorEditModal();
+            alert('บันทึกข้อมูล Door Work Process & CT เรียบร้อยแล้ว!');
+        }
+
+        function downloadProcessTemplate() {
+            let wb = XLSX.utils.book_new();
+            let wsData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["STA 10", "Press", "", "", 10, 0, 0, 1],
+                ["STA 20", "Bending", "", "", 15, 0, 0, 2]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
+            XLSX.writeFile(wb, "Process_Template.xlsx");
+        }
+
+        function downloadDoorProcessTemplate() {
+            downloadProcessTemplate();
+        }
+
+        function importProcessExcelData(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    let data = new Uint8Array(evt.target.result);
+                    let workbook = XLSX.read(data, {type: 'array'});
+                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    let rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    
+                    let newStations = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        let r = rows[i];
+                        if (r && r.length > 0 && r[0]) {
+                            newStations.push({
+                                station: String(r[0] || ''),
+                                p1: String(r[1] || ''),
+                                p2: String(r[2] || ''),
+                                p3: String(r[3] || ''),
+                                wt1: parseFloat(r[4]) || 0,
+                                wt2: parseFloat(r[5]) || 0,
+                                wt3: parseFloat(r[6]) || 0,
+                                loss: parseFloat(r[7]) || 0
+                            });
+                        }
+                    }
+                    if (newStations.length > 0) {
+                        currentProcessData = newStations;
+                        renderProcessTableInputs();
+                        renderSavedDisplayTable();
+                        updateLobChart();
+                        alert('นำเข้าข้อมูลสำเร็จ!');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function importDoorProcessExcelData(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    let data = new Uint8Array(evt.target.result);
+                    let workbook = XLSX.read(data, {type: 'array'});
+                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    let rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    
+                    let newStations = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        let r = rows[i];
+                        if (r && r.length > 0 && r[0]) {
+                            newStations.push({
+                                station: String(r[0] || ''),
+                                p1: String(r[1] || ''),
+                                p2: String(r[2] || ''),
+                                p3: String(r[3] || ''),
+                                wt1: parseFloat(r[4]) || 0,
+                                wt2: parseFloat(r[5]) || 0,
+                                wt3: parseFloat(r[6]) || 0,
+                                loss: parseFloat(r[7]) || 0
+                            });
+                        }
+                    }
+                    if (newStations.length > 0) {
+                        currentDoorProcessData = newStations;
+                        renderDoorProcessTableInputs();
+                        renderDoorSavedDisplayTable();
+                        updateDoorLobChart();
+                        alert('นำเข้าข้อมูล Door สำเร็จ!');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function previewExcelData(e) {
+            let file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('excelFileName').textContent = file.name;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    let data = new Uint8Array(evt.target.result);
+                    let workbook = XLSX.read(data, {type: 'array'});
+                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    let rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    if (rows.length > 1) {
+                        let headerRow = rows[0];
+                        let days = [];
+                        for (let c = 2; c < headerRow.length; c++) {
+                            if (headerRow[c] !== undefined && headerRow[c] !== '') {
+                                days.push(String(headerRow[c]));
+                            }
+                        }
+                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
+
+                        let groupsMap = {};
+                        for (let r = 1; r < rows.length; r++) {
+                            let row = rows[r];
+                            if (!row || row.length < 2) continue;
+                            let groupNum = String(row[0] || '159').trim();
+                            let modelName = String(row[1] || '').trim();
+                            if (!modelName) continue;
+
+                            let orders = [];
+                            for (let d = 0; d < days.length; d++) {
+                                let val = Number(row[2 + d]) || 0;
+                                orders.push(val);
+                            }
+
+                            if (!groupsMap[groupNum]) {
+                                groupsMap[groupNum] = [];
+                            }
+                            groupsMap[groupNum].push({ name: modelName, orders: orders });
+                        }
+
+                        let newGroups = [];
+                        Object.keys(groupsMap).forEach(gKey => {
+                            newGroups.push({ productGroup: gKey, models: groupsMap[gKey] });
+                        });
+
+                        if (newGroups.length > 0) {
+                            currentDailyData = { days: days, groups: newGroups };
+                            initSelectors();
+                            renderCapacityTable(currentDailyData);
+                            renderDailyOrderSummaryTable(currentDailyData);
+                            planChart.data.labels = currentDailyData.days;
+                            let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
+                            planChart.data.datasets[0].data = calc.totalOutputs;
+                            planChart.update();
+                            alert('โหลดข้อมูลจาก Excel สำเร็จ!');
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('ไม่สามารถอ่านไฟล์ Excel ได้');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function saveDashboardData() {
+            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
+            alert('บันทึกข้อมูลแผนการผลิตและยอดรายวันเรียบร้อยแล้ว!');
+        }
 
         window.onload = function() {
             initSelectors();
-            renderUnifiedTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
+            renderDailyOrderSummaryTable(currentDailyData);
+            renderMasterModelTable();
+            loadProcessDataForCurrentSelection();
+            loadDoorProcessDataForCurrentSelection();
         };
     </script>
 </body>
