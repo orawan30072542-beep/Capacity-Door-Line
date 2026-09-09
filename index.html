@@ -40,6 +40,10 @@
             width: 100%;
             height: 480px;
         }
+        .off-day-cell {
+            background: repeating-linear-gradient(45deg, #1e293b, #1e293b 5px, #0f172a 5px, #0f172a 10px);
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
@@ -125,7 +129,7 @@
                             <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน</span>
                         </div>
                         <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">ผลิตได้จริงตามแผน (A)</p>
+                            <p class="text-xs text-slate-300 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)</p>
                             <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
                             <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%</span>
                         </div>
@@ -147,7 +151,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">2. ตารางสรุปแผนการผลิต (P) และยอดรายวัน</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">2. ตารางสรุปแผนการผลิตและยอดรายวัน</h2>
                         </div>
                         <div class="flex flex-wrap items-center gap-3">
                             <span id="excelFileName" class="text-xs text-slate-300">ยังไม่ได้เลือกไฟล์</span>
@@ -166,7 +170,7 @@
                         <div class="lg:col-span-5 bg-slate-900/40 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
                             <div class="text-xs text-cyan-400 mb-2 font-medium flex items-center space-x-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                                <span>กราฟแสดงยอด Order (P) รวมรายวัน</span>
+                                <span>กราฟแสดงยอด Order รวมรายวัน</span>
                             </div>
                             <div class="chart-container-wrapper">
                                 <canvas id="planChart"></canvas>
@@ -190,7 +194,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (P) (คูณจำนวนประตูต่อ Set)</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
                         </div>
                         <!-- Group Station Filter Buttons -->
                         <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
@@ -203,7 +207,7 @@
                         </div>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด P คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (P & A Max CT) แถวบนสุด
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -1050,7 +1054,7 @@
             data: {
                 labels: currentDailyData.days,
                 datasets: [{
-                    label: 'Total Order (P)',
+                    label: 'Total Order (ยอดสั่งผลิตรวม)',
                     data: initialCalc.totalOutputs,
                     backgroundColor: '#00F0FF',
                     borderRadius: 4
@@ -1218,16 +1222,25 @@
 
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total P</td>`;
+            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
             for (let i = 0; i < days.length; i++) {
                 let dayTotal = calc.totalOutputs[i];
-                let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
-                totalHtml += `
-                    <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
-                        <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
-                        <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
-                    </td>
-                `;
+                let isOffDay = (dayTotal === 0);
+                if (isOffDay) {
+                    totalHtml += `
+                        <td class="p-2 text-center border-l border-bordercolor/40 off-day-cell">
+                            <div class="text-slate-400 text-xs font-semibold">วันหยุด</div>
+                        </td>
+                    `;
+                } else {
+                    let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
+                    totalHtml += `
+                        <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
+                            <div class="text-amber-400 text-sm font-bold">P: ${dayTotal.toLocaleString()}</div>
+                            <div class="text-cyan-300 text-xs font-semibold">A: ${Math.round(dayTotal * 0.85).toLocaleString()}</div>
+                        </td>
+                    `;
+                }
             }
             totalTr.innerHTML = totalHtml;
             tbody.appendChild(totalTr);
@@ -1245,14 +1258,18 @@
                     html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
                     for (let i = 0; i < days.length; i++) {
                         let orderVal = Number(m.orders[i]) || 0;
-                        let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
-                        let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
-                        html += `
-                            <td class="p-2 text-center border-l border-bordercolor/30">
-                                <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
-                                <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
-                            </td>
-                        `;
+                        let isOffDay = (orderVal === 0);
+                        if (isOffDay) {
+                            html += `<td class="p-2 text-center border-l border-bordercolor/30 off-day-cell"></td>`;
+                        } else {
+                            let actVal = Math.round(orderVal * 0.85);
+                            html += `
+                                <td class="p-2 text-center border-l border-bordercolor/30">
+                                    <div class="text-cyan-400 font-medium text-xs">P: ${orderVal.toLocaleString()}</div>
+                                    <div class="text-emerald-400 font-medium text-xs">A: ${actVal.toLocaleString()}</div>
+                                </td>
+                            `;
+                        }
                     }
                     tr.innerHTML = html;
                     tbody.appendChild(tr);
@@ -1304,19 +1321,24 @@
                 });
             });
 
-            // 1. Render Top Summary Row First with Capacity (UPH P & UPH A Max CT)
+            // 1. Render Top Summary Row First with Capacity (UPH Plan & UPH ACT Max CT)
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
             let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
             for (let i = 0; i < days.length; i++) {
                 let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
-                topTotalHtml += `
-                    <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
-                        <div class="text-amber-400 text-xs font-bold mb-1">${metrics.totalQty.toLocaleString()} PCS</div>
-                        <div class="text-cyan-300 font-medium">UPH P: ${Math.round(metrics.uphPlan)} ┃ ${Math.round(metrics.uphPlan85)}</div>
-                        <div class="text-emerald-300 font-medium">UPH A: ${Math.round(metrics.uphActMaxCT)} ┃ ${Math.round(metrics.uphActMaxCT85)}</div>
-                    </td>
-                `;
+                let isOffDay = (metrics.totalQty === 0);
+                if (isOffDay) {
+                    topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 off-day-cell"></td>`;
+                } else {
+                    topTotalHtml += `
+                        <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
+                            <div class="text-amber-400 text-xs font-bold mb-1">P: ${metrics.totalQty.toLocaleString()} ┃ A: ${Math.round(metrics.totalQty * 0.85).toLocaleString()}</div>
+                            <div class="text-cyan-300 font-medium">UPH Plan: ${Math.round(metrics.uphPlan)} ┃ ${Math.round(metrics.uphPlan85)}</div>
+                            <div class="text-emerald-300 font-medium">UPH ACT: ${Math.round(metrics.uphActMaxCT)} ┃ ${Math.round(metrics.uphActMaxCT85)}</div>
+                        </td>
+                    `;
+                }
             }
             topTotalTr.innerHTML = topTotalHtml;
             tbody.appendChild(topTotalTr);
@@ -1353,14 +1375,18 @@
                     for (let i = 0; i < days.length; i++) {
                         let orderVal = Number(m.orders[i]) || 0;
                         let requiredParts = orderVal * qtyPerSet;
-                        let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
-                        let modelUphInt = requiredParts > 0 && hours > 0 ? Math.round(requiredParts / hours) : '-';
-                        html += `
-                            <td class="p-2 text-center border-l border-bordercolor/30">
-                                <div class="text-cyan-400 font-semibold text-xs">${displayVal}</div>
-                                <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
-                            </td>
-                        `;
+                        let isOffDay = (requiredParts === 0);
+                        if (isOffDay) {
+                            html += `<td class="p-2 text-center border-l border-bordercolor/30 off-day-cell"></td>`;
+                        } else {
+                            let actParts = Math.round(requiredParts * 0.85);
+                            html += `
+                                <td class="p-2 text-center border-l border-bordercolor/30">
+                                    <div class="text-cyan-400 font-semibold text-xs">P: ${requiredParts.toLocaleString()}</div>
+                                    <div class="text-emerald-400 font-semibold text-xs">A: ${actParts.toLocaleString()}</div>
+                                </td>
+                            `;
+                        }
                     }
                     tr.innerHTML = html;
                     tbody.appendChild(tr);
@@ -1684,25 +1710,11 @@
         function addNewStationRow() {
             currentProcessData.push({ station: `STA0${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
             renderProcessTableInputs();
-            updateLobChart();
-        }
-
-        function removeStationRow(index) {
-            currentProcessData.splice(index, 1);
-            renderProcessTableInputs();
-            updateLobChart();
         }
 
         function addDoorNewStationRow() {
             currentDoorProcessData.push({ station: `STA0${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: null, wt2: null, wt3: null, loss: null });
             renderDoorProcessTableInputs();
-            updateDoorLobChart();
-        }
-
-        function removeDoorStationRow(index) {
-            currentDoorProcessData.splice(index, 1);
-            renderDoorProcessTableInputs();
-            updateDoorLobChart();
         }
 
         function renderProcessTableInputs() {
@@ -1710,44 +1722,23 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             currentProcessData.forEach((item, index) => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTotal = w1 + w2 + w3;
-                let ct = wtTotal + l;
-
                 let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
-                    <td class="p-1.5"><input type="text" value="${item.station || ''}" oninput="currentProcessData[${index}].station = this.value" class="w-full bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" oninput="currentProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" oninput="currentProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" oninput="currentProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}" oninput="currentProcessData[${index}].wt1 = parseFloat(this.value); updateRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}" oninput="currentProcessData[${index}].wt2 = parseFloat(this.value); updateRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}" oninput="currentProcessData[${index}].wt3 = parseFloat(this.value); updateRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-slate-300" id="row_wttotal_${index}">${wtTotal.toFixed(1)}</td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}" oninput="currentProcessData[${index}].loss = parseFloat(this.value); updateRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-cyan-400" id="row_ct_${index}">${ct.toFixed(1)}</td>
-                    <td class="p-1.5 text-center"><button onclick="removeStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-950/40 rounded border border-rose-900/40">&times;</button></td>
+                    <td class="p-1.5"><input type="text" value="${item.station || ''}" onchange="currentProcessData[${index}].station = this.value" class="w-full bg-slate-800 text-cyan-300 text-center text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="currentProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="currentProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="currentProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt1 !== null ? item.wt1 : ''}" onchange="currentProcessData[${index}].wt1 = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt2 !== null ? item.wt2 : ''}" onchange="currentProcessData[${index}].wt2 = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt3 !== null ? item.wt3 : ''}" onchange="currentProcessData[${index}].wt3 = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400">-</td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.loss !== null ? item.loss : ''}" onchange="currentProcessData[${index}].loss = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">-</td>
+                    <td class="p-1.5 text-center"><button onclick="currentProcessData.splice(${index}, 1); renderProcessTableInputs();" class="bg-rose-600/80 hover:bg-rose-500 text-white px-2 py-1 rounded text-[10px]">ลบ</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function updateRowCalc(index) {
-            let item = currentProcessData[index];
-            let w1 = parseFloat(item.wt1) || 0;
-            let w2 = parseFloat(item.wt2) || 0;
-            let w3 = parseFloat(item.wt3) || 0;
-            let l = parseFloat(item.loss) || 0;
-            let wtTotal = w1 + w2 + w3;
-            let ct = wtTotal + l;
-
-            document.getElementById(`row_wttotal_${index}`).textContent = wtTotal.toFixed(1);
-            document.getElementById(`row_ct_${index}`).textContent = ct.toFixed(1);
-            updateLobChart();
         }
 
         function renderDoorProcessTableInputs() {
@@ -1755,44 +1746,23 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             currentDoorProcessData.forEach((item, index) => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTotal = w1 + w2 + w3;
-                let ct = wtTotal + l;
-
                 let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
-                    <td class="p-1.5"><input type="text" value="${item.station || ''}" oninput="currentDoorProcessData[${index}].station = this.value" class="w-full bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" oninput="currentDoorProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" oninput="currentDoorProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" oninput="currentDoorProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt1 !== null && item.wt1 !== undefined ? item.wt1 : ''}" oninput="currentDoorProcessData[${index}].wt1 = parseFloat(this.value); updateDoorRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt2 !== null && item.wt2 !== undefined ? item.wt2 : ''}" oninput="currentDoorProcessData[${index}].wt2 = parseFloat(this.value); updateDoorRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt3 !== null && item.wt3 !== undefined ? item.wt3 : ''}" oninput="currentDoorProcessData[${index}].wt3 = parseFloat(this.value); updateDoorRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-slate-300" id="door_row_wttotal_${index}">${wtTotal.toFixed(1)}</td>
-                    <td class="p-1.5"><input type="number" step="0.1" value="${item.loss !== null && item.loss !== undefined ? item.loss : ''}" oninput="currentDoorProcessData[${index}].loss = parseFloat(this.value); updateDoorRowCalc(${index});" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-amber-400" id="door_row_ct_${index}">${ct.toFixed(1)}</td>
-                    <td class="p-1.5 text-center"><button onclick="removeDoorStationRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-950/40 rounded border border-rose-900/40">&times;</button></td>
+                    <td class="p-1.5"><input type="text" value="${item.station || ''}" onchange="currentDoorProcessData[${index}].station = this.value" class="w-full bg-slate-800 text-amber-300 text-center text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="currentDoorProcessData[${index}].p1 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="currentDoorProcessData[${index}].p2 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="currentDoorProcessData[${index}].p3 = this.value" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt1 !== null ? item.wt1 : ''}" onchange="currentDoorProcessData[${index}].wt1 = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt2 !== null ? item.wt2 : ''}" onchange="currentDoorProcessData[${index}].wt2 = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.wt3 !== null ? item.wt3 : ''}" onchange="currentDoorProcessData[${index}].wt3 = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400">-</td>
+                    <td class="p-1.5"><input type="number" step="0.1" value="${item.loss !== null ? item.loss : ''}" onchange="currentDoorProcessData[${index}].loss = this.value !== '' ? Number(this.value) : null" class="w-full bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">-</td>
+                    <td class="p-1.5 text-center"><button onclick="currentDoorProcessData.splice(${index}, 1); renderDoorProcessTableInputs();" class="bg-rose-600/80 hover:bg-rose-500 text-white px-2 py-1 rounded text-[10px]">ลบ</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function updateDoorRowCalc(index) {
-            let item = currentDoorProcessData[index];
-            let w1 = parseFloat(item.wt1) || 0;
-            let w2 = parseFloat(item.wt2) || 0;
-            let w3 = parseFloat(item.wt3) || 0;
-            let l = parseFloat(item.loss) || 0;
-            let wtTotal = w1 + w2 + w3;
-            let ct = wtTotal + l;
-
-            document.getElementById(`door_row_wttotal_${index}`).textContent = wtTotal.toFixed(1);
-            document.getElementById(`door_row_ct_${index}`).textContent = ct.toFixed(1);
-            updateDoorLobChart();
         }
 
         function renderSavedDisplayTable() {
@@ -1812,13 +1782,13 @@
                 let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-400">${item.station || '-'}</td>
-                    <td class="p-1.5 text-slate-200">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center font-semibold text-slate-300">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-slate-400">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
+                    <td class="p-1.5 truncate max-w-[120px]">${item.p1 || '-'}</td>
+                    <td class="p-1.5 text-center font-semibold text-amber-400">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center text-slate-300">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1841,13 +1811,13 @@
                 let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition';
+                tr.className = 'border-b border-bordercolor/30';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-amber-400">${item.station || '-'}</td>
-                    <td class="p-1.5 text-slate-200">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center font-semibold text-slate-300">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-slate-400">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-amber-300">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station || '-'}</td>
+                    <td class="p-1.5 truncate max-w-[120px]">${item.p1 || '-'}</td>
+                    <td class="p-1.5 text-center font-semibold text-amber-400">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center text-slate-300">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1860,8 +1830,7 @@
             renderSavedDisplayTable();
             updateLobChart();
             renderCapacityTable(currentDailyData);
-            toggleEditModal();
-            alert('บันทึกข้อมูล Work Process และ Cycle Time เรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูล Work Process & CT เรียบร้อยแล้ว!');
         }
 
         function saveDoorProcessAndStationData() {
@@ -1872,8 +1841,7 @@
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
-            toggleDoorEditModal();
-            alert('บันทึกข้อมูล Work Process และ Cycle Time (Door Part) เรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูล Door Process & CT เรียบร้อยแล้ว!');
         }
     </script>
 </body>
