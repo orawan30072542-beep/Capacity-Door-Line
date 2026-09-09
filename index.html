@@ -208,8 +208,8 @@
                         ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน เฉพาะรายการที่มีสถานะ "ผลิตเอง" อ้างอิงจากการตั้งค่าใน Master Model & Routing เท่านั้น
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
-                        <div class="max-h-[400px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableDailyOrderSummary" class="w-full text-left border-collapse text-xs min-w-[1100px]">
+                        <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableDailyOrderSummary" class="w-full text-left border-collapse text-xs min-w-max">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
                                 </thead>
@@ -1410,7 +1410,6 @@
         function renderDailyOrderSummaryTable(data) {
             const tableElement = document.getElementById('tableDailyOrderSummary');
             if (!tableElement) return;
-            tableElement.className = "w-full text-left border-collapse text-xs min-w-[1100px]";
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
 
@@ -1421,9 +1420,9 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-36 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-36 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
+            let headerHtml = `<th class="p-3 font-medium min-w-[120px] text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium min-w-[120px] text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center min-w-[140px] text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 min-w-[120px]">${day}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 min-w-[150px]">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
@@ -1446,26 +1445,18 @@
 
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+            let topTotalHtml = `<td class="p-3 bg-amber-950/95 min-w-[120px]">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95 min-w-[120px]">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95 min-w-[140px]">—</td>`;
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
                 if (isSunday(day)) {
-                    topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                    topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600 min-w-[150px]">—</td>`;
                 } else {
                     let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
                     topTotalHtml += `
-                        <td class="p-3 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[11px]">
-                            <div class="text-amber-400 text-sm font-bold mb-1.5">${metrics.totalQty.toLocaleString()} PCS</div>
-                            <div class="flex justify-center items-center space-x-2 text-cyan-300 font-medium whitespace-nowrap mb-0.5">
-                                <span>P: ${Math.round(metrics.uphPlan)}</span>
-                                <span class="text-slate-400">|</span>
-                                <span>A: ${Math.round(metrics.uphPlan85)}</span>
-                            </div>
-                            <div class="flex justify-center items-center space-x-2 text-emerald-300 font-medium whitespace-nowrap">
-                                <span>P: ${Math.round(metrics.uphActMaxCT)}</span>
-                                <span class="text-slate-400">|</span>
-                                <span>A: ${Math.round(metrics.uphActMaxCT85)}</span>
-                            </div>
+                        <td class="p-3 text-center border-l border-bordercolor/40 bg-amber-950/95 text-xs min-w-[150px]">
+                            <div class="text-amber-400 font-bold mb-1">${Math.round(metrics.totalQty).toLocaleString()} PCS</div>
+                            <div class="text-cyan-300 font-semibold whitespace-nowrap">P: ${Math.round(metrics.uphPlan)} | A: ${Math.round(metrics.uphPlan85)}</div>
+                            <div class="text-emerald-300 font-semibold whitespace-nowrap">P: ${Math.round(metrics.uphActMaxCT)} | A: ${Math.round(metrics.uphActMaxCT85)}</div>
                         </td>
                     `;
                 }
@@ -1511,24 +1502,24 @@
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
                     if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle min-w-[120px]" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
                     }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
-                    html += `<td class="p-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-[11px]">${statusText}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40 min-w-[120px]">${m.name}</td>`;
+                    html += `<td class="p-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-xs min-w-[140px]">${statusText}</td>`;
 
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
                         if (isSunday(day)) {
-                            html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
+                            html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600 min-w-[150px]">—</td>`;
                         } else {
                             let orderVal = Number(m.orders[i]) || 0;
                             let requiredParts = orderVal * multiplier;
-                            let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
+                            let displayVal = requiredParts > 0 ? Math.round(requiredParts).toLocaleString() : '-';
                             let modelUphInt = requiredParts > 0 && hours > 0 ? Math.round(requiredParts / hours) : '-';
                             html += `
-                                <td class="p-2 text-center border-l border-bordercolor/30">
+                                <td class="p-3 text-center border-l border-bordercolor/30 min-w-[150px]">
                                     <div class="text-cyan-400 font-semibold text-xs">${displayVal}</div>
-                                    <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
+                                    <div class="text-white text-[11px] font-medium opacity-90 mt-0.5">${modelUphInt !== '-' ? Math.round(modelUphInt).toLocaleString() : '-'}</div>
                                 </td>
                             `;
                         }
@@ -1625,64 +1616,36 @@
                         html += `
                             <td class="p-1.5 border border-bordercolor/40 bg-slate-900/20 align-middle text-center" colspan="1">
                                 <div class="space-y-0.5 text-[10px]">
-                                    <div class="text-cyan-300 font-bold">${lineName}</div>
-                                    <div class="text-slate-300">Leadtime: <span class="text-amber-400 font-semibold">${leadTimeStr}</span></div>
-                                    <div class="text-slate-300">Max CT: <span class="text-rose-400 font-semibold">${maxCtStr}</span></div>
+                                    <div class="text-cyan-400 font-semibold">${lineName}</div>
+                                    <div class="text-slate-300">WT: ${leadTimeStr}</div>
+                                    <div class="text-amber-400 font-bold">Max CT: ${maxCtStr}</div>
                                 </div>
                             </td>
                         `;
                     } else {
-                        columns.forEach(doorType => {
-                            let foundAny = false;
-                            let cellLeadtime = 0;
-                            let cellMaxCt = 0;
-
-                            subParts.forEach(sp => {
-                                let storageKey = `${m.name}_Door (${sp} - ${doorType})`;
-                                let stations = doorProcessDatabase[storageKey];
-                                if (stations && Array.isArray(stations) && stations.length > 0) {
-                                    foundAny = true;
-                                    let subWt = 0;
-                                    let subMaxCt = 0;
-                                    stations.forEach(st => {
-                                        let w1 = parseFloat(st.wt1) || 0;
-                                        let w2 = parseFloat(st.wt2) || 0;
-                                        let w3 = parseFloat(st.wt3) || 0;
-                                        let l = parseFloat(st.loss) || 0;
-                                        let ct = w1 + w2 + w3 + l;
-                                        subWt += ct;
-                                        if (ct > subMaxCt) subMaxCt = ct;
-                                    });
-                                    cellLeadtime += subWt;
-                                    if (subMaxCt > cellMaxCt) cellMaxCt = subMaxCt;
-                                }
-                            });
-
-                            if (foundAny) {
-                                html += `
-                                    <td class="p-1 border border-bordercolor/40 bg-slate-900/20 align-middle text-center">
-                                        <div class="space-y-0.5 text-[10px]">
-                                            <div class="text-cyan-300 font-bold">${cellLeadtime.toFixed(1)}s</div>
-                                            <div class="text-rose-400 font-medium">CT: ${cellMaxCt.toFixed(1)}s</div>
-                                        </div>
-                                    </td>
-                                `;
-                            } else {
-                                html += `<td class="p-1 border border-bordercolor/40 bg-slate-950/40 text-center text-slate-600">—</td>`;
+                        columns.forEach(col => {
+                            let subPartName = col;
+                            let storageKey = `${m.name}_Door (${subPartName})`;
+                            let stations = doorProcessDatabase[storageKey];
+                            let maxCT = 0;
+                            if (stations && Array.isArray(stations)) {
+                                stations.forEach(st => {
+                                    let w1 = parseFloat(st.wt1) || 0;
+                                    let w2 = parseFloat(st.wt2) || 0;
+                                    let w3 = parseFloat(st.wt3) || 0;
+                                    let l = parseFloat(st.loss) || 0;
+                                    let ct = w1 + w2 + w3 + l;
+                                    if (ct > maxCT) maxCT = ct;
+                                });
                             }
+                            html += `<td class="p-1.5 border border-bordercolor/40 text-center align-middle text-amber-300 font-semibold">${maxCT > 0 ? maxCT.toFixed(1) + 's' : '-'}</td>`;
                         });
                     }
-
                     tr.innerHTML = html;
                     tbody.appendChild(tr);
                 });
             });
         }
-
-        initSelectors();
-        renderUnifiedTable(currentDailyData);
-        renderDailyOrderSummaryTable(currentDailyData);
-        renderCapacityTable(currentDailyData);
     </script>
 </body>
 </html>
