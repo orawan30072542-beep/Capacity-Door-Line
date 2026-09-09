@@ -190,20 +190,22 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (เฉพาะการผลิตเองอ้างอิงจาก Master Model)</h2>
                         </div>
                         <!-- Group Station Filter Buttons -->
-                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
+                        <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
                             <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
                             <button onclick="switchSummaryStation('All')" id="sum-btn-all" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">All</button>
                             <button onclick="switchSummaryStation('Door A')" id="sum-btn-door-a" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door A</button>
                             <button onclick="switchSummaryStation('Door B')" id="sum-btn-door-b" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchSummaryStation('Door C')" id="sum-btn-door-c" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchSummaryStation('Door Glass')" id="sum-btn-door-glass" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchSummaryStation('Back Plate')" id="sum-btn-back-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchSummaryStation('Bottom Plate')" id="sum-btn-bottom-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
                         </div>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน เฉพาะรายการที่มีสถานะ "ผลิตเอง" อ้างอิงจากการตั้งค่าใน Master Model & Routing เท่านั้น
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -224,12 +226,14 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
-                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
+                        <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
                             <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
                             <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
                             <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
                         </div>
                     </div>
                     
@@ -258,7 +262,7 @@
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Master Model & Component Routing</h2>
-                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น แบ่งเป็น 2 Group หลัก</p>
+                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น พร้อมตั้งค่าแหล่งผลิต Back Plate และ Bottom Plate</p>
                         </div>
                     </div>
                     <button onclick="saveMasterModelConfig()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
@@ -1043,10 +1047,28 @@
             groups.forEach(g => {
                 g.models.forEach(m => {
                     let config = getMasterConfigForModel(m.name);
-                    if (summaryStation !== 'All' && config.station !== summaryStation) return;
-                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+                    
+                    if (summaryStation !== 'All') {
+                        if (summaryStation === 'Back Plate') {
+                            if (config.backPlateSource !== 'ผลิตเอง') return;
+                        } else if (summaryStation === 'Bottom Plate') {
+                            if (config.bottomSource !== 'ผลิตเอง') return;
+                        } else {
+                            if (config.station !== summaryStation) return;
+                        }
+                    }
+
+                    let multiplier = 1;
+                    if (summaryStation === 'Back Plate') {
+                        multiplier = 1; 
+                    } else if (summaryStation === 'Bottom Plate') {
+                        multiplier = 1; 
+                    } else {
+                        multiplier = Number(config.qtyPerSet) || 1;
+                    }
+
                     let orderVal = Number(m.orders[dayIndex]) || 0;
-                    let required = orderVal * qtyPerSet;
+                    let required = orderVal * multiplier;
                     if (required > 0) {
                         totalQty += required;
                         let ct = getModelMaxCT(m.name);
@@ -1371,7 +1393,7 @@
 
         function switchSummaryStation(stationName) {
             currentSummaryStation = stationName;
-            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass'].forEach(st => {
+            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
                 let btnId = 'sum-btn-' + (st === 'All' ? 'all' : st.toLowerCase().replace(' ', '-'));
                 let btn = document.getElementById(btnId);
                 if (btn) {
@@ -1398,7 +1420,7 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
             });
@@ -1408,7 +1430,15 @@
             groups.forEach(g => {
                 g.models.forEach((m) => {
                     let config = getMasterConfigForModel(m.name);
-                    if (currentSummaryStation !== 'All' && config.station !== currentSummaryStation) return;
+                    if (currentSummaryStation !== 'All') {
+                        if (currentSummaryStation === 'Back Plate') {
+                            if (config.backPlateSource !== 'ผลิตเอง') return;
+                        } else if (currentSummaryStation === 'Bottom Plate') {
+                            if (config.bottomSource !== 'ผลิตเอง') return;
+                        } else {
+                            if (config.station !== currentSummaryStation) return;
+                        }
+                    }
                     filteredRowsCount++;
                 });
             });
@@ -1436,7 +1466,7 @@
 
             if (filteredRowsCount === 0) {
                 let emptyTr = document.createElement('tr');
-                emptyTr.innerHTML = `<td colspan="${days.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลโมเดลสำหรับ Group Station: ${currentSummaryStation}</td>`;
+                emptyTr.innerHTML = `<td colspan="${days.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลโมเดลที่ผลิตเองสำหรับ Group Station: ${currentSummaryStation}</td>`;
                 tbody.appendChild(emptyTr);
                 return;
             }
@@ -1444,14 +1474,29 @@
             groups.forEach(g => {
                 let validModelsInGroup = g.models.filter(m => {
                     let config = getMasterConfigForModel(m.name);
-                    return currentSummaryStation === 'All' || config.station === currentSummaryStation;
+                    if (currentSummaryStation === 'All') return true;
+                    if (currentSummaryStation === 'Back Plate') return config.backPlateSource === 'ผลิตเอง';
+                    if (currentSummaryStation === 'Bottom Plate') return config.bottomSource === 'ผลิตเอง';
+                    return config.station === currentSummaryStation;
                 });
 
                 if (validModelsInGroup.length === 0) return;
 
                 validModelsInGroup.forEach((m, mIndex) => {
                     let config = getMasterConfigForModel(m.name);
-                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+                    
+                    let statusText = '';
+                    let multiplier = 1;
+                    if (currentSummaryStation === 'Back Plate') {
+                        statusText = `Back Plate (${config.backPlateLine || 'Line#1'})`;
+                        multiplier = 1;
+                    } else if (currentSummaryStation === 'Bottom Plate') {
+                        statusText = `Bottom Plate (${config.bottomLine || 'Line#1'})`;
+                        multiplier = 1;
+                    } else {
+                        statusText = `${config.station} (x${config.qtyPerSet})`;
+                        multiplier = Number(config.qtyPerSet) || 1;
+                    }
 
                     let tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
@@ -1459,8 +1504,8 @@
                     if (mIndex === 0) {
                         html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
                     }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name} <span class="text-[10px] text-cyan-400">(${config.station})</span></td>`;
-                    html += `<td class="p-3 text-center text-amber-400 font-bold bg-slate-900/40">${qtyPerSet}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-[11px]">${statusText}</td>`;
 
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
@@ -1468,7 +1513,7 @@
                             html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
                         } else {
                             let orderVal = Number(m.orders[i]) || 0;
-                            let requiredParts = orderVal * qtyPerSet;
+                            let requiredParts = orderVal * multiplier;
                             let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
                             let modelUphInt = requiredParts > 0 && hours > 0 ? Math.round(requiredParts / hours) : '-';
                             html += `
@@ -1489,7 +1534,7 @@
             currentCapacityStation = stationName;
             document.getElementById('currentCapacityStationLabel').textContent = stationName;
             
-            ['Door A', 'Door B', 'Door C', 'Door Glass'].forEach(st => {
+            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
                 let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
                 let btn = document.getElementById(btnId);
                 if (btn) {
@@ -1516,10 +1561,12 @@
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            const isPlateStation = (currentCapacityStation === 'Back Plate' || currentCapacityStation === 'Bottom Plate');
+            const columns = isPlateStation ? ['Routing / Line'] : ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+
             let headerHtml = `<th class="p-2 font-medium w-24 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Group</th><th class="p-2 font-medium w-24 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Model</th>`;
-            doorTypes.forEach(dt => {
-                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${dt}</th>`;
+            columns.forEach(col => {
+                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${col}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
@@ -1530,8 +1577,12 @@
             data.groups.forEach(g => {
                 g.models.forEach((m) => {
                     let config = getMasterConfigForModel(m.name);
-                    if (config.station !== currentCapacityStation) {
-                        return; 
+                    
+                    if (isPlateStation) {
+                        if (currentCapacityStation === 'Back Plate' && config.backPlateSource !== 'ผลิตเอง') return;
+                        if (currentCapacityStation === 'Bottom Plate' && config.bottomSource !== 'ผลิตเอง') return;
+                    } else {
+                        if (config.station !== currentCapacityStation) return;
                     }
 
                     let tr = document.createElement('tr');
@@ -1541,40 +1592,72 @@
                     html += `<td class="p-2 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center">${g.productGroup}</td>`;
                     html += `<td class="p-2 font-medium text-slate-200 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${m.name}</td>`;
 
-                    doorTypes.forEach(dt => {
+                    if (isPlateStation) {
+                        let targetPart = currentCapacityStation;
+                        let storageKey = `${m.name}_${targetPart}`;
+                        let stations = processDatabase[storageKey];
                         let totalWT = 0;
                         let maxCT = 0;
-
-                        subParts.forEach(sp => {
-                            let storageKey = `${m.name}_Door (${sp} - ${dt})`;
-                            let stations = doorProcessDatabase[storageKey];
-                            if (stations && Array.isArray(stations) && stations.length > 0) {
-                                stations.forEach(st => {
-                                    let w1 = parseFloat(st.wt1) || 0;
-                                    let w2 = parseFloat(st.wt2) || 0;
-                                    let w3 = parseFloat(st.wt3) || 0;
-                                    let l = parseFloat(st.loss) || 0;
-                                    let ct = w1 + w2 + w3 + l;
-
-                                    totalWT += ct;
-                                    if (ct > maxCT) maxCT = ct;
-                                });
-                            }
-                        });
-
-                        let leadTime = totalWT;
-                        let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(1)}s` : '-';
+                        if (stations && Array.isArray(stations) && stations.length > 0) {
+                            stations.forEach(st => {
+                                let w1 = parseFloat(st.wt1) || 0;
+                                let w2 = parseFloat(st.wt2) || 0;
+                                let w3 = parseFloat(st.wt3) || 0;
+                                let l = parseFloat(st.loss) || 0;
+                                let ct = w1 + w2 + w3 + l;
+                                totalWT += ct;
+                                if (ct > maxCT) maxCT = ct;
+                            });
+                        }
+                        let leadTimeStr = totalWT > 0 ? `${totalWT.toFixed(1)}s` : '-';
                         let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(1)}s` : '-';
+                        let lineName = currentCapacityStation === 'Back Plate' ? config.backPlateLine : config.bottomLine;
 
                         html += `
-                            <td class="p-1.5 border border-bordercolor/40 bg-slate-900/20 align-middle text-center">
+                            <td class="p-1.5 border border-bordercolor/40 bg-slate-900/20 align-middle text-center" colspan="1">
                                 <div class="space-y-0.5 text-[10px]">
-                                    <div class="text-slate-300">LT: <span class="font-bold text-cyan-400">${leadTimeStr}</span></div>
-                                    <div class="text-slate-300">CT: <span class="font-bold text-amber-400">${maxCtStr}</span></div>
+                                    <div class="text-cyan-300 font-bold">${lineName}</div>
+                                    <div class="text-slate-300">LT: <span class="font-bold text-cyan-400">${leadTimeStr}</span> | CT: <span class="font-bold text-amber-400">${maxCtStr}</span></div>
                                 </div>
                             </td>
                         `;
-                    });
+                    } else {
+                        const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+                        doorTypes.forEach(dt => {
+                            let totalWT = 0;
+                            let maxCT = 0;
+
+                            subParts.forEach(sp => {
+                                let storageKey = `${m.name}_Door (${sp} - ${dt})`;
+                                let stations = doorProcessDatabase[storageKey];
+                                if (stations && Array.isArray(stations) && stations.length > 0) {
+                                    stations.forEach(st => {
+                                        let w1 = parseFloat(st.wt1) || 0;
+                                        let w2 = parseFloat(st.wt2) || 0;
+                                        let w3 = parseFloat(st.wt3) || 0;
+                                        let l = parseFloat(st.loss) || 0;
+                                        let ct = w1 + w2 + w3 + l;
+
+                                        totalWT += ct;
+                                        if (ct > maxCT) maxCT = ct;
+                                    });
+                                }
+                            });
+
+                            let leadTime = totalWT;
+                            let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(1)}s` : '-';
+                            let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(1)}s` : '-';
+
+                            html += `
+                                <td class="p-1.5 border border-bordercolor/40 bg-slate-900/20 align-middle text-center">
+                                    <div class="space-y-0.5 text-[10px]">
+                                        <div class="text-slate-300">LT: <span class="font-bold text-cyan-400">${leadTimeStr}</span></div>
+                                        <div class="text-slate-300">CT: <span class="font-bold text-amber-400">${maxCtStr}</span></div>
+                                    </div>
+                                </td>
+                            `;
+                        });
+                    }
 
                     tr.innerHTML = html;
                     tbody.appendChild(tr);
@@ -1616,38 +1699,45 @@
                             if (prodCell !== undefined && String(prodCell).trim() !== '') {
                                 currentProductGroup = String(prodCell).trim();
                             }
-                            let modelName = String(row[1] || '').trim();
-                            if (modelName !== '') {
-                                let rowOrders = [];
-                                for(let dIdx = 0; dIdx < days.length; dIdx++) {
-                                    let cellVal = row[2 + dIdx];
-                                    rowOrders.push(isSunday(days[dIdx]) ? 0 : Math.round(Number(cellVal) || 0));
-                                }
+                            let modelCell = row[1];
+                            if (modelCell === undefined || String(modelCell).trim() === '') continue;
+                            let modelName = String(modelCell).trim();
 
-                                if (!groupMap[currentProductGroup]) {
-                                    groupMap[currentProductGroup] = [];
-                                    groupOrderList.push(currentProductGroup);
-                                }
-                                groupMap[currentProductGroup].push({ name: modelName, orders: rowOrders });
+                            let orders = [];
+                            for (let dIdx = 0; dIdx < days.length; dIdx++) {
+                                let val = Number(row[2 + dIdx]) || 0;
+                                orders.push(val);
                             }
+
+                            if (!groupMap[currentProductGroup]) {
+                                groupMap[currentProductGroup] = [];
+                                groupOrderList.push(currentProductGroup);
+                            }
+                            groupMap[currentProductGroup].push({ name: modelName, orders: orders });
                         }
 
-                        let groups = [];
-                        groupOrderList.forEach(gName => {
-                            groups.push({ productGroup: gName, models: groupMap[gName] });
-                        });
+                        let newGroups = groupOrderList.map(pg => ({
+                            productGroup: pg,
+                            models: groupMap[pg]
+                        }));
 
-                        if (groups.length > 0) {
-                            window.tempImportedData = { days: days, groups: groups };
-                            renderUnifiedTable(window.tempImportedData);
-                            renderDailyOrderSummaryTable(window.tempImportedData);
-                            renderCapacityTable(window.tempImportedData);
+                        if (newGroups.length > 0) {
+                            currentDailyData = { days: days, groups: newGroups };
+                            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
+                            renderUnifiedTable(currentDailyData);
+                            renderDailyOrderSummaryTable(currentDailyData);
+                            renderCapacityTable(currentDailyData);
+                            initSelectors();
                             renderMasterModelTable();
-                            let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
-                            planChart.data.labels = window.tempImportedData.days;
-                            planChart.data.datasets[0].data = newCalc.totalOutputs;
+
+                            let totalOutputs = calculateTotalOrders(currentDailyData.groups, currentDailyData.days).totalOutputs;
+                            planChart.data.labels = currentDailyData.days;
+                            planChart.data.datasets[0].data = totalOutputs;
                             planChart.update();
-                            alert('โหลดข้อมูล Excel ตัวอย่างสำเร็จ! คลิก "บันทึกข้อมูล" เพื่อยืนยันการใช้งาน');
+
+                            alert('นำเข้าข้อมูลออเดอร์จากไฟล์ Excel สำเร็จเรียบร้อยแล้ว!');
+                        } else {
+                            alert('ไม่พบข้อมูล Model ภายใต้ไฟล์ Excel ที่ระบุรูปแบบ');
                         }
                     }
                 } catch (err) {
@@ -1659,68 +1749,42 @@
         }
 
         function saveDashboardData() {
-            if (window.tempImportedData) {
-                currentDailyData = window.tempImportedData;
-            }
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            renderUnifiedTable(currentDailyData);
-            renderDailyOrderSummaryTable(currentDailyData);
-            renderCapacityTable(currentDailyData);
-            let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
-            planChart.data.labels = currentDailyData.days;
-            planChart.data.datasets[0].data = calc.totalOutputs;
-            planChart.update();
-            initSelectors();
-            alert('บันทึกข้อมูลตารางแผนการผลิตเรียบร้อยแล้ว!');
-        }
-
-        function toggleEditModal() {
-            const sec = document.getElementById('editProcessSection');
-            const btnText = document.getElementById('editModalBtnText');
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station';
-            } else {
-                sec.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
-            }
-        }
-
-        function toggleDoorEditModal() {
-            const sec = document.getElementById('editDoorProcessSection');
-            const btnText = document.getElementById('editDoorModalBtnText');
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station (Door)';
-            } else {
-                sec.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
-            }
+            alert('บันทึกข้อมูลแผนการผลิตลงในระบบสำเร็จเรียบร้อยแล้ว!');
         }
 
         function renderProcessTableInputs() {
             const tbody = document.getElementById('processTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
+
             if (!currentProcessData || currentProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">ยังไม่มีข้อมูล Station สำหรับ Model นี้ สามารถเพิ่ม Station ได้ด้านบน</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">ยังไม่มีข้อมูล Station (กดเพิ่ม Station หรืออัปโหลดเทมเพลต)</td></tr>`;
                 return;
             }
+
             currentProcessData.forEach((item, index) => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40 hover:bg-slate-800/20';
+                tr.className = 'border-b border-bordercolor/50 hover:bg-slate-800/30';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" value="${item.station || ''}" onchange="updateProcessRow(${index}, 'station', this.value)" class="w-full bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded border border-bordercolor text-center font-bold"></td>
-                    <td class="p-2"><input type="text" value="${item.p1 || ''}" onchange="updateProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p2 || ''}" onchange="updateProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p3 || ''}" onchange="updateProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt1 || 0}" onchange="updateProcessRow(${index}, 'wt1', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt2 || 0}" onchange="updateProcessRow(${index}, 'wt2', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt3 || 0}" onchange="updateProcessRow(${index}, 'wt3', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center font-bold text-cyan-400">${((parseFloat(item.wt1)||0)+(parseFloat(item.wt2)||0)+(parseFloat(item.wt3)||0)).toFixed(1)}</td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.loss || 0}" onchange="updateProcessRow(${index}, 'loss', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-rose-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center font-bold text-emerald-400">${((parseFloat(item.wt1)||0)+(parseFloat(item.wt2)||0)+(parseFloat(item.wt3)||0)+(parseFloat(item.loss)||0)).toFixed(1)}</td>
-                    <td class="p-2 text-center"><button onclick="deleteStationRow(${index})" class="bg-rose-600/80 hover:bg-rose-600 text-white px-2 py-1 rounded text-[10px]">ลบ</button></td>
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" onchange="updateProcessRowField(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 text-center text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="updateProcessRowField(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="updateProcessRowField(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="updateProcessRowField(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w1}" onchange="updateProcessRowField(${index}, 'wt1', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-amber-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w2}" onchange="updateProcessRowField(${index}, 'wt2', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-amber-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w3}" onchange="updateProcessRowField(${index}, 'wt3', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-amber-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400">${wtTot.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${l}" onchange="updateProcessRowField(${index}, 'loss', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-rose-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><button onclick="removeProcessRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 rounded bg-slate-800">×</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1730,98 +1794,65 @@
             const tbody = document.getElementById('doorProcessTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
+
             if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">ยังไม่มีข้อมูล Station สำหรับ Door Part นี้ สามารถเพิ่ม Station ได้ด้านบน</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">ยังไม่มีข้อมูล Station สำหรับพาร์ทประตูนี้</td></tr>`;
                 return;
             }
+
             currentDoorProcessData.forEach((item, index) => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40 hover:bg-slate-800/20';
+                tr.className = 'border-b border-bordercolor/50 hover:bg-slate-800/30';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" value="${item.station || ''}" onchange="updateDoorProcessRow(${index}, 'station', this.value)" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor text-center font-bold"></td>
-                    <td class="p-2"><input type="text" value="${item.p1 || ''}" onchange="updateDoorProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p2 || ''}" onchange="updateDoorProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p3 || ''}" onchange="updateDoorProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt1 || 0}" onchange="updateDoorProcessRow(${index}, 'wt1', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt2 || 0}" onchange="updateDoorProcessRow(${index}, 'wt2', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt3 || 0}" onchange="updateDoorProcessRow(${index}, 'wt3', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center font-bold text-cyan-400">${((parseFloat(item.wt1)||0)+(parseFloat(item.wt2)||0)+(parseFloat(item.wt3)||0)).toFixed(1)}</td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.loss || 0}" onchange="updateDoorProcessRow(${index}, 'loss', parseFloat(this.value)||0)" class="w-full bg-slate-800 text-rose-300 text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
-                    <td class="p-2 text-center font-bold text-emerald-400">${((parseFloat(item.wt1)||0)+(parseFloat(item.wt2)||0)+(parseFloat(item.wt3)||0)+(parseFloat(item.loss)||0)).toFixed(1)}</td>
-                    <td class="p-2 text-center"><button onclick="deleteDoorStationRow(${index})" class="bg-rose-600/80 hover:bg-rose-600 text-white px-2 py-1 rounded text-[10px]">ลบ</button></td>
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" onchange="updateDoorProcessRowField(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 text-center text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" onchange="updateDoorProcessRowField(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" onchange="updateDoorProcessRowField(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" onchange="updateDoorProcessRowField(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w1}" onchange="updateDoorProcessRowField(${index}, 'wt1', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-amber-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w2}" onchange="updateDoorProcessRowField(${index}, 'wt2', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-amber-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${w3}" onchange="updateDoorProcessRowField(${index}, 'wt3', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-amber-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400">${wtTot.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${l}" onchange="updateDoorProcessRowField(${index}, 'loss', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-rose-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}</td>
+                    <td class="p-1.5 text-center"><button onclick="removeDoorProcessRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 rounded bg-slate-800">×</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function updateProcessRow(index, field, val) {
-            currentProcessData[index][field] = val;
-            renderProcessTableInputs();
-            renderSavedDisplayTable();
-            updateLobChart();
-        }
-
-        function updateDoorProcessRow(index, field, val) {
-            currentDoorProcessData[index][field] = val;
-            renderDoorProcessTableInputs();
-            renderDoorSavedDisplayTable();
-            updateDoorLobChart();
-        }
-
-        function deleteStationRow(index) {
-            currentProcessData.splice(index, 1);
-            renderProcessTableInputs();
-            renderSavedDisplayTable();
-            updateLobChart();
-        }
-
-        function deleteDoorStationRow(index) {
-            currentDoorProcessData.splice(index, 1);
-            renderDoorProcessTableInputs();
-            renderDoorSavedDisplayTable();
-            updateDoorLobChart();
-        }
-
-        function addNewStationRow() {
-            let nextNo = currentProcessData.length + 1;
-            currentProcessData.push({ station: `STA-${nextNo}`, p1: 'Process Name', p2: '', p3: '', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
-            renderProcessTableInputs();
-            renderSavedDisplayTable();
-            updateLobChart();
-        }
-
-        function addDoorNewStationRow() {
-            let nextNo = currentDoorProcessData.length + 1;
-            currentDoorProcessData.push({ station: `D-STA-${nextNo}`, p1: 'Process Name', p2: '', p3: '', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
-            renderDoorProcessTableInputs();
-            renderDoorSavedDisplayTable();
-            updateDoorLobChart();
         }
 
         function renderSavedDisplayTable() {
             const tbody = document.getElementById('displaySavedTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
+
             if (!currentProcessData || currentProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Station</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ไม่มีข้อมูลกระบวนการ</td></tr>`;
                 return;
             }
+
             currentProcessData.forEach(item => {
                 let w1 = parseFloat(item.wt1) || 0;
                 let w2 = parseFloat(item.wt2) || 0;
                 let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
-                let loss = parseFloat(item.loss) || 0;
-                let ct = wtTot + loss;
+                let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
                 tr.className = 'border-b border-bordercolor/30 hover:bg-slate-800/20';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
+                    <td class="p-1.5 text-center font-semibold text-cyan-300">${item.station || '-'}</td>
                     <td class="p-1.5">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center text-amber-300">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-rose-300">${loss.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-cyan-400">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-medium">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center text-rose-300">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1831,37 +1862,119 @@
             const tbody = document.getElementById('displayDoorSavedTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
+
             if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Station</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ไม่มีข้อมูลกระบวนการ</td></tr>`;
                 return;
             }
+
             currentDoorProcessData.forEach(item => {
                 let w1 = parseFloat(item.wt1) || 0;
                 let w2 = parseFloat(item.wt2) || 0;
                 let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
                 let wtTot = w1 + w2 + w3;
-                let loss = parseFloat(item.loss) || 0;
-                let ct = wtTot + loss;
+                let ct = wtTot + l;
 
                 let tr = document.createElement('tr');
                 tr.className = 'border-b border-bordercolor/30 hover:bg-slate-800/20';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station || '-'}</td>
+                    <td class="p-1.5 text-center font-semibold text-amber-300">${item.station || '-'}</td>
                     <td class="p-1.5">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center text-amber-300">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-rose-300">${loss.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-medium">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center text-rose-300">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function updateProcessRowField(index, field, value) {
+            if (currentProcessData[index]) {
+                currentProcessData[index][field] = value;
+                renderProcessTableInputs();
+            }
+        }
+
+        function updateDoorProcessRowField(index, field, value) {
+            if (currentDoorProcessData[index]) {
+                currentDoorProcessData[index][field] = value;
+                renderDoorProcessTableInputs();
+            }
+        }
+
+        function addNewStationRow() {
+            let nextNo = currentProcessData.length + 1;
+            currentProcessData.push({
+                station: `ST${nextNo}`,
+                p1: 'Process Name',
+                p2: '',
+                p3: '',
+                wt1: 10,
+                wt2: 0,
+                wt3: 0,
+                loss: 2
+            });
+            renderProcessTableInputs();
+        }
+
+        function addDoorNewStationRow() {
+            let nextNo = currentDoorProcessData.length + 1;
+            currentDoorProcessData.push({
+                station: `ST${nextNo}`,
+                p1: 'Door Process',
+                p2: '',
+                p3: '',
+                wt1: 10,
+                wt2: 0,
+                wt3: 0,
+                loss: 2
+            });
+            renderDoorProcessTableInputs();
+        }
+
+        function removeProcessRow(index) {
+            currentProcessData.splice(index, 1);
+            renderProcessTableInputs();
+        }
+
+        function removeDoorProcessRow(index) {
+            currentDoorProcessData.splice(index, 1);
+            renderDoorProcessTableInputs();
+        }
+
+        function toggleEditModal() {
+            let section = document.getElementById('editProcessSection');
+            let btnText = document.getElementById('editModalBtnText');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                btnText.textContent = 'ปิดตารางแก้ไข Work Station';
+            } else {
+                section.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
+            }
+        }
+
+        function toggleDoorEditModal() {
+            let section = document.getElementById('editDoorProcessSection');
+            let btnText = document.getElementById('editDoorModalBtnText');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                btnText.textContent = 'ปิดตารางแก้ไข Work Station (Door)';
+            } else {
+                section.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
+            }
         }
 
         function saveProcessAndStationData() {
             let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
             processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            renderSavedDisplayTable();
+            updateLobChart();
             renderCapacityTable(currentDailyData);
-            alert('บันทึกข้อมูลตาราง Cycle Time เรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูล Work Process & Cycle Time สำเร็จเรียบร้อยแล้ว!');
         }
 
         function saveDoorProcessAndStationData() {
@@ -1869,32 +1982,34 @@
             let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
             doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
             renderCapacityTable(currentDailyData);
-            alert('บันทึกข้อมูลตาราง Cycle Time (Door Part) เรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูล Door Work Process สำเร็จเรียบร้อยแล้ว!');
         }
 
         function downloadProcessTemplate() {
-            let ws_data = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT1", "WT2", "WT3", "Loss"],
-                ["STA-1", "Cutting", "", "", 12, 0, 0, 1],
-                ["STA-2", "Bending", "", "", 15, 0, 0, 1.5]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(ws_data);
             let wb = XLSX.utils.book_new();
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["ST1", "Cutting", "", "", 15, 0, 0, 2],
+                ["ST2", "Bending", "", "", 20, 0, 0, 3]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
             XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
-            XLSX.writeFile(wb, "Haier_Process_Template.xlsx");
+            XLSX.writeFile(wb, "Process_Template.xlsx");
         }
 
         function downloadDoorProcessTemplate() {
-            let ws_data = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT1", "WT2", "WT3", "Loss"],
-                ["D-STA-1", "Door Preparation", "", "", 10, 0, 0, 1],
-                ["D-STA-2", "Foaming Injection", "", "", 20, 0, 0, 2]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(ws_data);
             let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "DoorProcessTemplate");
-            XLSX.writeFile(wb, "Haier_Door_Process_Template.xlsx");
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["ST1", "Door Assembly", "", "", 18, 0, 0, 2],
+                ["ST2", "Sealing", "", "", 12, 0, 0, 2]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
+            XLSX.utils.book_append_sheet(wb, ws, "DoorTemplate");
+            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
         }
 
         function importProcessExcelData(event) {
@@ -1905,31 +2020,33 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                    
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
                     let imported = [];
                     for (let i = 1; i < json.length; i++) {
                         let r = json[i];
-                        if (r && r.length > 0 && r[0]) {
-                            imported.push({
-                                station: String(r[0] || '').trim(),
-                                p1: String(r[1] || '').trim(),
-                                p2: String(r[2] || '').trim(),
-                                p3: String(r[3] || '').trim(),
-                                wt1: Number(r[4]) || 0,
-                                wt2: Number(r[5]) || 0,
-                                wt3: Number(r[6]) || 0,
-                                loss: Number(r[7]) || 0
-                            });
-                        }
+                        if (!r || r.length === 0) continue;
+                        imported.push({
+                            station: String(r[0] || `ST${i}`),
+                            p1: String(r[1] || ''),
+                            p2: String(r[2] || ''),
+                            p3: String(r[3] || ''),
+                            wt1: Number(r[4]) || 0,
+                            wt2: Number(r[5]) || 0,
+                            wt3: Number(r[6]) || 0,
+                            loss: Number(r[7]) || 0
+                        });
                     }
+
                     if (imported.length > 0) {
                         currentProcessData = imported;
                         renderProcessTableInputs();
                         renderSavedDisplayTable();
                         updateLobChart();
-                        alert('นำเข้าข้อมูลสำเร็จ! คลิก "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
+                        alert('นำเข้าข้อมูล Work Process สำเร็จ!');
+                    } else {
+                        alert('ไม่พบข้อมูลในไฟล์ Excel ที่อัปโหลด');
                     }
                 } catch (err) {
                     console.error(err);
@@ -1947,31 +2064,33 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                    
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
                     let imported = [];
                     for (let i = 1; i < json.length; i++) {
                         let r = json[i];
-                        if (r && r.length > 0 && r[0]) {
-                            imported.push({
-                                station: String(r[0] || '').trim(),
-                                p1: String(r[1] || '').trim(),
-                                p2: String(r[2] || '').trim(),
-                                p3: String(r[3] || '').trim(),
-                                wt1: Number(r[4]) || 0,
-                                wt2: Number(r[5]) || 0,
-                                wt3: Number(r[6]) || 0,
-                                loss: Number(r[7]) || 0
-                            });
-                        }
+                        if (!r || r.length === 0) continue;
+                        imported.push({
+                            station: String(r[0] || `ST${i}`),
+                            p1: String(r[1] || ''),
+                            p2: String(r[2] || ''),
+                            p3: String(r[3] || ''),
+                            wt1: Number(r[4]) || 0,
+                            wt2: Number(r[5]) || 0,
+                            wt3: Number(r[6]) || 0,
+                            loss: Number(r[7]) || 0
+                        });
                     }
+
                     if (imported.length > 0) {
                         currentDoorProcessData = imported;
                         renderDoorProcessTableInputs();
                         renderDoorSavedDisplayTable();
                         updateDoorLobChart();
-                        alert('นำเข้าข้อมูลสำเร็จ! คลิก "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
+                        alert('นำเข้าข้อมูล Door Work Process สำเร็จ!');
+                    } else {
+                        alert('ไม่พบข้อมูลในไฟล์ Excel ที่อัปโหลด');
                     }
                 } catch (err) {
                     console.error(err);
