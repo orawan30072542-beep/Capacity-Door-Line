@@ -190,20 +190,22 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
+                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (แยกชิ้นส่วนและสถานีงาน)</h2>
                         </div>
                         <!-- Group Station Filter Buttons -->
-                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
-                            <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
+                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor flex-wrap gap-y-1">
+                            <span class="text-xs text-slate-300 font-medium px-2">Station:</span>
                             <button onclick="switchSummaryStation('All')" id="sum-btn-all" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">All</button>
                             <button onclick="switchSummaryStation('Door A')" id="sum-btn-door-a" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door A</button>
                             <button onclick="switchSummaryStation('Door B')" id="sum-btn-door-b" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchSummaryStation('Door C')" id="sum-btn-door-c" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchSummaryStation('Door Glass')" id="sum-btn-door-glass" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchSummaryStation('Back Plate')" id="sum-btn-back-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchSummaryStation('Bottom Plate')" id="sum-btn-bottom-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
                         </div>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด[cite: 16]
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยแยกตามการตั้งค่าชิ้นส่วน Door, Back Plate และ Bottom Plate พร้อมตัวเลือกการผลิต (#1, #2) และอัตรากำลังการผลิต UPH อัตโนมัติ
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -224,12 +226,14 @@
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
-                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
+                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor flex-wrap gap-y-1">
                             <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
                             <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
                             <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
                         </div>
                     </div>
                     
@@ -258,7 +262,7 @@
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Master Model & Component Routing</h2>
-                            <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น[cite: 16]</p>
+                            <p class="text-xs text-slate-300 mt-0.5">กำหนดค่าชิ้นส่วนประตู, ตัวเลือกการผลิต Back Plate และ Bottom Plate พร้อมสถานีงานแยกอิสระ</p>
                         </div>
                     </div>
                     <button onclick="saveMasterModelConfig()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2">
@@ -274,11 +278,10 @@
                                 <tr class="border-b border-bordercolor text-slate-300 bg-slate-900">
                                     <th class="p-3">Group</th>
                                     <th class="p-3">Model Name</th>
-                                    <th class="p-3 text-center">Door Type / Component</th>
-                                    <th class="p-3 text-center">สถานีงานหลัก (Station)</th>
-                                    <th class="p-3 text-center">Back Plate</th>
-                                    <th class="p-3 text-center">Bottom Plate</th>
-                                    <th class="p-3">Assigned Routing Process & Lines</th>
+                                    <th class="p-3 text-center">Door Component</th>
+                                    <th class="p-3 text-center">Back Plate Option</th>
+                                    <th class="p-3 text-center">Bottom Plate Option</th>
+                                    <th class="p-3 text-center">Assigned Routing / Station</th>
                                     <th class="p-3 text-center">Qty / Set</th>
                                 </tr>
                             </thead>
@@ -294,7 +297,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป[cite: 16]</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
                             &larr; กลับหน้า Dashboard หลัก
@@ -304,7 +307,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-slate-300 mr-1">Part:[cite: 16]</span>
+                                <span class="text-[10px] font-medium text-slate-300 mr-1">Part:</span>
                                 <div id="partTabContainer" class="flex flex-wrap gap-1">
                                     <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
                                     <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
@@ -314,12 +317,12 @@
                         </div>
 
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:[cite: 16]</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="groupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
 
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:[cite: 16]</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
                             <div id="modelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -331,7 +334,7 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <div class="flex items-center space-x-1.5">
                                     <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
-                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis[cite: 16]</h3>
+                                    <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
                                     <span>TT 100%: <strong id="displayTtVal" class="text-yellow-300">30.00s</strong></span>
@@ -352,7 +355,7 @@
                         </div>
                         <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
                             <h3 class="text-xs font-semibold text-cyan-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
-                                <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)[cite: 16]</span>
+                                <span>Active Work Stations (Model: <span id="displayActiveModelTag" class="text-amber-400">-</span>)</span>
                             </h3>
                             <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
@@ -375,7 +378,7 @@
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time[cite: 16]</h3>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time</h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button onclick="downloadProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel</button>
@@ -393,7 +396,7 @@
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
                                 <h3 class="text-xs font-semibold text-cyan-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span>[cite: 16]</p>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editModelNameTag" class="font-bold text-amber-400">-</span> | Part: <span id="editPartNameTag" class="font-bold text-amber-400">-</span></p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
@@ -430,7 +433,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door[cite: 16]</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
                             &larr; กลับหน้า Dashboard หลัก
@@ -440,7 +443,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-1.5 text-xs">
                         <div class="md:col-span-12 flex flex-col gap-1 bg-slate-900/60 p-1.5 rounded-lg border border-bordercolor/60">
                             <div class="flex flex-wrap items-center gap-1">
-                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:[cite: 16]</span>
+                                <span class="text-[10px] font-medium text-cyan-400 mr-1">Door Process:</span>
                                 <button type="button" onclick="selectDoorSubPart('Bending')" data-subpart="Bending" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-cyan-600 text-white shadow border border-cyan-500">Bending</button>
                                 <button type="button" onclick="selectDoorSubPart('Foaming')" data-subpart="Foaming" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Foaming</button>
                                 <button type="button" onclick="selectDoorSubPart('Door Cap Assembly')" data-subpart="Door Cap Assembly" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Cap Assembly</button>
@@ -449,7 +452,7 @@
                                 <button type="button" onclick="selectDoorSubPart('Door Glass')" data-subpart="Door Glass" class="door-sub-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Door Glass</button>
                             </div>
                             <div class="flex flex-wrap items-center gap-1 pt-1 border-t border-bordercolor/40">
-                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:[cite: 16]</span>
+                                <span class="text-[10px] font-medium text-amber-400 mr-1">Door Type:</span>
                                 <button type="button" onclick="selectDoorType('RR')" data-doortype="RR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-amber-600 text-white shadow border border-amber-500">RR</button>
                                 <button type="button" onclick="selectDoorType('RL')" data-doortype="RL" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">RL</button>
                                 <button type="button" onclick="selectDoorType('FR')" data-doortype="FR" class="door-type-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">FR</button>
@@ -460,11 +463,11 @@
                         </div>
 
                         <div class="md:col-span-8 flex flex-wrap items-center gap-1 bg-slate-900/60 p-1 rounded-lg border border-bordercolor/60">
-                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:[cite: 16]</span>
+                            <span class="text-[10px] font-semibold text-amber-400 mr-1">Group:</span>
                             <div id="doorGroupRadioContainer" class="flex flex-wrap gap-1"></div>
                         </div>
                         <div class="md:col-span-4 flex flex-col gap-0.5 justify-center bg-slate-950/40 p-1 rounded-lg border border-bordercolor/40 overflow-hidden">
-                            <span class="text-[10px] font-semibold text-cyan-400">Model:[cite: 16]</span>
+                            <span class="text-[10px] font-semibold text-cyan-400">Model:</span>
                             <div id="doorModelCheckboxContainer" class="grid grid-flow-col grid-rows-2 gap-1 overflow-x-auto pb-0.5 w-full"></div>
                         </div>
                     </div>
@@ -476,7 +479,7 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <div class="flex items-center space-x-1.5">
                                     <div class="w-1.5 h-5 bg-amber-400 rounded-full"></div>
-                                    <h3 class="text-sm font-bold text-amber-400">กราฟ Line of Balance & Takt Time Analysis (Door Part)[cite: 16]</h3>
+                                    <h3 class="text-sm font-bold text-amber-400">กราฟ Line of Balance & Takt Time Analysis (Door Part)</h3>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded border border-bordercolor flex items-center space-x-2">
                                     <span>TT 100%: <strong id="displayDoorTtVal" class="text-yellow-300">30.00s</strong></span>
@@ -498,7 +501,7 @@
                         </div>
                         <div class="lg:col-span-5 bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80 space-y-2.5">
                             <h3 class="text-xs font-semibold text-amber-400 flex items-center justify-between border-b border-bordercolor pb-1.5">
-                                <span>Active Work Stations (Model: <span id="displayDoorActiveModelTag" class="text-cyan-400">-</span>)[cite: 16]</span>
+                                <span>Active Work Stations (Model: <span id="displayDoorActiveModelTag" class="text-cyan-400">-</span>)</span>
                             </h3>
                             <div class="overflow-x-auto max-h-[420px]">
                                 <table class="w-full text-left border-collapse text-xs">
@@ -521,7 +524,7 @@
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-slate-900/60 p-3.5 rounded-xl border border-bordercolor text-xs">
                         <div>
-                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time (Door Part)[cite: 16]</h3>
+                            <h3 class="font-semibold text-white">จัดการข้อมูลตารางกำหนดชื่อกระบวนการทำงานและ Cycle Time (Door Part)</h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
                             <button onclick="downloadDoorProcessTemplate()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-semibold px-2.5 py-2 rounded-lg border border-bordercolor transition">เทมเพลต Excel</button>
@@ -538,8 +541,8 @@
                     <div id="editDoorProcessSection" class="space-y-3 hidden border border-amber-500/30 bg-slate-900/90 p-4 rounded-xl shadow-xl">
                         <div class="flex justify-between items-center border-b border-bordercolor pb-2.5">
                             <div>
-                                <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)[cite: 16]</h3>
-                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span>[cite: 16]</p>
+                                <h3 class="text-xs font-semibold text-amber-400">ตารางแก้ไข Cycle Time และชื่อกระบวนการ (Door Part)</h3>
+                                <p class="text-[11px] text-slate-300 mt-0.5">กำลังแก้ไข Model: <span id="editDoorModelNameTag" class="font-bold text-cyan-400">-</span> | Door Process: <span id="editDoorSubPartTag" class="font-bold text-cyan-400">-</span> | Type: <span id="editDoorTypeTag" class="font-bold text-cyan-400">-</span></p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveDoorProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
@@ -841,9 +844,9 @@
         function getMasterConfigForModel(modelName) {
             if (masterModelConfig[modelName]) return masterModelConfig[modelName];
             if (modelName.includes('C')) {
-                return { doorType: 'Glass', station: 'Door A', backPlate: '#1', bottomPlate: '#1', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 };
+                return { doorType: 'Glass', backPlateOption: '#1', bottomPlateOption: '#1', station: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 };
             } else {
-                return { doorType: 'Metal', station: 'Door B', backPlate: '#1', bottomPlate: '#1', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
+                return { doorType: 'Metal', backPlateOption: '#1', bottomPlateOption: '#2', station: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
             }
         }
 
@@ -868,26 +871,26 @@
                             </select>
                         </td>
                         <td class="p-3 text-center">
-                            <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
+                            <select onchange="updateMasterModelField('${m.name}', 'backPlateOption', this.value)" class="bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
+                                <option value="#1" ${config.backPlateOption === '#1' ? 'selected' : ''}>Back Plate #1 (ผลิต)</option>
+                                <option value="#2" ${config.backPlateOption === '#2' ? 'selected' : ''}>Back Plate #2 (ไม่ผลิต)</option>
+                            </select>
+                        </td>
+                        <td class="p-3 text-center">
+                            <select onchange="updateMasterModelField('${m.name}', 'bottomPlateOption', this.value)" class="bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
+                                <option value="#1" ${config.bottomPlateOption === '#1' ? 'selected' : ''}>Bottom Plate #1 (ผลิต)</option>
+                                <option value="#2" ${config.bottomPlateOption === '#2' ? 'selected' : ''}>Bottom Plate #2 (ไม่ผลิต)</option>
+                            </select>
+                        </td>
+                        <td class="p-3 text-center space-y-1">
+                            <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold w-full">
                                 <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
                                 <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
                                 <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
                                 <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
+                                <option value="Back Plate" ${config.station === 'Back Plate' ? 'selected' : ''}>Back Plate</option>
+                                <option value="Bottom Plate" ${config.station === 'Bottom Plate' ? 'selected' : ''}>Bottom Plate</option>
                             </select>
-                        </td>
-                        <td class="p-3 text-center">
-                            <select onchange="updateMasterModelField('${m.name}', 'backPlate', this.value)" class="bg-slate-800 text-emerald-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
-                                <option value="#1" ${config.backPlate === '#1' ? 'selected' : ''}>#1</option>
-                                <option value="#2" ${config.backPlate === '#2' ? 'selected' : ''}>#2</option>
-                            </select>
-                        </td>
-                        <td class="p-3 text-center">
-                            <select onchange="updateMasterModelField('${m.name}', 'bottomPlate', this.value)" class="bg-slate-800 text-emerald-300 text-xs px-2 py-1 rounded border border-bordercolor focus:outline-none font-semibold">
-                                <option value="#1" ${config.bottomPlate === '#1' ? 'selected' : ''}>#1</option>
-                                <option value="#2" ${config.bottomPlate === '#2' ? 'selected' : ''}>#2</option>
-                            </select>
-                        </td>
-                        <td class="p-3">
                             <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor">
                         </td>
                         <td class="p-3 text-center">
@@ -909,7 +912,7 @@
         function saveMasterModelConfig() {
             localStorage.setItem('haier_master_model_config_v2', JSON.stringify(masterModelConfig));
             renderDailyOrderSummaryTable(currentDailyData);
-            alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว![cite: 16]');
+            alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
         }
 
         let processDatabase = {};
@@ -980,10 +983,35 @@
             groups.forEach(g => {
                 g.models.forEach(m => {
                     let config = getMasterConfigForModel(m.name);
-                    if (summaryStation !== 'All' && config.station !== summaryStation) return;
-                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+                    
+                    // เงื่อนไขการนัดหมายตาม Station หรือชิ้นส่วนที่เลือก
+                    let isMatch = false;
+                    let qtyMultiplier = 1;
+
+                    if (summaryStation === 'All') {
+                        isMatch = true;
+                        qtyMultiplier = Number(config.qtyPerSet) || 1;
+                    } else if (summaryStation === 'Back Plate') {
+                        if (config.backPlateOption === '#1') {
+                            isMatch = true;
+                            qtyMultiplier = 1;
+                        }
+                    } else if (summaryStation === 'Bottom Plate') {
+                        if (config.bottomPlateOption === '#1') {
+                            isMatch = true;
+                            qtyMultiplier = 1;
+                        }
+                    } else {
+                        if (config.station === summaryStation) {
+                            isMatch = true;
+                            qtyMultiplier = Number(config.qtyPerSet) || 1;
+                        }
+                    }
+
+                    if (!isMatch) return;
+
                     let orderVal = Number(m.orders[dayIndex]) || 0;
-                    let required = orderVal * qtyPerSet;
+                    let required = orderVal * qtyMultiplier;
                     if (required > 0) {
                         totalQty += required;
                         let ct = getModelMaxCT(m.name);
@@ -1308,7 +1336,7 @@
 
         function switchSummaryStation(stationName) {
             currentSummaryStation = stationName;
-            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass'].forEach(st => {
+            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
                 let btnId = 'sum-btn-' + (st === 'All' ? 'all' : st.toLowerCase().replace(' ', '-'));
                 let btn = document.getElementById(btnId);
                 if (btn) {
@@ -1345,8 +1373,17 @@
             groups.forEach(g => {
                 g.models.forEach((m) => {
                     let config = getMasterConfigForModel(m.name);
-                    if (currentSummaryStation !== 'All' && config.station !== currentSummaryStation) return;
-                    filteredRowsCount++;
+                    let isMatch = false;
+                    if (currentSummaryStation === 'All') {
+                        isMatch = true;
+                    } else if (currentSummaryStation === 'Back Plate') {
+                        if (config.backPlateOption === '#1') isMatch = true;
+                    } else if (currentSummaryStation === 'Bottom Plate') {
+                        if (config.bottomPlateOption === '#1') isMatch = true;
+                    } else {
+                        if (config.station === currentSummaryStation) isMatch = true;
+                    }
+                    if (isMatch) filteredRowsCount++;
                 });
             });
 
@@ -1383,14 +1420,20 @@
             groups.forEach(g => {
                 let validModelsInGroup = g.models.filter(m => {
                     let config = getMasterConfigForModel(m.name);
-                    return currentSummaryStation === 'All' || config.station === currentSummaryStation;
+                    if (currentSummaryStation === 'All') return true;
+                    if (currentSummaryStation === 'Back Plate') return config.backPlateOption === '#1';
+                    if (currentSummaryStation === 'Bottom Plate') return config.bottomPlateOption === '#1';
+                    return config.station === currentSummaryStation;
                 });
 
                 if (validModelsInGroup.length === 0) return;
 
                 validModelsInGroup.forEach((m, mIndex) => {
                     let config = getMasterConfigForModel(m.name);
-                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+                    let qtyPerSet = 1;
+                    if (currentSummaryStation === 'All' || currentSummaryStation === config.station) {
+                        qtyPerSet = Number(config.qtyPerSet) || 1;
+                    }
 
                     let tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
@@ -1428,7 +1471,7 @@
             currentCapacityStation = stationName;
             document.getElementById('currentCapacityStationLabel').textContent = stationName;
             
-            ['Door A', 'Door B', 'Door C', 'Door Glass'].forEach(st => {
+            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
                 let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
                 let btn = document.getElementById(btnId);
                 if (btn) {
@@ -1557,45 +1600,392 @@
                             }
                             let modelName = String(row[1] || '').trim();
                             if (modelName !== '') {
+                                let rowOrders = [];
+                                for(let dIdx = 0; dIdx < days.length; dIdx++) {
+                                    let cellVal = row[2 + dIdx];
+                                    rowOrders.push(isSunday(days[dIdx]) ? 0 : Math.round(Number(cellVal) || 0));
+                                }
+
                                 if (!groupMap[currentProductGroup]) {
                                     groupMap[currentProductGroup] = [];
                                     groupOrderList.push(currentProductGroup);
                                 }
-                                let orders = [];
-                                for (let dIdx = 0; dIdx < days.length; dIdx++) {
-                                    let val = Number(row[2 + dIdx]) || 0;
-                                    orders.push(val);
-                                }
-                                groupMap[currentProductGroup].push({ name: modelName, orders: orders });
+                                groupMap[currentProductGroup].push({ name: modelName, orders: rowOrders });
                             }
                         }
 
-                        let newGroups = groupOrderList.map(pg => ({
-                            productGroup: pg,
-                            models: groupMap[pg]
-                        }));
+                        let groups = [];
+                        groupOrderList.forEach(gName => {
+                            groups.push({ productGroup: gName, models: groupMap[gName] });
+                        });
 
-                        if (newGroups.length > 0) {
-                            currentDailyData = { days: days, groups: newGroups };
-                            renderUnifiedTable(currentDailyData);
-                            renderDailyOrderSummaryTable(currentDailyData);
-                            renderCapacityTable(currentDailyData);
+                        if (groups.length > 0) {
+                            window.tempImportedData = { days: days, groups: groups };
+                            renderUnifiedTable(window.tempImportedData);
+                            renderDailyOrderSummaryTable(window.tempImportedData);
+                            renderCapacityTable(window.tempImportedData);
                             renderMasterModelTable();
-                            initSelectors();
-                            alert('โหลดข้อมูลจาก Excel สำเร็จแล้ว![cite: 16]');
+                            let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
+                            planChart.data.labels = window.tempImportedData.days;
+                            planChart.data.datasets[0].data = newCalc.totalOutputs;
+                            planChart.update();
+                            alert('โหลดข้อมูลจาก Excel สำเร็จ! กรุณากดปุ่ม "บันทึกข้อมูล"');
                         }
                     }
-                } catch (err) {
-                    console.error(err);
-                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel[cite: 16]');
-                }
+                } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
             };
             reader.readAsArrayBuffer(file);
         }
 
         function saveDashboardData() {
+            if (!window.tempImportedData) {
+                alert('กรุณาเลือกไฟล์ Excel ใหม่ก่อนบันทึกข้อมูล');
+                return;
+            }
+            currentDailyData = window.tempImportedData;
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            alert('บันทึกข้อมูลตารางแผนการผลิตเรียบร้อยแล้ว![cite: 16]');
+            initSelectors();
+            renderMasterModelTable();
+            renderDailyOrderSummaryTable(currentDailyData);
+            renderCapacityTable(currentDailyData);
+            alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
+        }
+
+        function downloadProcessTemplate() {
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["STA01", "Feeding", "Pressing", "", 12.5, 8.0, "", 2.0],
+                ["STA02", "Welding", "Inspection", "", 15.0, 10.5, "", 1.5]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
+            XLSX.writeFile(wb, "Process_Template.xlsx");
+        }
+
+        function importProcessExcelData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    let importedStations = [];
+                    for (let i = 1; i < excelJson.length; i++) {
+                        let row = excelJson[i];
+                        if (row && row.length > 0 && row[0]) {
+                            importedStations.push({
+                                station: String(row[0] || '').trim(),
+                                p1: String(row[1] || '').trim(),
+                                p2: String(row[2] || '').trim(),
+                                p3: String(row[3] || '').trim(),
+                                wt1: Number(row[4]) || 0,
+                                wt2: Number(row[5]) || 0,
+                                wt3: Number(row[6]) || 0,
+                                loss: Number(row[7]) || 0
+                            });
+                        }
+                    }
+
+                    if (importedStations.length > 0) {
+                        currentProcessData = importedStations;
+                        renderProcessTableInputs();
+                        renderSavedDisplayTable();
+                        updateLobChart();
+                        alert('นำเข้าข้อมูล Work Process สำเร็จ!');
+                    }
+                } catch (err) { alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์: ' + err.message); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadDoorProcessTemplate() {
+            let templateData = [
+                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
+                ["DOOR_ST1", "Bending Frame", "Corner Lock", "", 14.0, 9.5, "", 2.0],
+                ["DOOR_ST2", "Foaming Inject", "Seal Check", "", 18.0, 11.0, "", 1.5]
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(templateData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "DoorProcessTemplate");
+            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
+        }
+
+        function importDoorProcessExcelData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    let importedStations = [];
+                    for (let i = 1; i < excelJson.length; i++) {
+                        let row = excelJson[i];
+                        if (row && row.length > 0 && row[0]) {
+                            importedStations.push({
+                                station: String(row[0] || '').trim(),
+                                p1: String(row[1] || '').trim(),
+                                p2: String(row[2] || '').trim(),
+                                p3: String(row[3] || '').trim(),
+                                wt1: Number(row[4]) || 0,
+                                wt2: Number(row[5]) || 0,
+                                wt3: Number(row[6]) || 0,
+                                loss: Number(row[7]) || 0
+                            });
+                        }
+                    }
+
+                    if (importedStations.length > 0) {
+                        currentDoorProcessData = importedStations;
+                        renderDoorProcessTableInputs();
+                        renderDoorSavedDisplayTable();
+                        updateDoorLobChart();
+                        alert('นำเข้าข้อมูล Door Process สำเร็จ!');
+                    }
+                } catch (err) { alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์ Door: ' + err.message); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function toggleEditModal() {
+            let section = document.getElementById('editProcessSection');
+            let btnText = document.getElementById('editModalBtnText');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                btnText.textContent = 'ซ่อนตารางแก้ไข Work Station';
+                renderProcessTableInputs();
+            } else {
+                section.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
+            }
+        }
+
+        function toggleDoorEditModal() {
+            let section = document.getElementById('editDoorProcessSection');
+            let btnText = document.getElementById('editDoorModalBtnText');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                btnText.textContent = 'ซ่อนตารางแก้ไข Work Station (Door)';
+                renderDoorProcessTableInputs();
+            } else {
+                section.classList.add('hidden');
+                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
+            }
+        }
+
+        function renderProcessTableInputs() {
+            const tbody = document.getElementById('processTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            currentProcessData.forEach((item, index) => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition border-b border-bordercolor/40';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" oninput="updateProcessRow(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 font-bold text-xs px-1.5 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" oninput="updateProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" oninput="updateProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" oninput="updateProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt1 || 0}" oninput="updateProcessRow(${index}, 'wt1', this.value)" class="w-14 bg-slate-800 text-amber-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt2 || 0}" oninput="updateProcessRow(${index}, 'wt2', this.value)" class="w-14 bg-slate-800 text-amber-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt3 || 0}" oninput="updateProcessRow(${index}, 'wt3', this.value)" class="w-14 bg-slate-800 text-amber-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200" id="wtTot_${index}">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.loss || 0}" oninput="updateProcessRow(${index}, 'loss', this.value)" class="w-14 bg-slate-800 text-rose-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400" id="ct_${index}">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><button onclick="deleteStationRow(${index})" class="bg-rose-600/80 hover:bg-rose-600 text-white text-[10px] px-2 py-1 rounded transition">&times;</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDoorProcessTableInputs() {
+            const tbody = document.getElementById('doorProcessTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            currentDoorProcessData.forEach((item, index) => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition border-b border-bordercolor/40';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center"><input type="text" value="${item.station || ''}" oninput="updateDoorProcessRow(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 font-bold text-xs px-1.5 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p1 || ''}" oninput="updateDoorProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p2 || ''}" oninput="updateDoorProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5"><input type="text" value="${item.p3 || ''}" oninput="updateDoorProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt1 || 0}" oninput="updateDoorProcessRow(${index}, 'wt1', this.value)" class="w-14 bg-slate-800 text-amber-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt2 || 0}" oninput="updateDoorProcessRow(${index}, 'wt2', this.value)" class="w-14 bg-slate-800 text-amber-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt3 || 0}" oninput="updateDoorProcessRow(${index}, 'wt3', this.value)" class="w-14 bg-slate-800 text-amber-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center font-bold text-slate-200" id="doorWtTot_${index}">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.loss || 0}" oninput="updateDoorProcessRow(${index}, 'loss', this.value)" class="w-14 bg-slate-800 text-rose-400 font-semibold text-xs px-1 py-1 rounded border border-bordercolor text-center"></td>
+                    <td class="p-1.5 text-center font-bold text-cyan-400" id="doorCt_${index}">${ct.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center"><button onclick="deleteDoorStationRow(${index})" class="bg-rose-600/80 hover:bg-rose-600 text-white text-[10px] px-2 py-1 rounded transition">&times;</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateProcessRow(index, field, value) {
+            currentProcessData[index][field] = (field.startsWith('wt') || field === 'loss') ? (parseFloat(value) || 0) : value;
+            let w1 = parseFloat(currentProcessData[index].wt1) || 0;
+            let w2 = parseFloat(currentProcessData[index].wt2) || 0;
+            let w3 = parseFloat(currentProcessData[index].wt3) || 0;
+            let l = parseFloat(currentProcessData[index].loss) || 0;
+            let wtTot = w1 + w2 + w3;
+            let ct = wtTot + l;
+
+            document.getElementById(`wtTot_${index}`).textContent = `${wtTot.toFixed(1)}s`;
+            document.getElementById(`ct_${index}`).textContent = `${ct.toFixed(1)}s`;
+            updateLobChart();
+        }
+
+        function updateDoorProcessRow(index, field, value) {
+            currentDoorProcessData[index][field] = (field.startsWith('wt') || field === 'loss') ? (parseFloat(value) || 0) : value;
+            let w1 = parseFloat(currentDoorProcessData[index].wt1) || 0;
+            let w2 = parseFloat(currentDoorProcessData[index].wt2) || 0;
+            let w3 = parseFloat(currentDoorProcessData[index].wt3) || 0;
+            let l = parseFloat(currentDoorProcessData[index].loss) || 0;
+            let wtTot = w1 + w2 + w3;
+            let ct = wtTot + l;
+
+            document.getElementById(`doorWtTot_${index}`).textContent = `${wtTot.toFixed(1)}s`;
+            document.getElementById(`doorCt_${index}`).textContent = `${ct.toFixed(1)}s`;
+            updateDoorLobChart();
+        }
+
+        function addNewStationRow() {
+            let nextNum = currentProcessData.length + 1;
+            let staName = `STA${nextNum < 10 ? '0' + nextNum : nextNum}`;
+            currentProcessData.push({ station: staName, p1: 'Process Name', p2: '', p3: '', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
+            renderProcessTableInputs();
+            renderSavedDisplayTable();
+            updateLobChart();
+        }
+
+        function addDoorNewStationRow() {
+            let nextNum = currentDoorProcessData.length + 1;
+            let staName = `DOOR_ST${nextNum}`;
+            currentDoorProcessData.push({ station: staName, p1: 'Door Process', p2: '', p3: '', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
+            renderDoorProcessTableInputs();
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+        }
+
+        function deleteStationRow(index) {
+            currentProcessData.splice(index, 1);
+            renderProcessTableInputs();
+            renderSavedDisplayTable();
+            updateLobChart();
+        }
+
+        function deleteDoorStationRow(index) {
+            currentDoorProcessData.splice(index, 1);
+            renderDoorProcessTableInputs();
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+        }
+
+        function saveProcessAndStationData() {
+            let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
+            processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
+            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            renderSavedDisplayTable();
+            updateLobChart();
+            renderCapacityTable(currentDailyData);
+            alert('บันทึกข้อมูล Work Process & CT เรียบร้อยแล้ว!');
+        }
+
+        function saveDoorProcessAndStationData() {
+            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
+            doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
+            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+            renderCapacityTable(currentDailyData);
+            alert('บันทึกข้อมูล Door Process & CT เรียบร้อยแล้ว!');
+        }
+
+        function renderSavedDisplayTable() {
+            const tbody = document.getElementById('displaySavedTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!currentProcessData || currentProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูล Work Station</td></tr>`;
+                return;
+            }
+
+            currentProcessData.forEach(item => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center font-bold text-cyan-400">${item.station || '-'}</td>
+                    <td class="p-1.5 text-slate-200">${item.p1 || '-'}${item.p2 ? ' / ' + item.p2 : ''}</td>
+                    <td class="p-1.5 text-center font-semibold text-slate-300">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center text-rose-400">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${ct.toFixed(1)}s</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDoorSavedDisplayTable() {
+            const tbody = document.getElementById('displayDoorSavedTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ไม่มีข้อมูล Work Station สำหรับ Door Part</td></tr>`;
+                return;
+            }
+
+            currentDoorProcessData.forEach(item => {
+                let w1 = parseFloat(item.wt1) || 0;
+                let w2 = parseFloat(item.wt2) || 0;
+                let w3 = parseFloat(item.wt3) || 0;
+                let l = parseFloat(item.loss) || 0;
+                let wtTot = w1 + w2 + w3;
+                let ct = wtTot + l;
+
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                tr.innerHTML = `
+                    <td class="p-1.5 text-center font-bold text-amber-400">${item.station || '-'}</td>
+                    <td class="p-1.5 text-slate-200">${item.p1 || '-'}${item.p2 ? ' / ' + item.p2 : ''}</td>
+                    <td class="p-1.5 text-center font-semibold text-slate-300">${wtTot.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center text-rose-400">${l.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${ct.toFixed(1)}s</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
     </script>
 </body>
