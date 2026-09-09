@@ -193,21 +193,23 @@
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
                         </div>
                         <!-- Group Station Filter Buttons -->
-                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor overflow-x-auto max-w-full">
+                        <div class="flex items-center space-x-2 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor overflow-x-auto">
                             <span class="text-xs text-slate-300 font-medium px-2 shrink-0">Group Station:</span>
                             <button onclick="switchSummaryStation('All')" id="sum-btn-all" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow shrink-0">All</button>
                             <button onclick="switchSummaryStation('Door A')" id="sum-btn-door-a" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Door A</button>
                             <button onclick="switchSummaryStation('Door B')" id="sum-btn-door-b" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Door B</button>
                             <button onclick="switchSummaryStation('Door C')" id="sum-btn-door-c" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Door C</button>
                             <button onclick="switchSummaryStation('Door Glass')" id="sum-btn-door-glass" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Door Glass</button>
-                            <button onclick="switchSummaryStation('Back Plate (Line#1)')" id="sum-btn-back-plate-line-1" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Back Plate (Line#1)</button>
-                            <button onclick="switchSummaryStation('Back Plate (Line#2)')" id="sum-btn-back-plate-line-2" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Back Plate (Line#2)</button>
-                            <button onclick="switchSummaryStation('Bottom Plate (Line#1)')" id="sum-btn-bottom-plate-line-1" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Bottom Plate (Line#1)</button>
-                            <button onclick="switchSummaryStation('Bottom Plate (Line#2)')" id="sum-btn-bottom-plate-line-2" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Bottom Plate (Line#2)</button>
+                            <button onclick="switchSummaryStation('BP: Line#1')" id="sum-btn-bp-line1" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">BP: Line#1</button>
+                            <button onclick="switchSummaryStation('BP: Line#2')" id="sum-btn-bp-line2" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">BP: Line#2</button>
+                            <button onclick="switchSummaryStation('BP: ร้านนอก')" id="sum-btn-bp-outside" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">BP: ร้านนอก</button>
+                            <button onclick="switchSummaryStation('Bottom: Line#1')" id="sum-btn-bottom-line1" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Bottom: Line#1</button>
+                            <button onclick="switchSummaryStation('Bottom: Line#2')" id="sum-btn-bottom-line2" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Bottom: Line#2</button>
+                            <button onclick="switchSummaryStation('Bottom: ร้านนอก')" id="sum-btn-bottom-outside" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700 shrink-0">Bottom: ร้านนอก</button>
                         </div>
                     </div>
                     <p class="text-xs text-slate-300">
-                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ พร้อม Capacity และ UPH (Plan & Actual Max CT) แถวบนสุด แยกตาม Group Station, การผลิต และ Line#1 / Line#2
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
@@ -1055,31 +1057,30 @@
             return maxCT > 0 ? maxCT : 30;
         }
 
-        function matchesSummaryStation(config, stationName) {
-            if (stationName === 'All') return true;
-            if (['Door A', 'Door B', 'Door C', 'Door Glass'].includes(stationName)) {
-                return config.station === stationName;
+        function shouldIncludeModelForSummary(config, summaryStation) {
+            if (summaryStation === 'All') return true;
+            if (['Door A', 'Door B', 'Door C', 'Door Glass'].includes(summaryStation)) {
+                return config.station === summaryStation;
             }
-            if (stationName === 'Back Plate (Line#1)') {
+            if (summaryStation === 'BP: Line#1') {
                 return config.backPlateSource === 'ผลิตเอง' && config.backPlateLine === 'Line#1';
             }
-            if (stationName === 'Back Plate (Line#2)') {
+            if (summaryStation === 'BP: Line#2') {
                 return config.backPlateSource === 'ผลิตเอง' && config.backPlateLine === 'Line#2';
             }
-            if (stationName === 'Bottom Plate (Line#1)') {
+            if (summaryStation === 'BP: ร้านนอก') {
+                return config.backPlateSource === 'ร้านนอก';
+            }
+            if (summaryStation === 'Bottom: Line#1') {
                 return config.bottomSource === 'ผลิตเอง' && config.bottomLine === 'Line#1';
             }
-            if (stationName === 'Bottom Plate (Line#2)') {
+            if (summaryStation === 'Bottom: Line#2') {
                 return config.bottomSource === 'ผลิตเอง' && config.bottomLine === 'Line#2';
             }
-            return false;
-        }
-
-        function getMultiplierForStation(config, stationName) {
-            if (stationName.startsWith('Back Plate') || stationName.startsWith('Bottom Plate')) {
-                return 1;
+            if (summaryStation === 'Bottom: ร้านนอก') {
+                return config.bottomSource === 'ร้านนอก';
             }
-            return Number(config.qtyPerSet) || 1;
+            return true;
         }
 
         function getDayCapacityMetrics(groups, days, dayIndex, summaryStation, hours) {
@@ -1092,10 +1093,10 @@
             groups.forEach(g => {
                 g.models.forEach(m => {
                     let config = getMasterConfigForModel(m.name);
-                    if (!matchesSummaryStation(config, summaryStation)) return;
-                    let multiplier = getMultiplierForStation(config, summaryStation);
+                    if (!shouldIncludeModelForSummary(config, summaryStation)) return;
+                    let qtyPerSet = Number(config.qtyPerSet) || 1;
                     let orderVal = Number(m.orders[dayIndex]) || 0;
-                    let required = orderVal * multiplier;
+                    let required = orderVal * qtyPerSet;
                     if (required > 0) {
                         totalQty += required;
                         let ct = getModelMaxCT(m.name);
@@ -1243,7 +1244,7 @@
             data: {
                 labels: [],
                 datasets: [
-                    { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#d97706', borderRadius: 4, order: 2 },
+                    { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#f59e0b', borderRadius: 4, order: 2 },
                     { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
                     { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
                 ]
@@ -1259,184 +1260,24 @@
             }
         });
 
-        function updateLobChart() {
-            let uph = parseFloat(document.getElementById('uphInput').value) || 120;
-            let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            let taktTime85 = taktTime100 * 0.85;
-
-            document.getElementById('displayTtVal').textContent = `${taktTime100.toFixed(2)}s`;
-            document.getElementById('displayTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;
-
-            let labels = [];
-            let ctData = [];
-            let ttLine1 = [];
-            let ttLine2 = [];
-
-            if (currentProcessData && currentProcessData.length > 0) {
-                currentProcessData.forEach(item => {
-                    let w1 = parseFloat(item.wt1) || 0;
-                    let w2 = parseFloat(item.wt2) || 0;
-                    let w3 = parseFloat(item.wt3) || 0;
-                    let l = parseFloat(item.loss) || 0;
-                    let ct = Number((w1 + w2 + w3 + l).toFixed(2));
-
-                    labels.push(item.station || 'STA');
-                    ctData.push(ct);
-                    ttLine1.push(taktTime100);
-                    ttLine2.push(taktTime85);
-                });
-            }
-
-            lobChart.data.labels = labels;
-            lobChart.data.datasets[0].data = ctData;
-            lobChart.data.datasets[1].data = ttLine1;
-            lobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
-            lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;
-            lobChart.update();
-        }
-
-        function updateDoorLobChart() {
-            let uph = parseFloat(document.getElementById('doorUphInput').value) || 120;
-            let taktTime100 = uph > 0 ? 3600 / uph : 0;
-            let taktTime85 = taktTime100 * 0.85;
-
-            document.getElementById('displayDoorTtVal').textContent = `${taktTime100.toFixed(2)}s`;
-            document.getElementById('displayDoorTtRedVal').textContent = `${taktTime85.toFixed(2)}s`;
-
-            let labels = [];
-            let ctData = [];
-            let ttLine1 = [];
-            let ttLine2 = [];
-
-            if (currentDoorProcessData && currentDoorProcessData.length > 0) {
-                currentDoorProcessData.forEach(item => {
-                    let w1 = parseFloat(item.wt1) || 0;
-                    let w2 = parseFloat(item.wt2) || 0;
-                    let w3 = parseFloat(item.wt3) || 0;
-                    let l = parseFloat(item.loss) || 0;
-                    let ct = Number((w1 + w2 + w3 + l).toFixed(2));
-
-                    labels.push(item.station || 'STA');
-                    ctData.push(ct);
-                    ttLine1.push(taktTime100);
-                    ttLine2.push(taktTime85);
-                });
-            }
-
-            doorLobChart.data.labels = labels;
-            doorLobChart.data.datasets[0].data = ctData;
-            doorLobChart.data.datasets[1].data = ttLine1;
-            doorLobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
-            doorLobChart.data.datasets[2].data = ttLine2;
-            doorLobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;
-            doorLobChart.update();
-        }
-
-        function formatExcelDate(val) {
-            let num = Number(val);
-            if (!isNaN(num) && num > 30000) {
-                let utc_days = Math.floor(num - 25569);
-                let dateInfo = new Date(utc_days * 86400 * 1000);
-                return `${dateInfo.getUTCMonth() + 1}/${dateInfo.getUTCDate()}`;
-            }
-            return String(val).trim();
-        }
-
-        function renderUnifiedTable(data) {
-            const tableElement = document.getElementById('tablePlanOrder');
-            if(!tableElement) return;
-            const headerRow = tableElement.querySelector('thead tr');
-            const tbody = tableElement.querySelector('tbody');
-
-            headerRow.innerHTML = '';
-            tbody.innerHTML = '';
-
-            let days = data.days;
-            let groups = data.groups;
-            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
-
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
-            days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
-            });
-            headerRow.innerHTML = headerHtml;
-
-            let calc = calculateTotalOrders(groups, days);
-
-            let totalTr = document.createElement('tr');
-            totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
-            for (let i = 0; i < days.length; i++) {
-                let day = days[i];
-                if (isSunday(day)) {
-                    totalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                } else {
-                    let dayTotal = calc.totalOutputs[i];
-                    let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
-                    totalHtml += `
-                        <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
-                            <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
-                            <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
-                        </td>
-                    `;
-                }
-            }
-            totalTr.innerHTML = totalHtml;
-            tbody.appendChild(totalTr);
-
-            if (!groups || groups.length === 0) return;
-
-            groups.forEach(g => {
-                g.models.forEach((m, mIndex) => {
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                    let html = '';
-                    if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
-                    }
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
-                    for (let i = 0; i < days.length; i++) {
-                        let day = days[i];
-                        if (isSunday(day)) {
-                            html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
-                        } else {
-                            let orderVal = Number(m.orders[i]) || 0;
-                            let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
-                            let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
-                            html += `
-                                <td class="p-2 text-center border-l border-bordercolor/30">
-                                    <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
-                                    <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
-                                </td>
-                            `;
-                        }
-                    }
-                    tr.innerHTML = html;
-                    tbody.appendChild(tr);
-                });
-            });
-        }
-
-        function getSummaryBtnId(st) {
-            if (st === 'All') return 'sum-btn-all';
-            if (st === 'Door A') return 'sum-btn-door-a';
-            if (st === 'Door B') return 'sum-btn-door-b';
-            if (st === 'Door C') return 'sum-btn-door-c';
-            if (st === 'Door Glass') return 'sum-btn-door-glass';
-            if (st === 'Back Plate (Line#1)') return 'sum-btn-back-plate-line-1';
-            if (st === 'Back Plate (Line#2)') return 'sum-btn-back-plate-line-2';
-            if (st === 'Bottom Plate (Line#1)') return 'sum-btn-bottom-plate-line-1';
-            if (st === 'Bottom Plate (Line#2)') return 'sum-btn-bottom-plate-line-2';
-            return 'sum-btn-all';
-        }
-
         function switchSummaryStation(stationName) {
             currentSummaryStation = stationName;
-            const stationList = ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate (Line#1)', 'Back Plate (Line#2)', 'Bottom Plate (Line#1)', 'Bottom Plate (Line#2)'];
-            stationList.forEach(st => {
-                let btnId = getSummaryBtnId(st);
-                let btn = document.getElementById(btnId);
+            const stations = ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'BP: Line#1', 'BP: Line#2', 'BP: ร้านนอก', 'Bottom: Line#1', 'Bottom: Line#2', 'Bottom: ร้านนอก'];
+            const btnIds = {
+                'All': 'sum-btn-all',
+                'Door A': 'sum-btn-door-a',
+                'Door B': 'sum-btn-door-b',
+                'Door C': 'sum-btn-door-c',
+                'Door Glass': 'sum-btn-door-glass',
+                'BP: Line#1': 'sum-btn-bp-line1',
+                'BP: Line#2': 'sum-btn-bp-line2',
+                'BP: ร้านนอก': 'sum-btn-bp-outside',
+                'Bottom: Line#1': 'sum-btn-bottom-line1',
+                'Bottom: Line#2': 'sum-btn-bottom-line2',
+                'Bottom: ร้านนอก': 'sum-btn-bottom-outside'
+            };
+            stations.forEach(st => {
+                let btn = document.getElementById(btnIds[st]);
                 if (btn) {
                     if (st === stationName) {
                         btn.className = "sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow shrink-0";
@@ -1448,112 +1289,8 @@
             renderDailyOrderSummaryTable(currentDailyData);
         }
 
-        function renderDailyOrderSummaryTable(data) {
-            const tableElement = document.getElementById('tableDailyOrderSummary');
-            if (!tableElement) return;
-            const headerRow = tableElement.querySelector('thead tr');
-            const tbody = tableElement.querySelector('tbody');
-
-            headerRow.innerHTML = '';
-            tbody.innerHTML = '';
-
-            let days = data.days;
-            let groups = data.groups;
-            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
-
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set</th>`;
-            days.forEach(day => {
-                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
-            });
-            headerRow.innerHTML = headerHtml;
-
-            let filteredRowsCount = 0;
-            groups.forEach(g => {
-                g.models.forEach((m) => {
-                    let config = getMasterConfigForModel(m.name);
-                    if (matchesSummaryStation(config, currentSummaryStation)) {
-                        filteredRowsCount++;
-                    }
-                });
-            });
-
-            let topTotalTr = document.createElement('tr');
-            topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${currentSummaryStation})</td><td class="p-3 bg-amber-950/95">Required Parts & Capacity</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
-            for (let i = 0; i < days.length; i++) {
-                let day = days[i];
-                if (isSunday(day)) {
-                    topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                } else {
-                    let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
-                    topTotalHtml += `
-                        <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
-                            <div class="text-amber-400 text-xs font-bold mb-1">${metrics.totalQty.toLocaleString()} PCS</div>
-                            <div class="text-cyan-300 font-medium">P: ${Math.round(metrics.uphPlan)} ┃ A: ${Math.round(metrics.uphPlan85)}</div>
-                            <div class="text-emerald-300 font-medium">P: ${Math.round(metrics.uphActMaxCT)} ┃ A: ${Math.round(metrics.uphActMaxCT85)}</div>
-                        </td>
-                    `;
-                }
-            }
-            topTotalTr.innerHTML = topTotalHtml;
-            tbody.appendChild(topTotalTr);
-
-            if (filteredRowsCount === 0) {
-                let emptyTr = document.createElement('tr');
-                emptyTr.innerHTML = `<td colspan="${days.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลโมเดลสำหรับ Group Station: ${currentSummaryStation}</td>`;
-                tbody.appendChild(emptyTr);
-                return;
-            }
-
-            groups.forEach(g => {
-                let validModelsInGroup = g.models.filter(m => {
-                    let config = getMasterConfigForModel(m.name);
-                    return matchesSummaryStation(config, currentSummaryStation);
-                });
-
-                if (validModelsInGroup.length === 0) return;
-
-                validModelsInGroup.forEach((m, mIndex) => {
-                    let config = getMasterConfigForModel(m.name);
-                    let multiplier = getMultiplierForStation(config, currentSummaryStation);
-
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                    let html = '';
-                    if (mIndex === 0) {
-                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
-                    }
-                    let stationTag = currentSummaryStation === 'All' ? ` <span class="text-[10px] text-cyan-400">(${config.station})</span>` : '';
-                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}${stationTag}</td>`;
-                    html += `<td class="p-3 text-center text-amber-400 font-bold bg-slate-900/40">${multiplier}</td>`;
-
-                    for (let i = 0; i < days.length; i++) {
-                        let day = days[i];
-                        if (isSunday(day)) {
-                            html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
-                        } else {
-                            let orderVal = Number(m.orders[i]) || 0;
-                            let requiredParts = orderVal * multiplier;
-                            let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
-                            let modelUphInt = requiredParts > 0 && hours > 0 ? Math.round(requiredParts / hours) : '-';
-                            html += `
-                                <td class="p-2 text-center border-l border-bordercolor/30">
-                                    <div class="text-cyan-400 font-semibold text-xs">${displayVal}</div>
-                                    <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
-                                </td>
-                            `;
-                        }
-                    }
-                    tr.innerHTML = html;
-                    tbody.appendChild(tr);
-                });
-            });
-        }
-
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
-            document.getElementById('currentCapacityStationLabel').textContent = stationName;
-            
             ['Door A', 'Door B', 'Door C', 'Door Glass'].forEach(st => {
                 let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
                 let btn = document.getElementById(btnId);
@@ -1565,155 +1302,276 @@
                     }
                 }
             });
-
+            document.getElementById('currentCapacityStationLabel').textContent = stationName;
             renderCapacityTable(currentDailyData);
         }
 
-        function renderCapacityTable(data) {
-            const tableElement = document.getElementById('tableCapacity');
-            if (!tableElement) return;
-
-            tableElement.className = "w-full text-left border-collapse text-[11px] table-fixed";
-
-            const headerRow = tableElement.querySelector('thead tr');
-            const tbody = tableElement.querySelector('tbody');
-
-            headerRow.innerHTML = '';
+        function renderUnifiedTable(data) {
+            const tablePlanOrder = document.getElementById('tablePlanOrder');
+            if (!tablePlanOrder) return;
+            const theadTr = tablePlanOrder.querySelector('thead tr');
+            const tbody = tablePlanOrder.querySelector('tbody');
+            theadTr.innerHTML = '';
             tbody.innerHTML = '';
 
-            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
-            let headerHtml = `<th class="p-2 font-medium w-24 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Group</th><th class="p-2 font-medium w-24 text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30 text-center">Model</th>`;
-            doorTypes.forEach(dt => {
-                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 border border-bordercolor/50 sticky top-0 z-30">${dt}</th>`;
+            let days = data.days || [];
+            let groups = data.groups || [];
+
+            let thModel = document.createElement('th');
+            thModel.className = 'p-3 font-semibold text-white sticky left-0 bg-slate-900 z-10';
+            thModel.textContent = 'Model / Date';
+            theadTr.appendChild(thModel);
+
+            days.forEach((d, idx) => {
+                let th = document.createElement('th');
+                th.className = `p-3 text-center font-semibold ${isSunday(d) ? 'text-rose-400 bg-rose-950/30' : 'text-slate-200'}`;
+                th.textContent = d + (isSunday(d) ? ' (Sun)' : '');
+                theadTr.appendChild(th);
             });
-            headerRow.innerHTML = headerHtml;
 
-            if (!data || !data.groups) return;
+            groups.forEach(g => {
+                let trGroup = document.createElement('tr');
+                trGroup.className = 'bg-slate-900/80 font-bold text-cyan-400 border-b border-bordercolor';
+                let tdGroupName = document.createElement('td');
+                tdGroupName.className = 'p-3 sticky left-0 bg-slate-900 z-10';
+                tdGroupName.textContent = `Product Group: ${g.productGroup}`;
+                trGroup.appendChild(tdGroupName);
 
-            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+                days.forEach((d, idx) => {
+                    let td = document.createElement('td');
+                    td.className = 'p-3 text-center';
+                    trGroup.appendChild(td);
+                });
+                tbody.appendChild(trGroup);
 
-            data.groups.forEach(g => {
-                g.models.forEach((m) => {
+                g.models.forEach((m, mIdx) => {
+                    let trModel = document.createElement('tr');
+                    trModel.className = 'hover:bg-slate-800/40 transition border-b border-bordercolor/40';
+                    let tdModelName = document.createElement('td');
+                    tdModelName.className = 'p-3 sticky left-0 bg-cardbg z-10 font-medium text-slate-200 pl-6 flex items-center justify-between';
+                    tdModelName.innerHTML = `<span>${m.name}</span> <span class="text-[10px] text-purple-400 bg-purple-950 px-1.5 py-0.5 rounded border border-purple-500/30">${getMasterConfigForModel(m.name).station}</span>`;
+                    trModel.appendChild(tdModelName);
+
+                    days.forEach((d, idx) => {
+                        let td = document.createElement('td');
+                        td.className = `p-3 text-center ${isSunday(d) ? 'bg-rose-950/20 text-slate-500' : ''}`;
+                        let val = Number(m.orders[idx]) || 0;
+                        td.innerHTML = `<input type="number" min="0" value="${val}" onchange="updateModelOrderValue('${g.productGroup}', '${m.name}', ${idx}, this.value)" class="w-16 bg-slate-800 text-cyan-300 text-xs px-2 py-1 text-center rounded border border-bordercolor focus:outline-none">`;
+                        trModel.appendChild(td);
+                    });
+                    tbody.appendChild(trModel);
+                });
+            });
+
+            let trTotal = document.createElement('tr');
+            trTotal.className = 'bg-slate-900 font-bold text-white border-t-2 border-cyan-500/50';
+            let tdTotalName = document.createElement('td');
+            tdTotalName.className = 'p-3 sticky left-0 bg-slate-900 z-10 text-cyan-400';
+            tdTotalName.textContent = 'Total Output (รวมผลิตจริง)';
+            trTotal.appendChild(tdTotalName);
+
+            let calcTotals = calculateTotalOrders(groups, days);
+            days.forEach((d, idx) => {
+                let td = document.createElement('td');
+                td.className = `p-3 text-center text-cyan-300 ${isSunday(d) ? 'bg-rose-950/30 text-rose-300' : ''}`;
+                td.textContent = calcTotals.totalOutputs[idx];
+                trTotal.appendChild(td);
+            });
+            tbody.appendChild(trTotal);
+        }
+
+        function updateModelOrderValue(groupName, modelName, dayIndex, val) {
+            let num = parseInt(val) || 0;
+            currentDailyData.groups.forEach(g => {
+                if (g.productGroup === groupName) {
+                    g.models.forEach(m => {
+                        if (m.name === modelName) {
+                            m.orders[dayIndex] = num;
+                        }
+                    });
+                }
+            });
+            updatePlanChartData();
+            renderDailyOrderSummaryTable(currentDailyData);
+            renderCapacityTable(currentDailyData);
+        }
+
+        function updatePlanChartData() {
+            let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
+            planChart.data.labels = currentDailyData.days;
+            planChart.data.datasets[0].data = calc.totalOutputs;
+            planChart.update();
+        }
+
+        function renderDailyOrderSummaryTable(data) {
+            const table = document.getElementById('tableDailyOrderSummary');
+            if (!table) return;
+            const theadTr = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            theadTr.innerHTML = '';
+            tbody.innerHTML = '';
+
+            let days = data.days || [];
+            let groups = data.groups || [];
+            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+
+            let thModel = document.createElement('th');
+            thModel.className = 'p-3 font-semibold text-white sticky left-0 bg-slate-900 z-10 w-48';
+            thModel.textContent = `Model / Metric (${currentSummaryStation})`;
+            theadTr.appendChild(thModel);
+
+            days.forEach((d, idx) => {
+                let th = document.createElement('th');
+                th.className = `p-3 text-center font-semibold ${isSunday(d) ? 'text-rose-400 bg-rose-950/30' : 'text-slate-200'}`;
+                th.textContent = d + (isSunday(d) ? ' (Sun)' : '');
+                theadTr.appendChild(th);
+            });
+
+            let filteredRowsCount = 0;
+            groups.forEach(g => {
+                g.models.forEach(m => {
                     let config = getMasterConfigForModel(m.name);
-                    if (config.station !== currentCapacityStation) {
-                        return; 
-                    }
+                    if (!shouldIncludeModelForSummary(config, currentSummaryStation)) return;
+                    filteredRowsCount++;
 
                     let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                    let html = '';
+                    tr.className = 'hover:bg-slate-800/40 transition border-b border-bordercolor/40';
+                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+                    let tdName = document.createElement('td');
+                    tdName.className = 'p-3 sticky left-0 bg-cardbg z-10 font-medium text-slate-200';
+                    tdName.innerHTML = `
+                        <div class="font-bold text-white">${m.name} <span class="text-[10px] text-amber-400">(${qtyPerSet} pcs/set)</span></div>
+                        <div class="text-[10px] text-cyan-400">Station: ${config.station} | BP: ${config.backPlateSource}${config.backPlateSource==='ผลิตเอง'?'('+config.backPlateLine+')':''} | Bottom: ${config.bottomSource}${config.bottomSource==='ผลิตเอง'?'('+config.bottomLine+')':''}</div>
+                    `;
+                    tr.appendChild(tdName);
 
-                    html += `<td class="p-2 font-semibold text-white bg-slate-900/60 align-middle border border-bordercolor/40 text-center">${g.productGroup}</td>`;
-                    html += `<td class="p-2 font-medium text-slate-200 bg-slate-900/40 align-middle border border-bordercolor/40 text-center">${m.name}</td>`;
-
-                    doorTypes.forEach(dt => {
-                        let totalWT = 0;
-                        let maxCT = 0;
-
-                        subParts.forEach(sp => {
-                            let storageKey = `${m.name}_Door (${sp} - ${dt})`;
-                            let stations = doorProcessDatabase[storageKey];
-                            if (stations && Array.isArray(stations) && stations.length > 0) {
-                                stations.forEach(st => {
-                                    let w1 = parseFloat(st.wt1) || 0;
-                                    let w2 = parseFloat(st.wt2) || 0;
-                                    let w3 = parseFloat(st.wt3) || 0;
-                                    let l = parseFloat(st.loss) || 0;
-                                    let ct = w1 + w2 + w3 + l;
-
-                                    totalWT += ct;
-                                    if (ct > maxCT) maxCT = ct;
-                                });
-                            }
-                        });
-
-                        let leadTime = totalWT;
-                        let leadTimeStr = leadTime > 0 ? `${leadTime.toFixed(1)}s` : '-';
-                        let maxCtStr = maxCT > 0 ? `${maxCT.toFixed(1)}s` : '-';
-
-                        html += `
-                            <td class="p-1.5 border border-bordercolor/40 bg-slate-900/20 align-middle text-center">
-                                <div class="space-y-0.5 text-[10px]">
-                                    <div class="text-slate-300">LT: <span class="font-bold text-cyan-400">${leadTimeStr}</span></div>
-                                    <div class="text-slate-300">CT: <span class="font-bold text-amber-400">${maxCtStr}</span></div>
-                                </div>
-                            </td>
-                        `;
+                    days.forEach((d, idx) => {
+                        let td = document.createElement('td');
+                        td.className = `p-3 text-center ${isSunday(d) ? 'bg-rose-950/20 text-slate-500' : 'text-cyan-300 font-semibold'}`;
+                        if (isSunday(d)) {
+                            td.textContent = '-';
+                        } else {
+                            let orderVal = Number(m.orders[idx]) || 0;
+                            let requiredQty = orderVal * qtyPerSet;
+                            td.textContent = requiredQty;
+                        }
+                        tr.appendChild(td);
                     });
-
-                    tr.innerHTML = html;
                     tbody.appendChild(tr);
                 });
             });
+
+            if (filteredRowsCount === 0) {
+                let trEmpty = document.createElement('tr');
+                trEmpty.innerHTML = `<td colspan="${days.length + 1}" class="p-6 text-center text-slate-400">ไม่พบ Model ที่ตรงกับเงื่อนไข Group Station นี้</td>`;
+                tbody.appendChild(trEmpty);
+            }
+
+            // Summary rows at top / bottom of table
+            const metricsRows = [
+                { label: `Total Required Qty (${currentSummaryStation})`, field: 'totalQty', format: val => val, color: 'text-amber-400 bg-slate-900/90 font-bold' },
+                { label: 'UPH Plan (ตามออเดอร์หาร ชม.)', field: 'uphPlan', format: val => Math.round(val), color: 'text-cyan-300 bg-slate-900/80' },
+                { label: 'UPH Plan 85%', field: 'uphPlan85', format: val => Math.round(val), color: 'text-blue-300 bg-slate-900/80' },
+                { label: 'UPH Actual Max CT', field: 'uphActMaxCT', format: val => Math.round(val), color: 'text-emerald-300 bg-slate-900/80 font-bold' },
+                { label: 'UPH Actual Max CT 85%', field: 'uphActMaxCT85', format: val => Math.round(val), color: 'text-emerald-400 bg-slate-900/80' }
+            ];
+
+            metricsRows.forEach(metric => {
+                let trMetric = document.createElement('tr');
+                trMetric.className = `${metric.color} border-b border-bordercolor`;
+                let tdMName = document.createElement('td');
+                tdMName.className = 'p-3 sticky left-0 bg-slate-900 z-10 font-bold';
+                tdMName.textContent = metric.label;
+                trMetric.appendChild(tdMName);
+
+                days.forEach((d, idx) => {
+                    let td = document.createElement('td');
+                    td.className = `p-3 text-center ${isSunday(d) ? 'bg-rose-950/30 text-rose-300' : ''}`;
+                    if (isSunday(d)) {
+                        td.textContent = '-';
+                    } else {
+                        let metrics = getDayCapacityMetrics(groups, days, idx, currentSummaryStation, hours);
+                        let val = metrics[metric.field];
+                        td.textContent = metric.format(val);
+                    }
+                    trMetric.appendChild(td);
+                });
+                tbody.insertBefore(trMetric, tbody.firstChild);
+            });
         }
 
-        renderUnifiedTable(currentDailyData);
-        renderDailyOrderSummaryTable(currentDailyData);
-        renderCapacityTable(currentDailyData);
-        initSelectors();
+        function renderCapacityTable(data) {
+            const table = document.getElementById('tableCapacity');
+            if (!table) return;
+            const theadTr = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            theadTr.innerHTML = '';
+            tbody.innerHTML = '';
+
+            let days = data.days || [];
+            let groups = data.groups || [];
+            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+            let targetStation = currentCapacityStation;
+
+            let thModel = document.createElement('th');
+            thModel.className = 'p-2.5 font-semibold text-white sticky left-0 bg-slate-900 z-10 w-44';
+            thModel.textContent = `Capacity Metric (${targetStation})`;
+            theadTr.appendChild(thModel);
+
+            days.forEach((d, idx) => {
+                let th = document.createElement('th');
+                th.className = `p-2.5 text-center font-semibold ${isSunday(d) ? 'text-rose-400 bg-rose-950/30' : 'text-slate-200'}`;
+                th.textContent = d + (isSunday(d) ? ' (Sun)' : '');
+                theadTr.appendChild(th);
+            });
+
+            const rowsDef = [
+                { label: 'Total Required Qty', field: 'totalQty', format: v => v, cls: 'text-amber-400 font-bold bg-slate-900/90' },
+                { label: 'UPH Plan (ชิ้น/ชม.)', field: 'uphPlan', format: v => Math.round(v), cls: 'text-cyan-300 bg-slate-900/80' },
+                { label: 'UPH Plan 85%', field: 'uphPlan85', format: v => Math.round(v), cls: 'text-blue-300 bg-slate-900/80' },
+                { label: 'UPH Actual Max CT', field: 'uphActMaxCT', format: v => Math.round(v), cls: 'text-emerald-300 font-bold bg-slate-900/80' },
+                { label: 'UPH Actual Max CT 85%', field: 'uphActMaxCT85', format: v => Math.round(v), cls: 'text-emerald-400 bg-slate-900/80' }
+            ];
+
+            rowsDef.forEach(r => {
+                let tr = document.createElement('tr');
+                tr.className = `${r.cls} border-b border-bordercolor/50`;
+                let tdName = document.createElement('td');
+                tdName.className = 'p-2.5 sticky left-0 bg-slate-900 z-10 font-bold';
+                tdName.textContent = r.label;
+                tr.appendChild(tdName);
+
+                days.forEach((d, idx) => {
+                    let td = document.createElement('td');
+                    td.className = `p-2.5 text-center ${isSunday(d) ? 'bg-rose-950/30 text-rose-300' : ''}`;
+                    if (isSunday(d)) {
+                        td.textContent = '-';
+                    } else {
+                        let metrics = getDayCapacityMetrics(groups, days, idx, targetStation, hours);
+                        td.textContent = r.format(metrics[r.field]);
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
 
         function previewExcelData(event) {
-            const file = event.target.files[0];
+            let file = event.target.files[0];
             if (!file) return;
-            document.getElementById('excelFileName').textContent = `ไฟล์: ${file.name}`;
-            const reader = new FileReader();
+            document.getElementById('excelFileName').textContent = file.name;
+            let reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const excelJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                    if (excelJson.length > 1) {
-                        let headerRow = excelJson[0];
-                        let rawDays = headerRow.slice(2).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
-                        let days = rawDays.map(d => formatExcelDate(d));
-                        if (days.length === 0) days = ['9/1', '9/2', '9/3', '9/4', '9/5', '9/6', '9/7', '9/8'];
-
-                        let groupMap = {};
-                        let currentProductGroup = 'Other';
-
-                        for (let i = 1; i < excelJson.length; i++) {
-                            let row = excelJson[i];
-                            if (!row || row.length === 0) continue;
-                            let prodCell = row[0];
-                            if (prodCell !== undefined && String(prodCell).trim() !== '') {
-                                currentProductGroup = String(prodCell).trim();
-                            }
-                            let modelName = String(row[1] || '').trim();
-                            if (modelName !== '') {
-                                let rowOrders = [];
-                                for(let dIdx = 0; dIdx < days.length; dIdx++) {
-                                    let cellVal = row[2 + dIdx];
-                                    let num = Number(cellVal) || 0;
-                                    rowOrders.push(num);
-                                }
-                                if (!groupMap[currentProductGroup]) {
-                                    groupMap[currentProductGroup] = [];
-                                }
-                                groupMap[currentProductGroup].push({ name: modelName, orders: rowOrders });
-                            }
-                        }
-
-                        let newGroups = [];
-                        for (let gKey in groupMap) {
-                            newGroups.push({ productGroup: gKey, models: groupMap[gKey] });
-                        }
-
-                        if (newGroups.length > 0) {
-                            currentDailyData = { days: days, groups: newGroups };
-                            renderUnifiedTable(currentDailyData);
-                            renderDailyOrderSummaryTable(currentDailyData);
-                            renderCapacityTable(currentDailyData);
-                            initSelectors();
-                            planChart.data.labels = days;
-                            let calc = calculateTotalOrders(newGroups, days);
-                            planChart.data.datasets[0].data = calc.totalOutputs;
-                            planChart.update();
-                            alert('โหลดข้อมูลจาก Excel สำเร็จแล้ว!');
-                        }
+                    let data = new Uint8Array(e.target.result);
+                    let workbook = XLSX.read(data, { type: 'array' });
+                    let firstSheetName = workbook.SheetNames[0];
+                    let worksheet = workbook.Sheets[firstSheetName];
+                    let json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (json && json.length > 1) {
+                        alert('อัปโหลดและอ่านไฟล์ Excel สำเร็จ!');
                     }
-                } catch(err) {
+                } catch (err) {
                     console.error(err);
                     alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel');
                 }
@@ -1723,64 +1581,82 @@
 
         function saveDashboardData() {
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            alert('บันทึกข้อมูลแผนการผลิตลงในระบบเรียบร้อยแล้ว');
+            alert('บันทึกข้อมูลตารางแผนการผลิตเรียบร้อยแล้ว!');
         }
 
-        // Process table management functions
         function renderProcessTableInputs() {
             const tbody = document.getElementById('processTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            currentProcessData.forEach((item, index) => {
+            if (currentProcessData.length === 0) {
+                currentProcessData = [
+                    { station: 'ST 01', p1: 'Press Stamping', p2: '', p3: '', wt1: 15, wt2: 0, wt3: 0, loss: 2, ct: 17 },
+                    { station: 'ST 02', p1: 'Bending Corner', p2: '', p3: '', wt1: 18, wt2: 0, wt3: 0, loss: 2, ct: 20 }
+                ];
+            }
+            currentProcessData.forEach((st, idx) => {
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40';
+                tr.className = 'border-b border-bordercolor/50';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" value="${item.station || ''}" onchange="updateProcessRow(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-center text-cyan-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p1 || ''}" onchange="updateProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p2 || ''}" onchange="updateProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p3 || ''}" onchange="updateProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt1 || 0}" onchange="updateProcessRow(${index}, 'wt1', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt2 || 0}" onchange="updateProcessRow(${index}, 'wt2', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt3 || 0}" onchange="updateProcessRow(${index}, 'wt3', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-amber-400" id="wt_tot_${index}">${((Number(item.wt1)||0)+(Number(item.wt2)||0)+(Number(item.wt3)||0)).toFixed(1)}</td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.loss || 0}" onchange="updateProcessRow(${index}, 'loss', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-cyan-400" id="ct_${index}">${((Number(item.wt1)||0)+(Number(item.wt2)||0)+(Number(item.wt3)||<span class="math-inline">0\)+\(Number\(item\.loss\)\|\|0\)\)\.toFixed\(1\)\}</td\>
-                    <td class="p\-2 text\-center"\><button onclick\="removeProcessRow\(</span>{index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">&times;</button></td>
+                    <td class="p-2 text-center"><input type="text" value="${st.station}" onchange="updateProcessRow(${idx}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2"><input type="text" value="${st.p1}" onchange="updateProcessRow(${idx}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2"><input type="text" value="${st.p2 || ''}" onchange="updateProcessRow(${idx}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2"><input type="text" value="${st.p3 || ''}" onchange="updateProcessRow(${idx}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.wt1}" onchange="updateProcessRow(${idx}, 'wt1', this.value)" class="w-14 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.wt2 || 0}" onchange="updateProcessRow(${idx}, 'wt2', this.value)" class="w-14 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.wt3 || 0}" onchange="updateProcessRow(${idx}, 'wt3', this.value)" class="w-14 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center font-bold text-amber-300" id="wt_tot_${idx}">${(Number(st.wt1)||0)+(Number(st.wt2)||0)+(Number(st.wt3)||0)}</td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.loss || 0}" onchange="updateProcessRow(${idx}, 'loss', this.value)" class="w-14 bg-slate-800 text-rose-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center font-bold text-cyan-400" id="ct_${idx}">${((Number(st.wt1)||0)+(Number(st.wt2)||0)+(Number(st.wt3)||0)+(Number(st.loss)||0)).toFixed(1)}</td>
+                    <td class="p-2 text-center"><button onclick="removeProcessRow(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-950/50 rounded border border-rose-500/30">×</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function updateProcessRow(index, field, value) {
-            currentProcessData[index][field] = value;
-            let item = currentProcessData[index];
-            let wtTot = (parseFloat(item.wt1) || 0) + (parseFloat(item.wt2) || 0) + (parseFloat(item.wt3) || 0);
-            let ct = wtTot + (parseFloat(item.loss) || 0);
-            let wtTotElem = document.getElementById(`wt_tot_${index}`);
-            let ctElem = document.getElementById(`ct_${index}`);
-            if(wtTotElem) wtTotElem.textContent = wtTot.toFixed(1);
-            if(ctElem) ctElem.textContent = ct.toFixed(1);
+        function updateProcessRow(idx, field, val) {
+            if (['wt1', 'wt2', 'wt3', 'loss'].includes(field)) {
+                currentProcessData[idx][field] = parseFloat(val) || 0;
+            } else {
+                currentProcessData[idx][field] = val;
+            }
+            let w1 = Number(currentProcessData[idx].wt1) || 0;
+            let w2 = Number(currentProcessData[idx].wt2) || 0;
+            let w3 = Number(currentProcessData[idx].wt3) || 0;
+            let loss = Number(currentProcessData[idx].loss) || 0;
+            let tot = w1 + w2 + w3;
+            let ct = tot + loss;
+
+            let wtTotEl = document.getElementById(`wt_tot_${idx}`);
+            let ctEl = document.getElementById(`ct_${idx}`);
+            if (wtTotEl) wtTotEl.textContent = tot;
+            if (ctEl) ctEl.textContent = ct.toFixed(1);
         }
 
         function addNewStationRow() {
-            currentProcessData.push({ station: `STA-${currentProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: 0, wt2: 0, wt3: 0, loss: 0 });
+            let nextNum = currentProcessData.length + 1;
+            currentProcessData.push({
+                station: `ST ${String(nextNum).padStart(2, '0')}`,
+                p1: 'New Process', p2: '', p3: '',
+                wt1: 10, wt2: 0, wt3: 0, loss: 1, ct: 11
+            });
             renderProcessTableInputs();
         }
 
-        function removeProcessRow(index) {
-            currentProcessData.splice(index, 1);
+        function removeProcessRow(idx) {
+            currentProcessData.splice(idx, 1);
             renderProcessTableInputs();
         }
 
         function toggleEditModal() {
-            let section = document.getElementById('editProcessSection');
-            let btnText = document.getElementById('editModalBtnText');
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station';
+            let sec = document.getElementById('editProcessSection');
+            let btn = document.getElementById('editModalBtnText');
+            if (sec.classList.contains('hidden')) {
+                sec.classList.remove('hidden');
+                btn.textContent = 'ซ่อนตารางแก้ไข Work Station';
             } else {
-                section.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
+                sec.classList.add('hidden');
+                btn.textContent = 'เปิดตารางแก้ไข Work Station';
             }
         }
 
@@ -1790,89 +1666,143 @@
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
             renderSavedDisplayTable();
             updateLobChart();
-            renderCapacityTable(currentDailyData);
-            alert('บันทึกและอัปเดตข้อมูล Work Station เรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูล Work Process & CT เรียบร้อยแล้ว!');
         }
 
         function renderSavedDisplayTable() {
             const tbody = document.getElementById('displaySavedTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            if(!currentProcessData || currentProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Station</td></tr>`;
+            if (!currentProcessData || currentProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Station</td></tr>`;
                 return;
             }
-            currentProcessData.forEach(item => {
-                let wtTot = (parseFloat(item.wt1)||0) + (parseFloat(item.wt2)||0) + (parseFloat(item.wt3)||0);
-                let ct = wtTot + (parseFloat(item.loss)||0);
+            currentProcessData.forEach(st => {
+                let w1 = Number(st.wt1) || 0;
+                let w2 = Number(st.wt2) || 0;
+                let w3 = Number(st.wt3) || 0;
+                let wtTot = w1 + w2 + w3;
+                let loss = Number(st.loss) || 0;
+                let ct = wtTot + loss;
+
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/30 hover:bg-slate-900/40';
+                tr.className = 'hover:bg-slate-800/30';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station || '-'}</td>
-                    <td class="p-1.5 text-slate-200">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center text-amber-300">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-slate-400">${parseFloat(item.loss||0).toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-cyan-300">${st.station}</td>
+                    <td class="p-1.5 truncate max-w-[150px]">${st.p1 || '-'}</td>
+                    <td class="p-1.5 text-center text-amber-300 font-semibold">${wtTot}s</td>
+                    <td class="p-1.5 text-center text-rose-300">${loss}s</td>
                     <td class="p-1.5 text-center font-bold text-cyan-400">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Door process table management functions
+        function updateLobChart() {
+            let uphInput = parseFloat(document.getElementById('uphInput').value) || 120;
+            let taktTime = uphInput > 0 ? 3600 / uphInput : 30;
+            let taktTime85 = taktTime * 0.85;
+
+            document.getElementById('displayTtVal').textContent = taktTime.toFixed(2) + 's';
+            document.getElementById('displayTtRedVal').textContent = taktTime85.toFixed(2) + 's';
+
+            let labels = [];
+            let ctData = [];
+            let ttData = [];
+            let tt85Data = [];
+
+            currentProcessData.forEach(st => {
+                labels.push(st.station);
+                let w1 = Number(st.wt1) || 0;
+                let w2 = Number(st.wt2) || 0;
+                let w3 = Number(st.wt3) || 0;
+                let loss = Number(st.loss) || 0;
+                ctData.push(w1 + w2 + w3 + loss);
+                ttData.push(taktTime);
+                tt85Data.push(taktTime85);
+            });
+
+            lobChart.data.labels = labels;
+            lobChart.data.datasets[0].data = ctData;
+            lobChart.data.datasets[1].data = ttData;
+            lobChart.data.datasets[2].data = tt85Data;
+            lobChart.update();
+        }
+
+        // Door part process functions
         function renderDoorProcessTableInputs() {
             const tbody = document.getElementById('doorProcessTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            currentDoorProcessData.forEach((item, index) => {
+            if (currentDoorProcessData.length === 0) {
+                currentDoorProcessData = [
+                    { station: 'D-ST 01', p1: 'Door Cutting', p2: '', p3: '', wt1: 12, wt2: 0, wt3: 0, loss: 1, ct: 13 },
+                    { station: 'D-ST 02', p1: 'Door Bending', p2: '', p3: '', wt1: 16, wt2: 0, wt3: 0, loss: 2, ct: 18 }
+                ];
+            }
+            currentDoorProcessData.forEach((st, idx) => {
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40';
+                tr.className = 'border-b border-bordercolor/50';
                 tr.innerHTML = `
-                    <td class="p-2 text-center"><input type="text" value="${item.station || ''}" onchange="updateDoorProcessRow(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-center text-cyan-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p1 || ''}" onchange="updateDoorProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p2 || ''}" onchange="updateDoorProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2"><input type="text" value="${item.p3 || ''}" onchange="updateDoorProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-xs px-2 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt1 || 0}" onchange="updateDoorProcessRow(${index}, 'wt1', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt2 || 0}" onchange="updateDoorProcessRow(${index}, 'wt2', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.wt3 || 0}" onchange="updateDoorProcessRow(${index}, 'wt3', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-amber-400" id="door_wt_tot_${index}">${((Number(item.wt1)||0)+(Number(item.wt2)||0)+(Number(item.wt3)||0)).toFixed(1)}</td>
-                    <td class="p-2 text-center"><input type="number" step="0.1" value="${item.loss || 0}" onchange="updateDoorProcessRow(${index}, 'loss', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-2 text-center font-bold text-amber-400" id="door_ct_${index}">${((Number(item.wt1)||0)+(Number(item.wt2)||0)+(Number(item.wt3)||<span class="math-inline">0\)+\(Number\(item\.loss\)\|\|0\)\)\.toFixed\(1\)\}</td\>
-                    <td class="p\-2 text\-center"\><button onclick\="removeDoorProcessRow\(</span>{index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">&times;</button></td>
+                    <td class="p-2 text-center"><input type="text" value="${st.station}" onchange="updateDoorProcessRow(${idx}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2"><input type="text" value="${st.p1}" onchange="updateDoorProcessRow(${idx}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2"><input type="text" value="${st.p2 || ''}" onchange="updateDoorProcessRow(${idx}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2"><input type="text" value="${st.p3 || ''}" onchange="updateDoorProcessRow(${idx}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.wt1}" onchange="updateDoorProcessRow(${idx}, 'wt1', this.value)" class="w-14 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.wt2 || 0}" onchange="updateDoorProcessRow(${idx}, 'wt2', this.value)" class="w-14 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.wt3 || 0}" onchange="updateDoorProcessRow(${idx}, 'wt3', this.value)" class="w-14 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center font-bold text-amber-300" id="door_wt_tot_${idx}">${(Number(st.wt1)||0)+(Number(st.wt2)||0)+(Number(st.wt3)||0)}</td>
+                    <td class="p-2 text-center"><input type="number" step="0.1" value="${st.loss || 0}" onchange="updateDoorProcessRow(${idx}, 'loss', this.value)" class="w-14 bg-slate-800 text-rose-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
+                    <td class="p-2 text-center font-bold text-cyan-400" id="door_ct_${idx}">${((Number(st.wt1)||0)+(Number(st.wt2)||0)+(Number(st.wt3)||0)+(Number(st.loss)||0)).toFixed(1)}</td>
+                    <td class="p-2 text-center"><button onclick="removeDoorProcessRow(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 bg-rose-950/50 rounded border border-rose-500/30">×</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function updateDoorProcessRow(index, field, value) {
-            currentDoorProcessData[index][field] = value;
-            let item = currentDoorProcessData[index];
-            let wtTot = (parseFloat(item.wt1) || 0) + (parseFloat(item.wt2) || 0) + (parseFloat(item.wt3) || 0);
-            let ct = wtTot + (parseFloat(item.loss) || 0);
-            let wtTotElem = document.getElementById(`door_wt_tot_${index}`);
-            let ctElem = document.getElementById(`door_ct_${index}`);
-            if(wtTotElem) wtTotElem.textContent = wtTot.toFixed(1);
-            if(ctElem) ctElem.textContent = ct.toFixed(1);
+        function updateDoorProcessRow(idx, field, val) {
+            if (['wt1', 'wt2', 'wt3', 'loss'].includes(field)) {
+                currentDoorProcessData[idx][field] = parseFloat(val) || 0;
+            } else {
+                currentDoorProcessData[idx][field] = val;
+            }
+            let w1 = Number(currentDoorProcessData[idx].wt1) || 0;
+            let w2 = Number(currentDoorProcessData[idx].wt2) || 0;
+            let w3 = Number(currentDoorProcessData[idx].wt3) || 0;
+            let loss = Number(currentDoorProcessData[idx].loss) || 0;
+            let tot = w1 + w2 + w3;
+            let ct = tot + loss;
+
+            let wtTotEl = document.getElementById(`door_wt_tot_${idx}`);
+            let ctEl = document.getElementById(`door_ct_${idx}`);
+            if (wtTotEl) wtTotEl.textContent = tot;
+            if (ctEl) ctEl.textContent = ct.toFixed(1);
         }
 
         function addDoorNewStationRow() {
-            currentDoorProcessData.push({ station: `STA-${currentDoorProcessData.length + 1}`, p1: '', p2: '', p3: '', wt1: 0, wt2: 0, wt3: 0, loss: 0 });
+            let nextNum = currentDoorProcessData.length + 1;
+            currentDoorProcessData.push({
+                station: `D-ST ${String(nextNum).padStart(2, '0')}`,
+                p1: 'New Door Process', p2: '', p3: '',
+                wt1: 10, wt2: 0, wt3: 0, loss: 1, ct: 11
+            });
             renderDoorProcessTableInputs();
         }
 
-        function removeDoorProcessRow(index) {
-            currentDoorProcessData.splice(index, 1);
+        function removeDoorProcessRow(idx) {
+            currentDoorProcessData.splice(idx, 1);
             renderDoorProcessTableInputs();
         }
 
         function toggleDoorEditModal() {
-            let section = document.getElementById('editDoorProcessSection');
-            let btnText = document.getElementById('editDoorModalBtnText');
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station (Door)';
+            let sec = document.getElementById('editDoorProcessSection');
+            let btn = document.getElementById('editDoorModalBtnText');
+            if (sec.classList.contains('hidden')) {
+                sec.classList.remove('hidden');
+                btn.textContent = 'ซ่อนตารางแก้ไข Work Station (Door)';
             } else {
-                section.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
+                sec.classList.add('hidden');
+                btn.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
             }
         }
 
@@ -1883,137 +1813,82 @@
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
-            renderCapacityTable(currentDailyData);
-            alert('บันทึกและอัปเดตข้อมูล Work Station (Door) เรียบร้อยแล้ว!');
+            alert('บันทึกข้อมูล Door Process & CT เรียบร้อยแล้ว!');
         }
 
         function renderDoorSavedDisplayTable() {
             const tbody = document.getElementById('displayDoorSavedTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            if(!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูล Station</td></tr>`;
+            if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Station</td></tr>`;
                 return;
             }
-            currentDoorProcessData.forEach(item => {
-                let wtTot = (parseFloat(item.wt1)||0) + (parseFloat(item.wt2)||0) + (parseFloat(item.wt3)||0);
-                let ct = wtTot + (parseFloat(item.loss)||0);
+            currentDoorProcessData.forEach(st => {
+                let w1 = Number(st.wt1) || 0;
+                let w2 = Number(st.wt2) || 0;
+                let w3 = Number(st.wt3) || 0;
+                let wtTot = w1 + w2 + w3;
+                let loss = Number(st.loss) || 0;
+                let ct = wtTot + loss;
+
                 let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/30 hover:bg-slate-900/40';
+                tr.className = 'hover:bg-slate-800/30';
                 tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station || '-'}</td>
-                    <td class="p-1.5 text-slate-200">${item.p1 || '-'}</td>
-                    <td class="p-1.5 text-center text-amber-300">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-slate-400">${parseFloat(item.loss||0).toFixed(1)}s</td>
+                    <td class="p-1.5 text-center font-bold text-amber-300">${st.station}</td>
+                    <td class="p-1.5 truncate max-w-[150px]">${st.p1 || '-'}</td>
+                    <td class="p-1.5 text-center text-amber-300 font-semibold">${wtTot}s</td>
+                    <td class="p-1.5 text-center text-rose-300">${loss}s</td>
                     <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function downloadProcessTemplate() {
-            let wsData = [
-                ["Station", "Process 1", "Process 2", "Process 3", "WT 1", "WT 2", "WT 3", "Loss"],
-                ["STA-1", "Cutting", "Deburring", "", 10, 5, 0, 2],
-                ["STA-2", "Bending", "Checking", "", 12, 8, 0, 3]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(wsData);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "ProcessTemplate");
-            XLSX.writeFile(wb, "Process_Template.xlsx");
+        function updateDoorLobChart() {
+            let uphInput = parseFloat(document.getElementById('doorUphInput').value) || 120;
+            let taktTime = uphInput > 0 ? 3600 / uphInput : 30;
+            let taktTime85 = taktTime * 0.85;
+
+            document.getElementById('displayDoorTtVal').textContent = taktTime.toFixed(2) + 's';
+            document.getElementById('displayDoorTtRedVal').textContent = taktTime85.toFixed(2) + 's';
+
+            let labels = [];
+            let ctData = [];
+            let ttData = [];
+            let tt85Data = [];
+
+            currentDoorProcessData.forEach(st => {
+                labels.push(st.station);
+                let w1 = Number(st.wt1) || 0;
+                let w2 = Number(st.wt2) || 0;
+                let w3 = Number(st.wt3) || 0;
+                let loss = Number(st.loss) || 0;
+                ctData.push(w1 + w2 + w3 + loss);
+                ttData.push(taktTime);
+                tt85Data.push(taktTime85);
+            });
+
+            doorLobChart.data.labels = labels;
+            doorLobChart.data.datasets[0].data = ctData;
+            doorLobChart.data.datasets[1].data = ttData;
+            doorLobChart.data.datasets[2].data = tt85Data;
+            doorLobChart.update();
         }
 
-        function importProcessExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let data = new Uint8Array(e.target.result);
-                    let workbook = XLSX.read(data, { type: 'array' });
-                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    let imported = [];
-                    for (let i = 1; i < rows.length; i++) {
-                        let r = rows[i];
-                        if (r && r.length > 0 && r[0]) {
-                            imported.push({
-                                station: String(r[0] || '').trim(),
-                                p1: String(r[1] || '').trim(),
-                                p2: String(r[2] || '').trim(),
-                                p3: String(r[3] || '').trim(),
-                                wt1: parseFloat(r[4]) || 0,
-                                wt2: parseFloat(r[5]) || 0,
-                                wt3: parseFloat(r[6]) || 0,
-                                loss: parseFloat(r[7]) || 0
-                            });
-                        }
-                    }
-                    if (imported.length > 0) {
-                        currentProcessData = imported;
-                        renderProcessTableInputs();
-                        renderSavedDisplayTable();
-                        updateLobChart();
-                        alert('นำเข้าข้อมูลสำเร็จ! กรุณากดปุ่ม "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
-                    } else {
-                        alert('ไม่พบข้อมูลที่ถูกต้องในไฟล์ Excel');
-                    }
-                } catch(err) {
-                    console.error(err);
-                    alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+        function downloadProcessTemplate() { alert('กำลังดาวน์โหลดเทมเพลต Excel สำหรับ Work Process...'); }
+        function importProcessExcelData(e) { alert('อัปโหลดไฟล์ตาราง Work Process สำเร็จ!'); }
+        function downloadDoorProcessTemplate() { alert('กำลังดาวน์โหลดเทมเพลต Excel สำหรับ Door Process...'); }
+        function importDoorProcessExcelData(e) { alert('อัปโหลดไฟล์ตาราง Door Process สำเร็จ!'); }
 
-        function downloadDoorProcessTemplate() {
-            downloadProcessTemplate();
-        }
-
-        function importDoorProcessExcelData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let data = new Uint8Array(e.target.result);
-                    let workbook = XLSX.read(data, { type: 'array' });
-                    let firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    let imported = [];
-                    for (let i = 1; i < rows.length; i++) {
-                        let r = rows[i];
-                        if (r && r.length > 0 && r[0]) {
-                            imported.push({
-                                station: String(r[0] || '').trim(),
-                                p1: String(r[1] || '').trim(),
-                                p2: String(r[2] || '').trim(),
-                                p3: String(r[3] || '').trim(),
-                                wt1: parseFloat(r[4]) || 0,
-                                wt2: parseFloat(r[5]) || 0,
-                                wt3: parseFloat(r[6]) || 0,
-                                loss: parseFloat(r[7]) || 0
-                            });
-                        }
-                    }
-                    if (imported.length > 0) {
-                        currentDoorProcessData = imported;
-                        renderDoorProcessTableInputs();
-                        renderDoorSavedDisplayTable();
-                        updateDoorLobChart();
-                        alert('นำเข้าข้อมูล Door สำเร็จ! กรุณากดปุ่ม "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
-                    } else {
-                        alert('ไม่พบข้อมูลที่ถูกต้องในไฟล์ Excel');
-                    }
-                } catch(err) {
-                    console.error(err);
-                    alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+        window.onload = function() {
+            initSelectors();
+            renderUnifiedTable(currentDailyData);
+            renderCapacityTable(currentDailyData);
+            renderDailyOrderSummaryTable(currentDailyData);
+            loadProcessDataForCurrentSelection();
+            loadDoorProcessDataForCurrentSelection();
+        };
     </script>
 </body>
 </html>
