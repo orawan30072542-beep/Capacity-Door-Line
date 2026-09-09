@@ -185,6 +185,27 @@
                     </div>
                 </section>
 
+                <!-- 2.5 รวมออเดอร์รายวันที่ต้องทำ (New Feature Added) -->
+                <section id="daily-order-summary" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
+                        <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">ยอดรวมออเดอร์รายวันที่ต้องผลิต (คูณจำนวนประตูต่อ Set)</h2>
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน โดยนำยอด Order (เช่น 159C ในวันที่ 1 มี 610 ชิ้น) คูณด้วยจำนวนประตูต่อ Set จาก Master Model & Routing อัตโนมัติ
+                    </p>
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                        <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableDailyOrderSummary" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
+                                </thead>
+                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- 3. CAPACITY จากเวลาการทำงาน (Work Process) -->
                 <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm"> 
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -576,6 +597,7 @@
                 document.getElementById('tab-content-dashboard').classList.remove('hidden');
                 document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
                 renderCapacityTable(currentDailyData);
+                renderDailyOrderSummaryTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
                 document.getElementById('tab-content-mastermodel').classList.remove('hidden');
                 document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
@@ -845,10 +867,12 @@
                 masterModelConfig[modelName] = getMasterConfigForModel(modelName);
             }
             masterModelConfig[modelName][field] = value;
+            renderDailyOrderSummaryTable(currentDailyData);
         }
 
         function saveMasterModelConfig() {
             localStorage.setItem('haier_master_model_config_v1', JSON.stringify(masterModelConfig));
+            renderDailyOrderSummaryTable(currentDailyData);
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
         }
 
@@ -1155,6 +1179,69 @@
             });
         }
 
+        // ฟังก์ชันสร้างตารางรวมออเดอร์รายวันที่ต้องทำ (คูณ Qty/Set) ตามที่ผู้ใช้ต้องการ
+        function renderDailyOrderSummaryTable(data) {
+            const tableElement = document.getElementById('tableDailyOrderSummary');
+            if (!tableElement) return;
+            const headerRow = tableElement.querySelector('thead tr');
+            const tbody = tableElement.querySelector('tbody');
+
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            let days = data.days;
+            let groups = data.groups;
+
+            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Qty/Set</th>`;
+            days.forEach(day => {
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
+            });
+            headerRow.innerHTML = headerHtml;
+
+            // คำนวณผลรวมชิ้นงานที่ต้องผลิตจริงในแต่ละวัน (Order * Qty/Set)
+            let totalRequiredOutputs = new Array(days.length).fill(0);
+
+            groups.forEach(g => {
+                g.models.forEach((m, mIndex) => {
+                    let config = getMasterConfigForModel(m.name);
+                    let qtyPerSet = Number(config.qtyPerSet) || 1;
+
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                    let html = '';
+                    if (mIndex === 0) {
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
+                    }
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 text-center text-amber-400 font-bold bg-slate-900/40">${qtyPerSet}</td>`;
+
+                    for (let i = 0; i < days.length; i++) {
+                        let orderVal = Number(m.orders[i]) || 0;
+                        let requiredParts = orderVal * qtyPerSet;
+                        totalRequiredOutputs[i] += requiredParts;
+                        let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
+                        html += `
+                            <td class="p-2 text-center border-l border-bordercolor/30">
+                                <div class="text-cyan-400 font-semibold text-xs">${displayVal}</div>
+                            </td>
+                        `;
+                    }
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            });
+
+            // แถวสรุปผลรวมทั้งหมด (Total Required Parts)
+            let totalTr = document.createElement('tr');
+            totalTr.className = 'bg-amber-950/80 font-bold text-amber-300 border-t-2 border-bordercolor';
+            let totalHtml = `<td class="p-3">TOTAL</td><td class="p-3">Required Parts</td><td class="p-3 text-center">—</td>`;
+            for (let i = 0; i < days.length; i++) {
+                totalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 text-amber-400 text-sm font-bold">${totalRequiredOutputs[i].toLocaleString()}</td>`;
+            }
+            totalTr.innerHTML = totalHtml;
+            tbody.appendChild(totalTr);
+        }
+
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
             document.getElementById('currentCapacityStationLabel').textContent = stationName;
@@ -1253,6 +1340,7 @@
         }
 
         renderUnifiedTable(currentDailyData);
+        renderDailyOrderSummaryTable(currentDailyData);
         renderCapacityTable(currentDailyData);
         initSelectors();
 
@@ -1304,6 +1392,7 @@
                         if (groups.length > 0) {
                             window.tempImportedData = { days: days, groups: groups };
                             renderUnifiedTable(window.tempImportedData);
+                            renderDailyOrderSummaryTable(window.tempImportedData);
                             renderCapacityTable(window.tempImportedData);
                             renderMasterModelTable();
                             let newCalc = calculateTotalOrders(window.tempImportedData.groups, window.tempImportedData.days);
@@ -1327,6 +1416,7 @@
             localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
             initSelectors();
             renderMasterModelTable();
+            renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
             alert('บันทึกข้อมูลแผนการผลิตเรียบร้อยแล้ว!');
         }
@@ -1666,7 +1756,7 @@
             if (!displayBody) return;
             displayBody.innerHTML = '';
             if (!currentDoorProcessData || currentDoorProcessData.length === 0) {
-                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Work Station</td></tr>`;
+                displayBody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">ยังไม่มีข้อมูล Work Station (Door)</td></tr>`;
                 return;
             }
             currentDoorProcessData.forEach((item) => {
@@ -1677,7 +1767,7 @@
                 let wtTotal = w1 + w2 + w3;
                 let cycleTime = wtTotal + l;
                 let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/35 transition';
+                tr.className = 'hover:bg-slate-800/30 transition';
                 tr.innerHTML = `
                     <td class="p-1.5 text-center"><span class="bg-amber-600/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">${item.station || '-'}</span></td>
                     <td class="p-1.5 text-white">${item.p1 || '-'}</td>
