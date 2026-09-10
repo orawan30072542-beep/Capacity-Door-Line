@@ -1109,6 +1109,8 @@
                             if (config.backPlateSource !== 'ผลิตเอง') return;
                         } else if (summaryStation === 'Bottom Plate') {
                             if (config.bottomSource !== 'ผลิตเอง') return;
+                        } else if (summaryStation === 'DND') {
+                            if (!isDNDModel(m.name)) return;
                         } else {
                             if (config.station !== summaryStation) return;
                         }
@@ -1119,6 +1121,8 @@
                         multiplier = 1; 
                     } else if (summaryStation === 'Bottom Plate') {
                         multiplier = 1; 
+                    } else if (summaryStation === 'DND') {
+                        multiplier = 1;
                     } else {
                         multiplier = Number(config.qtyPerSet) || 1;
                     }
@@ -1599,8 +1603,8 @@
                         statusText = `Bottom Plate (${config.bottomLine || 'Line#1'})`;
                         multiplier = 1;
                     } else if (currentSummaryStation === 'DND') {
-                        statusText = `DND (x${config.qtyPerSet || 2})`;
-                        multiplier = Number(config.qtyPerSet) || 2;
+                        statusText = `DND (x1)`;
+                        multiplier = 1;
                     } else {
                         statusText = `${config.station} (x${config.qtyPerSet})`;
                         multiplier = Number(config.qtyPerSet) || 1;
