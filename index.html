@@ -1445,7 +1445,10 @@
 
             let topTotalTr = document.createElement('tr');
             topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL </td><td class="p-3 bg-amber-950/95"> </td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+            let topTotalHtml = <td class="p-3 bg-amber-950/95 w-[180px] truncate">TOTAL (${currentSummaryStation})</td>
+    <td class="p-3 bg-amber-950/95 w-[130px]">Required Parts</td>
+    <td class="p-3 text-center bg-amber-950/95 w-[60px]">—</td>
+`;
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
                 if (isSunday(day)) {
