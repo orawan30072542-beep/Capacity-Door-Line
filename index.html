@@ -837,7 +837,8 @@
             if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
         } catch (e) { console.error(e); }
 
-        function getMasterConfigForModel(modelName) {
+        // 1. เพิ่มฟังก์ชันตรวจสอบและกำหนดค่าเริ่มต้นของ Door C Line
+function getMasterConfigForModel(modelName) {
     if (masterModelConfig[modelName]) {
         let cfg = masterModelConfig[modelName];
         if (!cfg.backPlateSource) cfg.backPlateSource = 'ผลิตเอง';
@@ -865,12 +866,12 @@
     };
 }
 
-        function renderMasterModelTable() {
-    const tbody = document.querySelector('#tableMasterModel tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    if (!currentDailyData || !currentDailyData.groups) return;
-
+    function renderMasterModelTable() {
+        const tbody = document.querySelector('#tableMasterModel tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!currentDailyData || !currentDailyData.groups) return;
+        
     currentDailyData.groups.forEach(g => {
         g.models.forEach(m => {
             let config = getMasterConfigForModel(m.name);
