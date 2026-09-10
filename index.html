@@ -837,102 +837,133 @@
             if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
         } catch (e) { console.error(e); }
 
-        // 1. เพิ่มฟังก์ชันตรวจสอบและกำหนดค่าเริ่มต้นของ Door C Line
-function getMasterConfigForModel(modelName) {
-    if (masterModelConfig[modelName]) {
-        let cfg = masterModelConfig[modelName];
-        if (!cfg.backPlateSource) cfg.backPlateSource = 'ผลิตเอง';
-        if (!cfg.backPlateLine) cfg.backPlateLine = 'Line#1';
-        if (!cfg.bottomSource) cfg.bottomSource = 'ผลิตเอง';
-        if (!cfg.bottomLine) cfg.bottomLine = 'Line#1';
-        if (!cfg.doorCLine) cfg.doorCLine = 'LineC-1'; // ค่าเริ่มต้นสำหรับ Door C
-        if (cfg.welding === undefined) cfg.welding = true;
-        if (cfg.gasket === undefined) cfg.gasket = true;
-        return cfg;
-    }
-    let base = modelName.includes('C') ?
-        { doorType: 'Glass', station: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 } :
-        { doorType: 'Metal', station: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
-    
-    return {
-        ...base,
-        backPlateSource: 'ผลิตเอง',
-        backPlateLine: 'Line#1',
-        bottomSource: 'ผลิตเอง',
-        bottomLine: 'Line#1',
-        doorCLine: 'LineC-1',
-        welding: true,
-        gasket: true
-    };
-}
+        function getMasterConfigForModel(modelName) {
+            if (masterModelConfig[modelName]) {
+                let cfg = masterModelConfig[modelName];
+                if (!cfg.backPlateSource) cfg.backPlateSource = 'ผลิตเอง';
+                if (!cfg.backPlateLine) cfg.backPlateLine = 'Line#1';
+                if (!cfg.bottomSource) cfg.bottomSource = 'ผลิตเอง';
+                if (!cfg.bottomLine) cfg.bottomLine = 'Line#1';
+                if (cfg.welding === undefined) cfg.welding = true;
+                if (cfg.gasket === undefined) cfg.gasket = true;
+                return cfg;
+            }
+            let base = modelName.includes('C') ?
+                { doorType: 'Glass', station: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 } :
+                { doorType: 'Metal', station: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
+            
+            return {
+                ...base,
+                backPlateSource: 'ผลิตเอง',
+                backPlateLine: 'Line#1',
+                bottomSource: 'ผลิตเอง',
+                bottomLine: 'Line#1',
+                welding: true,
+                gasket: true
+            };
+        }
 
-    function renderMasterModelTable() {
-        const tbody = document.querySelector('#tableMasterModel tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-        if (!currentDailyData || !currentDailyData.groups) return;
-        
-    currentDailyData.groups.forEach(g => {
-        g.models.forEach(m => {
-            let config = getMasterConfigForModel(m.name);
-            let tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/50';
-            tr.innerHTML = `
-                <td class="p-3">
-                    <div class="font-semibold text-white">Group ${g.productGroup}</div>
-                    <div class="font-bold text-purple-400 text-sm mt-0.5">${m.name}</div>
-                </td>
-                <td class="p-3 space-y-2 bg-slate-900/40">
-                    <div class="text-[11px] font-bold text-cyan-400 border-b border-bordercolor/60 pb-1">1. Door Component Group</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[10px] text-slate-400 block">Door Type / Component</label>
-                            <select onchange="updateMasterModelField('${m.name}', 'doorType', this.value)" class="w-full bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
-                                <option value="Glass" ${config.doorType === 'Glass' ? 'selected' : ''}>Glass (กระจก)</option>
-                                <option value="Metal" ${config.doorType === 'Metal' ? 'selected' : ''}>Metal (โลหะ)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 block">Station</label>
-                            <select onchange="updateMasterModelField('${m.name}', 'station', this.value); renderMasterModelTable();" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 font-semibold">
-                                <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
-                                <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
-                                <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
-                                <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    ${config.station === 'Door C' ? `
-                    <div class="bg-blue-950/40 p-2 rounded border border-blue-500/30 mt-2">
-                        <label class="text-[10px] text-cyan-300 font-semibold block">ทางเลือกไลน์ผลิต Door C (Door C Line Selection):</label>
-                        <select onchange="updateMasterModelField('${m.name}', 'doorCLine', this.value)" class="w-full bg-slate-800 text-cyan-400 text-xs px-2 py-1.5 rounded border border-bordercolor mt-1 font-bold">
-                            <option value="LineC-1" ${config.doorCLine === 'LineC-1' ? 'selected' : ''}>LineC-1</option>
-                            <option value="LineC-2" ${config.doorCLine === 'LineC-2' ? 'selected' : ''}>LineC-2</option>
-                            <option value="LineC-3" ${config.doorCLine === 'LineC-3' ? 'selected' : ''}>LineC-3</option>
-                            <option value="LineDND" ${config.doorCLine === 'LineDND' ? 'selected' : ''}>LineDND</option>
-                        </select>
-                    </div>` : ''}
+        function renderMasterModelTable() {
+            const tbody = document.querySelector('#tableMasterModel tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!currentDailyData || !currentDailyData.groups) return;
 
-                    <div class="mt-2">
-                        <label class="text-[10px] text-slate-400 block">Assigned Routing Process & Lines</label>
-                        <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 block">Qty / Set</label>
-                        <input type="number" min="1" value="${config.qtyPerSet}" onchange="updateMasterModelField('${m.name}', 'qtyPerSet', parseInt(this.value) || 1)" class="w-20 bg-slate-800 text-center text-amber-400 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
-                    </div>
-                </td>
-                <td class="p-3 space-y-2 bg-slate-900/20">
-                    <!-- ส่วนข้อมูลประกอบอื่นๆ (Back Plate, Bottom, Gasket) คงเดิม -->
-                    <div class="text-[11px] font-bold text-amber-400 border-b border-bordercolor/60 pb-1">2. Other Components Group</div>
-                    <!-- ... โค้ดเดิมสำหรับ Back Plate / Bottom / Gasket ... -->
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    });
-}
+            currentDailyData.groups.forEach(g => {
+                g.models.forEach(m => {
+                    let config = getMasterConfigForModel(m.name);
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/50';
+                    tr.innerHTML = `
+                        <td class="p-3">
+                            <div class="font-semibold text-white">Group ${g.productGroup}</div>
+                            <div class="font-bold text-purple-400 text-sm mt-0.5">${m.name}</div>
+                        </td>
+                        <td class="p-3 space-y-2 bg-slate-900/40">
+                            <div class="text-[11px] font-bold text-cyan-400 border-b border-bordercolor/60 pb-1">1. Door Component Group</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block">Door Type / Component</label>
+                                    <select onchange="updateMasterModelField('${m.name}', 'doorType', this.value)" class="w-full bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
+                                        <option value="Glass" ${config.doorType === 'Glass' ? 'selected' : ''}>Glass (กระจก)</option>
+                                        <option value="Metal" ${config.doorType === 'Metal' ? 'selected' : ''}>Metal (โลหะ)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-slate-400 block">Station</label>
+                                    <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 font-semibold">
+                                        <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
+                                        <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
+                                        <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
+                                        <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block">Assigned Routing Process & Lines</label>
+                                <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 block">Qty / Set</label>
+                                <input type="number" min="1" value="${config.qtyPerSet}" onchange="updateMasterModelField('${m.name}', 'qtyPerSet', parseInt(this.value) || 1)" class="w-20 bg-slate-800 text-center text-amber-400 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
+                            </div>
+                        </td>
+                        <td class="p-3 space-y-2 bg-slate-900/20">
+                            <div class="text-[11px] font-bold text-amber-400 border-b border-bordercolor/60 pb-1">2. Other Components Group</div>
+                            
+                            <!-- Back Plate -->
+                            <div class="bg-slate-800/40 p-2 rounded border border-bordercolor/50 space-y-1">
+                                <span class="text-[11px] font-semibold text-slate-200 block">Back Plate:</span>
+                                <div class="flex items-center space-x-2">
+                                    <select onchange="updateMasterModelField('${m.name}', 'backPlateSource', this.value); renderMasterModelTable();" class="bg-slate-800 text-xs text-slate-200 px-2 py-1 rounded border border-bordercolor">
+                                        <option value="ผลิตเอง" ${config.backPlateSource === 'ผลิตเอง' ? 'selected' : ''}>ผลิตเอง</option>
+                                        <option value="ร้านนอก" ${config.backPlateSource === 'ร้านนอก' ? 'selected' : ''}>ร้านนอก</option>
+                                    </select>
+                                    ${config.backPlateSource === 'ผลิตเอง' ? `
+                                    <select onchange="updateMasterModelField('${m.name}', 'backPlateLine', this.value)" class="bg-slate-800 text-xs text-cyan-300 px-2 py-1 rounded border border-bordercolor">
+                                        <option value="Line#1" ${config.backPlateLine === 'Line#1' ? 'selected' : ''}>Line#1</option>
+                                        <option value="Line#2" ${config.backPlateLine === 'Line#2' ? 'selected' : ''}>Line#2</option>
+                                    </select>` : ''}
+                                </div>
+                            </div>
+
+                            <!-- Bottom & Welding -->
+                            <div class="bg-slate-800/40 p-2 rounded border border-bordercolor/50 space-y-1">
+                                <span class="text-[11px] font-semibold text-slate-200 block">Bottom & Welding:</span>
+                                <div class="flex items-center space-x-2">
+                                    <select onchange="updateMasterModelField('${m.name}', 'bottomSource', this.value); renderMasterModelTable();" class="bg-slate-800 text-xs text-slate-200 px-2 py-1 rounded border border-bordercolor">
+                                        <option value="ผลิตเอง" ${config.bottomSource === 'ผลิตเอง' ? 'selected' : ''}>ผลิตเอง</option>
+                                        <option value="ร้านนอก" ${config.bottomSource === 'ร้านนอก' ? 'selected' : ''}>ร้านนอก</option>
+                                    </select>
+                                    ${config.bottomSource === 'ผลิตเอง' ? `
+                                    <select onchange="updateMasterModelField('${m.name}', 'bottomLine', this.value)" class="bg-slate-800 text-xs text-cyan-300 px-2 py-1 rounded border border-bordercolor">
+                                        <option value="Line#1" ${config.bottomLine === 'Line#1' ? 'selected' : ''}>Line#1</option>
+                                        <option value="Line#2" ${config.bottomLine === 'Line#2' ? 'selected' : ''}>Line#2</option>
+                                    </select>` : ''}
+                                </div>
+                                <div class="flex items-center space-x-2 pt-1">
+                                    <label class="text-[10px] text-slate-300">Welding:</label>
+                                    <select onchange="updateMasterModelField('${m.name}', 'welding', this.value === 'true')" class="bg-slate-800 text-xs text-amber-300 px-2 py-1 rounded border border-bordercolor">
+                                        <option value="true" ${config.welding ? 'selected' : ''}>เลือก (Yes)</option>
+                                        <option value="false" ${!config.welding ? 'selected' : ''}>ไม่เลือก (No)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Gasket -->
+                            <div class="bg-slate-800/40 p-2 rounded border border-bordercolor/50 flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-slate-200">Gasket:</span>
+                                <select onchange="updateMasterModelField('${m.name}', 'gasket', this.value === 'true')" class="bg-slate-800 text-xs text-amber-300 px-2 py-1 rounded border border-bordercolor">
+                                    <option value="true" ${config.gasket ? 'selected' : ''}>เลือก (Yes)</option>
+                                    <option value="false" ${!config.gasket ? 'selected' : ''}>ไม่เลือก (No)</option>
+                                </select>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
 
         function updateMasterModelField(modelName, field, value) {
             if (!masterModelConfig[modelName]) {
