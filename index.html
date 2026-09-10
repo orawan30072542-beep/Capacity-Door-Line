@@ -1340,38 +1340,23 @@
             let totalTr = document.createElement('tr');
             totalTr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
             let totalHtml = `<td class="p-3 bg-blue-950/95">TOTAL</td><td class="p-3 bg-blue-950/95">Total Output</td>`;
-            
-            let uphTr = document.createElement('tr');
-            uphTr.className = 'bg-blue-900/90 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-            let uphHtml = `<td class="p-3 bg-blue-900/90">UPH TOTAL</td><td class="p-3 bg-blue-900/90">Hourly Rate</td>`;
-
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
                 if (isSunday(day)) {
                     totalHtml += `<td class="p-8 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                    uphHtml += `<td class="p-4 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
                 } else {
                     let dayTotal = Math.round(calc.totalOutputs[i]);
                     let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
-                    
                     totalHtml += `
                         <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95">
                             <div class="text-amber-400 text-sm font-bold">${dayTotal.toLocaleString()}</div>
-                        </td>
-                    `;
-                    
-                    uphHtml += `
-                        <td class="p-2 text-center border-l border-bordercolor/40 bg-blue-900/90">
-                            <div class="text-cyan-300 text-sm font-bold">${dayUphInt.toLocaleString()} <span class="text-[10px] font-normal text-slate-200">PCS/Hr</span></div>
+                            <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
                         </td>
                     `;
                 }
             }
             totalTr.innerHTML = totalHtml;
-            uphTr.innerHTML = uphHtml;
-            
             tbody.appendChild(totalTr);
-            tbody.appendChild(uphTr); // เพิ่มแถว Uph ไว้ข้างล่าง Total
 
             if (!groups || groups.length === 0) return;
 
@@ -1391,9 +1376,11 @@
                         } else {
                             let orderVal = Math.round(Number(m.orders[i]) || 0);
                             let orderDisplay = orderVal > 0 ? `${orderVal.toLocaleString()}` : '-';
+                            let modelUphInt = orderVal > 0 && hours > 0 ? Math.round(orderVal / hours) : '-';
                             html += `
                                 <td class="p-2 text-center border-l border-bordercolor/30">
                                     <div class="text-cyan-400 font-medium text-xs">${orderDisplay}</div>
+                                    <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
                                 </td>
                             `;
                         }
