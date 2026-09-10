@@ -1420,12 +1420,12 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-80 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th>` +
+            let headerHtml = `<th class="p-3 font-medium w-40 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th>` +
                  `<th class="p-3 font-medium w-50 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>` +
                  `<th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
 
 days.forEach(day => {
-    // เพิ่ม min-w-[90px] หรือปรับค่าตามความต้องการเพื่อให้ช่องวันกว้างขึ้น
+    // เพิ่ม min-w-[120px] หรือปรับค่าตามความต้องการเพื่อให้ช่องวันกว้างขึ้น
     headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-10 min-w-[75px]">${day}</th>`;
 });
 headerRow.innerHTML = headerHtml;
