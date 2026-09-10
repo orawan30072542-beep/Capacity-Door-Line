@@ -965,53 +965,32 @@
             });
         }
 
+        function getDoorCAutoRouting(modelName) {
+            const name = String(modelName || '').trim().toUpperCase();
+            if (name === 'BM23' || name.startsWith('BM23 ') || name === 'BM29' || name.startsWith('BM29 ') || name === 'BM T-DOOR 23' || name === 'BM T-DOOR 28') {
+                return { routing: "C-1 = RR, RL = Q'ty 2\nC-2 = VEG, FB = Q'ty 2\nC-3 = FL, FR = Q'ty 2", qtyPerSet: 2 };
+            }
+            if (name === 'TM14' || name.startsWith('TM-19') || name.startsWith('TM-21') || name.startsWith('FUF14') || name.startsWith('FUF18') || name.startsWith('FUF22')) {
+                return { routing: 'C-3', qtyPerSet: 2 };
+            }
+            return null;
+        }
+
         function updateMasterModelField(modelName, field, value) {
-            if (!masterModelConfig[modelName]) {
-                masterModelConfig[modelName] = getMasterConfigForModel(modelName);
-            }
-
+            if (!masterModelConfig[modelName]) masterModelConfig[modelName] = getMasterConfigForModel(modelName);
             masterModelConfig[modelName][field] = value;
-
-            // Door C Auto Routing
-            // BM23 / BM29 family:
-            // C-1 = RR, RL | C-2 = VEG, FB | C-3 = FL, FR
-            // TM / FUF family:
-            // C-3
             if (field === 'station' && value === 'Door C') {
-                const group1Models = [
-                    'BM23', 'BM23 Café', 'BM23 DND', 'BM T-Door 23',
-                    'BM29', 'BM29 Café', 'BM29 DND', 'BM T-Door 28'
-                ];
-
-                const group2Models = [
-                    'TM14', 'TM-19 K', 'TM-19 L', 'TM-21 K', 'TM-21 T',
-                    'FUF14 D', 'FUF14 L', 'FUF14 Q', 'FUF14 S',
-                    'FUF18 D', 'FUF18 L', 'FUF18 Q', 'FUF18 S',
-                    'FUF22 D', 'FUF22 L', 'FUF22 Q', 'FUF22 S'
-                ];
-
-                if (group1Models.includes(modelName)) {
-                    masterModelConfig[modelName].routing =
-                        "C-1 = RR, RL = Q'ty 2\n" +
-                        "C-2 = VEG, FB = Q'ty 2\n" +
-                        "C-3 = FL, FR = Q'ty 2";
-                    masterModelConfig[modelName].qtyPerSet = 2;
-                } else if (group2Models.includes(modelName)) {
-                    masterModelConfig[modelName].routing = 'C-3';
-                    masterModelConfig[modelName].qtyPerSet = 2;
-                }
-
-                const routingInput = document.getElementById(`routing_input_${modelName}`);
-                const qtyInput = document.getElementById(`qty_input_${modelName}`);
-
-                if (routingInput) {
-                    routingInput.value = masterModelConfig[modelName].routing;
-                }
-                if (qtyInput) {
-                    qtyInput.value = masterModelConfig[modelName].qtyPerSet;
+                const auto = getDoorCAutoRouting(modelName);
+                if (auto) {
+                    masterModelConfig[modelName].routing = auto.routing;
+                    masterModelConfig[modelName].qtyPerSet = auto.qtyPerSet;
+                    const r = document.getElementById(`routing_input_${modelName}`);
+                    const q = document.getElementById(`qty_input_${modelName}`);
+                    if (r) r.value = auto.routing;
+                    if (q) q.value = auto.qtyPerSet;
                 }
             }
-
+            if (field === 'qtyPerSet') masterModelConfig[modelName].qtyPerSet = Math.max(1, parseInt(value,10) || 1);
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
         }
