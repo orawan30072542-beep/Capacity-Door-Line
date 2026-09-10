@@ -1329,7 +1329,7 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
             });
@@ -1420,7 +1420,7 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
             });
@@ -1562,7 +1562,7 @@
             const isPlateStation = (currentCapacityStation === 'Back Plate' || currentCapacityStation === 'Bottom Plate');
             const columns = isPlateStation ? ['Routing / Line'] : ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
 
-            let headerHtml = `<th class="p-2 font-medium w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
+            let headerHtml = `<th class="p-2 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             columns.forEach(col => {
                 headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${col}</th>`;
             });
