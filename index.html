@@ -220,21 +220,31 @@
                     </div>
                 </section>
 
+                <!-- GROUP STATION CONTROL: ใช้ร่วมกันทั้ง Capacity + Plan vs Actual -->
+                <div id="group-station-control" class="sticky top-[74px] z-20 bg-[#0b1329]/95 backdrop-blur-md border border-cyan-500/30 rounded-xl px-3 py-2 shadow-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
+                            <span class="text-xs font-bold text-white">Group Station:</span>
+                            <span id="topCurrentStationLabel" class="text-cyan-300 text-xs font-bold px-2 py-1 rounded bg-blue-950/70 border border-blue-500/30">Door A</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button onclick="switchCapacityStation('Door A')" data-topstation="Door A" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
+                            <button onclick="switchCapacityStation('Door B')" data-topstation="Door B" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
+                            <button onclick="switchCapacityStation('Door C')" data-topstation="Door C" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
+                            <button onclick="switchCapacityStation('Door Glass')" data-topstation="Door Glass" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchCapacityStation('Back Plate')" data-topstation="Back Plate" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchCapacityStation('Bottom Plate')" data-topstation="Bottom Plate" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 3. CAPACITY จากเวลาการทำงาน -->
-                <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm"> 
+                <section id="capacity-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-3 shadow-sm"> 
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
-                            <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
-                            <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
-                            <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
-                            <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
-                            <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
-                            <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
-                            <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
                         </div>
                     </div>
                     
@@ -256,7 +266,7 @@
                 </section>
 
                 <!-- 3.5 PLAN vs ACTUAL CAPACITY COMPARISON -->
-                <section id="plan-actual-comparison" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
+                <section id="plan-actual-comparison" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-3 shadow-sm">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
@@ -290,6 +300,16 @@
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Days Short</div>
                             <div id="cmpShortDays" class="text-lg font-bold text-rose-300 mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div class="text-xs font-semibold text-white">Plan UPH vs Actual UPH</div>
+                            <div class="text-[10px] text-slate-400">รวมข้อมูลตาม Group Station ที่เลือก</div>
+                        </div>
+                        <div style="height:250px;">
+                            <canvas id="planActualCompareChart"></canvas>
                         </div>
                     </div>
 
@@ -633,6 +653,8 @@
     <script>
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
+
+        let planActualCompareChart = null;
 
         let selectedPartValue = 'Back Plate'; 
         let selectedProductGroup = ''; 
@@ -1958,6 +1980,10 @@
             let shortDays = 0;
             let minCT = null;
 
+            const chartLabels = [];
+            const chartPlan = [];
+            const chartActual = [];
+
             data.days.forEach((day, i) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition';
@@ -1979,6 +2005,9 @@
                 const hasOrder = metrics.totalQty > 0;
 
                 if (hasOrder) {
+                    chartLabels.push(day);
+                    chartPlan.push(Number(plan.toFixed(1)));
+                    chartActual.push(Number(actual.toFixed(1)));
                     planSum += plan;
                     actualSum += actual;
                     diffSum += diff;
@@ -2039,22 +2068,50 @@
             if (diffEl) {
                 diffEl.className = `text-lg font-bold mt-1 ${avgDiff >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
             }
+
+            const chartCanvas = document.getElementById('planActualCompareChart');
+            if (chartCanvas) {
+                if (planActualCompareChart) planActualCompareChart.destroy();
+
+                planActualCompareChart = new Chart(chartCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            { label: 'Plan UPH', data: chartPlan, borderWidth: 2, tension: 0.25, pointRadius: 3 },
+                            { label: 'Actual UPH', data: chartActual, borderWidth: 2, tension: 0.25, pointRadius: 3 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'UPH (PCS/Hr)' } },
+                            x: { ticks: { maxRotation: 0, autoSkip: false } }
+                        }
+                    }
+                });
+            }
         }
 
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
-            document.getElementById('currentCapacityStationLabel').textContent = stationName;
-            
-            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
-                let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
-                let btn = document.getElementById(btnId);
-                if (btn) {
-                    if (st === stationName) {
-                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow";
-                    } else {
-                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
-                    }
-                }
+
+            const capLabel = document.getElementById('currentCapacityStationLabel');
+            if (capLabel) capLabel.textContent = stationName;
+
+            const topLabel = document.getElementById('topCurrentStationLabel');
+            if (topLabel) topLabel.textContent = stationName;
+
+            document.querySelectorAll('.top-station-btn').forEach(btn => {
+                const isActive = btn.getAttribute('data-topstation') === stationName;
+                btn.className = isActive
+                    ? "top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow"
+                    : "top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
             });
 
             renderCapacityTable(currentDailyData);
