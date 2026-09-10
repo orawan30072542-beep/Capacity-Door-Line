@@ -837,32 +837,6 @@
             if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
         } catch (e) { console.error(e); }
 
-        function getMasterConfigForModel(modelName) {
-            if (masterModelConfig[modelName]) {
-                let cfg = masterModelConfig[modelName];
-                if (!cfg.backPlateSource) cfg.backPlateSource = 'ผลิตเอง';
-                if (!cfg.backPlateLine) cfg.backPlateLine = 'Line#1';
-                if (!cfg.bottomSource) cfg.bottomSource = 'ผลิตเอง';
-                if (!cfg.bottomLine) cfg.bottomLine = 'Line#1';
-                if (cfg.welding === undefined) cfg.welding = true;
-                if (cfg.gasket === undefined) cfg.gasket = true;
-                return cfg;
-            }
-            let base = modelName.includes('C') ?
-                { doorType: 'Glass', station: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 } :
-                { doorType: 'Metal', station: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
-            
-            return {
-                ...base,
-                backPlateSource: 'ผลิตเอง',
-                backPlateLine: 'Line#1',
-                bottomSource: 'ผลิตเอง',
-                bottomLine: 'Line#1',
-                welding: true,
-                gasket: true
-            };
-        }
-
         function renderMasterModelTable() {
             const tbody = document.querySelector('#tableMasterModel tbody');
             if (!tbody) return;
