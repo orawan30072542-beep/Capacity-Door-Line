@@ -1427,101 +1427,142 @@
             });
             headerRow.innerHTML = headerHtml;
 
-            if (currentSummaryStation === 'Back Plate Bottom') {
-                let line1Totals = new Array(days.length).fill(0);
-                let line2Totals = new Array(days.length).fill(0);
-
-                groups.forEach(g => {
-                    g.models.forEach(m => {
-                        let config = getMasterConfigForModel(m.name);
-                        for (let i = 0; i < days.length; i++) {
-                            if (!isSunday(days[i])) {
-                                let orderVal = Math.round(Number(m.orders[i]) || 0);
-                                if (config.backPlateSource === 'ผลิตเอง') {
-                                    if (config.backPlateLine === 'Line#1') line1Totals[i] += orderVal;
-                                    else if (config.backPlateLine === 'Line#2') line2Totals[i] += orderVal;
-                                }
-                                if (config.bottomSource === 'ผลิตเอง') {
-                                    if (config.bottomLine === 'Line#1') line1Totals[i] += orderVal;
-                                    else if (config.bottomLine === 'Line#2') line2Totals[i] += orderVal;
-                                }
-                            }
+            // คำนวณแถวสรุปพิเศษเฉพาะ Back Plate (แยก Line#1 และ Line#2 ไว้แถวบนสุดเฉพาะหน้า Back Plate เท่านั้น)
+            if (currentSummaryStation === 'Back Plate') {
+                ['Line#1', 'Line#2'].forEach(lineName => {
+                    let lineTotalTr = document.createElement('tr');
+                    lineTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
+                    let lineTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${lineName})</td><td class="p-3 bg-amber-950/95">Back Plate</td><td class="p-3 text-center bg-amber-950/95">${lineName}</td>`;
+                    
+                    for (let i = 0; i < days.length; i++) {
+                        let day = days[i];
+                        if (isSunday(day)) {
+                            lineTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                        } else {
+                            let lineQty = 0;
+                            groups.forEach(g => {
+                                g.models.forEach(m => {
+                                    let config = getMasterConfigForModel(m.name);
+                                    if (config.backPlateSource === 'ผลิตเอง' && (config.backPlateLine || 'Line#1') === lineName) {
+                                        let orderVal = Math.round(Number(m.orders[i]) || 0);
+                                        lineQty += orderVal;
+                                    }
+                                });
+                            });
+                            lineTotalHtml += `
+                                <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
+                                    <div class="text-amber-400 text-xs font-bold">${Math.round(lineQty).toLocaleString()}</div>
+                                </td>
+                            `;
                         }
-                    });
+                    }
+                    lineTotalTr.innerHTML = lineTotalHtml;
+                    tbody.appendChild(lineTotalTr);
                 });
-
-                let line1Tr = document.createElement('tr');
-                line1Tr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b border-bordercolor';
-                let line1Html = `<td class="p-3 bg-blue-950/95">LINE TOTAL</td><td class="p-3 bg-blue-950/95">Line#1 Total</td><td class="p-3 text-center bg-blue-950/95 text-cyan-400">Back Plate & Bottom</td>`;
+            } else {
+                // กรณีเลือกแท็บอื่น แสดงยอดรวมปกติ
+                let topTotalTr = document.createElement('tr');
+                topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
+                let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL</td><td class="p-3 bg-amber-950/95"></td><td class="p-3 text-center bg-amber-950/95">—</td>`;
                 for (let i = 0; i < days.length; i++) {
                     let day = days[i];
                     if (isSunday(day)) {
-                        line1Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                        topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
                     } else {
-                        let val = Math.round(line1Totals[i]);
-                        line1Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95"><div class="text-cyan-400 text-xs font-bold">${val > 0 ? val.toLocaleString() : '-'}</div></td>`;
+                        let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
+                        topTotalHtml += `
+                            <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
+                                <div class="text-amber-400 text-xs font-bold">${Math.round(metrics.totalQty).toLocaleString()}</div>
+                            </td>
+                        `;
                     }
                 }
-                line1Tr.innerHTML = line1Html;
-                tbody.appendChild(line1Tr);
+                topTotalTr.innerHTML = topTotalHtml;
+                tbody.appendChild(topTotalTr);
+            }
 
-                let line2Tr = document.createElement('tr');
-                line2Tr.className = 'bg-indigo-950/95 font-bold text-indigo-300 sticky top-[82px] z-20 shadow-md border-b-2 border-bordercolor';
-                let line2Html = `<td class="p-3 bg-indigo-950/95">LINE TOTAL</td><td class="p-3 bg-indigo-950/95">Line#2 Total</td><td class="p-3 text-center bg-indigo-950/95 text-indigo-400">Back Plate & Bottom</td>`;
-                for (let i = 0; i < days.length; i++) {
-                    let day = days[i];
-                    if (isSunday(day)) {
-                        line2Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                    } else {
-                        let val = Math.round(line2Totals[i]);
-                        line2Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-indigo-950/95"><div class="text-indigo-400 text-xs font-bold">${val > 0 ? val.toLocaleString() : '-'}</div></td>`;
+            let filteredRowsCount = 0;
+            groups.forEach(g => {
+                g.models.forEach((m) => {
+                    let config = getMasterConfigForModel(m.name);
+                    if (currentSummaryStation !== 'All') {
+                        if (currentSummaryStation === 'Back Plate') {
+                            if (config.backPlateSource !== 'ผลิตเอง') return;
+                        } else if (currentSummaryStation === 'Bottom Plate') {
+                            if (config.bottomSource !== 'ผลิตเอง') return;
+                        } else {
+                            if (config.station !== currentSummaryStation) return;
+                        }
                     }
-                }
-                line2Tr.innerHTML = line2Html;
-                tbody.appendChild(line2Tr);
-
-                groups.forEach(g => {
-                    let validModels = g.models.filter(m => {
-                        let config = getMasterConfigForModel(m.name);
-                        return config.backPlateSource === 'ผลิตเอง' || config.bottomSource === 'ผลิตเอง';
-                    });
-                    if (validModels.length === 0) return;
-
-                    validModels.forEach((m, mIndex) => {
-                        let config = getMasterConfigForModel(m.name);
-                        let bpText = config.backPlateSource === 'ผลิตเอง' ? `BP:${config.backPlateLine}` : 'BP:ร้านนอก';
-                        let btText = config.bottomSource === 'ผลิตเอง' ? `Bot:${config.bottomLine}` : 'Bot:ร้านนอก';
-                        let statusText = `${bpText} | ${btText}`;
-
-                        let tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                        let html = '';
-                        if (mIndex === 0) {
-                            html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModels.length}">${g.productGroup}</td>`;
-                        }
-                        html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
-                        html += `<td class="p-3 text-center text-amber-300 font-semibold bg-slate-900/40 text-[11px]">${statusText}</td>`;
-
-                        for (let i = 0; i < days.length; i++) {
-                            let day = days[i];
-                            if (isSunday(day)) {
-                                html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
-                            } else {
-                                let orderVal = Math.round(Number(m.orders[i]) || 0);
-                                let displayVal = orderVal > 0 ? orderVal.toLocaleString() : '-';
-                                html += `
-                                    <td class="p-2 text-center border-l border-bordercolor/30">
-                                        <div class="text-slate-300 font-semibold text-xs">${displayVal}</div>
-                                    </td>
-                                `;
-                            }
-                        }
-                        tr.innerHTML = html;
-                        tbody.appendChild(tr);
-                    });
+                    filteredRowsCount++;
                 });
+            });
+
+            if (filteredRowsCount === 0) {
+                let emptyTr = document.createElement('tr');
+                emptyTr.innerHTML = `<td colspan="${days.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลโมเดลที่ผลิตเองสำหรับ Group Station: ${currentSummaryStation}</td>`;
+                tbody.appendChild(emptyTr);
                 return;
             }
+
+            groups.forEach(g => {
+                let validModelsInGroup = g.models.filter(m => {
+                    let config = getMasterConfigForModel(m.name);
+                    if (currentSummaryStation === 'All') return true;
+                    if (currentSummaryStation === 'Back Plate') return config.backPlateSource === 'ผลิตเอง';
+                    if (currentSummaryStation === 'Bottom Plate') return config.bottomSource === 'ผลิตเอง';
+                    return config.station === currentSummaryStation;
+                });
+
+                if (validModelsInGroup.length === 0) return;
+
+                validModelsInGroup.forEach((m, mIndex) => {
+                    let config = getMasterConfigForModel(m.name);
+                    
+                    let statusText = '';
+                    let multiplier = 1;
+                    if (currentSummaryStation === 'Back Plate') {
+                        statusText = `Back Plate (${config.backPlateLine || 'Line#1'})`;
+                        multiplier = 1;
+                    } else if (currentSummaryStation === 'Bottom Plate') {
+                        statusText = `Bottom Plate (${config.bottomLine || 'Line#1'})`;
+                        multiplier = 1;
+                    } else {
+                        statusText = `${config.station} (x${config.qtyPerSet})`;
+                        multiplier = Number(config.qtyPerSet) || 1;
+                    }
+
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                    let html = '';
+                    if (mIndex === 0) {
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
+                    }
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-[11px]">${statusText}</td>`;
+
+                    for (let i = 0; i < days.length; i++) {
+                        let day = days[i];
+                        if (isSunday(day)) {
+                            html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
+                        } else {
+                            let orderVal = Math.round(Number(m.orders[i]) || 0);
+                            let requiredParts = Math.round(orderVal * multiplier);
+                            let displayVal = requiredParts > 0 ? requiredParts.toLocaleString() : '-';
+                            let modelUphInt = requiredParts > 0 && hours > 0 ? Math.round(requiredParts / hours) : '-';
+                            html += `
+                                <td class="p-2 text-center border-l border-bordercolor/30">
+                                    <div class="text-cyan-400 font-semibold text-xs">${displayVal}</div>
+                                    <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
+                                </td>
+                            `;
+                        }
+                    }
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
 
             let filteredRowsCount = 0;
             groups.forEach(g => {
