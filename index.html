@@ -1343,7 +1343,7 @@
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
                 if (isSunday(day)) {
-                    totalHtml += `<td class="p-8 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                    totalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
                 } else {
                     let dayTotal = Math.round(calc.totalOutputs[i]);
                     let dayUphInt = hours > 0 ? Math.round(dayTotal / hours) : 0;
