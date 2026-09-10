@@ -841,6 +841,14 @@
         function getDoorCRoutingDetails(modelName) {
             const name = normalizeModelName(modelName);
 
+            // กติกานี้ถูกเรียกใช้เฉพาะเมื่อ Station = Door C:
+            // FUF และ TM ทุก Model → Door C : C-3 เท่านั้น
+            if (/^(FUF|TM)/.test(name)) {
+                return [
+                    { line: 'C-3', qty: 2 }
+                ];
+            }
+
             const exactRoutes = {
                 'BM23 CAFÉ': [
                     { line: 'C-1', qty: 2 },
