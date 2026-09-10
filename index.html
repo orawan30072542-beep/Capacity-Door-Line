@@ -1427,11 +1427,12 @@
             headerRow.innerHTML = headerHtml;
 
             // คำนวณแถวสรุปพิเศษเฉพาะ Back Plate (แยก Line#1 และ Line#2 ไว้แถวบนสุดเฉพาะหน้า Back Plate เท่านั้น)
-            if (currentSummaryStation === 'Back Plate') {
+            if (currentSummaryStation === 'Back Plate' || currentSummaryStation === 'Bottom Plate') {
+                let isBack = (currentSummaryStation === 'Back Plate');
                 ['Line#1', 'Line#2'].forEach(lineName => {
                     let lineTotalTr = document.createElement('tr');
                     lineTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-                    let lineTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${lineName})</td><td class="p-3 bg-amber-950/95">Back Plate</td><td class="p-3 text-center bg-amber-950/95">${lineName}</td>`;
+                    let lineTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${lineName})</td><td class="p-3 bg-amber-950/95">${currentSummaryStation}</td><td class="p-3 text-center bg-amber-950/95">${lineName}</td>`;
                     
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
@@ -1442,7 +1443,10 @@
                             groups.forEach(g => {
                                 g.models.forEach(m => {
                                     let config = getMasterConfigForModel(m.name);
-                                    if (config.backPlateSource === 'ผลิตเอง' && (config.backPlateLine || 'Line#1') === lineName) {
+                                    let source = isBack ? config.backPlateSource : config.bottomSource;
+                                    let line = isBack ? (config.backPlateLine || 'Line#1') : (config.bottomLine || 'Line#1');
+                                    
+                                    if (source === 'ผลิตเอง' && line === lineName) {
                                         let orderVal = Math.round(Number(m.orders[i]) || 0);
                                         lineQty += orderVal;
                                     }
