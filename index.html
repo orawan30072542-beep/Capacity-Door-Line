@@ -838,45 +838,119 @@
             if (savedMaster) { masterModelConfig = JSON.parse(savedMaster); }
         } catch (e) { console.error(e); }
 
-        function getMasterConfigForModel(modelName) {
-            if (masterModelConfig[modelName]) {
-                let cfg = masterModelConfig[modelName];
-                if (cfg.station === 'Door C') {
-                    const auto = getDoorCAutoRouting(modelName);
-                    if (auto) {
-                        cfg.routing = auto.routing;
-                        cfg.qtyPerSet = auto.qtyPerSet;
-                    }
-                }
-                if (!cfg.backPlateSource) cfg.backPlateSource = 'ผลิตเอง';
-                if (!cfg.backPlateLine) cfg.backPlateLine = 'Line#1';
-                if (!cfg.bottomSource) cfg.bottomSource = 'ผลิตเอง';
-                if (!cfg.bottomLine) cfg.bottomLine = 'Line#1';
-                if (cfg.welding === undefined) cfg.welding = true;
-                if (cfg.gasket === undefined) cfg.gasket = true;
-                return cfg;
-            }
-            let base = modelName.includes('C') ?
-                { doorType: 'Glass', station: 'Door A', routing: 'Line 1 (Frame) → Line 2 (Glass)', qtyPerSet: 2 } :
-                { doorType: 'Metal', station: 'Door B', routing: 'Line 3 (Press Machine) → Line 4 (Bending)', qtyPerSet: 1 };
-            
-            let result = {
-                ...base,
-                backPlateSource: 'ผลิตเอง',
-                backPlateLine: 'Line#1',
-                bottomSource: 'ผลิตเอง',
-                bottomLine: 'Line#1',
-                welding: true,
-                gasket: true
+        function getDoorCRoutingDetails(modelName) {
+            const name = normalizeModelName(modelName);
+
+            const exactRoutes = {
+                'BM23 CAFÉ': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM23 CAFE': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM23 DND': [
+                    { line: 'C-1', qty: 1 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM T-DOOR 23': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-3', qty: 2 }
+                ],
+                'BM29': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM29 CAFÉ': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM29 CAFE': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM29 DND': [
+                    { line: 'C-1', qty: 1 },
+                    { line: 'C-2', qty: 2 }
+                ],
+                'BM T-DOOR 28': [
+                    { line: 'C-1', qty: 2 },
+                    { line: 'C-3', qty: 2 }
+                ]
             };
-            if (result.station === 'Door C') {
-                const auto = getDoorCAutoRouting(modelName);
-                if (auto) {
-                    result.routing = auto.routing;
-                    result.qtyPerSet = auto.qtyPerSet;
-                }
+
+            if (exactRoutes[name]) return exactRoutes[name];
+
+            // รองรับชื่อ BM29 ที่ไม่มี suffix เพิ่มเติมเท่านั้น
+            if (name === 'BM29') return exactRoutes['BM29'];
+
+            // รุ่นอื่นที่เลือก Door C ยังคงแสดง C-1/C-2/C-3 ตามโครงสร้างทั่วไป
+            return [
+                { line: 'C-1', qty: 2 },
+                { line: 'C-2', qty: 2 },
+                { line: 'C-3', qty: 2 }
+            ];
+        }
+
+        function buildAssignedRouting(modelName, doorType, station) {
+            if (doorType === 'Glass') {
+                return 'Line 2 (Glass Machine)';
             }
-            return result;
+
+            let routingLines = ['Line 1 (Press Machine)'];
+
+            if (station === 'Door C') {
+                const details = getDoorCRoutingDetails(modelName);
+                details.forEach(item => {
+                    routingLines.push(`Door C : ${item.line}  Q'ty ${item.qty}`);
+                });
+            }
+
+            return routingLines.join('\n');
+        }
+
+        function getMasterConfigForModel(modelName) {
+            let cfg;
+
+            if (masterModelConfig[modelName]) {
+                cfg = masterModelConfig[modelName];
+            } else {
+                const isGlass = modelName.toUpperCase().includes('GLASS');
+                cfg = {
+                    doorType: isGlass ? 'Glass' : 'Metal',
+                    station: isGlass ? 'Door Glass' : 'Door A',
+                    qtyPerSet: 1,
+                    backPlateSource: 'ผลิตเอง',
+                    backPlateLine: 'Line#1',
+                    bottomSource: 'ผลิตเอง',
+                    bottomLine: 'Line#1',
+                    welding: true,
+                    gasket: true
+                };
+            }
+
+            if (!cfg.doorType) cfg.doorType = 'Metal';
+
+            // Door Type เป็นตัวกำหนด Station ที่อนุญาต
+            if (cfg.doorType === 'Glass') {
+                cfg.station = 'Door Glass';
+            } else if (!['Door A', 'Door B', 'Door C'].includes(cfg.station)) {
+                cfg.station = 'Door A';
+            }
+
+            if (!cfg.backPlateSource) cfg.backPlateSource = 'ผลิตเอง';
+            if (!cfg.backPlateLine) cfg.backPlateLine = 'Line#1';
+            if (!cfg.bottomSource) cfg.bottomSource = 'ผลิตเอง';
+            if (!cfg.bottomLine) cfg.bottomLine = 'Line#1';
+            if (cfg.welding === undefined) cfg.welding = true;
+            if (cfg.gasket === undefined) cfg.gasket = true;
+            if (!cfg.qtyPerSet) cfg.qtyPerSet = 1;
+
+            // Assigned Routing Process & Lines สร้างอัตโนมัติจาก Door Type + Station + Model
+            cfg.routing = buildAssignedRouting(modelName, cfg.doorType, cfg.station);
+
+            return cfg;
         }
 
         function renderMasterModelTable() {
@@ -901,23 +975,26 @@
                                 <div>
                                     <label class="text-[10px] text-slate-400 block">Door Type / Component</label>
                                     <select onchange="updateMasterModelField('${m.name}', 'doorType', this.value)" class="w-full bg-slate-800 text-cyan-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
-                                        <option value="Glass" ${config.doorType === 'Glass' ? 'selected' : ''}>Glass (กระจก)</option>
                                         <option value="Metal" ${config.doorType === 'Metal' ? 'selected' : ''}>Metal (โลหะ)</option>
+                                        <option value="Glass" ${config.doorType === 'Glass' ? 'selected' : ''}>Glass (กระจก)</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="text-[10px] text-slate-400 block">Station</label>
                                     <select id="station_select_${m.name}" onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 font-semibold">
-                                        <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
-                                        <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
-                                        <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
-                                        <option value="Door Glass" ${config.station === 'Door Glass' ? 'selected' : ''}>Door Glass</option>
+                                        ${config.doorType === 'Glass' ? `
+                                            <option value="Door Glass" selected>Door Glass</option>
+                                        ` : `
+                                            <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
+                                            <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
+                                            <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
+                                        `}
                                     </select>
                                 </div>
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 block">Assigned Routing Process & Lines</label>
-                                <input type="text" id="routing_input_${m.name}" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
+                                <textarea id="routing_input_${m.name}" rows="${config.station === 'Door C' ? 4 : 2}" readonly class="w-full bg-slate-900/80 text-emerald-300 text-xs px-2 py-1.5 rounded border border-emerald-500/30 mt-0.5 resize-none font-medium">${config.routing}</textarea>
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 block">Qty / Set</label>
@@ -990,41 +1067,50 @@
         }
 
         function getDoorCAutoRouting(modelName) {
-            const name = normalizeModelName(modelName);
-            const isBM = /^(BM23|BM29)(\s|$)/.test(name) ||
-                         name === 'BM T-DOOR 23' || name === 'BM T-DOOR 28';
-            if (isBM) {
-                return {
-                    routing: "C-1 = RR, RL = Q'ty 2\nC-2 = VEG, FB = Q'ty 2\nC-3 = FL, FR = Q'ty 2",
-                    qtyPerSet: 2
-                };
-            }
-
-            const isTMFUF = name === 'TM14' ||
-                /^TM-?19(\s|$)/.test(name) ||
-                /^TM-?21(\s|$)/.test(name) ||
-                /^FUF14(\s|$)/.test(name) ||
-                /^FUF18(\s|$)/.test(name) ||
-                /^FUF22(\s|$)/.test(name);
-            if (isTMFUF) return { routing: 'C-3', qtyPerSet: 2 };
-            return null;
+            const details = getDoorCRoutingDetails(modelName);
+            return {
+                routing: buildAssignedRouting(modelName, 'Metal', 'Door C'),
+                qtyPerSet: details.length ? Math.max(...details.map(x => x.qty)) : 1
+            };
         }
 
         function updateMasterModelField(modelName, field, value) {
-            if (!masterModelConfig[modelName]) masterModelConfig[modelName] = getMasterConfigForModel(modelName);
+            if (!masterModelConfig[modelName]) {
+                masterModelConfig[modelName] = { ...getMasterConfigForModel(modelName) };
+            }
+
             masterModelConfig[modelName][field] = value;
-            if (field === 'station' && value === 'Door C') {
-                const auto = getDoorCAutoRouting(modelName);
-                if (auto) {
-                    masterModelConfig[modelName].routing = auto.routing;
-                    masterModelConfig[modelName].qtyPerSet = auto.qtyPerSet;
-                    const r = document.getElementById(`routing_input_${modelName}`);
-                    const q = document.getElementById(`qty_input_${modelName}`);
-                    if (r) r.value = auto.routing;
-                    if (q) q.value = auto.qtyPerSet;
+
+            if (field === 'doorType') {
+                if (value === 'Glass') {
+                    masterModelConfig[modelName].station = 'Door Glass';
+                } else {
+                    masterModelConfig[modelName].station = 'Door A';
                 }
             }
-            if (field === 'qtyPerSet') masterModelConfig[modelName].qtyPerSet = Math.max(1, parseInt(value,10) || 1);
+
+            if (field === 'station' && masterModelConfig[modelName].doorType === 'Glass') {
+                masterModelConfig[modelName].station = 'Door Glass';
+            }
+
+            if (field === 'qtyPerSet') {
+                masterModelConfig[modelName].qtyPerSet = Math.max(1, parseInt(value, 10) || 1);
+            }
+
+            masterModelConfig[modelName].routing = buildAssignedRouting(
+                modelName,
+                masterModelConfig[modelName].doorType,
+                masterModelConfig[modelName].station
+            );
+
+            // Door Type / Station เปลี่ยนแล้ว render ใหม่เพื่ออัปเดตตัวเลือกและ Routing ทันที
+            if (field === 'doorType' || field === 'station') {
+                renderMasterModelTable();
+            } else {
+                const r = document.getElementById(`routing_input_${modelName}`);
+                if (r) r.value = masterModelConfig[modelName].routing;
+            }
+
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
         }
