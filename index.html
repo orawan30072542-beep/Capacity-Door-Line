@@ -1448,9 +1448,10 @@
             let topTotalHtml = `<td class="p-3 bg-amber-950/95 w-[180px] truncate">TOTAL ()</td><td class="p-3 bg-amber-950/95 w-[180px] truncate5">Required Parts</td><td class="p-3 text-center bg-amber-950/95">—</td>`;
             for (let i = 0; i < days.length; i++) {
                 let day = days[i];
-                if (isSunday(day)) {
-                    topTotalHtml += `<d class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                } else {
+                // สำหรับแถวข้อมูล Model ทั่วไป
+if (isSunday(day)) {
+    html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-black text-black select-none"></td>`;
+}
                     let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
                     topTotalHtml += `
                         <td class="p-8 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
