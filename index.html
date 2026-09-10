@@ -200,6 +200,8 @@
                             <button onclick="switchSummaryStation('Door B')" id="sum-btn-door-b" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
                             <button onclick="switchSummaryStation('Door C')" id="sum-btn-door-c" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
                             <button onclick="switchSummaryStation('Door Glass')" id="sum-btn-door-glass" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchSummaryStation('Back Plate')" id="sum-btn-back-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchSummaryStation('Bottom Plate')" id="sum-btn-bottom-plate" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
                             <button onclick="switchSummaryStation('Back Plate Bottom')" id="sum-btn-back-plate-bottom" class="sum-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate Bottom</button>
                         </div>
                     </div>
@@ -1048,17 +1050,19 @@
                     let config = getMasterConfigForModel(m.name);
                     
                     if (summaryStation !== 'All') {
-                        if (summaryStation === 'Back Plate Bottom') {
-                            let matchBP = (config.backPlateSource === 'ผลิตเอง');
-                            let matchBT = (config.bottomSource === 'ผลิตเอง');
-                            if (!matchBP && !matchBT) return;
+                        if (summaryStation === 'Back Plate') {
+                            if (config.backPlateSource !== 'ผลิตเอง') return;
+                        } else if (summaryStation === 'Bottom Plate') {
+                            if (config.bottomSource !== 'ผลิตเอง') return;
                         } else {
                             if (config.station !== summaryStation) return;
                         }
                     }
 
                     let multiplier = 1;
-                    if (summaryStation === 'Back Plate Bottom') {
+                    if (summaryStation === 'Back Plate') {
+                        multiplier = 1; 
+                    } else if (summaryStation === 'Bottom Plate') {
                         multiplier = 1; 
                     } else {
                         multiplier = Number(config.qtyPerSet) || 1;
@@ -1390,8 +1394,8 @@
 
         function switchSummaryStation(stationName) {
             currentSummaryStation = stationName;
-            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate Bottom'].forEach(st => {
-                let btnId = 'sum-btn-' + st.toLowerCase().replace(/ /g, '-');
+            ['All', 'Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate', 'Back Plate Bottom'].forEach(st => {
+                let btnId = 'sum-btn-' + (st === 'All' ? 'all' : st.toLowerCase().replace(/ /g, '-'));
                 let btn = document.getElementById(btnId);
                 if (btn) {
                     if (st === stationName) {
@@ -1417,28 +1421,11 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-80 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-40 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-80 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-10">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
-
-            let filteredRowsCount = 0;
-            groups.forEach(g => {
-                g.models.forEach((m) => {
-                    let config = getMasterConfigForModel(m.name);
-                    if (currentSummaryStation !== 'All') {
-                        if (currentSummaryStation === 'Back Plate Bottom') {
-                            let matchBP = (config.backPlateSource === 'ผลิตเอง');
-                            let matchBT = (config.bottomSource === 'ผลิตเอง');
-                            if (!matchBP && !matchBT) return;
-                        } else {
-                            if (config.station !== currentSummaryStation) return;
-                        }
-                    }
-                    filteredRowsCount++;
-                });
-            });
 
             if (currentSummaryStation === 'Back Plate Bottom') {
                 let line1Totals = new Array(days.length).fill(0);
@@ -1448,65 +1435,129 @@
                     g.models.forEach(m => {
                         let config = getMasterConfigForModel(m.name);
                         for (let i = 0; i < days.length; i++) {
-                            if (isSunday(days[i])) continue;
-                            let orderVal = Math.round(Number(m.orders[i]) || 0);
-                            if (config.backPlateSource === 'ผลิตเอง') {
-                                if (config.backPlateLine === 'Line#1') line1Totals[i] += orderVal;
-                                else if (config.backPlateLine === 'Line#2') line2Totals[i] += orderVal;
-                            }
-                            if (config.bottomSource === 'ผลิตเอง') {
-                                if (config.bottomLine === 'Line#1') line1Totals[i] += orderVal;
-                                else if (config.bottomLine === 'Line#2') line2Totals[i] += orderVal;
+                            if (!isSunday(days[i])) {
+                                let orderVal = Math.round(Number(m.orders[i]) || 0);
+                                if (config.backPlateSource === 'ผลิตเอง') {
+                                    if (config.backPlateLine === 'Line#1') line1Totals[i] += orderVal;
+                                    else if (config.backPlateLine === 'Line#2') line2Totals[i] += orderVal;
+                                }
+                                if (config.bottomSource === 'ผลิตเอง') {
+                                    if (config.bottomLine === 'Line#1') line1Totals[i] += orderVal;
+                                    else if (config.bottomLine === 'Line#2') line2Totals[i] += orderVal;
+                                }
                             }
                         }
                     });
                 });
 
-                let trLine1 = document.createElement('tr');
-                trLine1.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b border-bordercolor';
-                let htmlLine1 = `<td class="p-3 bg-amber-950/95">TOTAL (Line#1)</td><td class="p-3 bg-amber-950/95">Back Plate & Bottom</td><td class="p-3 text-center bg-amber-950/95 text-cyan-300">Line#1</td>`;
-                for (let i = 0; i < days.length; i++) {
-                    if (isSunday(days[i])) {
-                        htmlLine1 += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                    } else {
-                        htmlLine1 += `<td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-xs text-amber-400 font-bold">${line1Totals[i].toLocaleString()}</td>`;
-                    }
-                }
-                trLine1.innerHTML = htmlLine1;
-                tbody.appendChild(trLine1);
-
-                let trLine2 = document.createElement('tr');
-                trLine2.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[73px] z-20 shadow-md border-b-2 border-bordercolor';
-                let htmlLine2 = `<td class="p-3 bg-amber-950/95">TOTAL (Line#2)</td><td class="p-3 bg-amber-950/95">Back Plate & Bottom</td><td class="p-3 text-center bg-amber-950/95 text-cyan-300">Line#2</td>`;
-                for (let i = 0; i < days.length; i++) {
-                    if (isSunday(days[i])) {
-                        htmlLine2 += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                    } else {
-                        htmlLine2 += `<td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-xs text-amber-400 font-bold">${line2Totals[i].toLocaleString()}</td>`;
-                    }
-                }
-                trLine2.innerHTML = htmlLine2;
-                tbody.appendChild(trLine2);
-            } else {
-                let topTotalTr = document.createElement('tr');
-                topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-                let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL</td><td class="p-3 bg-amber-950/95"></td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+                let line1Tr = document.createElement('tr');
+                line1Tr.className = 'bg-blue-950/95 font-bold text-cyan-300 sticky top-[41px] z-20 shadow-md border-b border-bordercolor';
+                let line1Html = `<td class="p-3 bg-blue-950/95">LINE TOTAL</td><td class="p-3 bg-blue-950/95">Line#1 Total</td><td class="p-3 text-center bg-blue-950/95 text-cyan-400">Back Plate & Bottom</td>`;
                 for (let i = 0; i < days.length; i++) {
                     let day = days[i];
                     if (isSunday(day)) {
-                        topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                        line1Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
                     } else {
-                        let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
-                        topTotalHtml += `
-                            <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
-                                <div class="text-amber-400 text-xs font-bold">${Math.round(metrics.totalQty).toLocaleString()}</div>
-                            </td>
-                        `;
+                        let val = Math.round(line1Totals[i]);
+                        line1Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-blue-950/95"><div class="text-cyan-400 text-xs font-bold">${val > 0 ? val.toLocaleString() : '-'}</div></td>`;
                     }
                 }
-                topTotalTr.innerHTML = topTotalHtml;
-                tbody.appendChild(topTotalTr);
+                line1Tr.innerHTML = line1Html;
+                tbody.appendChild(line1Tr);
+
+                let line2Tr = document.createElement('tr');
+                line2Tr.className = 'bg-indigo-950/95 font-bold text-indigo-300 sticky top-[82px] z-20 shadow-md border-b-2 border-bordercolor';
+                let line2Html = `<td class="p-3 bg-indigo-950/95">LINE TOTAL</td><td class="p-3 bg-indigo-950/95">Line#2 Total</td><td class="p-3 text-center bg-indigo-950/95 text-indigo-400">Back Plate & Bottom</td>`;
+                for (let i = 0; i < days.length; i++) {
+                    let day = days[i];
+                    if (isSunday(day)) {
+                        line2Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                    } else {
+                        let val = Math.round(line2Totals[i]);
+                        line2Html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-indigo-950/95"><div class="text-indigo-400 text-xs font-bold">${val > 0 ? val.toLocaleString() : '-'}</div></td>`;
+                    }
+                }
+                line2Tr.innerHTML = line2Html;
+                tbody.appendChild(line2Tr);
+
+                groups.forEach(g => {
+                    let validModels = g.models.filter(m => {
+                        let config = getMasterConfigForModel(m.name);
+                        return config.backPlateSource === 'ผลิตเอง' || config.bottomSource === 'ผลิตเอง';
+                    });
+                    if (validModels.length === 0) return;
+
+                    validModels.forEach((m, mIndex) => {
+                        let config = getMasterConfigForModel(m.name);
+                        let bpText = config.backPlateSource === 'ผลิตเอง' ? `BP:${config.backPlateLine}` : 'BP:ร้านนอก';
+                        let btText = config.bottomSource === 'ผลิตเอง' ? `Bot:${config.bottomLine}` : 'Bot:ร้านนอก';
+                        let statusText = `${bpText} | ${btText}`;
+
+                        let tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
+                        let html = '';
+                        if (mIndex === 0) {
+                            html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModels.length}">${g.productGroup}</td>`;
+                        }
+                        html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                        html += `<td class="p-3 text-center text-amber-300 font-semibold bg-slate-900/40 text-[11px]">${statusText}</td>`;
+
+                        for (let i = 0; i < days.length; i++) {
+                            let day = days[i];
+                            if (isSunday(day)) {
+                                html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
+                            } else {
+                                let orderVal = Math.round(Number(m.orders[i]) || 0);
+                                let displayVal = orderVal > 0 ? orderVal.toLocaleString() : '-';
+                                html += `
+                                    <td class="p-2 text-center border-l border-bordercolor/30">
+                                        <div class="text-slate-300 font-semibold text-xs">${displayVal}</div>
+                                    </td>
+                                `;
+                            }
+                        }
+                        tr.innerHTML = html;
+                        tbody.appendChild(tr);
+                    });
+                });
+                return;
             }
+
+            let filteredRowsCount = 0;
+            groups.forEach(g => {
+                g.models.forEach((m) => {
+                    let config = getMasterConfigForModel(m.name);
+                    if (currentSummaryStation !== 'All') {
+                        if (currentSummaryStation === 'Back Plate') {
+                            if (config.backPlateSource !== 'ผลิตเอง') return;
+                        } else if (currentSummaryStation === 'Bottom Plate') {
+                            if (config.bottomSource !== 'ผลิตเอง') return;
+                        } else {
+                            if (config.station !== currentSummaryStation) return;
+                        }
+                    }
+                    filteredRowsCount++;
+                });
+            });
+
+            let topTotalTr = document.createElement('tr');
+            topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
+            let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL</td><td class="p-3 bg-amber-950/95"></td><td class="p-3 text-center bg-amber-950/95">—</td>`;
+            for (let i = 0; i < days.length; i++) {
+                let day = days[i];
+                if (isSunday(day)) {
+                    topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                } else {
+                    let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
+                    topTotalHtml += `
+                        <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
+                            <div class="text-amber-400 text-xs font-bold">${Math.round(metrics.totalQty).toLocaleString()}</div>
+                        </td>
+                    `;
+                }
+            }
+            topTotalTr.innerHTML = topTotalHtml;
+            tbody.appendChild(topTotalTr);
 
             if (filteredRowsCount === 0) {
                 let emptyTr = document.createElement('tr');
@@ -1519,9 +1570,8 @@
                 let validModelsInGroup = g.models.filter(m => {
                     let config = getMasterConfigForModel(m.name);
                     if (currentSummaryStation === 'All') return true;
-                    if (currentSummaryStation === 'Back Plate Bottom') {
-                        return (config.backPlateSource === 'ผลิตเอง' || config.bottomSource === 'ผลิตเอง');
-                    }
+                    if (currentSummaryStation === 'Back Plate') return config.backPlateSource === 'ผลิตเอง';
+                    if (currentSummaryStation === 'Bottom Plate') return config.bottomSource === 'ผลิตเอง';
                     return config.station === currentSummaryStation;
                 });
 
@@ -1532,10 +1582,11 @@
                     
                     let statusText = '';
                     let multiplier = 1;
-                    if (currentSummaryStation === 'Back Plate Bottom') {
-                        let bpInfo = config.backPlateSource === 'ผลิตเอง' ? `BP (${config.backPlateLine || 'Line#1'})` : 'BP (ร้านนอก)';
-                        let btInfo = config.bottomSource === 'ผลิตเอง`' ? `BT (${config.bottomLine || 'Line#1'})` : 'BT (ร้านนอก)';
-                        statusText = `${bpInfo} / ${btInfo}`;
+                    if (currentSummaryStation === 'Back Plate') {
+                        statusText = `Back Plate (${config.backPlateLine || 'Line#1'})`;
+                        multiplier = 1;
+                    } else if (currentSummaryStation === 'Bottom Plate') {
+                        statusText = `Bottom Plate (${config.bottomLine || 'Line#1'})`;
                         multiplier = 1;
                     } else {
                         statusText = `${config.station} (x${config.qtyPerSet})`;
@@ -1674,6 +1725,11 @@
                 tbody.appendChild(tr);
             });
         }
+
+        initSelectors();
+        renderUnifiedTable(currentDailyData);
+        renderDailyOrderSummaryTable(currentDailyData);
+        renderCapacityTable(currentDailyData);
     </script>
 </body>
 </html>
