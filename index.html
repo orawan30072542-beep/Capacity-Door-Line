@@ -186,7 +186,7 @@
                 </section>
 
                 <!-- 2.5 รวมออเดอร์รายวันที่ต้องทำ -->
-                <section id="daily-order-summary" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
+                <section id="daily-order-summary" class="bg-cardbg p-4 rounded-2xl border border-bordercolor space-y-4 shadow-sm w-full">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
@@ -208,7 +208,7 @@
                     <p class="text-xs text-slate-300">
                         ตารางนี้แสดงผลรวมจำนวนชิ้นงานที่ต้องผลิตจริงรายวัน เฉพาะรายการที่มีสถานะ "ผลิตเอง" อ้างอิงจากการตั้งค่าใน Master Model & Routing เท่านั้น
                     </p>
-                    <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
+                    <div class="bg-slate-900/60 p-2 rounded-xl border border-bordercolor w-full">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                             <table id="tableDailyOrderSummary" class="text-left border-collapse text-xs" style="table-layout:fixed; min-width:100%;">
                                 <thead>
@@ -1568,7 +1568,7 @@
                     if (mIndex === 0) {
                         html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
                     }
-                    html += `<td class="px-2 py-3 font-medium text-slate-200 bg-slate-900/40 whitespace-normal break-words">${m.name}</td>`;
+                    html += `<td class="px-2 py-3 font-medium text-slate-200 bg-[#101a34] whitespace-normal break-words sticky z-20" style="left:${firstColWidth}px;">${m.name}</td>`;
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
                         if (isSunday(day)) {
@@ -1630,8 +1630,13 @@
             const firstColWidth = 92;
             const secondColWidth = 104;
             const thirdColWidth = 128;
-            const dayColWidth = 64;
-            const totalTableWidth = firstColWidth + secondColWidth + thirdColWidth + (days.length * dayColWidth);
+            const fixedWidth = firstColWidth + secondColWidth + thirdColWidth;
+
+            // ขยายคอลัมน์วันที่ให้กินพื้นที่หน้าจอที่เหลือ แต่ไม่เล็กกว่า 58px
+            const wrapperWidth = tableElement.parentElement ? tableElement.parentElement.clientWidth : window.innerWidth;
+            const availableForDays = Math.max(0, wrapperWidth - fixedWidth);
+            const dayColWidth = Math.max(58, Math.floor(availableForDays / Math.max(days.length, 1)));
+            const totalTableWidth = Math.max(wrapperWidth, fixedWidth + (days.length * dayColWidth));
 
             tableElement.style.tableLayout = 'fixed';
             tableElement.style.width = `${totalTableWidth}px`;
@@ -1650,14 +1655,35 @@
             tableElement.insertBefore(colgroup, tableElement.firstChild);
 
             let headerHtml = `
-                <th class="px-2 py-3 font-medium text-slate-300 bg-slate-900 sticky top-0 z-30 whitespace-normal leading-tight">Product<br>Group</th>
-                <th class="px-2 py-3 font-medium text-slate-300 bg-slate-900 sticky top-0 z-30 whitespace-normal leading-tight">Model</th>
-                <th class="px-2 py-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 whitespace-normal leading-tight">Production<br>Status</th>
+                <th class="px-2 py-3 font-medium text-slate-300 bg-slate-900 sticky top-0 z-50 whitespace-normal leading-tight" style="left:0;">Product<br>Group</th>
+                <th class="px-2 py-3 font-medium text-slate-300 bg-slate-900 sticky top-0 z-50 whitespace-normal leading-tight" style="left:${firstColWidth}px;">Model</th>
+                <th class="px-2 py-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-50 whitespace-normal leading-tight border-r border-bordercolor" style="left:${firstColWidth + secondColWidth}px;">Production<br>Status</th>
             `;
             days.forEach(day => {
                 headerHtml += `<th class="px-1 py-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-10 whitespace-nowrap">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
+
+            function freezeSummaryTotalRow(row, topPx, zBase = 35) {
+                if (!row) return;
+                Array.from(row.children).forEach((cell, idx) => {
+                    cell.style.position = 'sticky';
+                    cell.style.top = `${topPx}px`;
+                    cell.style.zIndex = String(zBase);
+
+                    if (idx === 0) {
+                        cell.style.left = '0px';
+                        cell.style.zIndex = String(zBase + 10);
+                    } else if (idx === 1) {
+                        cell.style.left = `${firstColWidth}px`;
+                        cell.style.zIndex = String(zBase + 10);
+                    } else if (idx === 2) {
+                        cell.style.left = `${firstColWidth + secondColWidth}px`;
+                        cell.style.zIndex = String(zBase + 10);
+                        cell.style.borderRight = '1px solid #1E293B';
+                    }
+                });
+            }
 
             // TOTAL ด้านบน:
             // - Door C แสดงแยก C-1 / C-2 / C-3 เท่านั้น
@@ -1715,11 +1741,12 @@
 
                     lineTotalTr.innerHTML = lineTotalHtml;
                     tbody.appendChild(lineTotalTr);
+                    freezeSummaryTotalRow(lineTotalTr, 41 + (lineIndex * 36), 38 - lineIndex);
                 });
 
             } else if (currentSummaryStation === 'Back Plate' || currentSummaryStation === 'Bottom Plate') {
                 let isBack = (currentSummaryStation === 'Back Plate');
-                ['Line#1', 'Line#2'].forEach(lineName => {
+                ['Line#1', 'Line#2'].forEach((lineName, lineIndex) => {
                     let lineTotalTr = document.createElement('tr');
                     lineTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
                     let lineTotalHtml = `<td class="px-2 py-2 bg-amber-950/95">TOTAL (${lineName})</td><td class="px-2 py-2 bg-amber-950/95">${currentSummaryStation}</td><td class="px-2 py-2 text-center bg-amber-950/95">${lineName}</td>`;
@@ -1753,6 +1780,7 @@
                     }
                     lineTotalTr.innerHTML = lineTotalHtml;
                     tbody.appendChild(lineTotalTr);
+                    freezeSummaryTotalRow(lineTotalTr, 41 + (lineIndex * 36), 36 - lineIndex);
                 });
 
             } else {
@@ -1778,6 +1806,7 @@
 
                 topTotalTr.innerHTML = topTotalHtml;
                 tbody.appendChild(topTotalTr);
+                freezeSummaryTotalRow(topTotalTr, 41, 36);
             }
 
             let filteredRowsCount = 0;
@@ -1844,10 +1873,10 @@
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
                     if (mIndex === 0) {
-                        html += `<td class="px-2 py-3 font-semibold text-white bg-slate-900/60 align-middle whitespace-normal break-words" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
+                        html += `<td class="px-2 py-3 font-semibold text-white bg-slate-900 align-middle whitespace-normal break-words sticky z-20" style="left:0;" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
                     }
                     html += `<td class="px-2 py-3 font-medium text-slate-200 bg-slate-900/40 whitespace-normal break-words">${m.name}</td>`;
-                    html += `<td class="px-2 py-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-[10px] leading-tight whitespace-normal break-words">${statusText}</td>`;
+                    html += `<td class="px-2 py-3 text-center text-cyan-300 font-semibold bg-[#101a34] text-[10px] leading-tight whitespace-normal break-words sticky z-20 border-r border-bordercolor" style="left:${firstColWidth + secondColWidth}px;">${statusText}</td>`;
 
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
@@ -2032,7 +2061,15 @@
                         currentDailyData = { days: days, groups: newGroups };
                         renderUnifiedTable(currentDailyData);
                         renderMasterModelTable();
-                        initSelectors();
+                        let summaryResizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(summaryResizeTimer);
+            summaryResizeTimer = setTimeout(() => {
+                renderDailyOrderSummaryTable(currentDailyData);
+            }, 120);
+        });
+
+        initSelectors();
                         renderCapacityTable(currentDailyData);
                         renderDailyOrderSummaryTable(currentDailyData);
                         
