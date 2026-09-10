@@ -1652,509 +1652,461 @@
                         btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
                     }
                 }
+            <td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>
+                        <td class="p-3 text-center text-cyan-300 font-medium bg-slate-900/20">${statusText}</td>
+                    `;
+                    for (let i = 0; i < days.length; i++) {
+                        let day = days[i];
+                        if (isSunday(day)) {
+                            html += `<td class="p-2 text-center border-l border-bordercolor/30 bg-slate-950 text-slate-600">—</td>`;
+                        } else {
+                            let orderVal = Math.round(Number(m.orders[i]) || 0);
+                            let requiredQty = Math.round(orderVal * multiplier);
+                            let requiredDisplay = requiredQty > 0 ? `${requiredQty.toLocaleString()}` : '-';
+                            let modelUphInt = requiredQty > 0 && hours > 0 ? Math.round(requiredQty / hours) : '-';
+                            html += `
+                                <td class="p-2 text-center border-l border-bordercolor/30">
+                                    <div class="text-amber-400 font-bold text-xs">${requiredDisplay}</div>
+                                    <div class="text-white text-[10px] opacity-80 mt-0.5">${modelUphInt !== '-' ? modelUphInt.toLocaleString() : '-'}</div>
+                                </td>
+                            `;
+                        }
+                    }
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
             });
+        }
 
             renderCapacityTable(currentDailyData);
+        }
+
+        <!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haier Line B - Production & Defect Management Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <header class="mb-8 border-b border-slate-800 pb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-cyan-400">Haier Line B - Production & Defect Management Dashboard</h1>
+                <p class="text-xs text-slate-400 mt-1">ระบบจัดการแผนการผลิต วิเคราะห์สายการผลิต และบันทึกข้อบกพร่อง (Defect Tracking)</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                <label class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer transition shadow">
+                    อัปโหลดไฟล์แผนการผลิต (Excel)
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden" onchange="previewExcelData(event)">
+                </label>
+                <button onclick="saveDashboardData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow">
+                    บันทึกข้อมูลตาราง
+                </button>
+            </div>
+        </header>
+
+        <!-- แผงเนื้อหาหลัก -->
+        <main class="space-y-6">
+            <!-- ส่วนสรุปข้อมูลเบื้องต้น -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+                    <div class="text-xs text-slate-400 font-medium">ชื่อไฟล์ข้อมูลปัจจุบัน</div>
+                    <div id="excelFileName" class="text-sm font-bold text-cyan-300 mt-1 truncate">Haier_Default_Production_Plan.xlsx</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+                    <div class="text-xs text-slate-400 font-medium">สถานีการผลิตหลัก (Active Station)</div>
+                    <div id="currentCapacityStationLabel" class="text-sm font-bold text-amber-300 mt-1">Door B</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm flex items-center justify-between">
+                    <div>
+                        <div class="text-xs text-slate-400 font-medium">เวลาทำงานต่อกะ (Shift Hours)</div>
+                        <input type="number" id="shiftHoursInput" value="8" step="0.5" class="w-20 bg-slate-800 text-cyan-300 text-sm font-bold px-2 py-1 rounded border border-slate-700 mt-1 text-center" onchange="renderCapacityTable(currentDailyData)">
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 font-medium">หน่วย</div>
+                        <div class="text-sm font-bold text-slate-200 mt-1">ชั่วโมง / วัน</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- กราฟแผนการผลิตรวม -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                <h2 class="text-base font-semibold text-slate-200 mb-4">กราฟแสดงยอดรวมแผนการผลิตรายวัน</h2>
+                <div class="h-64 relative">
+                    <canvas id="planOverviewChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ตาราง Capacity Analysis -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <h2 class="text-base font-semibold text-slate-200">Capacity & UPH Analysis</h2>
+                    <div class="flex flex-wrap gap-2" id="stationButtonsContainer">
+                        <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door A</button>
+                        <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door B</button>
+                        <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
+                        <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                        <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                        <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                    <table id="tableCapacity" class="w-full text-xs text-left text-slate-300 whitespace-nowrap">
+                        <thead class="bg-slate-800 text-slate-200 uppercase font-semibold">
+                            <tr>
+                                <th class="p-2 font-medium w-36 text-slate-300 bg-slate-900 sticky top-0 z-30">Capacity Metric</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <!-- เรนเดอร์ข้อมูลโดย JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ตารางแผนการผลิตรายวัน (Unified Production Plan Table) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                <h2 class="text-base font-semibold text-slate-200">ตารางแผนการผลิตรายวัน (Unified Plan Table)</h2>
+                <div class="overflow-x-auto border border-slate-800 rounded-lg max-h-[500px]">
+                    <table id="tableUnified" class="w-full text-xs text-left text-slate-300 whitespace-nowrap">
+                        <thead class="bg-slate-800 text-slate-200 uppercase font-semibold sticky top-0 z-30">
+                            <tr id="unifiedTableHeader">
+                                <th class="p-2 w-32">กลุ่มผลิตภัณฑ์</th>
+                                <th class="p-2 w-48">รุ่น (Model)</th>
+                                <th class="p-2 text-center w-24">อัตราส่วน</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unifiedTableBody" class="divide-y divide-slate-800">
+                            <!-- เรนเดอร์ข้อมูลโดย JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 border-t border-slate-800 pt-4 text-center text-xs text-slate-500">
+            Haier Line B Quality Control & Production Planning Dashboard &copy; 2026
+        </footer>
+    </div>
+
+    <!-- Script สำหรับควบคุมระบบและเรนเดอร์ข้อมูล -->
+    <script>
+        let currentCapacityStation = 'Door B';
+        let currentDailyData = {
+            days: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            groups: [
+                {
+                    productGroup: "Door Line B",
+                    models: [
+                        { name: "HRF-A350", orders: [120, 130, 125, 140, 135, 0, 150, 145, 130, 135] },
+                        { name: "HRF-B400", orders: [100, 95, 110, 105, 115, 0, 120, 110, 105, 100] }
+                    ]
+                }
+            ]
+        };
+
+        let processDatabase = {};
+        let doorProcessDatabase = {};
+        let currentProcessData = [];
+        let currentDoorProcessData = [];
+        let selectedModel = '';
+        let selectedPartValue = 'Door A';
+        let selectedDoorModel = '';
+        let selectedDoorSubPart = 'Frame';
+        let selectedDoorType = 'Normal';
+
+        // สร้างกราฟภาพรวม
+        const ctx = document.getElementById('planOverviewChart').getContext('2d');
+        let planChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: currentDailyData.days,
+                datasets: [{
+                    label: 'ยอดผลิตรวมรายวัน',
+                    data: [220, 225, 235, 245, 250, 0, 270, 255, 235, 235],
+                    backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                    borderColor: 'rgba(56, 189, 248, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        function isSunday(dayStr) {
+            return String(dayStr).toLowerCase().includes('sun') || String(dayStr).includes('อา.');
+        }
+
+        function formatExcelDate(serial) {
+            if (typeof serial === 'number') {
+                let utc_days = Math.floor(serial - 25569);
+                let dateObj = new Date(utc_days * 86400 * 1000);
+                return dateObj.getDate();
+            }
+            return serial;
+        }
+
+        function calculateTotalOrders(groups, days) {
+            let totalOutputs = new Array(days.length).fill(0);
+            groups.forEach(g => {
+                g.models.forEach(m => {
+                    for (let i = 0; i < days.length; i++) {
+                        totalOutputs[i] += Number(m.orders[i]) || 0;
+                    }
+                });
+            });
+            return { totalOutputs };
+        }
+
+        function getDayCapacityMetrics(groups, days, dayIndex, station, hours) {
+            let totalQty = 0;
+            groups.forEach(g => {
+                g.models.forEach(m => {
+                    totalQty += Number(m.orders[dayIndex]) || 0;
+                });
+            });
+
+            // ค่าจำลองสำหรับการคำนวณ UPH และ Capacity
+            let activeCt = 35.0; // Cycle Time เฉลี่ย (วินาที)
+            let uphPlan = hours > 0 ? (totalQty / hours) : 0;
+            let uphPlan85 = uphPlan * 0.85;
+            let uphActMaxCT = activeCt > 0 ? (3600 / activeCt) : 0;
+            let uphActMaxCT85 = uphActMaxCT * 0.85;
+
+            return {
+                totalQty,
+                uphPlan,
+                uphPlan85,
+                uphActMaxCT,
+                uphActMaxCT85
+            };
+        }
+
+        function initSelectors() {
+            // ฟังก์ชันเริ่มต้นตัวเลือก (ถ้ามี)
+        }
+
+        function renderUnifiedTable(data) {
+            const tableElement = document.getElementById('tableUnified');
+            if (!tableElement) return;
+            const headerRow = document.getElementById('unifiedTableHeader');
+            const tbody = document.getElementById('unifiedTableBody');
+
+            // ล้างข้อมูลเก่า
+            headerRow.innerHTML = `<th class="p-2 w-36 bg-slate-800 sticky top-0 z-30">กลุ่มผลิตภัณฑ์</th>
+                                   <th class="p-2 w-48 bg-slate-800 sticky top-0 z-30">รุ่น (Model)</th>
+                                   <th class="p-2 text-center w-24 bg-slate-800 sticky top-0 z-30">อัตราส่วน</th>`;
+            data.days.forEach(day => {
+                headerRow.innerHTML += `<th class="p-2 text-center w-16 bg-slate-800 sticky top-0 z-30 border-l border-slate-700">${day}</th>`;
+            });
+
+            tbody.innerHTML = '';
+            data.groups.forEach(g => {
+                g.models.forEach((m, mIdx) => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800';
+                    let html = `
+                        ${mIdx === 0 ? `<td class="p-2 font-semibold text-cyan-400 bg-slate-900/80" rowspan="${g.models.length}">${g.productGroup}</td>` : ''}
+                        <td class="p-2 font-medium text-slate-200">${m.name}</td>
+                        <td class="p-2 text-center text-cyan-300 font-medium">1.0</td>
+                    `;
+                    for (let i = 0; i < data.days.length; i++) {
+                        let orderVal = Math.round(Number(m.orders[i]) || 0);
+                        html += `<td class="p-2 text-center border-l border-slate-800 text-amber-400 font-bold">${orderVal > 0 ? orderVal.toLocaleString() : '-'}</td>`;
+                    }
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            });
         }
 
         function renderCapacityTable(data) {
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
-
-            tableElement.className = "w-full text-left border-collapse text-[11px] table-fixed";
-
             const headerRow = tableElement.querySelector('thead tr');
             const tbody = tableElement.querySelector('tbody');
 
             headerRow.innerHTML = '';
             tbody.innerHTML = '';
 
-            const isPlateStation = (currentCapacityStation === 'Back Plate' || currentCapacityStation === 'Bottom Plate');
-            const columns = isPlateStation ? ['Routing / Line'] : ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            let days = data.days;
+            let groups = data.groups;
+            let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-2 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
-            columns.forEach(col => {
-                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${col}</th>`;
+            document.getElementById('currentCapacityStationLabel').textContent = currentCapacityStation;
+
+            let headerHtml = `<th class="p-2 font-medium w-36 text-slate-300 bg-slate-900 sticky top-0 z-30">Capacity Metric</th>`;
+            days.forEach(day => {
+                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
             });
-            headerHtml += `<th class="p-2 font-medium text-center text-cyan-300 bg-slate-900 sticky top-0 z-30 w-16">Max CT</th><th class="p-2 font-medium text-center text-amber-300 bg-slate-900 sticky top-0 z-30 w-20">UPH (Max)</th>`;
             headerRow.innerHTML = headerHtml;
 
-            let modelsToDisplay = [];
-            data.groups.forEach(g => {
-                g.models.forEach(m => {
-                    let config = getMasterConfigForModel(m.name);
-                    if (isPlateStation) {
-                        if (currentCapacityStation === 'Back Plate' && config.backPlateSource === 'ผลิตเอง') {
-                            modelsToDisplay.push({ model: m.name, routing: config.backPlateLine || 'Line#1' });
-                        } else if (currentCapacityStation === 'Bottom Plate' && config.bottomSource === 'ผลิตเอง') {
-                            modelsToDisplay.push({ model: m.name, routing: config.bottomLine || 'Line#1' });
-                        }
+            let metricsRows = [
+                { title: `ยอดรวมชิ้นงานผลิต (${currentCapacityStation})`, type: 'qty' },
+                { title: 'UPH Plan (100%)', type: 'uph_plan' },
+                { title: 'UPH Plan (85%)', type: 'uph_plan_85' },
+                { title: 'UPH Actual Max CT (100%)', type: 'uph_act' },
+                { title: 'UPH Actual Max CT (85%)', type: 'uph_act_85' }
+            ];
+
+            metricsRows.forEach(rowInfo => {
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/30 transition border-b border-slate-800';
+                let html = `<td class="p-2 font-semibold text-cyan-300 bg-slate-900/60">${rowInfo.title}</td>`;
+
+                for (let i = 0; i < days.length; i++) {
+                    let day = days[i];
+                    if (isSunday(day)) {
+                        html += `<td class="p-2 text-center border-l border-slate-800 bg-slate-950 text-slate-600">—</td>`;
                     } else {
-                        if (config.station === currentCapacityStation) {
-                            modelsToDisplay.push({ model: m.name });
+                        let metrics = getDayCapacityMetrics(groups, days, i, currentCapacityStation, hours);
+                        let valStr = '-';
+                        let colorClass = 'text-slate-200';
+
+                        if (rowInfo.type === 'qty') {
+                            valStr = metrics.totalQty > 0 ? metrics.totalQty.toLocaleString() : '-';
+                            colorClass = 'text-amber-400 font-bold';
+                        } else if (rowInfo.type === 'uph_plan') {
+                            valStr = metrics.uphPlan > 0 ? Math.round(metrics.uphPlan).toLocaleString() : '-';
+                            colorClass = 'text-cyan-400 font-semibold';
+                        } else if (rowInfo.type === 'uph_plan_85') {
+                            valStr = metrics.uphPlan85 > 0 ? Math.round(metrics.uphPlan85).toLocaleString() : '-';
+                            colorClass = 'text-cyan-300';
+                        } else if (rowInfo.type === 'uph_act') {
+                            valStr = metrics.uphActMaxCT > 0 ? Math.round(metrics.uphActMaxCT).toLocaleString() : '-';
+                            colorClass = 'text-emerald-400 font-semibold';
+                        } else if (rowInfo.type === 'uph_act_85') {
+                            valStr = metrics.uphActMaxCT85 > 0 ? Math.round(metrics.uphActMaxCT85).toLocaleString() : '-';
+                            colorClass = 'text-emerald-300';
                         }
+
+                        html += `<td class="p-2 text-center border-l border-slate-800 ${colorClass}">${valStr}</td>`;
                     }
-                });
-            });
-
-            if (modelsToDisplay.length === 0) {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="${columns.length + 3}" class="p-4 text-center text-slate-400">ไม่พบข้อมูลรุ่นที่ตรงกับเงื่อนไขสถานี: ${currentCapacityStation}</td>`;
-                tbody.appendChild(tr);
-                return;
-            }
-
-            modelsToDisplay.forEach(item => {
-                let modelName = item.model;
-                let maxCT = getModelMaxCT(modelName);
-                let uphMax = maxCT > 0 ? Math.round(3600 / maxCT) : 0;
-
-                let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
-                
-                let html = `<td class="p-2 font-bold text-white bg-slate-900/40">${modelName}</td>`;
-                
-                if (isPlateStation) {
-                    html += `<td class="p-2 text-center text-cyan-300">${item.routing}</td>`;
-                } else {
-                    columns.forEach(col => {
-                        const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
-                        let colCt = 0;
-
-                        subParts.forEach(subPart => {
-                            const storageKey = `${modelName}_Door (${subPart} - ${col})`;
-                            const stList = doorProcessDatabase[storageKey];
-
-                            if (stList && stList.length > 0) {
-                                stList.forEach(st => {
-                                    const ct =
-                                        (parseFloat(st.wt1) || 0) +
-                                        (parseFloat(st.wt2) || 0) +
-                                        (parseFloat(st.wt3) || 0) +
-                                        (parseFloat(st.loss) || 0);
-
-                                    if (ct > colCt) colCt = ct;
-                                });
-                            }
-                        });
-
-                        html += `<td class="p-2 text-center text-slate-300">${colCt > 0 ? colCt.toFixed(1) + 's' : '-'}</td>`;
-                    });
                 }
-
-                html += `
-                    <td class="p-2 text-center font-bold text-cyan-400 bg-slate-900/20">${maxCT.toFixed(1)}s</td>
-                    <td class="p-2 text-center font-bold text-amber-400 bg-slate-900/20">${uphMax.toLocaleString()}</td>
-                `;
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
         }
 
-        function saveDashboardData() {
-            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
-            alert('บันทึกข้อมูลตารางแผนการผลิตเรียบร้อยแล้ว!');
+        function switchCapacityStation(stationName) {
+            currentCapacityStation = stationName;
+            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
+                let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
+                let btn = document.getElementById(btnId);
+                if (btn) {
+                    if (st === stationName) {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow";
+                    } else {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+                    }
+                }
+            });
+            renderCapacityTable(currentDailyData);
         }
 
         function previewExcelData(event) {
-            let file = event.target.files[0];
+            const file = event.target.files[0];
             if (!file) return;
             document.getElementById('excelFileName').textContent = file.name;
 
-            let reader = new FileReader();
+            const reader = new FileReader();
             reader.onload = function(e) {
-                let data = new Uint8Array(e.target.result);
-                let workbook = XLSX.read(data, { type: 'array' });
-                let firstSheetName = workbook.SheetNames[0];
-                let worksheet = workbook.Sheets[firstSheetName];
-                let json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-                if (json.length > 1) {
-                    let rawDays = json[0].slice(2);
-                    let days = rawDays.map(d => formatExcelDate(d));
-                    let groupsMap = {};
-
-                    for (let i = 1; i < json.length; i++) {
-                        let row = json[i];
-                        if (!row || row.length === 0) continue;
-                        let gName = String(row[0] || '159').trim();
-                        let mName = String(row[1] || '').trim();
-                        if (!mName) continue;
-
-                        if (!groupsMap[gName]) groupsMap[gName] = [];
-                        let orders = [];
-                        for (let j = 2; j < 2 + days.length; j++) {
-                            orders.push(Math.round(Number(row[j]) || 0));
+                    if (jsonRows && jsonRows.length > 2) {
+                        let headerDaysRaw = jsonRows[0];
+                        let days = [];
+                        for (let c = 2; c < headerDaysRaw.length; c++) {
+                            let dVal = headerDaysRaw[c];
+                            if (dVal !== undefined && dVal !== null && String(dVal).trim() !== '') {
+                                days.push(formatExcelDate(dVal));
+                            }
                         }
-                        groupsMap[gName].push({ name: mName, orders: orders });
-                    }
 
-                    let newGroups = [];
-                    for (let gName in groupsMap) {
-                        newGroups.push({ productGroup: gName, models: groupsMap[gName] });
-                    }
+                        let groupsMap = {};
+                        for (let r = 1; r < jsonRows.length; r++) {
+                            let row = jsonRows[r];
+                            if (!row || row.length === 0) continue;
+                            let groupName = String(row[0] || '').trim();
+                            let modelName = String(row[1] || '').trim();
+                            if (!groupName && !modelName) continue;
 
-                    if (newGroups.length > 0) {
-                        currentDailyData = { days: days, groups: newGroups };
-                        renderUnifiedTable(currentDailyData);
-                        renderMasterModelTable();
-                        initSelectors();
-                        renderCapacityTable(currentDailyData);
-                        renderDailyOrderSummaryTable(currentDailyData);
-                        
-                        let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
-                        planChart.data.labels = currentDailyData.days;
-                        planChart.data.datasets[0].data = calc.totalOutputs;
-                        planChart.update();
-                        
-                        alert('โหลดและอัปเดตข้อมูลจาก Excel สำเร็จ!');
+                            if (!groupName && Object.keys(groupsMap).length > 0) {
+                                let lastKey = Object.keys(groupsMap)[Object.keys(groupsMap).length - 1];
+                                groupName = lastKey;
+                            }
+                            if (!groupsMap[groupName]) groupsMap[groupName] = [];
+
+                            let orders = [];
+                            for (let c = 2; c < 2 + days.length; c++) {
+                                let val = parseFloat(row[c]) || 0;
+                                orders.push(val);
+                            }
+                            groupsMap[groupName].push({ name: modelName, orders: orders });
+                        }
+
+                        let newGroups = [];
+                        for (let gKey in groupsMap) {
+                            newGroups.push({ productGroup: gKey, models: groupsMap[gKey] });
+                        }
+
+                        if (newGroups.length > 0 && days.length > 0) {
+                            currentDailyData = { days: days, groups: newGroups };
+                            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
+
+                            initSelectors();
+                            renderUnifiedTable(currentDailyData);
+                            renderCapacityTable(currentDailyData);
+
+                            let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
+                            planChart.data.labels = currentDailyData.days;
+                            planChart.data.datasets[0].data = calc.totalOutputs;
+                            planChart.update();
+
+                            alert('โหลดข้อมูลจากไฟล์ Excel สำเร็จ!');
+                        }
                     }
+                } catch (err) {
+                    console.error(err);
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel กรุณาตรวจสอบรูปแบบไฟล์');
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function renderProcessTableInputs() {
-            const tbody = document.getElementById('processTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (currentProcessData.length === 0) {
-                currentProcessData = [
-                    { station: 'STA 10', p1: 'Setup & Feeding', p2: '-', p3: '-', wt1: 15, wt2: 0, wt3: 0, loss: 2 },
-                    { station: 'STA 20', p1: 'Main Process', p2: 'Inspection', p3: '-', wt1: 20, wt2: 5, wt3: 0, loss: 3 }
-                ];
-            }
-
-            currentProcessData.forEach((item, index) => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTot = w1 + w2 + w3;
-                let ct = wtTot + l;
-
-                let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40';
-                tr.innerHTML = `
-                    <td class="p-1.5 text-center"><input type="text" value="${item.station}" oninput="updateProcessRow(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p1}" oninput="updateProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p2}" oninput="updateProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p3}" oninput="updateProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt1}" oninput="updateProcessRow(${index}, 'wt1', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt2}" oninput="updateProcessRow(${index}, 'wt2', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt3}" oninput="updateProcessRow(${index}, 'wt3', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-cyan-300" id="wtTotal-${index}">${wtTot.toFixed(1)}</td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.loss}" oninput="updateProcessRow(${index}, 'loss', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-rose-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-emerald-400" id="ct-${index}">${ct.toFixed(1)}</td>
-                    <td class="p-1.5 text-center"><button onclick="removeProcessRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-0.5 rounded bg-rose-950/40 border border-rose-500/30">&times;</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
+        function saveDashboardData() {
+            localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
+            alert('บันทึกข้อมูลตารางแผนการผลิตสำเร็จ!');
         }
 
-        function updateProcessRow(index, field, value) {
-            currentProcessData[index][field] = value;
-            let item = currentProcessData[index];
-            let w1 = parseFloat(item.wt1) || 0;
-            let w2 = parseFloat(item.wt2) || 0;
-            let w3 = parseFloat(item.wt3) || 0;
-            let l = parseFloat(item.loss) || 0;
-            let wtTot = w1 + w2 + w3;
-            let ct = wtTot + l;
-
-            let wtElem = document.getElementById(`wtTotal-${index}`);
-            let ctElem = document.getElementById(`ct-${index}`);
-            if (wtElem) wtElem.textContent = wtTot.toFixed(1);
-            if (ctElem) ctElem.textContent = ct.toFixed(1);
-        }
-
-        function addNewStationRow() {
-            currentProcessData.push({ station: `STA ${ (currentProcessData.length + 1) * 10 }`, p1: 'New Process', p2: '-', p3: '-', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
-            renderProcessTableInputs();
-        }
-
-        function removeProcessRow(index) {
-            currentProcessData.splice(index, 1);
-            renderProcessTableInputs();
-        }
-
-        function saveProcessAndStationData() {
-            let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
-            processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
-            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
-            
-            renderSavedDisplayTable();
-            updateLobChart();
-            renderCapacityTable(currentDailyData);
-            alert('บันทึกข้อมูล Work Process & CT สำเร็จ!');
-            toggleEditModal();
-        }
-
-        function renderSavedDisplayTable() {
-            const tbody = document.getElementById('displaySavedTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (currentProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการทำงาน</td></tr>`;
-                return;
-            }
-
-            currentProcessData.forEach(item => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTot = w1 + w2 + w3;
-                let ct = wtTot + l;
-
-                let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/30';
-                tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-cyan-300">${item.station}</td>
-                    <td class="p-1.5 truncate max-w-[120px]">${item.p1}</td>
-                    <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-rose-300">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-cyan-400">${ct.toFixed(1)}s</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderDoorProcessTableInputs() {
-            const tbody = document.getElementById('doorProcessTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (currentDoorProcessData.length === 0) {
-                currentDoorProcessData = [
-                    { station: 'STA 10', p1: 'Door Setup', p2: '-', p3: '-', wt1: 12, wt2: 0, wt3: 0, loss: 1 },
-                    { station: 'STA 20', p1: 'Door Process', p2: '-', p3: '-', wt1: 18, wt2: 0, wt3: 0, loss: 2 }
-                ];
-            }
-
-            currentDoorProcessData.forEach((item, index) => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTot = w1 + w2 + w3;
-                let ct = wtTot + l;
-
-                let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/40';
-                tr.innerHTML = `
-                    <td class="p-1.5 text-center"><input type="text" value="${item.station}" oninput="updateDoorProcessRow(${index}, 'station', this.value)" class="w-20 bg-slate-800 text-cyan-300 text-center text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p1}" oninput="updateDoorProcessRow(${index}, 'p1', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p2}" oninput="updateDoorProcessRow(${index}, 'p2', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5"><input type="text" value="${item.p3}" oninput="updateDoorProcessRow(${index}, 'p3', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-1.5 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt1}" oninput="updateDoorProcessRow(${index}, 'wt1', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt2}" oninput="updateDoorProcessRow(${index}, 'wt2', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.wt3}" oninput="updateDoorProcessRow(${index}, 'wt3', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-amber-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-cyan-300" id="doorWtTotal-${index}">${wtTot.toFixed(1)}</td>
-                    <td class="p-1.5 text-center"><input type="number" step="0.1" value="${item.loss}" oninput="updateDoorProcessRow(${index}, 'loss', parseFloat(this.value)||0)" class="w-14 bg-slate-800 text-center text-rose-300 text-xs px-1 py-1 rounded border border-bordercolor"></td>
-                    <td class="p-1.5 text-center font-bold text-emerald-400" id="doorCt-${index}">${ct.toFixed(1)}</td>
-                    <td class="p-1.5 text-center"><button onclick="removeDoorProcessRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-0.5 rounded bg-rose-950/40 border border-rose-500/30">&times;</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updateDoorProcessRow(index, field, value) {
-            currentDoorProcessData[index][field] = value;
-            let item = currentDoorProcessData[index];
-            let w1 = parseFloat(item.wt1) || 0;
-            let w2 = parseFloat(item.wt2) || 0;
-            let w3 = parseFloat(item.wt3) || 0;
-            let l = parseFloat(item.loss) || 0;
-            let wtTot = w1 + w2 + w3;
-            let ct = wtTot + l;
-
-            let wtElem = document.getElementById(`doorWtTotal-${index}`);
-            let ctElem = document.getElementById(`doorCt-${index}`);
-            if (wtElem) wtElem.textContent = wtTot.toFixed(1);
-            if (ctElem) ctElem.textContent = ct.toFixed(1);
-        }
-
-        function addDoorNewStationRow() {
-            currentDoorProcessData.push({ station: `STA ${ (currentDoorProcessData.length + 1) * 10 }`, p1: 'New Door Process', p2: '-', p3: '-', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
-            renderDoorProcessTableInputs();
-        }
-
-        function removeDoorProcessRow(index) {
-            currentDoorProcessData.splice(index, 1);
-            renderDoorProcessTableInputs();
-        }
-
-        function saveDoorProcessAndStationData() {
-            let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
-            let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
-            doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
-            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
-            
-            renderDoorSavedDisplayTable();
-            updateDoorLobChart();
-            renderCapacityTable(currentDailyData);
-            alert('บันทึกข้อมูล Work Process & CT (Door Part) สำเร็จ!');
-            toggleDoorEditModal();
-        }
-
-        function renderDoorSavedDisplayTable() {
-            const tbody = document.getElementById('displayDoorSavedTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (currentDoorProcessData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500">ยังไม่มีข้อมูลกระบวนการทำงาน (Door)</td></tr>`;
-                return;
-            }
-
-            currentDoorProcessData.forEach(item => {
-                let w1 = parseFloat(item.wt1) || 0;
-                let w2 = parseFloat(item.wt2) || 0;
-                let w3 = parseFloat(item.wt3) || 0;
-                let l = parseFloat(item.loss) || 0;
-                let wtTot = w1 + w2 + w3;
-                let ct = wtTot + l;
-
-                let tr = document.createElement('tr');
-                tr.className = 'border-b border-bordercolor/30';
-                tr.innerHTML = `
-                    <td class="p-1.5 text-center font-bold text-amber-300">${item.station}</td>
-                    <td class="p-1.5 truncate max-w-[120px]">${item.p1}</td>
-                    <td class="p-1.5 text-center">${wtTot.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center text-rose-300">${l.toFixed(1)}s</td>
-                    <td class="p-1.5 text-center font-bold text-amber-400">${ct.toFixed(1)}s</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function toggleEditModal() {
-            let sec = document.getElementById('editProcessSection');
-            let btnText = document.getElementById('editModalBtnText');
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station';
-            } else {
-                sec.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station';
-            }
-        }
-
-        function toggleDoorEditModal() {
-            let sec = document.getElementById('editDoorProcessSection');
-            let btnText = document.getElementById('editDoorModalBtnText');
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                btnText.textContent = 'ปิดตารางแก้ไข Work Station (Door)';
-            } else {
-                sec.classList.add('hidden');
-                btnText.textContent = 'เปิดตารางแก้ไข Work Station (Door)';
-            }
-        }
-
-        function downloadProcessTemplate() {
-            let wb = XLSX.utils.book_new();
-            let wsData = [
-                ['Station', 'Process 1', 'Process 2', 'Process 3', 'WT 1', 'WT 2', 'WT 3', 'Loss', 'Cycle Time'],
-                ['STA 10', 'Setup', '-', '-', 10, 0, 0, 1, 11],
-                ['STA 20', 'Assembly', '-', '-', 15, 0, 0, 2, 17]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(wsData);
-            XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Process_Template.xlsx");
-        }
-
-        function downloadDoorProcessTemplate() {
-            let wb = XLSX.utils.book_new();
-            let wsData = [
-                ['Station', 'Process 1', 'Process 2', 'Process 3', 'WT 1', 'WT 2', 'WT 3', 'Loss', 'Cycle Time'],
-                ['STA 10', 'Door Setup', '-', '-', 12, 0, 0, 1, 13],
-                ['STA 20', 'Door Process', '-', '-', 18, 0, 0, 2, 20]
-            ];
-            let ws = XLSX.utils.aoa_to_sheet(wsData);
-            XLSX.utils.book_append_sheet(wb, ws, "Door_Template");
-            XLSX.writeFile(wb, "Door_Process_Template.xlsx");
-        }
-
-        function importProcessExcelData(event) {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let data = new Uint8Array(e.target.result);
-                let workbook = XLSX.read(data, { type: 'array' });
-                let sheet = workbook.Sheets[workbook.SheetNames[0]];
-                let json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                
-                let newStations = [];
-                for (let i = 1; i < json.length; i++) {
-                    let r = json[i];
-                    if (r && r.length > 0 && r[0]) {
-                        newStations.push({
-                            station: String(r[0] || `STA ${i*10}`),
-                            p1: String(r[1] || '-'),
-                            p2: String(r[2] || '-'),
-                            p3: String(r[3] || '-'),
-                            wt1: parseFloat(r[4]) || 0,
-                            wt2: parseFloat(r[5]) || 0,
-                            wt3: parseFloat(r[6]) || 0,
-                            loss: parseFloat(r[7]) || 0
-                        });
-                    }
-                }
-                if (newStations.length > 0) {
-                    currentProcessData = newStations;
-                    renderProcessTableInputs();
-                    alert('นำเข้าข้อมูลสำเร็จ! กดปุ่ม "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function importDoorProcessExcelData(event) {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let data = new Uint8Array(e.target.result);
-                let workbook = XLSX.read(data, { type: 'array' });
-                let sheet = workbook.Sheets[workbook.SheetNames[0]];
-                let json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                
-                let newStations = [];
-                for (let i = 1; i < json.length; i++) {
-                    let r = json[i];
-                    if (r && r.length > 0 && r[0]) {
-                        newStations.push({
-                            station: String(r[0] || `STA ${i*10}`),
-                            p1: String(r[1] || '-'),
-                            p2: String(r[2] || '-'),
-                            p3: String(r[3] || '-'),
-                            wt1: parseFloat(r[4]) || 0,
-                            wt2: parseFloat(r[5]) || 0,
-                            wt3: parseFloat(r[6]) || 0,
-                            loss: parseFloat(r[7]) || 0
-                        });
-                    }
-                }
-                if (newStations.length > 0) {
-                    currentDoorProcessData = newStations;
-                    renderDoorProcessTableInputs();
-                    alert('นำเข้าข้อมูล (Door) สำเร็จ! กดปุ่ม "บันทึกและแสดงผล" เพื่อบันทึกถาวร');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        // Initialize on load
+        // เริ่มต้นการทำงานระบบ
         initSelectors();
         renderUnifiedTable(currentDailyData);
-        renderMasterModelTable();
         renderCapacityTable(currentDailyData);
-        renderDailyOrderSummaryTable(currentDailyData);
     </script>
 </body>
 </html>
