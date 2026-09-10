@@ -1452,9 +1452,11 @@
                                     }
                                 });
                             });
+                            let dayUphInt = hours > 0 ? Math.round(lineQty / hours) : 0;
                             lineTotalHtml += `
                                 <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
                                     <div class="text-amber-400 text-xs font-bold">${Math.round(lineQty).toLocaleString()}</div>
+                                    <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
                                 </td>
                             `;
                         }
@@ -1463,7 +1465,7 @@
                     tbody.appendChild(lineTotalTr);
                 });
             } else {
-                // กรณีเลือกแท็บอื่น แสดงยอดรวมปกติ
+                // กรณีเลือกแท็บอื่น แสดงยอดรวมปกติและ UPH
                 let topTotalTr = document.createElement('tr');
                 topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
                 let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL</td><td class="p-3 bg-amber-950/95"></td><td class="p-3 text-center bg-amber-950/95">—</td>`;
@@ -1473,9 +1475,11 @@
                         topTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
                     } else {
                         let metrics = getDayCapacityMetrics(groups, days, i, currentSummaryStation, hours);
+                        let dayUphInt = hours > 0 ? Math.round(metrics.totalQty / hours) : 0;
                         topTotalHtml += `
                             <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
                                 <div class="text-amber-400 text-xs font-bold">${Math.round(metrics.totalQty).toLocaleString()}</div>
+                                <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
                             </td>
                         `;
                     }
@@ -1483,7 +1487,6 @@
                 topTotalTr.innerHTML = topTotalHtml;
                 tbody.appendChild(topTotalTr);
             }
-
             let filteredRowsCount = 0;
             groups.forEach(g => {
                 g.models.forEach((m) => {
