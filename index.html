@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haier Door Line - Production Dashboard</title>
+    <title>Haier Door Line - Production Dashboard (Merged)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -891,7 +891,7 @@
                                 </div>
                                 <div>
                                     <label class="text-[10px] text-slate-400 block">Station</label>
-                                    <select onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 font-semibold">
+                                    <select id="station_select_${m.name}" onchange="updateMasterModelField('${m.name}', 'station', this.value)" class="w-full bg-slate-800 text-amber-300 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5 font-semibold">
                                         <option value="Door A" ${config.station === 'Door A' ? 'selected' : ''}>Door A</option>
                                         <option value="Door B" ${config.station === 'Door B' ? 'selected' : ''}>Door B</option>
                                         <option value="Door C" ${config.station === 'Door C' ? 'selected' : ''}>Door C</option>
@@ -901,11 +901,11 @@
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 block">Assigned Routing Process & Lines</label>
-                                <input type="text" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
+                                <input type="text" id="routing_input_${m.name}" value="${config.routing}" onchange="updateMasterModelField('${m.name}', 'routing', this.value)" class="w-full bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 block">Qty / Set</label>
-                                <input type="number" min="1" value="${config.qtyPerSet}" onchange="updateMasterModelField('${m.name}', 'qtyPerSet', parseInt(this.value) || 1)" class="w-20 bg-slate-800 text-center text-amber-400 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
+                                <input type="number" id="qty_input_${m.name}" min="1" value="${config.qtyPerSet}" onchange="updateMasterModelField('${m.name}', 'qtyPerSet', parseInt(this.value) || 1)" class="w-20 bg-slate-800 text-center text-amber-400 text-xs px-2 py-1 rounded border border-bordercolor mt-0.5">
                             </div>
                         </td>
                         <td class="p-3 space-y-2 bg-slate-900/20">
@@ -969,8 +969,51 @@
             if (!masterModelConfig[modelName]) {
                 masterModelConfig[modelName] = getMasterConfigForModel(modelName);
             }
+
             masterModelConfig[modelName][field] = value;
+
+            // Door C Auto Routing
+            // BM23 / BM29 family:
+            // C-1 = RR, RL | C-2 = VEG, FB | C-3 = FL, FR
+            // TM / FUF family:
+            // C-3
+            if (field === 'station' && value === 'Door C') {
+                const group1Models = [
+                    'BM23', 'BM23 Café', 'BM23 DND', 'BM T-Door 23',
+                    'BM29', 'BM29 Café', 'BM29 DND', 'BM T-Door 28'
+                ];
+
+                const group2Models = [
+                    'TM14', 'TM-19 K', 'TM-19 L', 'TM-21 K', 'TM-21 T',
+                    'FUF14 D', 'FUF14 L', 'FUF14 Q', 'FUF14 S',
+                    'FUF18 D', 'FUF18 L', 'FUF18 Q', 'FUF18 S',
+                    'FUF22 D', 'FUF22 L', 'FUF22 Q', 'FUF22 S'
+                ];
+
+                if (group1Models.includes(modelName)) {
+                    masterModelConfig[modelName].routing =
+                        "C-1 = RR, RL = Q'ty 2\n" +
+                        "C-2 = VEG, FB = Q'ty 2\n" +
+                        "C-3 = FL, FR = Q'ty 2";
+                    masterModelConfig[modelName].qtyPerSet = 2;
+                } else if (group2Models.includes(modelName)) {
+                    masterModelConfig[modelName].routing = 'C-3';
+                    masterModelConfig[modelName].qtyPerSet = 2;
+                }
+
+                const routingInput = document.getElementById(`routing_input_${modelName}`);
+                const qtyInput = document.getElementById(`qty_input_${modelName}`);
+
+                if (routingInput) {
+                    routingInput.value = masterModelConfig[modelName].routing;
+                }
+                if (qtyInput) {
+                    qtyInput.value = masterModelConfig[modelName].qtyPerSet;
+                }
+            }
+
             renderDailyOrderSummaryTable(currentDailyData);
+            renderCapacityTable(currentDailyData);
         }
 
         function saveMasterModelConfig() {
@@ -1650,14 +1693,26 @@
                     html += `<td class="p-2 text-center text-cyan-300">${item.routing}</td>`;
                 } else {
                     columns.forEach(col => {
-                        let storageKey = `${modelName}_Door (Bending - ${col})`;
-                        let stList = doorProcessDatabase[storageKey];
+                        const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
                         let colCt = 0;
-                        if (stList && stList.length > 0) {
-                            stList.forEach(st => {
-                                colCt += (parseFloat(st.wt1) || 0) + (parseFloat(st.wt2) || 0) + (parseFloat(st.wt3) || 0) + (parseFloat(st.loss) || 0);
-                            });
-                        }
+
+                        subParts.forEach(subPart => {
+                            const storageKey = `${modelName}_Door (${subPart} - ${col})`;
+                            const stList = doorProcessDatabase[storageKey];
+
+                            if (stList && stList.length > 0) {
+                                stList.forEach(st => {
+                                    const ct =
+                                        (parseFloat(st.wt1) || 0) +
+                                        (parseFloat(st.wt2) || 0) +
+                                        (parseFloat(st.wt3) || 0) +
+                                        (parseFloat(st.loss) || 0);
+
+                                    if (ct > colCt) colCt = ct;
+                                });
+                            }
+                        });
+
                         html += `<td class="p-2 text-center text-slate-300">${colCt > 0 ? colCt.toFixed(1) + 's' : '-'}</td>`;
                     });
                 }
