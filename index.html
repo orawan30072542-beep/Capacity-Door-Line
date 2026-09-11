@@ -210,7 +210,7 @@
                     </p>
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-bordercolor">
                         <div class="max-h-[350px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableDailyOrderSummary" class="text-left border-collapse text-xs" style="table-layout:fixed; min-width:100%;">
+                            <table id="tableDailyOrderSummary" class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
                                 </thead>
@@ -220,37 +220,46 @@
                     </div>
                 </section>
 
-                <!-- GROUP STATION CONTROL: ใช้ร่วมกันทั้ง Capacity + Plan vs Actual -->
-                <div id="group-station-control" class="sticky top-[74px] z-20 bg-[#0b1329]/95 backdrop-blur-md border border-cyan-500/30 rounded-xl px-3 py-2 shadow-lg">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
-                            <span class="text-xs font-bold text-white">Group Station:</span>
-                            <span id="topCurrentStationLabel" class="text-cyan-300 text-xs font-bold px-2 py-1 rounded bg-blue-950/70 border border-blue-500/30">Door A</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <button onclick="switchCapacityStation('Door A')" data-topstation="Door A" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
-                            <button onclick="switchCapacityStation('Door B')" data-topstation="Door B" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
-                            <button onclick="switchCapacityStation('Door C')" data-topstation="Door C" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
-                            <button onclick="switchCapacityStation('Door Glass')" data-topstation="Door Glass" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
-                            <button onclick="switchCapacityStation('Back Plate')" data-topstation="Back Plate" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
-                            <button onclick="switchCapacityStation('Bottom Plate')" data-topstation="Bottom Plate" class="top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 3. CAPACITY จากเวลาการทำงาน -->
-                <section id="capacity-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-3 shadow-sm"> 
+                <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm"> 
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
+                        <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
+                            <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
+                            <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
+                            <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
+                            <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
+                            <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
+                            <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
+                            <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
+                        </div>
                     </div>
                     
-                    <div class="text-xs text-slate-300 bg-slate-900/50 px-4 py-2.5 rounded-xl border border-bordercolor/60 flex items-center justify-between">
-                        <span>แสดงข้อมูล Leadtime และ Max CT แยกตาม Group Station:</span>
-                        <span id="currentCapacityStationLabel" class="text-cyan-400 font-bold text-sm bg-blue-950/80 px-2.5 py-0.5 rounded border border-blue-500/30">Door A</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="bg-slate-900/60 rounded-xl border border-bordercolor px-4 py-3">
+                            <div class="text-[10px] text-slate-400">Group Station</div>
+                            <div id="currentCapacityStationLabel" class="text-cyan-300 font-bold text-base mt-1">Door A</div>
+                        </div>
+
+                        <div class="bg-slate-900/60 rounded-xl border border-emerald-500/30 px-4 py-3">
+                            <div class="text-[10px] text-slate-400">Lead Time (รวม Process)</div>
+                            <div class="flex items-end gap-1 mt-1">
+                                <span id="capacityLeadTimeValue" class="text-2xl font-bold text-emerald-300">0.0</span>
+                                <span class="text-[10px] text-slate-400 mb-1">sec</span>
+                            </div>
+                            <div id="capacityLeadTimeModel" class="text-[9px] text-slate-500 mt-1">-</div>
+                        </div>
+
+                        <div class="bg-slate-900/60 rounded-xl border border-amber-500/30 px-4 py-3">
+                            <div class="text-[10px] text-slate-400">สูตร Lead Time</div>
+                            <div class="text-[10px] text-amber-200 mt-1 leading-relaxed">
+                                Lead Time = ผลรวม CT ของทุก Process<br>
+                                CT = WT1 + WT2 + WT3 + Loss
+                            </div>
+                        </div>
                     </div>
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
@@ -262,73 +271,6 @@
                                 <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
                             </table>
                         </div>
-                    </div>
-                </section>
-
-                <!-- 3.5 PLAN vs ACTUAL CAPACITY COMPARISON -->
-                <section id="plan-actual-comparison" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-3 shadow-sm">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
-                            <div>
-                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3.5 เปรียบเทียบ Plan UPH vs Actual Capacity</h2>
-                                <p class="text-[11px] text-slate-400 mt-1">
-                                    Plan UPH = Order ÷ ชั่วโมงทำงาน | Process CT = WT1 + WT2 + WT3 + Loss | Max CT = CT สูงสุด | Actual UPH = 3600 ÷ Max CT
-                                </p>
-                            </div>
-                        </div>
-                        <span id="comparisonStationLabel" class="text-emerald-300 font-bold text-xs bg-emerald-950/50 px-3 py-1.5 rounded-lg border border-emerald-500/30">Door A</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="comparisonKpiCards">
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Avg Plan UPH</div>
-                            <div id="cmpAvgPlan" class="text-lg font-bold text-amber-300 mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Avg Actual UPH</div>
-                            <div id="cmpAvgActual" class="text-lg font-bold text-cyan-300 mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Avg Diff UPH</div>
-                            <div id="cmpAvgDiff" class="text-lg font-bold text-white mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Min Max CT</div>
-                            <div id="cmpMinCT" class="text-lg font-bold text-emerald-300 mt-1">0s</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Days Short</div>
-                            <div id="cmpShortDays" class="text-lg font-bold text-rose-300 mt-1">0</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div class="text-xs font-semibold text-white">Plan UPH vs Actual UPH</div>
-                            <div class="text-[10px] text-slate-400">รวมข้อมูลตาม Group Station ที่เลือก</div>
-                        </div>
-                        <div style="height:250px;">
-                            <canvas id="planActualCompareChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-xl border border-bordercolor/60">
-                        <table id="tablePlanActualComparison" class="w-full text-left border-collapse text-[11px]">
-                            <thead>
-                                <tr class="bg-slate-900 text-slate-300">
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900">Date</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900">Order Plan</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900 text-amber-300">Plan UPH</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900">Max CT</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900 text-cyan-300">Actual UPH</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900">Diff UPH</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900">Diff %</th>
-                                    <th class="p-2 text-center sticky top-0 bg-slate-900">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
-                        </table>
                     </div>
                 </section>
             </div>
@@ -654,8 +596,6 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
-        let planActualCompareChart = null;
-
         let selectedPartValue = 'Back Plate'; 
         let selectedProductGroup = ''; 
         let selectedModel = ''; 
@@ -701,7 +641,6 @@
                 document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
                 renderCapacityTable(currentDailyData);
                 renderDailyOrderSummaryTable(currentDailyData);
-                renderPlanActualComparison(currentDailyData);
             } else if (tabId === 'mastermodel') {
                 document.getElementById('tab-content-mastermodel').classList.remove('hidden');
                 document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
@@ -1311,9 +1250,82 @@
             return maxCT > 0 ? maxCT : 30;
         }
 
+        function getModelLeadTime(modelName) {
+            let totalLeadTime = 0;
+
+            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+
+            // รวม CT ของทุก Process ใน Door Part
+            doorTypes.forEach(dt => {
+                subParts.forEach(sp => {
+                    const storageKey = `${modelName}_Door (${sp} - ${dt})`;
+                    const stations = doorProcessDatabase[storageKey];
+
+                    if (stations && Array.isArray(stations)) {
+                        stations.forEach(st => {
+                            totalLeadTime +=
+                                (parseFloat(st.wt1) || 0) +
+                                (parseFloat(st.wt2) || 0) +
+                                (parseFloat(st.wt3) || 0) +
+                                (parseFloat(st.loss) || 0);
+                        });
+                    }
+                });
+            });
+
+            // รวม CT ของ Back Plate / Bottom Plate / Gasket
+            ['Back Plate', 'Bottom Plate', 'Gasket'].forEach(part => {
+                const storageKey = `${modelName}_${part}`;
+                const stations = processDatabase[storageKey];
+
+                if (stations && Array.isArray(stations)) {
+                    stations.forEach(st => {
+                        totalLeadTime +=
+                            (parseFloat(st.wt1) || 0) +
+                            (parseFloat(st.wt2) || 0) +
+                            (parseFloat(st.wt3) || 0) +
+                            (parseFloat(st.loss) || 0);
+                    });
+                }
+            });
+
+            return totalLeadTime;
+        }
+
+        function updateCapacityLeadTimeSummary(modelsToDisplay) {
+            const valueEl = document.getElementById('capacityLeadTimeValue');
+            const modelEl = document.getElementById('capacityLeadTimeModel');
+            if (!valueEl || !modelEl) return;
+
+            if (!modelsToDisplay || modelsToDisplay.length === 0) {
+                valueEl.textContent = '0.0';
+                modelEl.textContent = 'ไม่พบ Model';
+                return;
+            }
+
+            let maxLeadTime = 0;
+            let maxModel = '-';
+
+            modelsToDisplay.forEach(item => {
+                const modelName = item.model || item;
+                const leadTime = getModelLeadTime(modelName);
+
+                if (leadTime > maxLeadTime) {
+                    maxLeadTime = leadTime;
+                    maxModel = modelName;
+                }
+            });
+
+            valueEl.textContent = maxLeadTime.toFixed(1);
+            modelEl.textContent = maxLeadTime > 0
+                ? `Max Lead Time Model: ${maxModel}`
+                : 'ยังไม่มีข้อมูล Work Process';
+        }
+
         function getDayCapacityMetrics(groups, days, dayIndex, summaryStation, hours) {
             if (isSunday(days[dayIndex])) {
-                return { totalQty: 0, uphPlan: 0, uphPlan85: 0, effectiveMaxCT: 0, uphActMaxCT: 0, uphActMaxCT85: 0, diffUph: 0, diffPct: 0 };
+                return { totalQty: 0, uphPlan: 0, uphPlan85: 0, uphActMaxCT: 0, uphActMaxCT85: 0 };
             }
             let totalQty = 0;
             let maxCTValues = [];
@@ -1364,18 +1376,12 @@
             let uphActMaxCT = effectiveMaxCT > 0 ? 3600 / effectiveMaxCT : 0;
             let uphActMaxCT85 = uphActMaxCT * 0.85;
 
-            const diffUph = uphActMaxCT - uphPlan;
-            const diffPct = uphPlan > 0 ? (diffUph / uphPlan) * 100 : 0;
-
             return {
                 totalQty: Math.round(totalQty),
                 uphPlan,
                 uphPlan85,
-                effectiveMaxCT,
                 uphActMaxCT,
-                uphActMaxCT85,
-                diffUph,
-                diffPct
+                uphActMaxCT85
             };
         }
 
@@ -1429,7 +1435,6 @@
             renderUnifiedTable(currentDailyData);
             renderCapacityTable(currentDailyData);
             renderDailyOrderSummaryTable(currentDailyData);
-            renderPlanActualComparison(currentDailyData);
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -1655,7 +1660,7 @@
                     if (mIndex === 0) {
                         html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${g.models.length}">${g.productGroup}</td>`;
                     }
-                    html += `<td class="px-2 py-3 font-medium text-slate-200 bg-slate-900/40 whitespace-normal break-words">${m.name}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
                         if (isSunday(day)) {
@@ -1713,104 +1718,20 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            // ล็อกความกว้าง 3 คอลัมน์แรก + คอลัมน์วันที่ เพื่อไม่ให้ขยับเมื่อเปลี่ยน Group Station
-            const firstColWidth = 92;
-            const secondColWidth = 104;
-            const thirdColWidth = 128;
-            const dayColWidth = 64;
-            const totalTableWidth = firstColWidth + secondColWidth + thirdColWidth + (days.length * dayColWidth);
-
-            tableElement.style.tableLayout = 'fixed';
-            tableElement.style.width = `${totalTableWidth}px`;
-            tableElement.style.minWidth = '100%';
-
-            let oldColgroup = tableElement.querySelector('colgroup');
-            if (oldColgroup) oldColgroup.remove();
-
-            const colgroup = document.createElement('colgroup');
-            colgroup.innerHTML = `
-                <col style="width:${firstColWidth}px">
-                <col style="width:${secondColWidth}px">
-                <col style="width:${thirdColWidth}px">
-                ${days.map(() => `<col style="width:${dayColWidth}px">`).join('')}
-            `;
-            tableElement.insertBefore(colgroup, tableElement.firstChild);
-
-            let headerHtml = `
-                <th class="px-2 py-3 font-medium text-slate-300 bg-slate-900 sticky top-0 z-30 whitespace-normal leading-tight">Product<br>Group</th>
-                <th class="px-2 py-3 font-medium text-slate-300 bg-slate-900 sticky top-0 z-30 whitespace-normal leading-tight">Model</th>
-                <th class="px-2 py-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30 whitespace-normal leading-tight">Production<br>Status</th>
-            `;
+            let headerHtml = `<th class="p-3 font-medium w-80 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th><th class="p-3 font-medium text-center w-28 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th>`;
             days.forEach(day => {
-                headerHtml += `<th class="px-1 py-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-10 whitespace-nowrap">${day}</th>`;
+                headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-10">${day}</th>`;
             });
             headerRow.innerHTML = headerHtml;
 
-            // TOTAL ด้านบน:
-            // - Door C แสดงแยก C-1 / C-2 / C-3 เท่านั้น
-            // - Back/Bottom Plate แสดง Line#1 / Line#2 ตามเดิม
-            // - Station อื่นแสดง TOTAL ปกติ
-            if (currentSummaryStation === 'Door C') {
-                const doorCLines = ['C-1', 'C-2', 'C-3'];
-
-                doorCLines.forEach((lineName, lineIndex) => {
-                    let lineTotalTr = document.createElement('tr');
-                    lineTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 shadow-md border-b border-bordercolor';
-                    lineTotalTr.style.position = 'sticky';
-                    lineTotalTr.style.top = `${41 + (lineIndex * 36)}px`;
-                    lineTotalTr.style.zIndex = String(24 - lineIndex);
-
-                    let lineTotalHtml = `
-                        <td class="px-2 py-2 bg-amber-950/95 whitespace-nowrap">TOTAL</td>
-                        <td class="px-2 py-2 bg-amber-950/95 text-center font-bold text-amber-300">${lineName}</td>
-                        <td class="px-2 py-2 text-center bg-amber-950/95 text-[10px] text-amber-200">Door C</td>
-                    `;
-
-                    for (let i = 0; i < days.length; i++) {
-                        let day = days[i];
-
-                        if (isSunday(day)) {
-                            lineTotalHtml += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                            continue;
-                        }
-
-                        let lineQty = 0;
-
-                        groups.forEach(g => {
-                            g.models.forEach(m => {
-                                const config = getMasterConfigForModel(m.name);
-                                if (config.station !== 'Door C') return;
-
-                                const routeItem = getDoorCRoutingDetails(m.name).find(item => item.line === lineName);
-                                if (!routeItem) return;
-
-                                const ratio = getDoorCManualRatio(m.name, lineName, routeItem.qty);
-                                const orderVal = Math.round(Number(m.orders[i]) || 0);
-                                lineQty += orderVal * ratio;
-                            });
-                        });
-
-                        const dayUphInt = hours > 0 ? Math.round(lineQty / hours) : 0;
-
-                        lineTotalHtml += `
-                            <td class="p-2 text-center border-l border-bordercolor/40 bg-amber-950/95 text-[10px]">
-                                <div class="text-amber-400 text-xs font-bold">${Math.round(lineQty).toLocaleString()}</div>
-                                <div class="text-white text-[10px] font-normal opacity-90">${dayUphInt.toLocaleString()}</div>
-                            </td>
-                        `;
-                    }
-
-                    lineTotalTr.innerHTML = lineTotalHtml;
-                    tbody.appendChild(lineTotalTr);
-                });
-
-            } else if (currentSummaryStation === 'Back Plate' || currentSummaryStation === 'Bottom Plate') {
+            // คำนวณแถวสรุปพิเศษเฉพาะ Back Plate (แยก Line#1 และ Line#2 ไว้แถวบนสุดเฉพาะหน้า Back Plate เท่านั้น)
+            if (currentSummaryStation === 'Back Plate' || currentSummaryStation === 'Bottom Plate') {
                 let isBack = (currentSummaryStation === 'Back Plate');
                 ['Line#1', 'Line#2'].forEach(lineName => {
                     let lineTotalTr = document.createElement('tr');
                     lineTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-                    let lineTotalHtml = `<td class="px-2 py-2 bg-amber-950/95">TOTAL (${lineName})</td><td class="px-2 py-2 bg-amber-950/95">${currentSummaryStation}</td><td class="px-2 py-2 text-center bg-amber-950/95">${lineName}</td>`;
-
+                    let lineTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL (${lineName})</td><td class="p-3 bg-amber-950/95">${currentSummaryStation}</td><td class="p-3 text-center bg-amber-950/95">${lineName}</td>`;
+                    
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
                         if (isSunday(day)) {
@@ -1822,7 +1743,7 @@
                                     let config = getMasterConfigForModel(m.name);
                                     let source = isBack ? config.backPlateSource : config.bottomSource;
                                     let line = isBack ? (config.backPlateLine || 'Line#1') : (config.bottomLine || 'Line#1');
-
+                                    
                                     if (source === 'ผลิตเอง' && line === lineName) {
                                         let orderVal = Math.round(Number(m.orders[i]) || 0);
                                         lineQty += orderVal;
@@ -1841,12 +1762,11 @@
                     lineTotalTr.innerHTML = lineTotalHtml;
                     tbody.appendChild(lineTotalTr);
                 });
-
             } else {
+                // กรณีเลือกแท็บอื่น แสดงยอดรวมปกติและ UPH
                 let topTotalTr = document.createElement('tr');
                 topTotalTr.className = 'bg-amber-950/95 font-bold text-amber-300 sticky top-[41px] z-20 shadow-md border-b-2 border-bordercolor';
-                let topTotalHtml = `<td class="px-2 py-2 bg-amber-950/95">TOTAL</td><td class="px-2 py-2 bg-amber-950/95"></td><td class="px-2 py-2 text-center bg-amber-950/95">—</td>`;
-
+                let topTotalHtml = `<td class="p-3 bg-amber-950/95">TOTAL</td><td class="p-3 bg-amber-950/95"></td><td class="p-3 text-center bg-amber-950/95">—</td>`;
                 for (let i = 0; i < days.length; i++) {
                     let day = days[i];
                     if (isSunday(day)) {
@@ -1862,11 +1782,9 @@
                         `;
                     }
                 }
-
                 topTotalTr.innerHTML = topTotalHtml;
                 tbody.appendChild(topTotalTr);
             }
-
             let filteredRowsCount = 0;
             groups.forEach(g => {
                 g.models.forEach((m) => {
@@ -1931,10 +1849,10 @@
                     tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
                     let html = '';
                     if (mIndex === 0) {
-                        html += `<td class="px-2 py-3 font-semibold text-white bg-slate-900/60 align-middle whitespace-normal break-words" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
+                        html += `<td class="p-3 font-semibold text-white bg-slate-900/60 align-middle" rowspan="${validModelsInGroup.length}">${g.productGroup}</td>`;
                     }
-                    html += `<td class="px-2 py-3 font-medium text-slate-200 bg-slate-900/40 whitespace-normal break-words">${m.name}</td>`;
-                    html += `<td class="px-2 py-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-[10px] leading-tight whitespace-normal break-words">${statusText}</td>`;
+                    html += `<td class="p-3 font-medium text-slate-200 bg-slate-900/40">${m.name}</td>`;
+                    html += `<td class="p-3 text-center text-cyan-300 font-semibold bg-slate-900/40 text-[11px]">${statusText}</td>`;
 
                     for (let i = 0; i < days.length; i++) {
                         let day = days[i];
@@ -1959,163 +1877,23 @@
             });
         }
 
-        function renderPlanActualComparison(data) {
-            const table = document.getElementById('tablePlanActualComparison');
-            if (!table || !data || !data.days || !data.groups) return;
-
-            const tbody = table.querySelector('tbody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
-            const station = currentCapacityStation || 'Door A';
-
-            const label = document.getElementById('comparisonStationLabel');
-            if (label) label.textContent = station;
-
-            let planSum = 0;
-            let actualSum = 0;
-            let diffSum = 0;
-            let activeDays = 0;
-            let shortDays = 0;
-            let minCT = null;
-
-            const chartLabels = [];
-            const chartPlan = [];
-            const chartActual = [];
-
-            data.days.forEach((day, i) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition';
-
-                if (isSunday(day)) {
-                    tr.innerHTML = `
-                        <td class="p-2 text-center text-slate-500">${day}</td>
-                        <td colspan="7" class="p-2 text-center text-slate-600 bg-slate-950/50">Sunday / No production</td>
-                    `;
-                    tbody.appendChild(tr);
-                    return;
-                }
-
-                const metrics = getDayCapacityMetrics(data.groups, data.days, i, station, hours);
-                const plan = metrics.uphPlan || 0;
-                const actual = metrics.uphActMaxCT || 0;
-                const diff = actual - plan;
-                const diffPct = plan > 0 ? (diff / plan) * 100 : 0;
-                const hasOrder = metrics.totalQty > 0;
-
-                if (hasOrder) {
-                    chartLabels.push(day);
-                    chartPlan.push(Number(plan.toFixed(1)));
-                    chartActual.push(Number(actual.toFixed(1)));
-                    planSum += plan;
-                    actualSum += actual;
-                    diffSum += diff;
-                    activeDays++;
-                    if (diff < 0) shortDays++;
-                    if (metrics.effectiveMaxCT > 0) {
-                        minCT = minCT === null ? metrics.effectiveMaxCT : Math.min(minCT, metrics.effectiveMaxCT);
-                    }
-                }
-
-                let diffClass = 'text-slate-400';
-                let statusText = 'NO PLAN';
-                let statusClass = 'text-slate-500 bg-slate-800/50';
-
-                if (hasOrder) {
-                    if (diff >= 0) {
-                        diffClass = 'text-emerald-300';
-                        statusText = 'PASS';
-                        statusClass = 'text-emerald-300 bg-emerald-950/40';
-                    } else {
-                        diffClass = 'text-rose-300';
-                        statusText = 'SHORT';
-                        statusClass = 'text-rose-300 bg-rose-950/40';
-                    }
-                }
-
-                tr.innerHTML = `
-                    <td class="p-2 text-center font-medium text-white">${day}</td>
-                    <td class="p-2 text-center text-slate-200">${metrics.totalQty.toLocaleString()}</td>
-                    <td class="p-2 text-center font-bold text-amber-300">${hasOrder ? plan.toFixed(1) : '-'}</td>
-                    <td class="p-2 text-center text-cyan-200">${hasOrder ? metrics.effectiveMaxCT.toFixed(1) + 's' : '-'}</td>
-                    <td class="p-2 text-center font-bold text-cyan-300">${hasOrder ? actual.toFixed(1) : '-'}</td>
-                    <td class="p-2 text-center font-bold ${diffClass}">${hasOrder ? (diff >= 0 ? '+' : '') + diff.toFixed(1) : '-'}</td>
-                    <td class="p-2 text-center font-semibold ${diffClass}">${hasOrder ? (diffPct >= 0 ? '+' : '') + diffPct.toFixed(1) + '%' : '-'}</td>
-                    <td class="p-2 text-center">
-                        <span class="inline-block min-w-[62px] px-2 py-1 rounded-md text-[10px] font-bold ${statusClass}">${statusText}</span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            const avgPlan = activeDays > 0 ? planSum / activeDays : 0;
-            const avgActual = activeDays > 0 ? actualSum / activeDays : 0;
-            const avgDiff = activeDays > 0 ? diffSum / activeDays : 0;
-
-            const setText = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
-            };
-
-            setText('cmpAvgPlan', avgPlan.toFixed(1));
-            setText('cmpAvgActual', avgActual.toFixed(1));
-            setText('cmpAvgDiff', `${avgDiff >= 0 ? '+' : ''}${avgDiff.toFixed(1)}`);
-            setText('cmpMinCT', minCT !== null ? `${minCT.toFixed(1)}s` : '-');
-            setText('cmpShortDays', String(shortDays));
-
-            const diffEl = document.getElementById('cmpAvgDiff');
-            if (diffEl) {
-                diffEl.className = `text-lg font-bold mt-1 ${avgDiff >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
-            }
-
-            const chartCanvas = document.getElementById('planActualCompareChart');
-            if (chartCanvas) {
-                if (planActualCompareChart) planActualCompareChart.destroy();
-
-                planActualCompareChart = new Chart(chartCanvas.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: chartLabels,
-                        datasets: [
-                            { label: 'Plan UPH', data: chartPlan, borderWidth: 2, tension: 0.25, pointRadius: 3 },
-                            { label: 'Actual UPH', data: chartActual, borderWidth: 2, tension: 0.25, pointRadius: 3 }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true } }
-                        },
-                        scales: {
-                            y: { beginAtZero: true, title: { display: true, text: 'UPH (PCS/Hr)' } },
-                            x: { ticks: { maxRotation: 0, autoSkip: false } }
-                        }
-                    }
-                });
-            }
-        }
-
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
-
-            const capLabel = document.getElementById('currentCapacityStationLabel');
-            if (capLabel) capLabel.textContent = stationName;
-
-            const topLabel = document.getElementById('topCurrentStationLabel');
-            if (topLabel) topLabel.textContent = stationName;
-
-            document.querySelectorAll('.top-station-btn').forEach(btn => {
-                const isActive = btn.getAttribute('data-topstation') === stationName;
-                btn.className = isActive
-                    ? "top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow"
-                    : "top-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+            document.getElementById('currentCapacityStationLabel').textContent = stationName;
+            
+            ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'].forEach(st => {
+                let btnId = 'cap-btn-' + st.toLowerCase().replace(' ', '-');
+                let btn = document.getElementById(btnId);
+                if (btn) {
+                    if (st === stationName) {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow";
+                    } else {
+                        btn.className = "cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+                    }
+                }
             });
 
             renderCapacityTable(currentDailyData);
-            renderPlanActualComparison(currentDailyData);
         }
 
         function renderCapacityTable(data) {
@@ -2157,6 +1935,8 @@
                     }
                 });
             });
+
+            updateCapacityLeadTimeSummary(modelsToDisplay);
 
             if (modelsToDisplay.length === 0) {
                 let tr = document.createElement('tr');
@@ -2262,7 +2042,6 @@
                         initSelectors();
                         renderCapacityTable(currentDailyData);
                         renderDailyOrderSummaryTable(currentDailyData);
-                        renderPlanActualComparison(currentDailyData);
                         
                         let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
                         planChart.data.labels = currentDailyData.days;
@@ -2617,7 +2396,6 @@
         renderMasterModelTable();
         renderCapacityTable(currentDailyData);
         renderDailyOrderSummaryTable(currentDailyData);
-        renderPlanActualComparison(currentDailyData);
     </script>
 </body>
 </html>
