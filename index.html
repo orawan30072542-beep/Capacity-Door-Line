@@ -121,7 +121,7 @@
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower Requirement Overview ตาม Order รายวัน</h2>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนตามไลน์ผลิต | Order + Short 20% = Door Order × 1.20 | UPH แสดงในช่องเดียวกับ Order | Manpower คำนวณจาก Order + Short 20%
+                                สรุปกำลังคนตามไลน์ผลิต | Order + Short 20% = Door Order × 1.20 | พนักงานคนต่อวัน = Order + Short 20% ÷ (3600 ÷ Overall Lead Time)
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1996,6 +1996,12 @@
             const effectiveUPM85 = avgLeadTime > 0 ? (3600 / avgLeadTime) * 0.85 : 0;
             const capacityPerManDay = effectiveUPM85 * hours;
 
+            // พนักงานคนต่อวัน ตามสูตรที่กำหนด:
+            // Order + Short 20% ÷ (3600 ÷ Overall Lead Time)
+            const personPerDay = avgLeadTime > 0
+                ? shortageOrder / (3600 / avgLeadTime)
+                : 0;
+
             // Manpower คิดจาก Order ที่เผื่อ Short 20%
             const shortageManHours = effectiveUPM85 > 0 ? shortageOrder / effectiveUPM85 : 0;
             const manpowerCalc = hours > 0 ? shortageManHours / hours : 0;
@@ -2012,6 +2018,7 @@
                 avgLeadTime,
                 effectiveUPM85,
                 capacityPerManDay,
+                personPerDay,
                 manpowerCalc,
                 manpowerRequired
             };
@@ -2107,7 +2114,13 @@
                         : '-'
                 },
                 { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
-                { key: 'effectiveUPM85', label: 'UPH 85% / Man', subLabel: 'จาก Overall Lead Time', cls: 'text-cyan-300', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
+                {
+                    key: 'personPerDay',
+                    label: 'พนักงานคนต่อวัน',
+                    subLabel: 'Order + Short 20% ÷ (3600 ÷ Lead Time)',
+                    cls: 'text-cyan-300',
+                    format: v => v > 0 ? Math.ceil(v).toLocaleString() : '-'
+                },
                 { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
 ];
 
@@ -2122,6 +2135,7 @@
                             avgLeadTime: 0,
                             effectiveUPM85: 0,
                             capacityPerManDay: 0,
+                            personPerDay: 0,
                             manpowerCalc: 0,
                             manpowerRequired: 0};
                     }
