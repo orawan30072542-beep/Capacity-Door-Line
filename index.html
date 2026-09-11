@@ -2123,8 +2123,7 @@
                     subLabel: 'Order/Hour ÷ (3600 ÷ Lead Time)',
                     cls: 'text-cyan-300',
                     format: (v, row) => v > 0
-                        ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>
-                           <div class="text-[8px] text-sky-300 mt-0.5">Order/Hour ${Math.ceil(row.requiredOrderPerHour).toLocaleString()}</div>`
+                        ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>`
                         : '-'
                 },
 ];
