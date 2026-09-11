@@ -41,6 +41,19 @@
             height: 480px;
         }
     </style>
+
+<style>
+#tableManpowerCapacity thead th{
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 65 !important;
+}
+#tableManpowerCapacity thead th:nth-child(1),
+#tableManpowerCapacity thead th:nth-child(2){
+    z-index: 70 !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -2130,14 +2143,14 @@
             table.insertBefore(colgroup, table.firstChild);
 
             let headerHtml = `
-                <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-[60] text-center shadow-sm">Group / Line</th>
-                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-[60] text-left whitespace-nowrap shadow-sm"
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-[70] text-center shadow-md">Group / Line</th>
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-[70] text-left whitespace-nowrap shadow-md"
                     style="left:${fixedGroupWidth}px;">Metric</th>
             `;
             days.forEach(day => {
-                headerHtml += `<th class="px-1 py-2 bg-slate-900 sticky top-0 z-50 text-center whitespace-nowrap shadow-sm">${day}</th>`;
+                headerHtml += `<th class="px-1 py-2 bg-slate-900 sticky top-0 z-[65] text-center whitespace-nowrap shadow-md">${day}</th>`;
             });
-            headerHtml += `<th class="px-1 py-2 bg-amber-950 sticky top-0 z-50 text-center text-amber-300 shadow-sm">TOTAL</th>`;
+            headerHtml += `<th class="px-1 py-2 bg-amber-950 sticky top-0 z-[65] text-center text-amber-300 shadow-md">TOTAL</th>`;
             headerRow.innerHTML = headerHtml;
 
             tbody.innerHTML = '';
