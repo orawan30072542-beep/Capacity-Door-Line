@@ -397,6 +397,7 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
+                                <button onclick="clearProcessAndStationData()" class="bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">ล้างข้อมูล</button>
                                 <button onclick="toggleEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">ปิดหน้าต่าง</button>
                             </div>
                         </div>
@@ -543,6 +544,7 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <button onclick="saveDoorProcessAndStationData()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">บันทึกและแสดงผล</button>
+                                <button onclick="clearDoorProcessAndStationData()" class="bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition">ล้างข้อมูล</button>
                                 <button onclick="toggleDoorEditModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-bordercolor transition">ปิดหน้าต่าง</button>
                             </div>
                         </div>
@@ -2045,10 +2047,8 @@
             tbody.innerHTML = '';
 
             if (currentProcessData.length === 0) {
-                currentProcessData = [
-                    { station: 'STA 10', p1: 'Setup & Feeding', p2: '-', p3: '-', wt1: 15, wt2: 0, wt3: 0, loss: 2 },
-                    { station: 'STA 20', p1: 'Main Process', p2: 'Inspection', p3: '-', wt1: 20, wt2: 5, wt3: 0, loss: 3 }
-                ];
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-500">ไม่มีข้อมูล — กด “เพิ่ม Station” เพื่อเริ่มกรอกข้อมูลใหม่</td></tr>`;
+                return;
             }
 
             currentProcessData.forEach((item, index) => {
@@ -2116,6 +2116,28 @@
             toggleEditModal();
         }
 
+        function clearProcessAndStationData() {
+            const modelName = selectedModel || '-';
+            const partName = selectedPartValue || '-';
+
+            if (!confirm(`ยืนยันล้างข้อมูล Cycle Time และชื่อกระบวนการ\nModel: ${modelName}\nPart: ${partName}\n\nข้อมูลที่บันทึกไว้ของรายการนี้จะถูกลบ`)) {
+                return;
+            }
+
+            const storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
+
+            currentProcessData = [];
+            delete processDatabase[storageKey];
+            localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+
+            renderProcessTableInputs();
+            renderSavedDisplayTable();
+            updateLobChart();
+            renderCapacityTable(currentDailyData);
+
+            alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการเรียบร้อยแล้ว');
+        }
+
         function renderSavedDisplayTable() {
             const tbody = document.getElementById('displaySavedTableBody');
             if (!tbody) return;
@@ -2153,10 +2175,8 @@
             tbody.innerHTML = '';
 
             if (currentDoorProcessData.length === 0) {
-                currentDoorProcessData = [
-                    { station: 'STA 10', p1: 'Door Setup', p2: '-', p3: '-', wt1: 12, wt2: 0, wt3: 0, loss: 1 },
-                    { station: 'STA 20', p1: 'Door Process', p2: '-', p3: '-', wt1: 18, wt2: 0, wt3: 0, loss: 2 }
-                ];
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-500">ไม่มีข้อมูล — กด “เพิ่ม Station” เพื่อเริ่มกรอกข้อมูลใหม่</td></tr>`;
+                return;
             }
 
             currentDoorProcessData.forEach((item, index) => {
@@ -2223,6 +2243,30 @@
             renderCapacityTable(currentDailyData);
             alert('บันทึกข้อมูล Work Process & CT (Door Part) สำเร็จ!');
             toggleDoorEditModal();
+        }
+
+        function clearDoorProcessAndStationData() {
+            const modelName = selectedDoorModel || '-';
+            const processName = selectedDoorSubPart || '-';
+            const doorType = selectedDoorType || '-';
+
+            if (!confirm(`ยืนยันล้างข้อมูล Cycle Time และชื่อกระบวนการ (Door Part)\nModel: ${modelName}\nProcess: ${processName}\nType: ${doorType}\n\nข้อมูลที่บันทึกไว้ของรายการนี้จะถูกลบ`)) {
+                return;
+            }
+
+            const effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
+            const storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
+
+            currentDoorProcessData = [];
+            delete doorProcessDatabase[storageKey];
+            localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+
+            renderDoorProcessTableInputs();
+            renderDoorSavedDisplayTable();
+            updateDoorLobChart();
+            renderCapacityTable(currentDailyData);
+
+            alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการ (Door Part) เรียบร้อยแล้ว');
         }
 
         function renderDoorSavedDisplayTable() {
