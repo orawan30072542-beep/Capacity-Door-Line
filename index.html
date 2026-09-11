@@ -713,6 +713,7 @@
                 document.getElementById('tab-content-dashboard').classList.remove('hidden');
                 document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
                 renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
                 renderDailyOrderSummaryTable(currentDailyData);
                 renderManpowerTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
@@ -1020,6 +1021,7 @@
             localStorage.setItem(getDoorCRatioKey(modelName, line), String(ratio));
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
         }
 
         function getDoorCOrderMultiplier(modelName) {
@@ -1258,6 +1260,7 @@
 
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
         }
 
         function saveMasterModelConfig() {
@@ -1435,6 +1438,7 @@
             alert(`บันทึกชั่วโมงทำงานเป็น: ${hours} ชั่วโมง เรียบร้อยแล้ว`);
             renderUnifiedTable(currentDailyData);
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
             renderDailyOrderSummaryTable(currentDailyData);
             renderManpowerTable(currentDailyData);
         }
@@ -2782,6 +2786,7 @@
             });
 
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
         }
 
         function getDoorTypeLeadTime(modelName, doorType) {
@@ -2833,6 +2838,7 @@
             else hidden.add(groupName);
 
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
         }
 
         function renderCapacityGroupVisibilityControls() {
@@ -2864,6 +2870,64 @@
                         ${isHidden ? 'Unhide' : 'Hide'} ${group}
                     </button>`;
             }).join('');
+        }
+
+
+        function applyBackBottomHourlyCapacityColumns() {
+            if (currentCapacityStation !== 'Back Plate' && currentCapacityStation !== 'Bottom Plate') return;
+
+            const table = document.querySelector('#capacity-section table, #capacityTable, #tableCapacity');
+            if (!table) return;
+
+            const headerCells = Array.from(table.querySelectorAll('thead th'));
+            const routingTh = headerCells.find(th => /Routing\s*\/\s*Line/i.test(th.textContent || ''));
+            if (routingTh) {
+                routingTh.style.width = '10%';
+                routingTh.style.minWidth = '90px';
+                routingTh.style.maxWidth = '10%';
+            }
+
+            // Find UPH85 column
+            let headers = Array.from(table.querySelectorAll('thead th'));
+            const uph85Index = headers.findIndex(th => /UPH\s*85%/i.test(th.textContent || ''));
+            if (uph85Index < 0) return;
+
+            // Avoid duplicate columns.
+            if (headers.some(th => (th.textContent || '').trim() === '4 hr')) return;
+
+            const hours = [4, 8, 10.5, 21];
+            const headerRow = table.querySelector('thead tr');
+            hours.forEach(hr => {
+                const th = document.createElement('th');
+                th.className = 'px-2 py-2 text-center text-cyan-300 whitespace-nowrap';
+                th.textContent = `${hr} hr`;
+                headerRow.appendChild(th);
+            });
+
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const cells = Array.from(tr.children);
+                if (!cells.length) return;
+
+                // Group separator rows span the table; extend colspan.
+                const spanCell = cells.find(td => Number(td.getAttribute('colspan') || 0) > 1);
+                if (spanCell) {
+                    spanCell.colSpan = Number(spanCell.colSpan || 1) + hours.length;
+                    return;
+                }
+
+                const uph85Cell = cells[uph85Index];
+                if (!uph85Cell) return;
+
+                const raw = (uph85Cell.textContent || '').replace(/,/g, '').trim();
+                const uph85 = parseFloat(raw) || 0;
+
+                hours.forEach(hr => {
+                    const td = document.createElement('td');
+                    td.className = 'px-2 py-2 text-center text-cyan-300 font-semibold whitespace-nowrap';
+                    td.textContent = uph85 > 0 ? Math.round(uph85 * hr).toLocaleString() : '-';
+                    tr.appendChild(td);
+                });
+            });
         }
 
         function renderCapacityTable(data) {
@@ -3162,6 +3226,7 @@
                         renderMasterModelTable();
                         initSelectors();
                         renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
                         renderDailyOrderSummaryTable(currentDailyData);
                         renderManpowerTable(currentDailyData);
                         
@@ -3243,6 +3308,7 @@
             renderSavedDisplayTable();
             updateLobChart();
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
             alert('บันทึกข้อมูล Work Process & CT สำเร็จ!');
             toggleEditModal();
         }
@@ -3265,6 +3331,7 @@
             renderSavedDisplayTable();
             updateLobChart();
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
             renderManpowerTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการเรียบร้อยแล้ว');
@@ -3373,6 +3440,7 @@
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
             alert('บันทึกข้อมูล Work Process & CT (Door Part) สำเร็จ!');
             toggleDoorEditModal();
         }
@@ -3397,6 +3465,7 @@
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
             renderManpowerTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการ (Door Part) เรียบร้อยแล้ว');
@@ -3556,8 +3625,18 @@
         renderUnifiedTable(currentDailyData);
         renderMasterModelTable();
         renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
         renderDailyOrderSummaryTable(currentDailyData);
         renderManpowerTable(currentDailyData);
     </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (typeof applyBackBottomHourlyCapacityColumns === 'function') {
+            applyBackBottomHourlyCapacityColumns();
+        }
+    }, 100);
+});
+</script>
 </body>
 </html>
