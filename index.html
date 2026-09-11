@@ -125,7 +125,7 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
-                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Plan & Actual</h2>
+                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Actual</h2>
                             <p class="text-[10px] text-slate-400 mt-1">
                                 จัดข้อมูลเป็น 4 โซน: Order Plan → Capacity → Manpower → Result / Risk
                             </p>
@@ -2063,6 +2063,7 @@
 
             const actualCapacity = actualUPH > 0 && hours > 0 ? actualUPH * hours : 0;
             const gap = actualCapacity - totalOrder;
+            const gapPerHour = actualUPH - planUPH;
             const coverage = totalOrder > 0 ? (actualCapacity / totalOrder) * 100 : 0;
             const status =
                 totalOrder <= 0 ? 'NO PLAN' :
@@ -2075,6 +2076,7 @@
                 actualUPH,
                 actualCapacity,
                 gap,
+                gapPerHour,
                 coverage,
                 status,
                 requiredHoursAtActualUPH,
@@ -2157,7 +2159,7 @@
                 },
                 {
                     key: 'planUPH',
-                    label: 'Plan UPH',
+                    label: 'Required UPH',
                     subLabel: 'Order ÷ Working Hours',
                     cls: 'text-sky-300',
                     format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
@@ -2452,31 +2454,31 @@
                     format: v => v > 0 ? `${v.toFixed(1)}s` : '-'
                 },
                 {
-                    key: 'planUPH',
-                    zone: 'CAPACITY',
-                    zoneClass: 'emerald',
-                    label: 'Plan UPH',
-                    subLabel: 'Order ÷ Working Hours',
-                    cls: 'text-sky-300',
-                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
-                },
-                {
                     key: 'actualUPH',
                     zone: 'CAPACITY',
                     zoneClass: 'emerald',
-                    label: 'Actual Avg UPH',
-                    subLabel: 'Weighted by Product Mix',
+                    label: 'Actual Capacity',
+                    subLabel: 'Actual Avg UPH + Capacity / Day + Gap',
                     cls: 'text-emerald-300',
-                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
-                },
-                {
-                    key: 'actualCapacity',
-                    zone: 'CAPACITY',
-                    zoneClass: 'emerald',
-                    label: 'Actual Capacity / Day',
-                    subLabel: 'Actual UPH × Hours',
-                    cls: 'text-cyan-300',
-                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                    format: (v, row) => {
+                        if (!(v > 0)) return '-';
+
+                        const gapDay = Number(row.capacityGap || 0);
+                        const gapHour = Number(row.capacityGapPerHour || 0);
+                        const gapDayText = `${gapDay > 0 ? '+' : ''}${Math.round(gapDay).toLocaleString()}`;
+                        const gapHourText = `${gapHour > 0 ? '+' : ''}${Math.round(gapHour).toLocaleString()}`;
+
+                        return `
+                            <div class="font-bold text-emerald-300">UPH ${Math.round(v).toLocaleString()}</div>
+                            <div class="text-[8px] text-cyan-300 mt-0.5">Capacity/Day ${Math.round(row.actualCapacity || 0).toLocaleString()}</div>
+                            <div class="text-[8px] mt-1 ${gapDay >= 0 ? 'text-emerald-300' : 'text-rose-300'}">
+                                Gap/Day ${gapDayText}
+                            </div>
+                            <div class="text-[8px] ${gapHour >= 0 ? 'text-emerald-300' : 'text-rose-300'}">
+                                Gap/Hour ${gapHourText}
+                            </div>
+                        `;
+                    }
                 },
 
                 // ───────────── ZONE 3 : MANPOWER ─────────────
@@ -2553,17 +2555,6 @@
                     format: v => v > 0 ? `${v.toFixed(1)}%` : '-'
                 },
                 {
-                    key: 'capacityGap',
-                    zone: 'RESULT / RISK',
-                    zoneClass: 'amber',
-                    label: 'Capacity Gap',
-                    subLabel: 'Capacity - Order',
-                    cls: 'text-slate-200',
-                    format: v => Number.isFinite(v) && Math.abs(v) >= 0.5
-                        ? `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString()}`
-                        : (v === 0 ? '0' : '-')
-                },
-                {
                     key: 'capacityStatus',
                     zone: 'RESULT / RISK',
                     zoneClass: 'amber',
@@ -2601,6 +2592,7 @@
                             actualCapacity: 0,
                             coverage: 0,
                             capacityGap: 0,
+                            capacityGapPerHour: 0,
                             capacityStatus: 'NO PLAN',
                             manpowerCalc: 0,
                             manpowerRequired: 0};
@@ -2614,6 +2606,7 @@
                     result.actualCapacity = capResult.actualCapacity;
                     result.coverage = capResult.coverage;
                     result.capacityGap = capResult.gap;
+                    result.capacityGapPerHour = capResult.gapPerHour;
                     result.capacityStatus = capResult.status;
 
                     // Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
