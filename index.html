@@ -128,7 +128,7 @@
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower Requirement Overview ตาม Order รายวัน</h2>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนตามไลน์ผลิต | Order/Hour = Order + Short 20% ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
+                                สรุปกำลังคนตามไลน์ผลิต | Bottom Plate Line#1 / Line#2: Out Line = เสิร์ฟพาร์ท 1 + ยกชิ้นงานใส่รถ 1 + Delivery 1 (รวม +3 คน/ไลน์) | Order/Hour = Order + Short 20% ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1965,6 +1965,15 @@
             renderManpowerTable(currentDailyData);
         }
 
+        function getBottomOutLineManpower(station, groupName) {
+            // Bottom Plate Line#1 และ Line#2 เพิ่ม Out Line คงที่ไลน์ละ 3 คน
+            // Part Supply 1 + Load to Cart 1 + Delivery 1
+            if (station === 'Bottom Plate' && (groupName === 'Line#1' || groupName === 'Line#2')) {
+                return { partSupply: 1, loadToCart: 1, delivery: 1, total: 3 };
+            }
+            return { partSupply: 0, loadToCart: 0, delivery: 0, total: 0 };
+        }
+
         function calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours) {
             // Total Order = Order ที่ไลน์ต้องผลิตก่อนคูณ Ratio
             // Door Order  = Order ที่ต้องทำจริงหลังคูณ Ratio
@@ -2143,13 +2152,46 @@
                 {
                     key: 'manpowerPerHour',
                     label: 'Manpower / Hour',
-                    subLabel: 'Order/Hour ÷ (3600 ÷ Lead Time)',
+                    subLabel: 'In Line',
                     cls: 'text-cyan-300',
                     format: (v, row) => v > 0
                         ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>`
                         : '-'
                 },
 ];
+
+            if (station === 'Bottom Plate') {
+                metricDefs.push(
+                    {
+                        key: 'outLinePartSupply',
+                        label: 'Out Line - Part Supply',
+                        subLabel: 'พนักงานเสิร์ฟพาร์ท',
+                        cls: 'text-lime-300',
+                        format: v => v > 0 ? `${Math.round(v)} คน` : '-'
+                    },
+                    {
+                        key: 'outLineLoadToCart',
+                        label: 'Out Line - Load to Cart',
+                        subLabel: 'พนักงานยกชิ้นงานใส่รถ',
+                        cls: 'text-lime-300',
+                        format: v => v > 0 ? `${Math.round(v)} คน` : '-'
+                    },
+                    {
+                        key: 'outLineDelivery',
+                        label: 'Out Line - Delivery',
+                        subLabel: 'พนักงาน Delivery',
+                        cls: 'text-lime-300',
+                        format: v => v > 0 ? `${Math.round(v)} คน` : '-'
+                    },
+                    {
+                        key: 'totalManpowerWithOutLine',
+                        label: 'Total Manpower',
+                        subLabel: 'In Line + Out Line',
+                        cls: 'text-amber-300',
+                        format: v => v > 0 ? `<div class="font-bold">${Math.round(v)} คน</div>` : '-'
+                    }
+                );
+            }
 
             groups.forEach((groupName, groupIndex) => {
                 const dayResults = days.map((day, dayIndex) => {
@@ -2164,10 +2206,25 @@
                             capacityPerManDay: 0,
                             requiredOrderPerHour: 0,
                             manpowerPerHour: 0,
+                            outLinePartSupply: 0,
+                            outLineLoadToCart: 0,
+                            outLineDelivery: 0,
+                            outLineTotal: 0,
+                            totalManpowerWithOutLine: 0,
                             manpowerCalc: 0,
                             manpowerRequired: 0};
                     }
                     const result = calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
+
+                    // Bottom Plate Out Line: Line#1 และ Line#2 เพิ่มคงที่ไลน์ละ 3 คน
+                    const outLine = getBottomOutLineManpower(station, groupName);
+                    result.outLinePartSupply = outLine.partSupply;
+                    result.outLineLoadToCart = outLine.loadToCart;
+                    result.outLineDelivery = outLine.delivery;
+                    result.outLineTotal = outLine.total;
+                    result.totalManpowerWithOutLine =
+                        (result.manpowerPerHour > 0 ? Math.ceil(result.manpowerPerHour) : 0) + outLine.total;
+
                     const savedHourly = getManualHourlyOutput(station, groupName, day);
                     const manualHourlyOutput = savedHourly === '' ? 0 : Math.max(0, Number(savedHourly) || 0);
 
