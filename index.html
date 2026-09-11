@@ -2127,7 +2127,6 @@
                            <div class="text-[8px] text-sky-300 mt-0.5">Order/Hour ${Math.ceil(row.requiredOrderPerHour).toLocaleString()}</div>`
                         : '-'
                 },
-                { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
 ];
 
             groups.forEach((groupName, groupIndex) => {
