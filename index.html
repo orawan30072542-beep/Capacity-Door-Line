@@ -186,6 +186,84 @@
                     </div>
                 </section>
 
+
+                <!-- CAPACITY REQUIREMENT OVERVIEW : PLAN & ACTUAL -->
+                <section id="capacity-requirement-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-6 bg-blue-400 rounded-full"></div>
+                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">
+                                    Capacity Requirement Overview Plan & Actual
+                                </h2>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1 ml-3">
+                                Plan UPH = Order ÷ Working Hours |
+                                Actual UPH = ค่าเฉลี่ย Capacity UPH ของ Model ที่มี Order ในวันนั้นแบบถ่วงน้ำหนักตาม Order |
+                                Coverage = Actual Capacity ÷ Order × 100
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <span class="text-[10px] text-slate-400 font-semibold">เลือกไลน์ผลิต:</span>
+                            <select id="capacityReqLineSelect"
+                                onchange="switchCapacityRequirementStation(this.value)"
+                                class="bg-slate-800 border border-bordercolor text-blue-300 text-xs font-bold rounded-lg px-3 py-1.5 focus:outline-none">
+                                <option value="Door A">Door A</option>
+                                <option value="Door B">Door B</option>
+                                <option value="Door C">Door C</option>
+                                <option value="Door Glass">Door Glass</option>
+                                <option value="Back Plate">Back Plate</option>
+                                <option value="Bottom Plate">Bottom Plate</option>
+                            </select>
+                            <span id="capacityReqStationLabel"
+                                class="text-blue-300 font-bold text-xs bg-blue-950/50 px-3 py-1.5 rounded-lg border border-blue-500/30">
+                                Door A
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Working Hours</div>
+                            <div id="crHours" class="text-lg font-bold text-cyan-300 mt-1">8.0 hr</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Total Order</div>
+                            <div id="crTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Avg Plan UPH</div>
+                            <div id="crAvgPlanUPH" class="text-lg font-bold text-sky-300 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Avg Actual UPH</div>
+                            <div id="crAvgActualUPH" class="text-lg font-bold text-emerald-300 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Overall Coverage</div>
+                            <div id="crCoverage" class="text-lg font-bold text-amber-300 mt-1">0%</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Risk Days</div>
+                            <div id="crRiskDays" class="text-lg font-bold text-rose-300 mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
+                        <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableCapacityRequirement"
+                                class="text-left border-collapse text-[10px]"
+                                style="table-layout:fixed; min-width:100%;">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
+                                </thead>
+                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- 2. ORDER TABLES : LEFT / RIGHT -->
                 <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
 
@@ -651,6 +729,7 @@
 
         let currentCapacityStation = 'Door A';
         let currentManpowerStation = 'Door A';
+        let currentCapacityRequirementStation = 'Door A';
         let currentSummaryStation = 'All';
 
         function isSunday(dayStr) {
@@ -687,6 +766,7 @@
                 renderCapacityTable(currentDailyData);
                 renderDailyOrderSummaryTable(currentDailyData);
                 renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
                 document.getElementById('tab-content-mastermodel').classList.remove('hidden');
                 document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
@@ -992,6 +1072,7 @@
             localStorage.setItem(getDoorCRatioKey(modelName, line), String(ratio));
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
         }
 
         function getDoorCOrderMultiplier(modelName) {
@@ -1409,6 +1490,7 @@
             renderCapacityTable(currentDailyData);
             renderDailyOrderSummaryTable(currentDailyData);
             renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -1884,6 +1966,7 @@
                 localStorage.setItem(key, String(clean));
             }
             renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
         }
 
         function getShortPercent() {
@@ -1898,6 +1981,7 @@
             const input = document.getElementById('shortPercentInput');
             if (input && Number(input.value) !== pct) input.value = pct;
             renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
         }
 
         function getBottomOutLineManpower(station, groupName) {
@@ -1990,6 +2074,341 @@
                 manpowerCalc,
                 manpowerRequired
             };
+        }
+
+
+        function getCapacityRequirementModelUPH(modelName, station) {
+            // Plate ใช้ Max CT ของ Work Process ของสถานีนั้นโดยตรง
+            if (station === 'Back Plate' || station === 'Bottom Plate') {
+                const stations = processDatabase[`${modelName}_${station}`] || [];
+                let maxCT = 0;
+                stations.forEach(st => {
+                    const ct =
+                        (parseFloat(st.wt1) || 0) +
+                        (parseFloat(st.wt2) || 0) +
+                        (parseFloat(st.wt3) || 0) +
+                        (parseFloat(st.loss) || 0);
+                    if (ct > maxCT) maxCT = ct;
+                });
+                return maxCT > 0 ? 3600 / maxCT : 0;
+            }
+
+            // Door Line ใช้ Capacity จาก Max CT ของ Model
+            const maxCT = getModelMaxCT(modelName);
+            return maxCT > 0 ? 3600 / maxCT : 0;
+        }
+
+        function calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours) {
+            let totalOrder = 0;
+            let requiredHoursAtActualUPH = 0;
+            let modelsWithCapacity = 0;
+
+            data.groups.forEach(g => {
+                g.models.forEach(m => {
+                    if (!modelBelongsToManpowerGroup(m.name, station, groupName)) return;
+
+                    const multiplier = getManpowerOrderMultiplier(m.name, station, groupName);
+                    const baseOrder = Math.round(Number(m.orders[dayIndex]) || 0);
+                    if (baseOrder <= 0 || multiplier <= 0) return;
+
+                    const productionOrder = baseOrder * multiplier;
+                    const modelActualUPH = getCapacityRequirementModelUPH(m.name, station);
+                    if (modelActualUPH <= 0) return;
+
+                    totalOrder += productionOrder;
+                    requiredHoursAtActualUPH += productionOrder / modelActualUPH;
+                    modelsWithCapacity++;
+                });
+            });
+
+            const planUPH = hours > 0 ? totalOrder / hours : 0;
+
+            // Effective / weighted Actual UPH ของ Product Mix ในวันนั้น
+            // = Total Order ÷ Σ(Order ของแต่ละ Model ÷ Actual UPH ของ Model)
+            const actualUPH =
+                totalOrder > 0 && requiredHoursAtActualUPH > 0
+                    ? totalOrder / requiredHoursAtActualUPH
+                    : 0;
+
+            const actualCapacity = actualUPH > 0 && hours > 0 ? actualUPH * hours : 0;
+            const gap = actualCapacity - totalOrder;
+            const coverage = totalOrder > 0 ? (actualCapacity / totalOrder) * 100 : 0;
+            const status =
+                totalOrder <= 0 ? 'NO PLAN' :
+                coverage >= 100 ? 'NO SHORT' :
+                'RISK SHORT';
+
+            return {
+                totalOrder: Math.round(totalOrder),
+                planUPH,
+                actualUPH,
+                actualCapacity,
+                gap,
+                coverage,
+                status,
+                requiredHoursAtActualUPH,
+                modelsWithCapacity
+            };
+        }
+
+        function switchCapacityRequirementStation(stationName) {
+            currentCapacityRequirementStation = stationName;
+            const label = document.getElementById('capacityReqStationLabel');
+            if (label) label.textContent = stationName;
+
+            const select = document.getElementById('capacityReqLineSelect');
+            if (select && select.value !== stationName) select.value = stationName;
+
+            renderCapacityRequirementTable(currentDailyData);
+        }
+
+        function renderCapacityRequirementTable(data) {
+            const table = document.getElementById('tableCapacityRequirement');
+            if (!table || !data || !data.days || !data.groups) return;
+
+            const headerRow = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            if (!headerRow || !tbody) return;
+
+            const days = data.days;
+            const station = currentCapacityRequirementStation || 'Door A';
+            const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+            const groups = getManpowerGroupsForStation(station);
+
+            const label = document.getElementById('capacityReqStationLabel');
+            if (label) label.textContent = station;
+            const select = document.getElementById('capacityReqLineSelect');
+            if (select && select.value !== station) select.value = station;
+
+            const fixedGroupWidth = 82;
+            const fixedMetricWidth = 165;
+            const dayWidth = 70;
+            const totalWidth = fixedGroupWidth + fixedMetricWidth + ((days.length + 1) * dayWidth);
+
+            table.style.width = `${totalWidth}px`;
+            table.style.minWidth = '100%';
+
+            const oldColgroup = table.querySelector('colgroup');
+            if (oldColgroup) oldColgroup.remove();
+
+            const colgroup = document.createElement('colgroup');
+            colgroup.innerHTML = `
+                <col style="width:${fixedGroupWidth}px">
+                <col style="width:${fixedMetricWidth}px">
+                ${days.map(() => `<col style="width:${dayWidth}px">`).join('')}
+                <col style="width:${dayWidth}px">
+            `;
+            table.insertBefore(colgroup, table.firstChild);
+
+            let headerHtml = `
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-40 text-center">Group / Line</th>
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-40 text-left whitespace-nowrap"
+                    style="left:${fixedGroupWidth}px;">Metric</th>
+            `;
+            days.forEach(day => {
+                headerHtml += `<th class="px-1 py-2 bg-slate-900 sticky top-0 z-30 text-center whitespace-nowrap">${day}</th>`;
+            });
+            headerHtml += `<th class="px-1 py-2 bg-amber-950/80 sticky top-0 z-30 text-center text-amber-300">TOTAL</th>`;
+            headerRow.innerHTML = headerHtml;
+
+            tbody.innerHTML = '';
+
+            let dashboardTotalOrder = 0;
+            let dashboardActualCapacity = 0;
+            let dashboardRequiredHours = 0;
+            let dashboardActiveDays = 0;
+            let dashboardPlanUPHSum = 0;
+            let riskDays = new Set();
+
+            const metricDefs = [
+                {
+                    key: 'totalOrder',
+                    label: 'Order',
+                    subLabel: 'ยอดที่ต้องผลิต',
+                    cls: 'text-white',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'planUPH',
+                    label: 'Plan UPH',
+                    subLabel: 'Order ÷ Working Hours',
+                    cls: 'text-sky-300',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'actualUPH',
+                    label: 'Actual Avg UPH',
+                    subLabel: 'Weighted by Order Mix',
+                    cls: 'text-emerald-300',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'actualCapacity',
+                    label: 'Actual Capacity / Day',
+                    subLabel: 'Actual UPH × Hours',
+                    cls: 'text-cyan-300',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'coverage',
+                    label: 'Coverage %',
+                    subLabel: 'Actual Capacity ÷ Order',
+                    cls: 'text-amber-300',
+                    format: v => v > 0 ? `${v.toFixed(1)}%` : '-'
+                },
+                {
+                    key: 'gap',
+                    label: 'Gap',
+                    subLabel: 'Capacity - Order',
+                    cls: 'text-slate-200',
+                    format: v => {
+                        if (!Number.isFinite(v)) return '-';
+                        if (Math.abs(v) < 0.5) return '0';
+                        return `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString()}`;
+                    }
+                },
+                {
+                    key: 'status',
+                    label: 'Status',
+                    subLabel: 'Short Risk',
+                    cls: 'text-white',
+                    format: v => {
+                        if (v === 'NO SHORT') return `<span class="text-emerald-300 font-bold">NO SHORT</span>`;
+                        if (v === 'RISK SHORT') return `<span class="text-rose-300 font-bold">RISK SHORT</span>`;
+                        return '-';
+                    }
+                }
+            ];
+
+            groups.forEach(groupName => {
+                const dayRows = days.map((day, dayIndex) => {
+                    if (isSunday(day)) {
+                        return {
+                            totalOrder: 0, planUPH: 0, actualUPH: 0, actualCapacity: 0,
+                            coverage: 0, gap: 0, status: 'NO PLAN',
+                            requiredHoursAtActualUPH: 0
+                        };
+                    }
+                    return calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours);
+                });
+
+                const totalOrder = dayRows.reduce((s, r) => s + r.totalOrder, 0);
+                const totalActualCapacity = dayRows.reduce((s, r) => s + r.actualCapacity, 0);
+                const totalRequiredHours = dayRows.reduce((s, r) => s + r.requiredHoursAtActualUPH, 0);
+                const activeDays = dayRows.filter(r => r.totalOrder > 0).length;
+                const totalPlanUPH = activeDays > 0 && hours > 0
+                    ? totalOrder / (activeDays * hours)
+                    : 0;
+                const totalActualUPH = totalOrder > 0 && totalRequiredHours > 0
+                    ? totalOrder / totalRequiredHours
+                    : 0;
+                const totalCoverage = totalOrder > 0
+                    ? (totalActualCapacity / totalOrder) * 100
+                    : 0;
+                const totalGap = totalActualCapacity - totalOrder;
+                const totalStatus =
+                    totalOrder <= 0 ? 'NO PLAN' :
+                    totalCoverage >= 100 ? 'NO SHORT' :
+                    'RISK SHORT';
+
+                const totalRow = {
+                    totalOrder,
+                    planUPH: totalPlanUPH,
+                    actualUPH: totalActualUPH,
+                    actualCapacity: totalActualCapacity,
+                    coverage: totalCoverage,
+                    gap: totalGap,
+                    status: totalStatus
+                };
+
+                dashboardTotalOrder += totalOrder;
+                dashboardActualCapacity += totalActualCapacity;
+                dashboardRequiredHours += totalRequiredHours;
+                if (activeDays > 0) {
+                    dashboardPlanUPHSum += totalPlanUPH * activeDays;
+                    dashboardActiveDays += activeDays;
+                }
+
+                dayRows.forEach((r, dayIndex) => {
+                    if (r.totalOrder > 0 && r.coverage < 100) riskDays.add(dayIndex);
+                });
+
+                metricDefs.forEach((metric, metricIndex) => {
+                    let rowHtml = `<tr class="border-t border-slate-800 hover:bg-slate-900/40">`;
+
+                    if (metricIndex === 0) {
+                        rowHtml += `
+                            <td rowspan="${metricDefs.length}"
+                                class="px-2 py-1.5 sticky left-0 z-20 bg-[#101a33] text-center border-r border-slate-800 align-middle">
+                                <div class="font-bold text-blue-300">${groupName}</div>
+                            </td>`;
+                    }
+
+                    rowHtml += `
+                        <td class="px-2 py-1.5 sticky z-20 bg-[#101a33] border-r border-slate-800"
+                            style="left:${fixedGroupWidth}px;">
+                            <div class="font-semibold ${metric.cls} whitespace-nowrap">${metric.label}</div>
+                            ${metric.subLabel ? `<div class="text-[8px] font-normal text-slate-500 mt-0.5">${metric.subLabel}</div>` : ''}
+                        </td>`;
+
+                    dayRows.forEach((r, dayIndex) => {
+                        const isSun = isSunday(days[dayIndex]);
+                        const value = r[metric.key];
+                        const riskBg =
+                            metric.key === 'status' && value === 'RISK SHORT'
+                                ? 'bg-rose-950/20'
+                                : metric.key === 'status' && value === 'NO SHORT'
+                                    ? 'bg-emerald-950/10'
+                                    : '';
+
+                        rowHtml += `
+                            <td class="px-1 py-1.5 text-center border-l border-slate-800 ${metric.cls} ${riskBg}">
+                                ${isSun ? '-' : metric.format(value, r)}
+                            </td>`;
+                    });
+
+                    rowHtml += `
+                        <td class="px-1 py-1.5 text-center border-l border-amber-900/40 bg-amber-950/10 ${metric.cls}">
+                            ${metric.format(totalRow[metric.key], totalRow)}
+                        </td>`;
+
+                    rowHtml += `</tr>`;
+                    tbody.insertAdjacentHTML('beforeend', rowHtml);
+                });
+            });
+
+            const avgPlanUPH =
+                dashboardActiveDays > 0
+                    ? dashboardPlanUPHSum / dashboardActiveDays
+                    : 0;
+
+            const avgActualUPH =
+                dashboardTotalOrder > 0 && dashboardRequiredHours > 0
+                    ? dashboardTotalOrder / dashboardRequiredHours
+                    : 0;
+
+            const overallCoverage =
+                dashboardTotalOrder > 0
+                    ? (dashboardActualCapacity / dashboardTotalOrder) * 100
+                    : 0;
+
+            const crHours = document.getElementById('crHours');
+            const crTotalOrder = document.getElementById('crTotalOrder');
+            const crAvgPlanUPH = document.getElementById('crAvgPlanUPH');
+            const crAvgActualUPH = document.getElementById('crAvgActualUPH');
+            const crCoverage = document.getElementById('crCoverage');
+            const crRiskDays = document.getElementById('crRiskDays');
+
+            if (crHours) crHours.textContent = `${hours.toFixed(1)} hr`;
+            if (crTotalOrder) crTotalOrder.textContent = Math.round(dashboardTotalOrder).toLocaleString();
+            if (crAvgPlanUPH) crAvgPlanUPH.textContent = Math.round(avgPlanUPH).toLocaleString();
+            if (crAvgActualUPH) crAvgActualUPH.textContent = Math.round(avgActualUPH).toLocaleString();
+            if (crCoverage) {
+                crCoverage.textContent = `${overallCoverage.toFixed(1)}%`;
+                crCoverage.className =
+                    `text-lg font-bold mt-1 ${overallCoverage >= 100 ? 'text-emerald-300' : 'text-rose-300'}`;
+            }
+            if (crRiskDays) crRiskDays.textContent = riskDays.size.toLocaleString();
         }
 
         function renderManpowerTable(data) {
@@ -2275,6 +2694,7 @@
             if (select && select.value !== stationName) select.value = stationName;
 
             renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
         }
 
         function switchCapacityStation(stationName) {
@@ -2676,6 +3096,7 @@
                         renderCapacityTable(currentDailyData);
                         renderDailyOrderSummaryTable(currentDailyData);
                         renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
                         
                         alert('โหลดและอัปเดตข้อมูลจาก Excel สำเร็จ!');
                     }
@@ -2778,6 +3199,7 @@
             updateLobChart();
             renderCapacityTable(currentDailyData);
             renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการเรียบร้อยแล้ว');
         }
@@ -2910,6 +3332,7 @@
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
             renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการ (Door Part) เรียบร้อยแล้ว');
         }
@@ -3070,6 +3493,7 @@
         renderCapacityTable(currentDailyData);
         renderDailyOrderSummaryTable(currentDailyData);
         renderManpowerTable(currentDailyData);
+            renderCapacityRequirementTable(currentDailyData);
     </script>
 </body>
 </html>
