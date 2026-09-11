@@ -259,6 +259,55 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- 4. MANPOWER CALCULATION -->
+                <section id="manpower-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
+                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">4. Manpower Requirement ตาม Order รายวัน</h2>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1 ml-3">
+                                UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Manpower = Order ÷ (UPM 85% × ชั่วโมงทำงาน)
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-400">Group Station:</span>
+                            <span id="manpowerStationLabel" class="text-emerald-300 font-bold text-xs bg-emerald-950/50 px-3 py-1.5 rounded-lg border border-emerald-500/30">Door A</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Working Hours</div>
+                            <div id="mpHours" class="text-lg font-bold text-cyan-300 mt-1">8.0 hr</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Total Order</div>
+                            <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Avg Manpower / Day</div>
+                            <div id="mpAvgManpower" class="text-lg font-bold text-amber-300 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Peak Manpower</div>
+                            <div id="mpPeakManpower" class="text-lg font-bold text-rose-300 mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
+                        <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableManpower" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
+                                </thead>
+                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
 
             <!-- MASTER MODEL & ROUTING TAB -->
@@ -629,6 +678,7 @@
                 document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
                 renderCapacityTable(currentDailyData);
                 renderDailyOrderSummaryTable(currentDailyData);
+                renderManpowerTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
                 document.getElementById('tab-content-mastermodel').classList.remove('hidden');
                 document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
@@ -1350,6 +1400,7 @@
             renderUnifiedTable(currentDailyData);
             renderCapacityTable(currentDailyData);
             renderDailyOrderSummaryTable(currentDailyData);
+            renderManpowerTable(currentDailyData);
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -1792,6 +1843,250 @@
             });
         }
 
+        function getManpowerGroupsForStation(station) {
+            if (station === 'Door C') return ['C-1', 'C-2', 'C-3'];
+            if (station === 'Back Plate' || station === 'Bottom Plate') return ['Line#1', 'Line#2'];
+            return [station];
+        }
+
+        function modelBelongsToManpowerGroup(modelName, station, groupName) {
+            const config = getMasterConfigForModel(modelName);
+
+            if (station === 'Door C') {
+                if (config.station !== 'Door C') return false;
+                return (getDoorCRoutingDetails(modelName) || []).some(r => r.line === groupName);
+            }
+
+            if (station === 'Back Plate') {
+                return config.backPlateSource === 'ผลิตเอง' &&
+                    (config.backPlateLine || 'Line#1') === groupName;
+            }
+
+            if (station === 'Bottom Plate') {
+                return config.bottomSource === 'ผลิตเอง' &&
+                    (config.bottomLine || 'Line#1') === groupName;
+            }
+
+            return config.station === station;
+        }
+
+        function getManpowerOrderMultiplier(modelName, station, groupName) {
+            const config = getMasterConfigForModel(modelName);
+
+            if (station === 'Door C') {
+                const route = (getDoorCRoutingDetails(modelName) || []).find(r => r.line === groupName);
+                if (!route) return 0;
+                return getDoorCManualRatio(modelName, groupName, route.qty);
+            }
+
+            if (station === 'Back Plate' || station === 'Bottom Plate') return 1;
+            return Number(config.qtyPerSet) || 1;
+        }
+
+        function getLeadTimeForManpower(modelName, station) {
+            if (station === 'Back Plate' || station === 'Bottom Plate') {
+                const key = `${modelName}_${station}`;
+                const stations = processDatabase[key] || [];
+                return stations.reduce((sum, st) => {
+                    return sum +
+                        (parseFloat(st.wt1) || 0) +
+                        (parseFloat(st.wt2) || 0) +
+                        (parseFloat(st.wt3) || 0) +
+                        (parseFloat(st.loss) || 0);
+                }, 0);
+            }
+
+            return getOverallDoorLeadTime(modelName);
+        }
+
+        function calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours) {
+            let totalOrder = 0;
+            let totalManHours = 0;
+            let weightedLeadTime = 0;
+            let weightedQty = 0;
+
+            data.groups.forEach(g => {
+                g.models.forEach(m => {
+                    if (!modelBelongsToManpowerGroup(m.name, station, groupName)) return;
+
+                    const multiplier = getManpowerOrderMultiplier(m.name, station, groupName);
+                    const baseOrder = Math.round(Number(m.orders[dayIndex]) || 0);
+                    const order = baseOrder * multiplier;
+                    if (order <= 0) return;
+
+                    const leadTime = getLeadTimeForManpower(m.name, station);
+                    if (leadTime <= 0) return;
+
+                    const upm85 = (3600 / leadTime) * 0.85;
+                    if (upm85 <= 0) return;
+
+                    totalOrder += order;
+                    weightedLeadTime += order * leadTime;
+                    weightedQty += order;
+                    totalManHours += order / upm85;
+                });
+            });
+
+            const avgLeadTime = weightedQty > 0 ? weightedLeadTime / weightedQty : 0;
+            const effectiveUPM85 = avgLeadTime > 0 ? (3600 / avgLeadTime) * 0.85 : 0;
+            const capacityPerManDay = effectiveUPM85 * hours;
+            const manpowerCalc = hours > 0 ? totalManHours / hours : 0;
+            const manpowerRequired = manpowerCalc > 0 ? Math.ceil(manpowerCalc) : 0;
+
+            return {
+                totalOrder: Math.round(totalOrder),
+                avgLeadTime,
+                effectiveUPM85,
+                capacityPerManDay,
+                manpowerCalc,
+                manpowerRequired
+            };
+        }
+
+        function renderManpowerTable(data) {
+            const table = document.getElementById('tableManpower');
+            if (!table || !data || !data.days || !data.groups) return;
+
+            const headerRow = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            if (!headerRow || !tbody) return;
+
+            const days = data.days;
+            const station = currentCapacityStation || 'Door A';
+            const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+
+            const stationLabel = document.getElementById('manpowerStationLabel');
+            if (stationLabel) stationLabel.textContent = station;
+
+            const fixedGroupWidth = 82;
+            const fixedMetricWidth = 126;
+            const dayWidth = 68;
+            const totalWidth = fixedGroupWidth + fixedMetricWidth + (days.length * dayWidth);
+
+            table.style.width = `${totalWidth}px`;
+            table.style.minWidth = '100%';
+
+            const oldColgroup = table.querySelector('colgroup');
+            if (oldColgroup) oldColgroup.remove();
+
+            const colgroup = document.createElement('colgroup');
+            colgroup.innerHTML = `
+                <col style="width:${fixedGroupWidth}px">
+                <col style="width:${fixedMetricWidth}px">
+                ${days.map(() => `<col style="width:${dayWidth}px">`).join('')}
+            `;
+            table.insertBefore(colgroup, table.firstChild);
+
+            let headerHtml = `
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-40 text-center">Group / Line</th>
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-40 text-left" style="left:${fixedGroupWidth}px;">Metric</th>
+            `;
+
+            days.forEach(day => {
+                headerHtml += `<th class="px-1 py-2 bg-slate-900 sticky top-0 z-30 text-center whitespace-nowrap">${day}</th>`;
+            });
+            headerRow.innerHTML = headerHtml;
+
+            tbody.innerHTML = '';
+
+            const hidden = capacityHiddenGroups[station] || new Set();
+            const groups = getManpowerGroupsForStation(station).filter(g => !hidden.has(g));
+
+            let totalOrderAllDays = 0;
+            let totalDailyManpower = 0;
+            let activeDays = 0;
+            let peakManpower = 0;
+            const dailyMpTotals = new Array(days.length).fill(0);
+
+            const metricDefs = [
+                { key: 'totalOrder', label: 'Order', cls: 'text-white', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
+                { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
+                { key: 'effectiveUPM85', label: 'UPM 85%', cls: 'text-cyan-300', format: v => v > 0 ? v.toFixed(1) : '-' },
+                { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? v.toFixed(1) : '-' },
+                { key: 'manpowerCalc', label: 'Manpower Calc', cls: 'text-amber-300', format: v => v > 0 ? v.toFixed(2) : '-' },
+                { key: 'manpowerRequired', label: 'Manpower Required', cls: 'text-rose-300', format: v => v > 0 ? Math.ceil(v) : '-' }
+            ];
+
+            groups.forEach((groupName, groupIndex) => {
+                const dayResults = days.map((day, dayIndex) => {
+                    if (isSunday(day)) {
+                        return {
+                            totalOrder: 0,
+                            avgLeadTime: 0,
+                            effectiveUPM85: 0,
+                            capacityPerManDay: 0,
+                            manpowerCalc: 0,
+                            manpowerRequired: 0
+                        };
+                    }
+                    return calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
+                });
+
+                dayResults.forEach((r, i) => {
+                    totalOrderAllDays += r.totalOrder;
+                    dailyMpTotals[i] += r.manpowerCalc;
+                });
+
+                metricDefs.forEach((metric, metricIndex) => {
+                    const tr = document.createElement('tr');
+                    tr.className = metricIndex === 0
+                        ? 'border-t border-cyan-500/25 bg-slate-950/20'
+                        : 'bg-slate-950/10';
+
+                    let rowHtml = '';
+
+                    if (metricIndex === 0) {
+                        rowHtml += `
+                            <td rowspan="${metricDefs.length}"
+                                class="px-2 py-2 text-center align-middle font-bold text-cyan-300 bg-slate-900 sticky left-0 z-20 border-r border-bordercolor">
+                                ${groupName}
+                            </td>`;
+                    }
+
+                    rowHtml += `
+                        <td class="px-2 py-2 font-semibold ${metric.cls} bg-[#101a34] sticky z-20 border-r border-bordercolor"
+                            style="left:${fixedGroupWidth}px;">
+                            ${metric.label}
+                        </td>`;
+
+                    dayResults.forEach((r, dayIndex) => {
+                        const isSun = isSunday(days[dayIndex]);
+                        rowHtml += `
+                            <td class="px-1 py-2 text-center ${isSun ? 'bg-slate-950/60 text-slate-600' : metric.cls}">
+                                ${isSun ? '-' : metric.format(r[metric.key])}
+                            </td>`;
+                    });
+
+                    tr.innerHTML = rowHtml;
+                    tbody.appendChild(tr);
+                });
+            });
+
+            dailyMpTotals.forEach((mp, i) => {
+                if (!isSunday(days[i]) && mp > 0) {
+                    activeDays++;
+                    totalDailyManpower += mp;
+                    peakManpower = Math.max(peakManpower, Math.ceil(mp));
+                }
+            });
+
+            if (groups.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="${days.length + 2}" class="p-5 text-center text-slate-500">ไม่มี Group/Line ที่แสดงอยู่</td>`;
+                tbody.appendChild(tr);
+            }
+
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+
+            setText('mpHours', `${hours.toFixed(1)} hr`);
+            setText('mpTotalOrder', totalOrderAllDays.toLocaleString());
+            setText('mpAvgManpower', activeDays > 0 ? (totalDailyManpower / activeDays).toFixed(2) : '0');
+            setText('mpPeakManpower', String(peakManpower));
+        }
+
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
             document.getElementById('currentCapacityStationLabel').textContent = stationName;
@@ -1809,6 +2104,7 @@
             });
 
             renderCapacityTable(currentDailyData);
+            renderManpowerTable(currentDailyData);
         }
 
         function getDoorTypeLeadTime(modelName, doorType) {
@@ -1860,6 +2156,7 @@
             else hidden.add(groupName);
 
             renderCapacityTable(currentDailyData);
+            renderManpowerTable(currentDailyData);
         }
 
         function renderCapacityGroupVisibilityControls() {
@@ -2188,6 +2485,7 @@
                         initSelectors();
                         renderCapacityTable(currentDailyData);
                         renderDailyOrderSummaryTable(currentDailyData);
+                        renderManpowerTable(currentDailyData);
                         
                         let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
                         planChart.data.labels = currentDailyData.days;
@@ -2294,6 +2592,7 @@
             renderSavedDisplayTable();
             updateLobChart();
             renderCapacityTable(currentDailyData);
+            renderManpowerTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการเรียบร้อยแล้ว');
         }
@@ -2425,6 +2724,7 @@
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
+            renderManpowerTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการ (Door Part) เรียบร้อยแล้ว');
         }
@@ -2584,6 +2884,7 @@
         renderMasterModelTable();
         renderCapacityTable(currentDailyData);
         renderDailyOrderSummaryTable(currentDailyData);
+        renderManpowerTable(currentDailyData);
     </script>
 </body>
 </html>
