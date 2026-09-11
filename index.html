@@ -127,11 +127,11 @@
                                 <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Plan & Actual</h2>
                             <p class="text-[10px] text-slate-400 mt-1">
-                                ตารางเดียว: Order + Manpower + Capacity Plan/Actual + Coverage + Short Risk
+                                จัดข้อมูลเป็น 4 โซน: Order Plan → Capacity → Manpower → Result / Risk
                             </p>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Bottom Plate Line#1 / Line#2: Out Line = เสิร์ฟพาร์ท 1 + ยกชิ้นงานใส่รถ 1 + Delivery 1 (รวม +3 คน/ไลน์) | Order/Hour = Order + Short 20% ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
+                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Bottom Plate Line#1 / Line#2: Out Line = เสิร์ฟพาร์ท 1 + ยกชิ้นงานใส่รถ 1 + Delivery 1 (รวม +3 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -175,6 +175,13 @@
                             <div class="text-[9px] text-slate-500">จาก Manpower Calculation</div>
                             <div id="mpPeakManpower" class="text-lg font-bold text-rose-300 mt-1">0</div>
                         </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
+                        <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
+                        <span class="px-2.5 py-1 rounded-lg border border-emerald-500/25 bg-emerald-950/20 text-emerald-300">2 · CAPACITY</span>
+                        <span class="px-2.5 py-1 rounded-lg border border-cyan-500/25 bg-cyan-950/20 text-cyan-300">3 · MANPOWER</span>
+                        <span class="px-2.5 py-1 rounded-lg border border-amber-500/25 bg-amber-950/20 text-amber-300">4 · RESULT / RISK</span>
                     </div>
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
@@ -2352,7 +2359,7 @@
             if (lineSelect && lineSelect.value !== station) lineSelect.value = station;
 
             const fixedGroupWidth = 82;
-            const fixedMetricWidth = 170;
+            const fixedMetricWidth = 190;
             const dayWidth = 68;
             const totalWidth = fixedGroupWidth + fixedMetricWidth + (days.length * dayWidth);
 
@@ -2392,8 +2399,13 @@
             const dailyMpTotals = new Array(days.length).fill(0);
 
             const metricDefs = [
+                // ───────────── ZONE 1 : ORDER PLAN ─────────────
                 {
                     key: 'totalOrder',
+                    zone: 'ORDER PLAN',
+                    zoneNo: '1',
+                    zoneStart: true,
+                    zoneClass: 'violet',
                     label: 'Total Order',
                     subLabel: 'ไม่คูณ Ratio',
                     cls: 'text-white',
@@ -2404,6 +2416,8 @@
                 },
                 {
                     key: 'doorOrder',
+                    zone: 'ORDER PLAN',
+                    zoneClass: 'violet',
                     label: 'Door Order',
                     subLabel: 'คูณ Ratio',
                     cls: 'text-violet-300',
@@ -2414,6 +2428,8 @@
                 },
                 {
                     key: 'shortageOrder',
+                    zone: 'ORDER PLAN',
+                    zoneClass: 'violet',
                     label: `Order + Short ${getShortPercent()}%`,
                     subLabel: `Door Order × ${(1 + getShortPercent()/100).toFixed(2)}`,
                     cls: 'text-orange-300',
@@ -2422,18 +2438,23 @@
                            <div class="text-[8px] text-orange-200 mt-0.5">UPH ${Math.round(row.shortageOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
-                { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
+
+                // ───────────── ZONE 2 : CAPACITY ─────────────
                 {
-                    key: 'manpowerPerHour',
-                    label: 'Manpower / Hour',
-                    subLabel: 'In Line',
-                    cls: 'text-cyan-300',
-                    format: (v, row) => v > 0
-                        ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>`
-                        : '-'
+                    key: 'avgLeadTime',
+                    zone: 'CAPACITY',
+                    zoneNo: '2',
+                    zoneStart: true,
+                    zoneClass: 'emerald',
+                    label: 'Overall Lead Time',
+                    subLabel: 'Process Time',
+                    cls: 'text-emerald-300',
+                    format: v => v > 0 ? `${v.toFixed(1)}s` : '-'
                 },
                 {
                     key: 'planUPH',
+                    zone: 'CAPACITY',
+                    zoneClass: 'emerald',
                     label: 'Plan UPH',
                     subLabel: 'Order ÷ Working Hours',
                     cls: 'text-sky-300',
@@ -2441,76 +2462,75 @@
                 },
                 {
                     key: 'actualUPH',
+                    zone: 'CAPACITY',
+                    zoneClass: 'emerald',
                     label: 'Actual Avg UPH',
-                    subLabel: 'Capacity ตาม Product Mix',
+                    subLabel: 'Weighted by Product Mix',
                     cls: 'text-emerald-300',
                     format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
                 },
                 {
                     key: 'actualCapacity',
+                    zone: 'CAPACITY',
+                    zoneClass: 'emerald',
                     label: 'Actual Capacity / Day',
                     subLabel: 'Actual UPH × Hours',
                     cls: 'text-cyan-300',
                     format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
                 },
+
+                // ───────────── ZONE 3 : MANPOWER ─────────────
                 {
-                    key: 'coverage',
-                    label: 'Coverage %',
-                    subLabel: 'Capacity ÷ Order',
-                    cls: 'text-amber-300',
-                    format: v => v > 0 ? `${v.toFixed(1)}%` : '-'
-                },
-                {
-                    key: 'capacityGap',
-                    label: 'Capacity Gap',
-                    subLabel: 'Capacity - Order',
-                    cls: 'text-slate-200',
-                    format: v => Number.isFinite(v) && Math.abs(v) >= 0.5 ? `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString()}` : (v === 0 ? '0' : '-')
-                },
-                {
-                    key: 'capacityStatus',
-                    label: 'Capacity Status',
-                    subLabel: 'Short Risk',
-                    cls: 'text-white',
-                    format: v => v === 'NO SHORT'
-                        ? `<span class="text-emerald-300 font-bold">NO SHORT</span>`
-                        : v === 'RISK SHORT'
-                            ? `<span class="text-rose-300 font-bold">RISK SHORT</span>`
-                            : '-'
-                },
-];
+                    key: 'manpowerPerHour',
+                    zone: 'MANPOWER',
+                    zoneNo: '3',
+                    zoneStart: true,
+                    zoneClass: 'cyan',
+                    label: 'Manpower / Hour',
+                    subLabel: 'In Line',
+                    cls: 'text-cyan-300',
+                    format: v => v > 0
+                        ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>`
+                        : '-'
+                }
+            ];
 
             if (station === 'Bottom Plate') {
                 metricDefs.push(
                     {
                         key: 'outLinePartSupply',
+                        zone: 'MANPOWER',
+                        zoneClass: 'cyan',
                         singleLineSmall: true,
-                    compactRow: true,
-                        label: 'Out Line - Part Supply',
-                        subLabel: 'พนักงานเสิร์ฟพาร์ท',
+                        compactRow: true,
+                        label: 'Out Line · Part Supply',
                         cls: 'text-lime-300',
                         format: v => v > 0 ? `${Math.round(v)} คน` : '-'
                     },
                     {
                         key: 'outLineLoadToCart',
+                        zone: 'MANPOWER',
+                        zoneClass: 'cyan',
                         singleLineSmall: true,
-                    compactRow: true,
-                        label: 'Out Line - Load to Cart',
-                        subLabel: 'พนักงานยกชิ้นงานใส่รถ',
+                        compactRow: true,
+                        label: 'Out Line · Load Cart',
                         cls: 'text-lime-300',
                         format: v => v > 0 ? `${Math.round(v)} คน` : '-'
                     },
                     {
                         key: 'outLineDelivery',
+                        zone: 'MANPOWER',
+                        zoneClass: 'cyan',
                         singleLineSmall: true,
-                    compactRow: true,
-                        label: 'Out Line - Delivery',
-                        subLabel: 'พนักงาน Delivery',
+                        compactRow: true,
+                        label: 'Out Line · Delivery',
                         cls: 'text-lime-300',
                         format: v => v > 0 ? `${Math.round(v)} คน` : '-'
                     },
                     {
                         key: 'totalManpowerWithOutLine',
+                        zone: 'MANPOWER',
+                        zoneClass: 'cyan',
                         label: 'Total Manpower',
                         subLabel: 'In Line + Out Line',
                         cls: 'text-amber-300',
@@ -2518,6 +2538,45 @@
                     }
                 );
             }
+
+            metricDefs.push(
+                // ───────────── ZONE 4 : RESULT / RISK ─────────────
+                {
+                    key: 'coverage',
+                    zone: 'RESULT / RISK',
+                    zoneNo: '4',
+                    zoneStart: true,
+                    zoneClass: 'amber',
+                    label: 'Coverage %',
+                    subLabel: 'Capacity ÷ Order',
+                    cls: 'text-amber-300',
+                    format: v => v > 0 ? `${v.toFixed(1)}%` : '-'
+                },
+                {
+                    key: 'capacityGap',
+                    zone: 'RESULT / RISK',
+                    zoneClass: 'amber',
+                    label: 'Capacity Gap',
+                    subLabel: 'Capacity - Order',
+                    cls: 'text-slate-200',
+                    format: v => Number.isFinite(v) && Math.abs(v) >= 0.5
+                        ? `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString()}`
+                        : (v === 0 ? '0' : '-')
+                },
+                {
+                    key: 'capacityStatus',
+                    zone: 'RESULT / RISK',
+                    zoneClass: 'amber',
+                    label: 'Capacity Status',
+                    subLabel: 'Short Risk',
+                    cls: 'text-white',
+                    format: v => v === 'NO SHORT'
+                        ? `<span class="inline-flex px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-950/30 text-emerald-300 font-bold">NO SHORT</span>`
+                        : v === 'RISK SHORT'
+                            ? `<span class="inline-flex px-2 py-0.5 rounded-full border border-rose-500/30 bg-rose-950/30 text-rose-300 font-bold">RISK SHORT</span>`
+                            : '-'
+                }
+            );
 
             groups.forEach((groupName, groupIndex) => {
                 const dayResults = days.map((day, dayIndex) => {
@@ -2593,9 +2652,23 @@
 
                 metricDefs.forEach((metric, metricIndex) => {
                     const tr = document.createElement('tr');
-                    tr.className = metricIndex === 0
-                        ? 'border-t border-cyan-500/25 bg-slate-950/20'
-                        : 'bg-slate-950/10';
+
+                    const zoneBorder = metric.zoneStart
+                        ? (metric.zoneClass === 'violet' ? 'border-t-2 border-violet-500/45'
+                            : metric.zoneClass === 'emerald' ? 'border-t-2 border-emerald-500/45'
+                            : metric.zoneClass === 'cyan' ? 'border-t-2 border-cyan-500/45'
+                            : 'border-t-2 border-amber-500/45')
+                        : '';
+
+                    const zoneBg = metric.zoneClass === 'violet'
+                        ? 'bg-violet-950/10'
+                        : metric.zoneClass === 'emerald'
+                            ? 'bg-emerald-950/10'
+                            : metric.zoneClass === 'cyan'
+                                ? 'bg-cyan-950/10'
+                                : 'bg-amber-950/10';
+
+                    tr.className = `${zoneBorder} ${zoneBg}`;
 
                     let rowHtml = '';
 
@@ -2607,9 +2680,22 @@
                             </td>`;
                     }
 
+                    const zoneBadge = metric.zoneStart
+                        ? `<div class="mb-1">
+                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold tracking-wide
+                                    ${metric.zoneClass === 'violet' ? 'bg-violet-950/50 text-violet-300 border border-violet-500/25'
+                                        : metric.zoneClass === 'emerald' ? 'bg-emerald-950/50 text-emerald-300 border border-emerald-500/25'
+                                        : metric.zoneClass === 'cyan' ? 'bg-cyan-950/50 text-cyan-300 border border-cyan-500/25'
+                                        : 'bg-amber-950/50 text-amber-300 border border-amber-500/25'}">
+                                    ${metric.zoneNo} · ${metric.zone}
+                                </span>
+                           </div>`
+                        : '';
+
                     rowHtml += `
-                        <td class="px-2 py-2 font-semibold ${metric.cls} bg-[#101a34] sticky z-20 border-r border-bordercolor"
+                        <td class="${metric.compactRow ? 'px-2 py-1' : 'px-2 py-2'} font-semibold ${metric.cls} bg-[#101a34] sticky z-20 border-r border-bordercolor"
                             style="left:${fixedGroupWidth}px;">
+                            ${zoneBadge}
                             <div class="${metric.singleLineSmall ? 'text-[9px] whitespace-nowrap leading-none' : ''}">${metric.label}</div>
                             ${metric.subLabel && !metric.singleLineSmall ? `<div class="text-[8px] font-normal text-slate-500 mt-0.5">${metric.subLabel}</div>` : ''}
                         </td>`;
