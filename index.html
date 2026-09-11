@@ -125,10 +125,13 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
-                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower Requirement Overview ตาม Order รายวัน</h2>
+                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Plan & Actual</h2>
+                            <p class="text-[10px] text-slate-400 mt-1">
+                                ตารางเดียว: Order + Manpower + Capacity Plan/Actual + Coverage + Short Risk
+                            </p>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนตามไลน์ผลิต | Bottom Plate Line#1 / Line#2: Out Line = เสิร์ฟพาร์ท 1 + ยกชิ้นงานใส่รถ 1 + Delivery 1 (รวม +3 คน/ไลน์) | Order/Hour = Order + Short 20% ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
+                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Bottom Plate Line#1 / Line#2: Out Line = เสิร์ฟพาร์ท 1 + ยกชิ้นงานใส่รถ 1 + Delivery 1 (รวม +3 คน/ไลน์) | Order/Hour = Order + Short 20% ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -176,7 +179,7 @@
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
                         <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableManpower" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
+                            <table id="tableManpowerCapacity" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
                                 </thead>
@@ -188,81 +191,7 @@
 
 
                 <!-- CAPACITY REQUIREMENT OVERVIEW : PLAN & ACTUAL -->
-                <section id="capacity-requirement-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <div class="w-1.5 h-6 bg-blue-400 rounded-full"></div>
-                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">
-                                    Capacity Requirement Overview Plan & Actual
-                                </h2>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                Linked กับ Manpower: ใช้ Group/Line, Order และ Working Hours ชุดเดียวกัน | Plan UPH = Order ÷ Working Hours |
-                                Actual UPH = ค่าเฉลี่ย Capacity UPH ของ Model ที่มี Order ในวันนั้นแบบถ่วงน้ำหนักตาม Order |
-                                Coverage = Actual Capacity ÷ Order × 100
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                            <span class="text-[10px] text-slate-400 font-semibold">เลือกไลน์ผลิต:</span>
-                            <select id="capacityReqLineSelect"
-                                onchange="switchCapacityRequirementStation(this.value)"
-                                class="bg-slate-800 border border-bordercolor text-blue-300 text-xs font-bold rounded-lg px-3 py-1.5 focus:outline-none">
-                                <option value="Door A">Door A</option>
-                                <option value="Door B">Door B</option>
-                                <option value="Door C">Door C</option>
-                                <option value="Door Glass">Door Glass</option>
-                                <option value="Back Plate">Back Plate</option>
-                                <option value="Bottom Plate">Bottom Plate</option>
-                            </select>
-                            <span id="capacityReqStationLabel"
-                                class="text-blue-300 font-bold text-xs bg-blue-950/50 px-3 py-1.5 rounded-lg border border-blue-500/30">
-                                Door A
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Working Hours</div>
-                            <div id="crHours" class="text-lg font-bold text-cyan-300 mt-1">8.0 hr</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Total Order</div>
-                            <div id="crTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Avg Plan UPH</div>
-                            <div id="crAvgPlanUPH" class="text-lg font-bold text-sky-300 mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Avg Actual UPH</div>
-                            <div id="crAvgActualUPH" class="text-lg font-bold text-emerald-300 mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Overall Coverage</div>
-                            <div id="crCoverage" class="text-lg font-bold text-amber-300 mt-1">0%</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Risk Days</div>
-                            <div id="crRiskDays" class="text-lg font-bold text-rose-300 mt-1">0</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
-                        <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableCapacityRequirement"
-                                class="text-left border-collapse text-[10px]"
-                                style="table-layout:fixed; min-width:100%;">
-                                <thead>
-                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
-                                </thead>
-                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
+                
 
                 <!-- 2. ORDER TABLES : LEFT / RIGHT -->
                 <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
@@ -766,7 +695,6 @@
                 renderCapacityTable(currentDailyData);
                 renderDailyOrderSummaryTable(currentDailyData);
                 renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
                 document.getElementById('tab-content-mastermodel').classList.remove('hidden');
                 document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
@@ -1072,7 +1000,6 @@
             localStorage.setItem(getDoorCRatioKey(modelName, line), String(ratio));
             renderDailyOrderSummaryTable(currentDailyData);
             renderCapacityTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
         }
 
         function getDoorCOrderMultiplier(modelName) {
@@ -1490,7 +1417,6 @@
             renderCapacityTable(currentDailyData);
             renderDailyOrderSummaryTable(currentDailyData);
             renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
         }
 
         function calculateTotalOrders(groupsData, days) {
@@ -1966,7 +1892,6 @@
                 localStorage.setItem(key, String(clean));
             }
             renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
         }
 
         function getShortPercent() {
@@ -1981,7 +1906,6 @@
             const input = document.getElementById('shortPercentInput');
             if (input && Number(input.value) !== pct) input.value = pct;
             renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
         }
 
         function getBottomOutLineManpower(station, groupName) {
@@ -2408,7 +2332,7 @@
         }
 
         function renderManpowerTable(data) {
-            const table = document.getElementById('tableManpower');
+            const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
 
             const headerRow = table.querySelector('thead tr');
@@ -2508,6 +2432,52 @@
                         ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>`
                         : '-'
                 },
+                {
+                    key: 'planUPH',
+                    label: 'Plan UPH',
+                    subLabel: 'Order ÷ Working Hours',
+                    cls: 'text-sky-300',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'actualUPH',
+                    label: 'Actual Avg UPH',
+                    subLabel: 'Capacity ตาม Product Mix',
+                    cls: 'text-emerald-300',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'actualCapacity',
+                    label: 'Actual Capacity / Day',
+                    subLabel: 'Actual UPH × Hours',
+                    cls: 'text-cyan-300',
+                    format: v => v > 0 ? Math.round(v).toLocaleString() : '-'
+                },
+                {
+                    key: 'coverage',
+                    label: 'Coverage %',
+                    subLabel: 'Capacity ÷ Order',
+                    cls: 'text-amber-300',
+                    format: v => v > 0 ? `${v.toFixed(1)}%` : '-'
+                },
+                {
+                    key: 'capacityGap',
+                    label: 'Capacity Gap',
+                    subLabel: 'Capacity - Order',
+                    cls: 'text-slate-200',
+                    format: v => Number.isFinite(v) && Math.abs(v) >= 0.5 ? `${v > 0 ? '+' : ''}${Math.round(v).toLocaleString()}` : (v === 0 ? '0' : '-')
+                },
+                {
+                    key: 'capacityStatus',
+                    label: 'Capacity Status',
+                    subLabel: 'Short Risk',
+                    cls: 'text-white',
+                    format: v => v === 'NO SHORT'
+                        ? `<span class="text-emerald-300 font-bold">NO SHORT</span>`
+                        : v === 'RISK SHORT'
+                            ? `<span class="text-rose-300 font-bold">RISK SHORT</span>`
+                            : '-'
+                },
 ];
 
             if (station === 'Bottom Plate') {
@@ -2567,10 +2537,25 @@
                             outLineDelivery: 0,
                             outLineTotal: 0,
                             totalManpowerWithOutLine: 0,
+                            planUPH: 0,
+                            actualUPH: 0,
+                            actualCapacity: 0,
+                            coverage: 0,
+                            capacityGap: 0,
+                            capacityStatus: 'NO PLAN',
                             manpowerCalc: 0,
                             manpowerRequired: 0};
                     }
                     const result = calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
+
+                    // Capacity Plan & Actual ใช้ Order/Group/Day ชุดเดียวกับ Manpower
+                    const capResult = calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours);
+                    result.planUPH = capResult.planUPH;
+                    result.actualUPH = capResult.actualUPH;
+                    result.actualCapacity = capResult.actualCapacity;
+                    result.coverage = capResult.coverage;
+                    result.capacityGap = capResult.gap;
+                    result.capacityStatus = capResult.status;
 
                     // Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
                     const outLine = getBottomOutLineManpower(station, groupName);
@@ -2690,7 +2675,6 @@
             if (select && select.value !== stationName) select.value = stationName;
 
             renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
         }
 
         function switchCapacityStation(stationName) {
@@ -3092,7 +3076,6 @@
                         renderCapacityTable(currentDailyData);
                         renderDailyOrderSummaryTable(currentDailyData);
                         renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
                         
                         alert('โหลดและอัปเดตข้อมูลจาก Excel สำเร็จ!');
                     }
@@ -3195,7 +3178,6 @@
             updateLobChart();
             renderCapacityTable(currentDailyData);
             renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการเรียบร้อยแล้ว');
         }
@@ -3328,7 +3310,6 @@
             updateDoorLobChart();
             renderCapacityTable(currentDailyData);
             renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
 
             alert('ล้างข้อมูล Cycle Time และชื่อกระบวนการ (Door Part) เรียบร้อยแล้ว');
         }
@@ -3489,7 +3470,6 @@
         renderCapacityTable(currentDailyData);
         renderDailyOrderSummaryTable(currentDailyData);
         renderManpowerTable(currentDailyData);
-            renderCapacityRequirementTable(currentDailyData);
     </script>
 </body>
 </html>
