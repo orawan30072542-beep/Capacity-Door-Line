@@ -1902,10 +1902,63 @@
                 return;
             }
 
+            if (isPlateStation) {
+                const lineOrder = ['Line#1', 'Line#2'];
+                modelsToDisplay.sort((a, b) => {
+                    const ai = lineOrder.indexOf(a.routing);
+                    const bi = lineOrder.indexOf(b.routing);
+                    const aa = ai === -1 ? 99 : ai;
+                    const bb = bi === -1 ? 99 : bi;
+                    if (aa !== bb) return aa - bb;
+                    return String(a.model).localeCompare(String(b.model));
+                });
+            }
+
+            let lastPlateLine = null;
+
             modelsToDisplay.forEach(item => {
                 let modelName = item.model;
                 let maxCT = getModelMaxCT(modelName);
                 let overallLeadTime = isPlateStation ? 0 : getOverallDoorLeadTime(modelName);
+
+                if (isPlateStation) {
+                    const storageKey = `${modelName}_${currentCapacityStation}`;
+                    const stations = processDatabase[storageKey] || [];
+                    let plateMaxCT = 0;
+                    let plateLeadTime = 0;
+
+                    stations.forEach(st => {
+                        const ct =
+                            (parseFloat(st.wt1) || 0) +
+                            (parseFloat(st.wt2) || 0) +
+                            (parseFloat(st.wt3) || 0) +
+                            (parseFloat(st.loss) || 0);
+
+                        plateLeadTime += ct;
+                        if (ct > plateMaxCT) plateMaxCT = ct;
+                    });
+
+                    maxCT = plateMaxCT;
+                    overallLeadTime = plateLeadTime;
+
+                    if (item.routing !== lastPlateLine) {
+                        const groupTr = document.createElement('tr');
+                        groupTr.className = 'bg-blue-950/90 border-y border-blue-500/30';
+                        groupTr.innerHTML = `
+                            <td colspan="${columns.length + 4}" class="px-3 py-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-4 rounded-full ${item.routing === 'Line#1' ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
+                                    <span class="font-bold ${item.routing === 'Line#1' ? 'text-cyan-300' : 'text-amber-300'}">
+                                        ${currentCapacityStation} — ${item.routing}
+                                    </span>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(groupTr);
+                        lastPlateLine = item.routing;
+                    }
+                }
+
                 let uphMax = maxCT > 0 ? Math.round(3600 / maxCT) : 0;
                 let uph85 = Math.round(uphMax * 0.85);
 
@@ -1958,13 +2011,9 @@
 
                 html += `
                     <td class="px-1 py-1.5 text-center bg-slate-900/20">
-                        ${isPlateStation ? `
-                            <div class="text-[9px] font-bold text-cyan-300">${maxCT.toFixed(1)}s</div>
-                        ` : `
-                            <div class="text-[9px] font-bold text-emerald-300 leading-none">${overallLeadTime.toFixed(1)}s</div>
-                            <div class="text-[7px] text-slate-600 leading-none my-0.5">────</div>
-                            <div class="text-[9px] font-bold text-cyan-300 leading-none">${maxCT.toFixed(1)}s</div>
-                        `}
+                        <div class="text-[9px] font-bold text-emerald-300 leading-none">${overallLeadTime.toFixed(1)}s</div>
+                        <div class="text-[7px] text-slate-600 leading-none my-0.5">────</div>
+                        <div class="text-[9px] font-bold text-cyan-300 leading-none">${maxCT.toFixed(1)}s</div>
                     </td>
                     <td class="px-1 py-1.5 text-center font-bold text-amber-300 bg-slate-900/20">
                         ${uphMax.toLocaleString()}
