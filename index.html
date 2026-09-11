@@ -2458,7 +2458,7 @@
                     zone: 'CAPACITY',
                     zoneClass: 'emerald',
                     label: 'Actual Capacity',
-                    subLabel: 'Actual Avg UPH + Capacity / Day + Gap',
+                    subLabel: 'Day / UPH / Gap Day / Gap Hour',
                     cls: 'text-emerald-300',
                     format: (v, row) => {
                         if (!(v > 0)) return '-';
@@ -2469,14 +2469,10 @@
                         const gapHourText = `${gapHour > 0 ? '+' : ''}${Math.round(gapHour).toLocaleString()}`;
 
                         return `
-                            <div class="font-bold text-emerald-300">UPH ${Math.round(v).toLocaleString()}</div>
-                            <div class="text-[8px] text-cyan-300 mt-0.5">Capacity/Day ${Math.round(row.actualCapacity || 0).toLocaleString()}</div>
-                            <div class="text-[8px] mt-1 ${gapDay >= 0 ? 'text-emerald-300' : 'text-rose-300'}">
-                                Gap/Day ${gapDayText}
-                            </div>
-                            <div class="text-[8px] ${gapHour >= 0 ? 'text-emerald-300' : 'text-rose-300'}">
-                                Gap/Hour ${gapHourText}
-                            </div>
+                            <div class="font-bold text-cyan-300">${Math.round(row.actualCapacity || 0).toLocaleString()}</div>
+                            <div class="text-[9px] text-emerald-300 mt-0.5">${Math.round(v).toLocaleString()}</div>
+                            <div class="text-[9px] mt-1 pt-1 border-t border-slate-700/70 ${gapDay >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${gapDayText}</div>
+                            <div class="text-[9px] ${gapHour >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${gapHourText}</div>
                         `;
                     }
                 },
