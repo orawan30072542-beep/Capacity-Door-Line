@@ -112,6 +112,71 @@
 
             <!-- Dashboard Body Content -->
             <div id="tab-content-dashboard" class="p-6 space-y-6 w-full"> 
+                <!-- 4. MANPOWER CALCULATION -->
+                <section id="manpower-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
+                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower Requirement Overview ตาม Order รายวัน</h2>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1 ml-3">
+                                สรุปกำลังคนตามไลน์ผลิต | UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Door Order = Total Order × Ratio | Manpower = Door Order ÷ (UPM 85% × ชั่วโมงทำงาน)
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <span class="text-[10px] text-slate-400 font-semibold">เลือกไลน์ผลิต:</span>
+                            <select id="manpowerLineSelect"
+                                onchange="switchManpowerStation(this.value)"
+                                class="bg-slate-800 border border-bordercolor text-emerald-300 text-xs font-bold rounded-lg px-3 py-1.5 focus:outline-none">
+                                <option value="Door A">Door A</option>
+                                <option value="Door B">Door B</option>
+                                <option value="Door C">Door C</option>
+                                <option value="Door Glass">Door Glass</option>
+                                <option value="Back Plate">Back Plate</option>
+                                <option value="Bottom Plate">Bottom Plate</option>
+                            </select>
+                            <span id="manpowerStationLabel" class="text-emerald-300 font-bold text-xs bg-emerald-950/50 px-3 py-1.5 rounded-lg border border-emerald-500/30">Door A</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Working Hours</div>
+                            <div id="mpHours" class="text-lg font-bold text-cyan-300 mt-1">8.0 hr</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Total Order</div>
+                            <div class="text-[9px] text-slate-500">ยังไม่คูณ Ratio</div>
+                            <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Total Door Order</div>
+                            <div class="text-[9px] text-slate-500">คูณ Ratio แล้ว</div>
+                            <div id="mpTotalDoorOrder" class="text-lg font-bold text-violet-300 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Avg Manpower / Day</div>
+                            <div id="mpAvgManpower" class="text-lg font-bold text-amber-300 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Peak Manpower</div>
+                            <div id="mpPeakManpower" class="text-lg font-bold text-rose-300 mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
+                        <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <table id="tableManpower" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
+                                <thead>
+                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
+                                </thead>
+                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- 1. OVERVIEW SECTION -->
                 <section id="overview" class="space-y-4"> 
                     <div class="flex items-center space-x-2">
@@ -260,60 +325,7 @@
                     </div>
                 </section>
 
-                <!-- 4. MANPOWER CALCULATION -->
-                <section id="manpower-section" class="bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
-                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">4. Manpower Requirement ตาม Order รายวัน</h2>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Door Order = Total Order × Ratio | Manpower = Door Order ÷ (UPM 85% × ชั่วโมงทำงาน)
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] text-slate-400">Group Station:</span>
-                            <span id="manpowerStationLabel" class="text-emerald-300 font-bold text-xs bg-emerald-950/50 px-3 py-1.5 rounded-lg border border-emerald-500/30">Door A</span>
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Working Hours</div>
-                            <div id="mpHours" class="text-lg font-bold text-cyan-300 mt-1">8.0 hr</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Total Order</div>
-                            <div class="text-[9px] text-slate-500">ยังไม่คูณ Ratio</div>
-                            <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Total Door Order</div>
-                            <div class="text-[9px] text-slate-500">คูณ Ratio แล้ว</div>
-                            <div id="mpTotalDoorOrder" class="text-lg font-bold text-violet-300 mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Avg Manpower / Day</div>
-                            <div id="mpAvgManpower" class="text-lg font-bold text-amber-300 mt-1">0</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
-                            <div class="text-[10px] text-slate-400">Peak Manpower</div>
-                            <div id="mpPeakManpower" class="text-lg font-bold text-rose-300 mt-1">0</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
-                        <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableManpower" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
-                                <thead>
-                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
-                                </thead>
-                                <tbody class="divide-y divide-bordercolor/50 text-slate-300"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
             </div>
 
             <!-- MASTER MODEL & ROUTING TAB -->
@@ -649,6 +661,7 @@
         let selectedDoorModel = '';
 
         let currentCapacityStation = 'Door A';
+        let currentManpowerStation = 'Door A';
         let currentSummaryStation = 'All';
 
         function isSunday(dayStr) {
@@ -1968,11 +1981,14 @@
             if (!headerRow || !tbody) return;
 
             const days = data.days;
-            const station = currentCapacityStation || 'Door A';
+            const station = currentManpowerStation || 'Door A';
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
             const stationLabel = document.getElementById('manpowerStationLabel');
             if (stationLabel) stationLabel.textContent = station;
+
+            const lineSelect = document.getElementById('manpowerLineSelect');
+            if (lineSelect && lineSelect.value !== station) lineSelect.value = station;
 
             const fixedGroupWidth = 82;
             const fixedMetricWidth = 126;
@@ -2005,8 +2021,7 @@
 
             tbody.innerHTML = '';
 
-            const hidden = capacityHiddenGroups[station] || new Set();
-            const groups = getManpowerGroupsForStation(station).filter(g => !hidden.has(g));
+            const groups = getManpowerGroupsForStation(station);
 
             let totalOrderAllDays = 0;
             let totalDoorOrderAllDays = 0;
@@ -2109,6 +2124,18 @@
             setText('mpPeakManpower', String(peakManpower));
         }
 
+        function switchManpowerStation(stationName) {
+            currentManpowerStation = stationName;
+
+            const label = document.getElementById('manpowerStationLabel');
+            if (label) label.textContent = stationName;
+
+            const select = document.getElementById('manpowerLineSelect');
+            if (select && select.value !== stationName) select.value = stationName;
+
+            renderManpowerTable(currentDailyData);
+        }
+
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
             document.getElementById('currentCapacityStationLabel').textContent = stationName;
@@ -2126,7 +2153,6 @@
             });
 
             renderCapacityTable(currentDailyData);
-            renderManpowerTable(currentDailyData);
         }
 
         function getDoorTypeLeadTime(modelName, doorType) {
@@ -2178,7 +2204,6 @@
             else hidden.add(groupName);
 
             renderCapacityTable(currentDailyData);
-            renderManpowerTable(currentDailyData);
         }
 
         function renderCapacityGroupVisibilityControls() {
