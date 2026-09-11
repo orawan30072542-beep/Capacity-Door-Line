@@ -2164,6 +2164,7 @@
                 metricDefs.push(
                     {
                         key: 'outLinePartSupply',
+                        singleLineSmall: true,
                     compactRow: true,
                         label: 'Out Line - Part Supply',
                         subLabel: 'พนักงานเสิร์ฟพาร์ท',
@@ -2172,6 +2173,7 @@
                     },
                     {
                         key: 'outLineLoadToCart',
+                        singleLineSmall: true,
                     compactRow: true,
                         label: 'Out Line - Load to Cart',
                         subLabel: 'พนักงานยกชิ้นงานใส่รถ',
@@ -2180,6 +2182,7 @@
                     },
                     {
                         key: 'outLineDelivery',
+                        singleLineSmall: true,
                     compactRow: true,
                         label: 'Out Line - Delivery',
                         subLabel: 'พนักงาน Delivery',
@@ -2269,8 +2272,8 @@
                     rowHtml += `
                         <td class="px-2 py-2 font-semibold ${metric.cls} bg-[#101a34] sticky z-20 border-r border-bordercolor"
                             style="left:${fixedGroupWidth}px;">
-                            <div>${metric.label}</div>
-                            ${metric.subLabel ? `<div class="text-[8px] font-normal text-slate-500 mt-0.5">${metric.subLabel}</div>` : ''}
+                            <div class="${metric.singleLineSmall ? 'text-[9px] whitespace-nowrap leading-none' : ''}">${metric.label}</div>
+                            ${metric.subLabel && !metric.singleLineSmall ? `<div class="text-[8px] font-normal text-slate-500 mt-0.5">${metric.subLabel}</div>` : ''}
                         </td>`;
 
                     dayResults.forEach((r, dayIndex) => {
