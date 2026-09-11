@@ -121,7 +121,7 @@
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower Requirement Overview ตาม Order รายวัน</h2>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนตามไลน์ผลิต | Total Order UPH = Total Order ÷ ชั่วโมงทำงาน | Door Order UPH = Door Order ÷ ชั่วโมงทำงาน | UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Manpower ใช้ Door Order
+                                สรุปกำลังคนตามไลน์ผลิต | UPH แสดงในช่องเดียวกับ Total Order / Door Order และปัดเป็นจำนวนเต็ม | UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Manpower ใช้ Door Order
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -2039,13 +2039,29 @@
             const dailyMpTotals = new Array(days.length).fill(0);
 
             const metricDefs = [
-                { key: 'totalOrder', label: 'Total Order', subLabel: 'ไม่คูณ Ratio', cls: 'text-white', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
-                { key: 'totalOrderUPH', label: 'Total Order UPH', subLabel: 'Order ÷ Working Hours', cls: 'text-sky-300', format: v => v > 0 ? v.toFixed(1) : '-' },
-                { key: 'doorOrder', label: 'Door Order', subLabel: 'คูณ Ratio', cls: 'text-violet-300', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
-                { key: 'doorOrderUPH', label: 'Door Order UPH', subLabel: 'Door Order ÷ Working Hours', cls: 'text-fuchsia-300', format: v => v > 0 ? v.toFixed(1) : '-' },
+                {
+                    key: 'totalOrder',
+                    label: 'Total Order',
+                    subLabel: 'ไม่คูณ Ratio',
+                    cls: 'text-white',
+                    format: (v, row) => v > 0
+                        ? `<div class="font-bold">${Math.round(v).toLocaleString()}</div>
+                           <div class="text-[8px] text-sky-300 mt-0.5">UPH ${Math.round(row.totalOrderUPH).toLocaleString()}</div>`
+                        : '-'
+                },
+                {
+                    key: 'doorOrder',
+                    label: 'Door Order',
+                    subLabel: 'คูณ Ratio',
+                    cls: 'text-violet-300',
+                    format: (v, row) => v > 0
+                        ? `<div class="font-bold">${Math.round(v).toLocaleString()}</div>
+                           <div class="text-[8px] text-fuchsia-300 mt-0.5">UPH ${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
+                        : '-'
+                },
                 { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
-                { key: 'effectiveUPM85', label: 'UPM 85%', subLabel: 'Capacity / Man / Hr', cls: 'text-cyan-300', format: v => v > 0 ? v.toFixed(1) : '-' },
-                { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? v.toFixed(1) : '-' },
+                { key: 'effectiveUPM85', label: 'UPM 85%', subLabel: 'Capacity / Man / Hr', cls: 'text-cyan-300', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
+                { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
                 { key: 'manpowerCalc', label: 'Manpower Calc', subLabel: 'ใช้ Door Order', cls: 'text-amber-300', format: v => v > 0 ? v.toFixed(2) : '-' },
                 { key: 'manpowerRequired', label: 'Manpower Required', cls: 'text-rose-300', format: v => v > 0 ? Math.ceil(v) : '-' }
             ];
@@ -2101,7 +2117,7 @@
                         const isSun = isSunday(days[dayIndex]);
                         rowHtml += `
                             <td class="px-1 py-2 text-center ${isSun ? 'bg-slate-950/60 text-slate-600' : metric.cls}">
-                                ${isSun ? '-' : metric.format(r[metric.key])}
+                                ${isSun ? '-' : metric.format(r[metric.key], r)}
                             </td>`;
                     });
 
