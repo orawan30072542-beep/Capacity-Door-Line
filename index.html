@@ -269,7 +269,7 @@
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">4. Manpower Requirement ตาม Order รายวัน</h2>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Manpower = Order ÷ (UPM 85% × ชั่วโมงทำงาน)
+                                UPM 85% = (3600 ÷ Overall Lead Time) × 0.85 | Door Order = Total Order × Ratio | Manpower = Door Order ÷ (UPM 85% × ชั่วโมงทำงาน)
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -278,14 +278,20 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Working Hours</div>
                             <div id="mpHours" class="text-lg font-bold text-cyan-300 mt-1">8.0 hr</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Total Order</div>
+                            <div class="text-[9px] text-slate-500">ยังไม่คูณ Ratio</div>
                             <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
+                            <div class="text-[10px] text-slate-400">Total Door Order</div>
+                            <div class="text-[9px] text-slate-500">คูณ Ratio แล้ว</div>
+                            <div id="mpTotalDoorOrder" class="text-lg font-bold text-violet-300 mt-1">0</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Avg Manpower / Day</div>
@@ -1900,7 +1906,11 @@
         }
 
         function calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours) {
+            // Total Order = Order ที่ไลน์ต้องผลิตก่อนคูณ Ratio
+            // Door Order  = Order ที่ต้องทำจริงหลังคูณ Ratio
+            // การคำนวณ Manpower ใช้ Door Order เท่านั้น
             let totalOrder = 0;
+            let doorOrder = 0;
             let totalManHours = 0;
             let weightedLeadTime = 0;
             let weightedQty = 0;
@@ -1911,8 +1921,9 @@
 
                     const multiplier = getManpowerOrderMultiplier(m.name, station, groupName);
                     const baseOrder = Math.round(Number(m.orders[dayIndex]) || 0);
-                    const order = baseOrder * multiplier;
-                    if (order <= 0) return;
+                    if (baseOrder <= 0 || multiplier <= 0) return;
+
+                    const modelDoorOrder = baseOrder * multiplier;
 
                     const leadTime = getLeadTimeForManpower(m.name, station);
                     if (leadTime <= 0) return;
@@ -1920,10 +1931,14 @@
                     const upm85 = (3600 / leadTime) * 0.85;
                     if (upm85 <= 0) return;
 
-                    totalOrder += order;
-                    weightedLeadTime += order * leadTime;
-                    weightedQty += order;
-                    totalManHours += order / upm85;
+                    // แสดง Order 2 แบบ
+                    totalOrder += baseOrder;
+                    doorOrder += modelDoorOrder;
+
+                    // Lead Time และ Manpower ใช้น้ำหนักตาม Door Order
+                    weightedLeadTime += modelDoorOrder * leadTime;
+                    weightedQty += modelDoorOrder;
+                    totalManHours += modelDoorOrder / upm85;
                 });
             });
 
@@ -1935,6 +1950,7 @@
 
             return {
                 totalOrder: Math.round(totalOrder),
+                doorOrder: Math.round(doorOrder),
                 avgLeadTime,
                 effectiveUPM85,
                 capacityPerManDay,
@@ -1993,17 +2009,19 @@
             const groups = getManpowerGroupsForStation(station).filter(g => !hidden.has(g));
 
             let totalOrderAllDays = 0;
+            let totalDoorOrderAllDays = 0;
             let totalDailyManpower = 0;
             let activeDays = 0;
             let peakManpower = 0;
             const dailyMpTotals = new Array(days.length).fill(0);
 
             const metricDefs = [
-                { key: 'totalOrder', label: 'Order', cls: 'text-white', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
+                { key: 'totalOrder', label: 'Total Order', subLabel: 'ไม่คูณ Ratio', cls: 'text-white', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
+                { key: 'doorOrder', label: 'Door Order', subLabel: 'คูณ Ratio', cls: 'text-violet-300', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
                 { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
                 { key: 'effectiveUPM85', label: 'UPM 85%', cls: 'text-cyan-300', format: v => v > 0 ? v.toFixed(1) : '-' },
                 { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? v.toFixed(1) : '-' },
-                { key: 'manpowerCalc', label: 'Manpower Calc', cls: 'text-amber-300', format: v => v > 0 ? v.toFixed(2) : '-' },
+                { key: 'manpowerCalc', label: 'Manpower Calc', subLabel: 'ใช้ Door Order', cls: 'text-amber-300', format: v => v > 0 ? v.toFixed(2) : '-' },
                 { key: 'manpowerRequired', label: 'Manpower Required', cls: 'text-rose-300', format: v => v > 0 ? Math.ceil(v) : '-' }
             ];
 
@@ -2012,6 +2030,7 @@
                     if (isSunday(day)) {
                         return {
                             totalOrder: 0,
+                            doorOrder: 0,
                             avgLeadTime: 0,
                             effectiveUPM85: 0,
                             capacityPerManDay: 0,
@@ -2024,6 +2043,7 @@
 
                 dayResults.forEach((r, i) => {
                     totalOrderAllDays += r.totalOrder;
+                    totalDoorOrderAllDays += r.doorOrder;
                     dailyMpTotals[i] += r.manpowerCalc;
                 });
 
@@ -2046,7 +2066,8 @@
                     rowHtml += `
                         <td class="px-2 py-2 font-semibold ${metric.cls} bg-[#101a34] sticky z-20 border-r border-bordercolor"
                             style="left:${fixedGroupWidth}px;">
-                            ${metric.label}
+                            <div>${metric.label}</div>
+                            ${metric.subLabel ? `<div class="text-[8px] font-normal text-slate-500 mt-0.5">${metric.subLabel}</div>` : ''}
                         </td>`;
 
                     dayResults.forEach((r, dayIndex) => {
@@ -2083,6 +2104,7 @@
 
             setText('mpHours', `${hours.toFixed(1)} hr`);
             setText('mpTotalOrder', totalOrderAllDays.toLocaleString());
+            setText('mpTotalDoorOrder', totalDoorOrderAllDays.toLocaleString());
             setText('mpAvgManpower', activeDays > 0 ? (totalDailyManpower / activeDays).toFixed(2) : '0');
             setText('mpPeakManpower', String(peakManpower));
         }
