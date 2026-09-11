@@ -121,7 +121,7 @@
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower Requirement Overview ตาม Order รายวัน</h2>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนตามไลน์ผลิต | UPH แสดงในช่องเดียวกับ Total Order / Door Order | Hourly Output สามารถกรอกยอดผลิตจริงต่อชั่วโมงเองได้ และบันทึกอัตโนมัติ | Manpower ใช้ Door Order
+                                สรุปกำลังคนตามไลน์ผลิต | UPH แสดงในช่อง Total Order / Door Order | ด้านล่างสามารถกรอก Manual Hourly Output ได้เอง | Manpower Auto = Door Order ÷ (Manual Hourly Output × Working Hours)
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -157,10 +157,12 @@
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Avg Manpower / Day</div>
+                            <div class="text-[9px] text-slate-500">จาก Manual Hourly Output</div>
                             <div id="mpAvgManpower" class="text-lg font-bold text-amber-300 mt-1">0</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Peak Manpower</div>
+                            <div class="text-[9px] text-slate-500">จาก Manual Hourly Output</div>
                             <div id="mpPeakManpower" class="text-lg font-bold text-rose-300 mt-1">0</div>
                         </div>
                     </div>
@@ -2085,18 +2087,30 @@
                            <div class="text-[8px] text-fuchsia-300 mt-0.5">UPH ${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
+                { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
+                { key: 'effectiveUPM85', label: 'UPH 85% / Man', subLabel: 'จาก Overall Lead Time', cls: 'text-cyan-300', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
+                { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
                 {
                     key: 'manualHourlyOutput',
-                    label: 'Hourly Output',
-                    subLabel: 'กรอกยอดผลิต/ชั่วโมง',
+                    label: 'Manual Hourly Output',
+                    subLabel: 'กรอกเอง / คน / ชั่วโมง',
                     cls: 'text-lime-300',
                     isManualInput: true
                 },
-                { key: 'avgLeadTime', label: 'Overall Lead Time', cls: 'text-emerald-300', format: v => v > 0 ? `${v.toFixed(1)}s` : '-' },
-                { key: 'effectiveUPM85', label: 'UPM 85%', subLabel: 'Capacity / Man / Hr', cls: 'text-cyan-300', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
-                { key: 'capacityPerManDay', label: 'Capacity / Man / Day', cls: 'text-slate-200', format: v => v > 0 ? Math.round(v).toLocaleString() : '-' },
-                { key: 'manpowerCalc', label: 'Manpower Calc', subLabel: 'ใช้ Door Order', cls: 'text-amber-300', format: v => v > 0 ? v.toFixed(2) : '-' },
-                { key: 'manpowerRequired', label: 'Manpower Required', cls: 'text-rose-300', format: v => v > 0 ? Math.ceil(v) : '-' }
+                {
+                    key: 'manualManpowerCalc',
+                    label: 'Manpower Auto',
+                    subLabel: 'Door Order ÷ (Hourly × Hours)',
+                    cls: 'text-amber-300',
+                    format: v => v > 0 ? v.toFixed(2) : '-'
+                },
+                {
+                    key: 'manualManpowerRequired',
+                    label: 'Manpower Required',
+                    subLabel: 'ปัดขึ้นเป็นจำนวนเต็ม',
+                    cls: 'text-rose-300',
+                    format: v => v > 0 ? Math.ceil(v) : '-'
+                }
             ];
 
             groups.forEach((groupName, groupIndex) => {
@@ -2111,16 +2125,33 @@
                             effectiveUPM85: 0,
                             capacityPerManDay: 0,
                             manpowerCalc: 0,
-                            manpowerRequired: 0
+                            manpowerRequired: 0,
+                            manualHourlyOutput: 0,
+                            manualManpowerCalc: 0,
+                            manualManpowerRequired: 0
                         };
                     }
-                    return calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
+                    const result = calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
+                    const savedHourly = getManualHourlyOutput(station, groupName, day);
+                    const manualHourlyOutput = savedHourly === '' ? 0 : Math.max(0, Number(savedHourly) || 0);
+
+                    result.manualHourlyOutput = manualHourlyOutput;
+                    result.manualManpowerCalc =
+                        manualHourlyOutput > 0 && hours > 0
+                            ? result.doorOrder / (manualHourlyOutput * hours)
+                            : 0;
+                    result.manualManpowerRequired =
+                        result.manualManpowerCalc > 0
+                            ? Math.ceil(result.manualManpowerCalc)
+                            : 0;
+
+                    return result;
                 });
 
                 dayResults.forEach((r, i) => {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
-                    dailyMpTotals[i] += r.manpowerCalc;
+                    dailyMpTotals[i] += r.manualManpowerCalc;
                 });
 
                 metricDefs.forEach((metric, metricIndex) => {
@@ -2154,7 +2185,8 @@
                             : metric.isManualInput
                                 ? `<input type="number" min="0" step="1" inputmode="numeric"
                                     value="${getManualHourlyOutput(station, groupName, day)}"
-                                    placeholder="0"
+                                    placeholder="UPH"
+                                    title="กรอกจำนวนชิ้นต่อคนต่อชั่วโมง แล้วระบบจะคำนวณ Manpower ให้อัตโนมัติ"
                                     onchange="saveManualHourlyOutput('${station}', '${groupName}', '${day}', this.value)"
                                     class="w-14 sm:w-16 bg-slate-950/80 border border-lime-500/30 rounded-md px-1.5 py-1 text-center text-[10px] font-bold text-lime-300 focus:outline-none focus:border-lime-400" />`
                                 : metric.format(r[metric.key], r);
