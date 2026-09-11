@@ -198,7 +198,7 @@
                                 </h2>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                Plan UPH = Order ÷ Working Hours |
+                                Linked กับ Manpower: ใช้ Group/Line, Order และ Working Hours ชุดเดียวกัน | Plan UPH = Order ÷ Working Hours |
                                 Actual UPH = ค่าเฉลี่ย Capacity UPH ของ Model ที่มี Order ในวันนั้นแบบถ่วงน้ำหนักตาม Order |
                                 Coverage = Actual Capacity ÷ Order × 100
                             </p>
@@ -2152,14 +2152,8 @@
         }
 
         function switchCapacityRequirementStation(stationName) {
-            currentCapacityRequirementStation = stationName;
-            const label = document.getElementById('capacityReqStationLabel');
-            if (label) label.textContent = stationName;
-
-            const select = document.getElementById('capacityReqLineSelect');
-            if (select && select.value !== stationName) select.value = stationName;
-
-            renderCapacityRequirementTable(currentDailyData);
+            // Link 2 ตาราง: เปลี่ยนไลน์ครั้งเดียว อัปเดตทั้ง Manpower และ Capacity
+            switchManpowerStation(stationName);
         }
 
         function renderCapacityRequirementTable(data) {
@@ -2171,12 +2165,14 @@
             if (!headerRow || !tbody) return;
 
             const days = data.days;
-            const station = currentCapacityRequirementStation || 'Door A';
+            const station = currentManpowerStation || 'Door A';
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
             const groups = getManpowerGroupsForStation(station);
 
             const label = document.getElementById('capacityReqStationLabel');
             if (label) label.textContent = station;
+            const capacitySelect = document.getElementById('capacityReqLineSelect');
+            if (capacitySelect && capacitySelect.value !== station) capacitySelect.value = station;
             const select = document.getElementById('capacityReqLineSelect');
             if (select && select.value !== station) select.value = station;
 
