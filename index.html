@@ -2078,7 +2078,7 @@
             if (lineSelect && lineSelect.value !== station) lineSelect.value = station;
 
             const fixedGroupWidth = 82;
-            const fixedMetricWidth = 126;
+            const fixedMetricWidth = 170;
             const dayWidth = 68;
             const totalWidth = fixedGroupWidth + fixedMetricWidth + (days.length * dayWidth);
 
@@ -2098,7 +2098,7 @@
 
             let headerHtml = `
                 <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-40 text-center">Group / Line</th>
-                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-40 text-left" style="left:${fixedGroupWidth}px;">Metric</th>
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-40 text-left whitespace-nowrap" style="left:${fixedGroupWidth}px;">Metric</th>
             `;
 
             days.forEach(day => {
