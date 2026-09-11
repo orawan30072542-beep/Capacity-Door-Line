@@ -244,6 +244,11 @@
                     </div>
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
+                        <div id="capacityGroupVisibility" class="hidden flex-wrap items-center gap-2 bg-slate-900/50 border border-bordercolor/60 rounded-xl px-3 py-2">
+                            <span class="text-[10px] font-semibold text-slate-400 mr-1">Hide / Unhide:</span>
+                            <div id="capacityGroupVisibilityButtons" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+
                         <div class="max-h-[380px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                             <table id="tableCapacity" class="w-full text-left border-collapse text-[11px] table-fixed">
                                 <thead>
@@ -1835,7 +1840,62 @@
             }, 0);
         }
 
+        const capacityHiddenGroups = {
+            'Door C': new Set(),
+            'Back Plate': new Set(),
+            'Bottom Plate': new Set()
+        };
+
+        function getCapacityVisibilityGroups() {
+            if (currentCapacityStation === 'Door C') return ['C-1', 'C-2', 'C-3'];
+            if (currentCapacityStation === 'Back Plate' || currentCapacityStation === 'Bottom Plate') return ['Line#1', 'Line#2'];
+            return [];
+        }
+
+        function toggleCapacityGroupVisibility(groupName) {
+            const hidden = capacityHiddenGroups[currentCapacityStation];
+            if (!hidden) return;
+
+            if (hidden.has(groupName)) hidden.delete(groupName);
+            else hidden.add(groupName);
+
+            renderCapacityTable(currentDailyData);
+        }
+
+        function renderCapacityGroupVisibilityControls() {
+            const wrap = document.getElementById('capacityGroupVisibility');
+            const box = document.getElementById('capacityGroupVisibilityButtons');
+            if (!wrap || !box) return;
+
+            const groups = getCapacityVisibilityGroups();
+            if (!groups.length) {
+                wrap.classList.add('hidden');
+                wrap.classList.remove('flex');
+                box.innerHTML = '';
+                return;
+            }
+
+            wrap.classList.remove('hidden');
+            wrap.classList.add('flex');
+
+            const hidden = capacityHiddenGroups[currentCapacityStation] || new Set();
+            box.innerHTML = groups.map(group => {
+                const isHidden = hidden.has(group);
+                return `
+                    <button onclick="toggleCapacityGroupVisibility('${group}')"
+                        class="px-2.5 py-1 rounded-lg border text-[10px] font-bold transition ${
+                            isHidden
+                                ? 'bg-slate-800 border-slate-600 text-slate-400'
+                                : 'bg-cyan-950/70 border-cyan-500/40 text-cyan-300'
+                        }">
+                        ${isHidden ? 'Unhide' : 'Hide'} ${group}
+                    </button>`;
+            }).join('');
+        }
+
         function renderCapacityTable(data) {
+            renderCapacityGroupVisibilityControls();
+
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
 
@@ -1925,10 +1985,14 @@
                     return String(a.model).localeCompare(String(b.model));
                 });
 
-                modelsToDisplay = expandedDoorC;
+                const hiddenDoorCGroups = capacityHiddenGroups['Door C'];
+                modelsToDisplay = expandedDoorC.filter(item => !hiddenDoorCGroups.has(item.doorCRouteLine));
             }
 
             if (isPlateStation) {
+                const hiddenPlateGroups = capacityHiddenGroups[currentCapacityStation] || new Set();
+                modelsToDisplay = modelsToDisplay.filter(item => !hiddenPlateGroups.has(item.routing));
+
                 const lineOrder = ['Line#1', 'Line#2'];
                 modelsToDisplay.sort((a, b) => {
                     const ai = lineOrder.indexOf(a.routing);
