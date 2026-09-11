@@ -238,28 +238,9 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="bg-slate-900/60 rounded-xl border border-bordercolor px-4 py-3">
-                            <div class="text-[10px] text-slate-400">Group Station</div>
-                            <div id="currentCapacityStationLabel" class="text-cyan-300 font-bold text-base mt-1">Door A</div>
-                        </div>
-
-                        <div class="bg-slate-900/60 rounded-xl border border-emerald-500/30 px-4 py-3">
-                            <div class="text-[10px] text-slate-400">Lead Time (รวม Process)</div>
-                            <div class="flex items-end gap-1 mt-1">
-                                <span id="capacityLeadTimeValue" class="text-2xl font-bold text-emerald-300">0.0</span>
-                                <span class="text-[10px] text-slate-400 mb-1">sec</span>
-                            </div>
-                            <div id="capacityLeadTimeModel" class="text-[9px] text-slate-500 mt-1">-</div>
-                        </div>
-
-                        <div class="bg-slate-900/60 rounded-xl border border-amber-500/30 px-4 py-3">
-                            <div class="text-[10px] text-slate-400">สูตร Lead Time</div>
-                            <div class="text-[10px] text-amber-200 mt-1 leading-relaxed">
-                                Lead Time = ผลรวม CT ของทุก Process<br>
-                                CT = WT1 + WT2 + WT3 + Loss
-                            </div>
-                        </div>
+                    <div class="text-xs text-slate-300 bg-slate-900/50 px-4 py-2.5 rounded-xl border border-bordercolor/60 flex items-center justify-between">
+                        <span>แสดงข้อมูล Leadtime และ Max CT แยกตาม Group Station:</span>
+                        <span id="currentCapacityStationLabel" class="text-cyan-400 font-bold text-sm bg-blue-950/80 px-2.5 py-0.5 rounded border border-blue-500/30">Door A</span>
                     </div>
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
@@ -1250,79 +1231,6 @@
             return maxCT > 0 ? maxCT : 30;
         }
 
-        function getModelLeadTime(modelName) {
-            let totalLeadTime = 0;
-
-            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
-            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
-
-            // รวม CT ของทุก Process ใน Door Part
-            doorTypes.forEach(dt => {
-                subParts.forEach(sp => {
-                    const storageKey = `${modelName}_Door (${sp} - ${dt})`;
-                    const stations = doorProcessDatabase[storageKey];
-
-                    if (stations && Array.isArray(stations)) {
-                        stations.forEach(st => {
-                            totalLeadTime +=
-                                (parseFloat(st.wt1) || 0) +
-                                (parseFloat(st.wt2) || 0) +
-                                (parseFloat(st.wt3) || 0) +
-                                (parseFloat(st.loss) || 0);
-                        });
-                    }
-                });
-            });
-
-            // รวม CT ของ Back Plate / Bottom Plate / Gasket
-            ['Back Plate', 'Bottom Plate', 'Gasket'].forEach(part => {
-                const storageKey = `${modelName}_${part}`;
-                const stations = processDatabase[storageKey];
-
-                if (stations && Array.isArray(stations)) {
-                    stations.forEach(st => {
-                        totalLeadTime +=
-                            (parseFloat(st.wt1) || 0) +
-                            (parseFloat(st.wt2) || 0) +
-                            (parseFloat(st.wt3) || 0) +
-                            (parseFloat(st.loss) || 0);
-                    });
-                }
-            });
-
-            return totalLeadTime;
-        }
-
-        function updateCapacityLeadTimeSummary(modelsToDisplay) {
-            const valueEl = document.getElementById('capacityLeadTimeValue');
-            const modelEl = document.getElementById('capacityLeadTimeModel');
-            if (!valueEl || !modelEl) return;
-
-            if (!modelsToDisplay || modelsToDisplay.length === 0) {
-                valueEl.textContent = '0.0';
-                modelEl.textContent = 'ไม่พบ Model';
-                return;
-            }
-
-            let maxLeadTime = 0;
-            let maxModel = '-';
-
-            modelsToDisplay.forEach(item => {
-                const modelName = item.model || item;
-                const leadTime = getModelLeadTime(modelName);
-
-                if (leadTime > maxLeadTime) {
-                    maxLeadTime = leadTime;
-                    maxModel = modelName;
-                }
-            });
-
-            valueEl.textContent = maxLeadTime.toFixed(1);
-            modelEl.textContent = maxLeadTime > 0
-                ? `Max Lead Time Model: ${maxModel}`
-                : 'ยังไม่มีข้อมูล Work Process';
-        }
-
         function getDayCapacityMetrics(groups, days, dayIndex, summaryStation, hours) {
             if (isSunday(days[dayIndex])) {
                 return { totalQty: 0, uphPlan: 0, uphPlan85: 0, uphActMaxCT: 0, uphActMaxCT85: 0 };
@@ -1913,9 +1821,18 @@
 
             let headerHtml = `<th class="p-2 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             columns.forEach(col => {
-                headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${col}</th>`;
+                if (isPlateStation) {
+                    headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${col}</th>`;
+                } else {
+                    headerHtml += `
+                        <th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">
+                            <div class="font-bold text-white">${col}</div>
+                            <div class="text-[8px] text-emerald-300 mt-0.5">Lead Time</div>
+                            <div class="text-[8px] text-cyan-300">Max CT</div>
+                        </th>`;
+                }
             });
-            headerHtml += `<th class="p-2 font-medium text-center text-cyan-300 bg-slate-900 sticky top-0 z-30 w-16">Max CT</th><th class="p-2 font-medium text-center text-amber-300 bg-slate-900 sticky top-0 z-30 w-20">UPH (Max)</th>`;
+            headerHtml += `<th class="p-2 font-medium text-center text-cyan-300 bg-slate-900 sticky top-0 z-30 w-16">Overall<br>Max CT</th><th class="p-2 font-medium text-center text-amber-300 bg-slate-900 sticky top-0 z-30 w-20">UPH (Max)</th>`;
             headerRow.innerHTML = headerHtml;
 
             let modelsToDisplay = [];
@@ -1935,8 +1852,6 @@
                     }
                 });
             });
-
-            updateCapacityLeadTimeSummary(modelsToDisplay);
 
             if (modelsToDisplay.length === 0) {
                 let tr = document.createElement('tr');
@@ -1960,7 +1875,8 @@
                 } else {
                     columns.forEach(col => {
                         const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
-                        let colCt = 0;
+                        let colMaxCt = 0;
+                        let colLeadTime = 0;
 
                         subParts.forEach(subPart => {
                             const storageKey = `${modelName}_Door (${subPart} - ${col})`;
@@ -1974,12 +1890,29 @@
                                         (parseFloat(st.wt3) || 0) +
                                         (parseFloat(st.loss) || 0);
 
-                                    if (ct > colCt) colCt = ct;
+                                    // Lead Time = รวม CT ของทุก Process
+                                    colLeadTime += ct;
+
+                                    // Max CT = CT ที่สูงที่สุดใน Process
+                                    if (ct > colMaxCt) colMaxCt = ct;
                                 });
                             }
                         });
 
-                        html += `<td class="p-2 text-center text-slate-300">${colCt > 0 ? colCt.toFixed(1) + 's' : '-'}</td>`;
+                        if (colLeadTime > 0 || colMaxCt > 0) {
+                            html += `
+                                <td class="p-1.5 text-center bg-slate-900/10">
+                                    <div class="text-[10px] font-bold text-emerald-300 leading-tight">
+                                        ${colLeadTime.toFixed(1)}s
+                                    </div>
+                                    <div class="text-[8px] text-slate-500 leading-tight my-0.5">────────</div>
+                                    <div class="text-[10px] font-bold text-cyan-300 leading-tight">
+                                        ${colMaxCt.toFixed(1)}s
+                                    </div>
+                                </td>`;
+                        } else {
+                            html += `<td class="p-2 text-center text-slate-500">-</td>`;
+                        }
                     });
                 }
 
