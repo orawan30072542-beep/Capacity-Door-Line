@@ -185,7 +185,7 @@
                     </div>
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
-                        <div class="overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                        <div class="max-h-[620px] overflow-auto relative rounded-lg border border-bordercolor/50">
                             <table id="tableManpowerCapacity" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
@@ -2128,14 +2128,14 @@
             table.insertBefore(colgroup, table.firstChild);
 
             let headerHtml = `
-                <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-40 text-center">Group / Line</th>
-                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-40 text-left whitespace-nowrap"
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 left-0 z-[60] text-center shadow-sm">Group / Line</th>
+                <th class="px-2 py-2 bg-slate-900 sticky top-0 z-[60] text-left whitespace-nowrap shadow-sm"
                     style="left:${fixedGroupWidth}px;">Metric</th>
             `;
             days.forEach(day => {
-                headerHtml += `<th class="px-1 py-2 bg-slate-900 sticky top-0 z-30 text-center whitespace-nowrap">${day}</th>`;
+                headerHtml += `<th class="px-1 py-2 bg-slate-900 sticky top-0 z-50 text-center whitespace-nowrap shadow-sm">${day}</th>`;
             });
-            headerHtml += `<th class="px-1 py-2 bg-amber-950/80 sticky top-0 z-30 text-center text-amber-300">TOTAL</th>`;
+            headerHtml += `<th class="px-1 py-2 bg-amber-950 sticky top-0 z-50 text-center text-amber-300 shadow-sm">TOTAL</th>`;
             headerRow.innerHTML = headerHtml;
 
             tbody.innerHTML = '';
