@@ -2222,14 +2222,17 @@
                     }
                     const result = calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
 
-                    // Bottom Plate Out Line: Line#1 และ Line#2 เพิ่มคงที่ไลน์ละ 3 คน
+                    // Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
                     const outLine = getBottomOutLineManpower(station, groupName);
-                    result.outLinePartSupply = outLine.partSupply;
-                    result.outLineLoadToCart = outLine.loadToCart;
-                    result.outLineDelivery = outLine.delivery;
-                    result.outLineTotal = outLine.total;
-                    result.totalManpowerWithOutLine =
-                        (result.manpowerPerHour > 0 ? Math.ceil(result.manpowerPerHour) : 0) + outLine.total;
+                    const hasProduction = Number(result.shortageOrder || result.doorOrder || result.totalOrder || 0) > 0;
+
+                    result.outLinePartSupply = hasProduction ? outLine.partSupply : 0;
+                    result.outLineLoadToCart = hasProduction ? outLine.loadToCart : 0;
+                    result.outLineDelivery = hasProduction ? outLine.delivery : 0;
+                    result.outLineTotal = hasProduction ? outLine.total : 0;
+                    result.totalManpowerWithOutLine = hasProduction
+                        ? (result.manpowerPerHour > 0 ? Math.ceil(result.manpowerPerHour) : 0) + result.outLineTotal
+                        : 0;
 
                     const savedHourly = getManualHourlyOutput(station, groupName, day);
                     const manualHourlyOutput = savedHourly === '' ? 0 : Math.max(0, Number(savedHourly) || 0);
