@@ -1804,6 +1804,35 @@
             renderCapacityTable(currentDailyData);
         }
 
+        function getDoorTypeLeadTime(modelName, doorType) {
+            const subParts = ['Bending', 'Foaming', 'Door Cap Assembly', 'Door Liner', 'Door Frame', 'Door Glass'];
+            let total = 0;
+
+            subParts.forEach(subPart => {
+                const storageKey = `${modelName}_Door (${subPart} - ${doorType})`;
+                const stList = doorProcessDatabase[storageKey];
+
+                if (stList && Array.isArray(stList)) {
+                    stList.forEach(st => {
+                        total +=
+                            (parseFloat(st.wt1) || 0) +
+                            (parseFloat(st.wt2) || 0) +
+                            (parseFloat(st.wt3) || 0) +
+                            (parseFloat(st.loss) || 0);
+                    });
+                }
+            });
+
+            return total;
+        }
+
+        function getOverallDoorLeadTime(modelName) {
+            const doorTypes = ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
+            return doorTypes.reduce((sum, doorType) => {
+                return sum + getDoorTypeLeadTime(modelName, doorType);
+            }, 0);
+        }
+
         function renderCapacityTable(data) {
             const tableElement = document.getElementById('tableCapacity');
             if (!tableElement) return;
@@ -1832,7 +1861,13 @@
                         </th>`;
                 }
             });
-            headerHtml += `<th class="p-2 font-medium text-center text-cyan-300 bg-slate-900 sticky top-0 z-30 w-16">Overall<br>Max CT</th><th class="p-2 font-medium text-center text-amber-300 bg-slate-900 sticky top-0 z-30 w-20">UPH (Max)</th>`;
+            headerHtml += `
+                <th class="p-2 font-medium text-center bg-slate-900 sticky top-0 z-30 w-24">
+                    <div class="text-emerald-300">Overall Lead Time</div>
+                    <div class="text-[8px] text-slate-500 my-0.5">────────</div>
+                    <div class="text-cyan-300">Overall Max CT</div>
+                </th>
+                <th class="p-2 font-medium text-center text-amber-300 bg-slate-900 sticky top-0 z-30 w-20">UPH (Max)</th>`;
             headerRow.innerHTML = headerHtml;
 
             let modelsToDisplay = [];
@@ -1863,6 +1898,7 @@
             modelsToDisplay.forEach(item => {
                 let modelName = item.model;
                 let maxCT = getModelMaxCT(modelName);
+                let overallLeadTime = isPlateStation ? 0 : getOverallDoorLeadTime(modelName);
                 let uphMax = maxCT > 0 ? Math.round(3600 / maxCT) : 0;
 
                 let tr = document.createElement('tr');
@@ -1917,7 +1953,15 @@
                 }
 
                 html += `
-                    <td class="p-2 text-center font-bold text-cyan-400 bg-slate-900/20">${maxCT.toFixed(1)}s</td>
+                    <td class="p-1.5 text-center bg-slate-900/20">
+                        ${isPlateStation ? `
+                            <div class="text-[10px] font-bold text-cyan-300">${maxCT.toFixed(1)}s</div>
+                        ` : `
+                            <div class="text-[10px] font-bold text-emerald-300 leading-tight">${overallLeadTime.toFixed(1)}s</div>
+                            <div class="text-[8px] text-slate-500 leading-tight my-0.5">────────</div>
+                            <div class="text-[10px] font-bold text-cyan-300 leading-tight">${maxCT.toFixed(1)}s</div>
+                        `}
+                    </td>
                     <td class="p-2 text-center font-bold text-amber-400 bg-slate-900/20">${uphMax.toLocaleString()}</td>
                 `;
                 tr.innerHTML = html;
