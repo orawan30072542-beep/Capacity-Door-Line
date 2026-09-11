@@ -186,41 +186,11 @@
                     </div>
                 </section>
 
-                <!-- 1. OVERVIEW SECTION -->
-                <section id="overview" class="space-y-4"> 
-                    <div class="flex items-center space-x-2">
-                        <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                        <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">1. ภาพรวมการผลิต (Overview)</h2>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">ยอดออเดอร์รวมทั้งหมด (Order)</p>
-                            <h3 class="text-3xl font-bold text-white mt-2">12,500 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
-                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">↑ +8% จากสัปดาห์ก่อน</span>
-                        </div>
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">ผลิตได้จริงตามแผน (Actual)</p>
-                            <h3 class="text-3xl font-bold text-cyan-400 mt-2">11,200 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
-                            <span class="text-xs text-blue-400 font-medium mt-2 inline-block">Achievement: 89.6%</span>
-                        </div>
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">งานค้างส่งมอบ (Backlog)</p>
-                            <h3 class="text-3xl font-bold text-amber-400 mt-2">1,300 <span class="text-sm font-normal text-slate-300">PCS</span></h3>
-                            <span class="text-xs text-amber-400 font-medium mt-2 inline-block">ต้องเร่งดำเนินการตามรอบกะ</span>
-                        </div>
-                        <div class="bg-cardbg p-5 rounded-2xl border border-bordercolor relative overflow-hidden shadow-sm">
-                            <p class="text-xs text-slate-300 font-medium tracking-wide">อัตราของเสีย (Defect Rate)</p>
-                            <h3 class="text-3xl font-bold text-rose-400 mt-2">1.4%</h3>
-                            <span class="text-xs text-emerald-400 font-medium mt-2 inline-block">อยู่ในเกณฑ์ควบคุม (&lt; 2%)</span>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- 2. ORDER TABLES : LEFT / RIGHT -->
                 <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
 
                     <!-- LEFT : ตารางสรุปแผนการผลิตและยอดรายวัน -->
-                    <section id="plan-order" class="xl:col-span-5 bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm min-w-0">
+                    <section id="plan-order" class="xl:col-span-6 bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm min-w-0">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center space-x-2">
                                 <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
@@ -248,7 +218,7 @@
                         </div>
 
                         <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor min-w-0">
-                            <div class="max-h-[430px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <div class="h-[430px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                                 <table id="tablePlanOrder" class="w-full text-left border-collapse text-[10px]">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
@@ -260,7 +230,7 @@
                     </section>
 
                     <!-- RIGHT : ยอดรวมออเดอร์รายวันที่ต้องผลิต -->
-                    <section id="daily-order-summary" class="xl:col-span-7 bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm min-w-0">
+                    <section id="daily-order-summary" class="xl:col-span-6 bg-cardbg p-5 rounded-2xl border border-bordercolor space-y-4 shadow-sm min-w-0">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center space-x-2">
                                 <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
@@ -291,7 +261,7 @@
                         </p>
 
                         <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor min-w-0">
-                            <div class="max-h-[430px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
+                            <div class="h-[430px] overflow-y-auto overflow-x-auto relative rounded-lg border border-bordercolor/50">
                                 <table id="tableDailyOrderSummary" class="w-full text-left border-collapse text-[10px]">
                                     <thead>
                                         <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
@@ -1459,30 +1429,7 @@
             return { totalOutputs };
         }
 
-        const ctxPlan = document.getElementById('planChart').getContext('2d');
-        let initialCalc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
-
-        let planChart = new Chart(ctxPlan, {
-            type: 'bar',
-            data: {
-                labels: currentDailyData.days,
-                datasets: [{
-                    label: 'Total Order (ยอดสั่งผลิตรวม)',
-                    data: initialCalc.totalOutputs,
-                    backgroundColor: '#00F0FF',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1e293b' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
+        // Plan Order chart removed. Tables render directly from currentDailyData.
 
         const ctxLob = document.getElementById('lobChart').getContext('2d');
         let lobChart = new Chart(ctxLob, {
@@ -2684,7 +2631,8 @@
         function previewExcelData(event) {
             let file = event.target.files[0];
             if (!file) return;
-            document.getElementById('excelFileName').textContent = file.name;
+            const excelNameEl = document.getElementById('excelFileName');
+            if (excelNameEl) excelNameEl.textContent = file.name;
 
             let reader = new FileReader();
             reader.onload = function(e) {
@@ -2721,17 +2669,13 @@
 
                     if (newGroups.length > 0) {
                         currentDailyData = { days: days, groups: newGroups };
+                        localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
                         renderUnifiedTable(currentDailyData);
                         renderMasterModelTable();
                         initSelectors();
                         renderCapacityTable(currentDailyData);
                         renderDailyOrderSummaryTable(currentDailyData);
                         renderManpowerTable(currentDailyData);
-                        
-                        let calc = calculateTotalOrders(currentDailyData.groups, currentDailyData.days);
-                        planChart.data.labels = currentDailyData.days;
-                        planChart.data.datasets[0].data = calc.totalOutputs;
-                        planChart.update();
                         
                         alert('โหลดและอัปเดตข้อมูลจาก Excel สำเร็จ!');
                     }
