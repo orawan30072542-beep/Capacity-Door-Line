@@ -299,17 +299,9 @@
                         <span class="w-2 h-2 rounded-full bg-purple-500"></span>
                         <span>2. Master Model & Routing</span>
                     </button>
-                    <button onclick="switchTab('workprocess')" id="nav-workprocess" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        <span>3. Work Process & CT</span>
-                    </button>
-                    <button onclick="switchTab('doorparts')" id="nav-doorparts" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3">
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        <span>4. Door Part Quick Selection</span>
-                    </button>
                     <button onclick="switchTab('linebalance')" id="nav-linebalance" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3">
                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>5. Line Of Balance</span>
+                        <span>5. Line Of Balance Workspace</span>
                     </button>
                 </nav>
             </div>
@@ -598,15 +590,49 @@
             </div>
 
             <!-- WORK PROCESS & CYCLE TIME TAB -->
-            <div id="tab-content-workprocess" class="p-6 space-y-5 w-full hidden"> 
+            
+
+            <!-- DOOR PART QUICK SELECTION TAB -->
+            
+
+            <!-- 5. LINE OF BALANCE PAGE -->
+            <div id="tab-content-linebalance" class="hidden p-4 sm:p-6 space-y-5">
+
+                <!-- MERGED WORKSPACE: PAGE 3 + PAGE 4 + PAGE 5 -->
+                <section class="sticky top-16 z-40 bg-slate-950/95 backdrop-blur-md border border-emerald-500/30 rounded-2xl p-2 shadow-xl">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[9px] uppercase tracking-[0.22em] text-emerald-400 font-bold">Line Balance Workspace</div>
+                            <div class="text-xs text-slate-300">Work Process, Door Part และ Line Of Balance อยู่ในหน้าเดียวกัน</div>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button id="lob-workspace-btn-workprocess" onclick="switchLobWorkspace('workprocess')"
+                                class="lob-workspace-btn px-3 py-2 rounded-lg text-[11px] font-bold border border-bordercolor bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                                3. Work Process & CT
+                            </button>
+                            <button id="lob-workspace-btn-doorparts" onclick="switchLobWorkspace('doorparts')"
+                                class="lob-workspace-btn px-3 py-2 rounded-lg text-[11px] font-bold border border-bordercolor bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                                4. Door Part Quick Selection
+                            </button>
+                            <button id="lob-workspace-btn-linebalance" onclick="switchLobWorkspace('linebalance')"
+                                class="lob-workspace-btn px-3 py-2 rounded-lg text-[11px] font-bold border border-emerald-500/40 bg-emerald-600/20 text-emerald-300 transition">
+                                5. Line Of Balance
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="lob-workspace-panel-workprocess" class="hidden space-y-5">
+                    <div id="tab-content-workprocess" class="space-y-5 w-full">
+ 
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/30 shadow-lg space-y-1.5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-cyan-400 rounded-full"></div>
                             <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป</h2>
                         </div>
-                        <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
-                            &larr; กลับหน้า Dashboard หลัก
+                        <button onclick="switchLobWorkspace('linebalance')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
+                            &larr; กลับ Line Of Balance
                         </button>
                     </div>
 
@@ -732,10 +758,13 @@
                         </div>
                     </div>
                 </section>
-            </div>
+            
+                    </div>
+                </div>
 
-            <!-- DOOR PART QUICK SELECTION TAB -->
-            <div id="tab-content-doorparts" class="p-6 space-y-5 w-full hidden"> 
+                <div id="lob-workspace-panel-doorparts" class="hidden space-y-5">
+                    <div id="tab-content-doorparts" class="space-y-5 w-full">
+ 
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-amber-500/30 shadow-lg space-y-1.5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
@@ -879,10 +908,12 @@
                         </div>
                     </div>
                 </section>
-            </div>
+            
+                    </div>
+                </div>
 
-            <!-- 5. LINE OF BALANCE PAGE -->
-            <div id="tab-content-linebalance" class="hidden p-4 sm:p-6 space-y-5">
+                <div id="lob-workspace-panel-linebalance" class="space-y-5">
+
 
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
                     <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
@@ -1121,7 +1152,9 @@
                     </section>
                 </section>
 
-</div>
+
+                </div>
+            </div>
 
         </main>
     </div>
@@ -1163,43 +1196,80 @@
         }
 
         function switchTab(tabId) {
-            document.getElementById('tab-content-dashboard').classList.add('hidden');
-            document.getElementById('tab-content-mastermodel').classList.add('hidden');
-            document.getElementById('tab-content-workprocess').classList.add('hidden');
-            document.getElementById('tab-content-doorparts').classList.add('hidden');
-            document.getElementById('tab-content-linebalance').classList.add('hidden');
+            // Pages 3 and 4 are now embedded inside Page 5.
+            if (tabId === 'workprocess' || tabId === 'doorparts') {
+                const subTab = tabId;
+                tabId = 'linebalance';
+                document.getElementById('tab-content-dashboard')?.classList.add('hidden');
+                document.getElementById('tab-content-mastermodel')?.classList.add('hidden');
+                document.getElementById('tab-content-linebalance')?.classList.remove('hidden');
+                setMainNavState('linebalance');
+                switchLobWorkspace(subTab);
+                return;
+            }
 
-            document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
-            document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
-            document.getElementById('nav-workprocess').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
-            document.getElementById('nav-doorparts').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
-            document.getElementById('nav-linebalance').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
+            document.getElementById('tab-content-dashboard')?.classList.add('hidden');
+            document.getElementById('tab-content-mastermodel')?.classList.add('hidden');
+            document.getElementById('tab-content-linebalance')?.classList.add('hidden');
+
+            setMainNavState(tabId);
 
             if (tabId === 'dashboard') {
-                document.getElementById('tab-content-dashboard').classList.remove('hidden');
-                document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
+                document.getElementById('tab-content-dashboard')?.classList.remove('hidden');
                 renderCapacityTable(currentDailyData);
-            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
+                setTimeout(applyBackBottomHourlyCapacityColumns, 0);
                 renderDailyOrderSummaryTable(currentDailyData);
                 renderManpowerTable(currentDailyData);
             } else if (tabId === 'mastermodel') {
-                document.getElementById('tab-content-mastermodel').classList.remove('hidden');
-                document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3";
+                document.getElementById('tab-content-mastermodel')?.classList.remove('hidden');
                 renderMasterModelTable();
-            } else if (tabId === 'workprocess') {
-                document.getElementById('tab-content-workprocess').classList.remove('hidden');
-                document.getElementById('nav-workprocess').className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3";
+            } else if (tabId === 'linebalance') {
+                document.getElementById('tab-content-linebalance')?.classList.remove('hidden');
+                switchLobWorkspace('linebalance');
+            }
+        }
+
+        function setMainNavState(activeTab) {
+            const normal = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
+            const activeMap = {
+                dashboard: "w-full text-left px-4 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-medium transition flex items-center space-x-3",
+                mastermodel: "w-full text-left px-4 py-3 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 font-medium transition flex items-center space-x-3",
+                linebalance: "w-full text-left px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-medium transition flex items-center space-x-3"
+            };
+            ['dashboard','mastermodel','linebalance'].forEach(id => {
+                const el = document.getElementById(`nav-${id}`);
+                if (el) el.className = id === activeTab ? activeMap[id] : normal;
+            });
+        }
+
+        function switchLobWorkspace(workspace) {
+            const panels = ['workprocess', 'doorparts', 'linebalance'];
+            panels.forEach(name => {
+                const panel = document.getElementById(`lob-workspace-panel-${name}`);
+                if (panel) panel.classList.toggle('hidden', name !== workspace);
+
+                const btn = document.getElementById(`lob-workspace-btn-${name}`);
+                if (btn) {
+                    const activeClass = name === 'workprocess'
+                        ? 'border-cyan-500/40 bg-cyan-600/20 text-cyan-300'
+                        : name === 'doorparts'
+                            ? 'border-amber-500/40 bg-amber-600/20 text-amber-300'
+                            : 'border-emerald-500/40 bg-emerald-600/20 text-emerald-300';
+                    btn.className = `lob-workspace-btn px-3 py-2 rounded-lg text-[11px] font-bold border transition ${
+                        name === workspace
+                            ? activeClass
+                            : 'border-bordercolor bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`;
+                }
+            });
+
+            if (workspace === 'workprocess') {
                 renderWorkProcessSelectors();
                 loadProcessDataForCurrentSelection();
-            } else if (tabId === 'doorparts') {
-                document.getElementById('tab-content-doorparts').classList.remove('hidden');
-                document.getElementById('nav-doorparts').className = "w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3";
+            } else if (workspace === 'doorparts') {
                 renderDoorSelectors();
                 loadDoorProcessDataForCurrentSelection();
-            }
- else if (tabId === 'linebalance') {
-                document.getElementById('tab-content-linebalance').classList.remove('hidden');
-                document.getElementById('nav-linebalance').className = "w-full text-left px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-medium transition flex items-center space-x-3";
+            } else if (workspace === 'linebalance') {
                 initLineBalancePage();
             }
         }
