@@ -355,6 +355,68 @@
 }
 </style>
 
+
+<style>
+/* Compact Page 5 Line Of Balance control panel */
+#tab-content-linebalance .lob-control-compact{
+    padding:.55rem .7rem !important;
+}
+#tab-content-linebalance .lob-control-compact .lob-control-grid{
+    display:grid !important;
+    grid-template-columns:190px 118px minmax(360px,1fr) 190px 92px !important;
+    gap:.45rem !important;
+    align-items:center !important;
+}
+#tab-content-linebalance .lob-control-compact .lob-control-title{
+    grid-row:1;
+}
+#tab-content-linebalance .lob-control-compact .lob-control-box{
+    padding:.35rem .5rem !important;
+    border-radius:.55rem !important;
+}
+#tab-content-linebalance .lob-control-compact label{
+    font-size:8px !important;
+    margin-bottom:2px !important;
+}
+#tab-content-linebalance .lob-control-compact select,
+#tab-content-linebalance .lob-control-compact input{
+    min-height:28px !important;
+    padding:.25rem .5rem !important;
+    font-size:10px !important;
+}
+#tab-content-linebalance .lob-control-compact #lobGroupButtonContainer{
+    max-height:56px !important;
+    gap:.25rem !important;
+}
+#tab-content-linebalance .lob-control-compact .lob-group-btn{
+    padding:.2rem .45rem !important;
+    font-size:9px !important;
+    line-height:1rem !important;
+}
+#tab-content-linebalance .lob-control-compact .lob-group-actions{
+    margin-top:.25rem !important;
+}
+#tab-content-linebalance .lob-control-compact .lob-helper{
+    display:none !important;
+}
+#tab-content-linebalance .lob-control-compact .lob-data-box{
+    min-width:0 !important;
+}
+@media (max-width:1450px){
+    #tab-content-linebalance .lob-control-compact .lob-control-grid{
+        grid-template-columns:170px 105px minmax(300px,1fr) 170px 85px !important;
+    }
+}
+@media (max-width:1100px){
+    #tab-content-linebalance .lob-control-compact .lob-control-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    }
+    #tab-content-linebalance .lob-control-compact .lob-product-group-box{
+        grid-column:1 / -1 !important;
+    }
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -557,7 +619,7 @@
                     <section id="daily-order-summary" class="xl:col-span-6 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm min-w-0 h-full flex flex-col">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center space-x-2">
-                                <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
+                                <div class="w-1.5 h-6 bg-amber-400 rounded-full lob-helper"></div>
                                 <h2 class="text-sm sm:text-base font-bold text-white tracking-wide">
                                     ยอดรวมออเดอร์รายวันที่ต้องผลิต
                                     <span class="text-[10px] sm:text-xs font-normal text-slate-400">
@@ -1000,7 +1062,7 @@
                 <div id="lob-workspace-panel-linebalance" class="space-y-5">
 
 
-                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm lob-control-compact">
                     <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2">
@@ -1014,8 +1076,8 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2">
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                        <div class="flex flex-wrap items-center gap-2 lob-control-grid">
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box>
                                 <label class="text-[9px] text-slate-400 block mb-1">Production Line</label>
                                 <select id="lobLineSelect" onchange="onLobLineChange()"
                                     class="bg-slate-800 text-cyan-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
@@ -1028,7 +1090,7 @@
                                 </select>
                             </div>
 
-                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box>
                                 <label class="text-[9px] text-slate-400 block mb-1">Plate Line</label>
                                 <select id="lobPlateLineSelect" onchange="onLobPlateLineChange()"
                                     class="bg-slate-800 text-emerald-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[110px] focus:outline-none">
@@ -1048,17 +1110,17 @@
 
                                 <!-- Product Group buttons: same interaction style as Work Process -->
                                 <div id="lobGroupButtonContainer"
-                                    class="flex flex-wrap gap-1.5 min-w-[220px] max-w-[620px]">
+                                    class="flex flex-wrap gap-1.5 min-w-[220px] max-w-[620px] lob-product-group-box>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-1 mt-1.5">
+                                <div class="flex flex-wrap items-center gap-1 mt-1.5 lob-group-actions">
                                     <button type="button" onclick="selectAllLobModels()"
                                         class="px-2 py-0.5 rounded text-[8px] font-medium transition border bg-slate-800 text-cyan-300 hover:bg-slate-700 border-bordercolor">Select all</button>
                                     <button type="button" onclick="clearLobModels()"
                                         class="px-2 py-0.5 rounded text-[8px] font-medium transition border bg-slate-800 text-slate-300 hover:bg-slate-700 border-bordercolor">Clear</button>
                                     <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Group selected</span>
                                 </div>
-                                <div class="text-[8px] text-slate-500 mt-1">
+                                <div class="text-[8px] text-slate-500 mt-1 lob-helper">
                                     Product Group แสดงตาม Line ที่กำหนดใน Master Model — รูปแบบการเลือกเป็นปุ่มเหมือน Work Process
                                 </div>
                             </div>
@@ -1066,7 +1128,7 @@
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Data</label>
                                 <div class="flex items-center gap-2">
-                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px]">-</div>
+                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px] lob-data-box>-</div>
                                     <button type="button" onclick="populateLobModelSelect(); renderLineBalancePage();"
                                         class="px-2 py-1 rounded-md bg-slate-800 border border-bordercolor text-[9px] text-cyan-300 hover:bg-slate-700">
                                         Refresh
