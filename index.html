@@ -364,6 +364,15 @@
 }
 </style>
 
+
+<style>
+#lobWorkProcessEditorModal input:focus{
+    outline:none;
+    border-color:#22d3ee;
+    box-shadow:0 0 0 1px rgba(34,211,238,.2);
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1270,6 +1279,7 @@
                                         <th class="p-1.5 text-center">WT Tot</th>
                                         <th class="p-1.5 text-center">Loss</th>
                                         <th class="p-1.5 text-center text-cyan-300">CT</th>
+                                        <th class="p-1.5 text-center w-14">Edit</th>
                                     </tr>
                                 </thead>
                                 <tbody id="lobProcessTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]"></tbody>
@@ -1280,6 +1290,55 @@
 
 
                 </div>
+
+            <!-- LINE BALANCE INLINE WORK PROCESS EDITOR -->
+            <div id="lobWorkProcessEditorModal" class="hidden fixed inset-0 z-[120] bg-slate-950/80 backdrop-blur-sm p-3 sm:p-6 overflow-auto">
+                <div class="max-w-7xl mx-auto bg-cardbg border border-cyan-500/30 rounded-2xl shadow-2xl">
+                    <div class="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-900 border-b border-bordercolor rounded-t-2xl">
+                        <div>
+                            <div class="text-sm font-bold text-cyan-300">Edit Work Process & Cycle Time</div>
+                            <div id="lobWpEditorContext" class="text-[10px] text-slate-400 mt-0.5">-</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="addLobWpEditorRow()"
+                                class="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-bordercolor">
+                                + Add Station
+                            </button>
+                            <button type="button" onclick="saveLobWpEditor()"
+                                class="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white">
+                                Save Work Process
+                            </button>
+                            <button type="button" onclick="closeLobWpEditor()"
+                                class="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-bordercolor">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="overflow-auto max-h-[70vh] rounded-xl border border-bordercolor">
+                            <table class="w-full min-w-[1080px] text-left border-collapse text-[10px]">
+                                <thead class="sticky top-0 z-10 bg-slate-950 text-slate-300">
+                                    <tr class="border-b border-bordercolor">
+                                        <th class="p-2 text-center w-20">Station</th>
+                                        <th class="p-2">Process 1</th>
+                                        <th class="p-2">Process 2</th>
+                                        <th class="p-2">Process 3</th>
+                                        <th class="p-2 text-center w-20">WT1</th>
+                                        <th class="p-2 text-center w-20">WT2</th>
+                                        <th class="p-2 text-center w-20">WT3</th>
+                                        <th class="p-2 text-center w-20">Loss</th>
+                                        <th class="p-2 text-center w-20 text-cyan-300">CT</th>
+                                        <th class="p-2 text-center w-14">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lobWpEditorBody" class="divide-y divide-bordercolor/50 text-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             </div>
 
         </main>
@@ -2104,6 +2163,13 @@
         // LINE OF BALANCE PAGE
         // ============================================================
         let lineBalancePageChart = null;
+        let lobWpEditorMode = null;
+        let lobWpEditorModel = '';
+        let lobWpEditorPart = '';
+        let lobWpEditorDoorType = '';
+        let lobWpEditorRows = [];
+
+
 
         function getAllCurrentModels() {
             const names = new Set();
@@ -3413,6 +3479,8 @@
             const doorTypeHeader = document.getElementById('lobDoorTypeHeader');
             if (!tbody || !count) return;
 
+            window.lobRenderedProcessRows = Array.isArray(rows) ? rows : [];
+
             const currentLine = document.getElementById('lobLineSelect')?.value || '';
             const showDoorType = currentLine === 'Door C';
 
@@ -3423,11 +3491,11 @@
             count.textContent = `${rows.length} Process`;
 
             if (!rows.length) {
-                tbody.innerHTML = `<tr><td colspan="${showDoorType ? 6 : 5}" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${showDoorType ? 7 : 6}" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = rows.map(r => {
+            tbody.innerHTML = rows.map((r, index) => {
                 const over = Number(r.ct || 0) > Number(takt || 0);
                 const process1 = r.p1 && r.p1 !== '-' ? r.p1 : '-';
                 const groupText = r.productGroup
@@ -3447,21 +3515,211 @@
                             ${groupText}
                         </td>
                         ${doorTypeCell}
-                        <td class="p-1.5 text-slate-200">
-                            ${lobEscape(process1)}
-                        </td>
-                        <td class="p-1.5 text-center text-slate-300 font-medium">
-                            ${Number(r.wtTotal || 0).toFixed(1)}
-                        </td>
-                        <td class="p-1.5 text-center ${Number(r.loss || 0) > 0 ? 'text-rose-300' : 'text-slate-400'}">
-                            ${Number(r.loss || 0).toFixed(1)}
-                        </td>
-                        <td class="p-1.5 text-center font-black ${over ? 'text-rose-300' : 'text-cyan-300'}">
-                            ${Number(r.ct || 0).toFixed(1)}
+                        <td class="p-1.5 text-slate-200">${lobEscape(process1)}</td>
+                        <td class="p-1.5 text-center text-slate-300 font-medium">${Number(r.wtTotal || 0).toFixed(1)}</td>
+                        <td class="p-1.5 text-center ${Number(r.loss || 0) > 0 ? 'text-rose-300' : 'text-slate-400'}">${Number(r.loss || 0).toFixed(1)}</td>
+                        <td class="p-1.5 text-center font-black ${over ? 'text-rose-300' : 'text-cyan-300'}">${Number(r.ct || 0).toFixed(1)}</td>
+                        <td class="p-1.5 text-center">
+                            <button type="button" onclick="openLobWpEditor(${index})"
+                                class="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-bold">
+                                Edit
+                            </button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function parseLobDoorArea(area, fallbackDoorType = '-') {
+            const raw = String(area || '');
+            const match = raw.match(/^Door\s*\((.*?)\s*-\s*(RR|RL|FR|FL|VEG|FB)\)$/i);
+
+            if (match) {
+                return {
+                    subPart: String(match[1] || '').trim() || 'Bending',
+                    doorType: String(match[2] || fallbackDoorType || 'RR').toUpperCase()
+                };
+            }
+
+            return {
+                subPart: selectedDoorSubPart || 'Bending',
+                doorType: (fallbackDoorType && fallbackDoorType !== '-')
+                    ? String(fallbackDoorType).toUpperCase()
+                    : (selectedDoorType || 'RR')
+            };
+        }
+
+        function openLobWpEditor(rowIndex) {
+            const row = (window.lobRenderedProcessRows || [])[rowIndex];
+            if (!row) return;
+
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            lobWpEditorModel = String(row.model || '').trim();
+
+            if (!lobWpEditorModel) {
+                alert('ไม่พบ Model สำหรับแก้ไข Work Process');
+                return;
+            }
+
+            if (line === 'Back Plate' || line === 'Bottom Plate') {
+                lobWpEditorMode = 'plate';
+                lobWpEditorPart = line;
+                lobWpEditorDoorType = '';
+
+                const key = `${lobWpEditorModel}_${lobWpEditorPart}`;
+                const source = processDatabase[key];
+
+                lobWpEditorRows = Array.isArray(source)
+                    ? JSON.parse(JSON.stringify(source))
+                    : [];
+            } else {
+                lobWpEditorMode = 'door';
+
+                const parsed = parseLobDoorArea(row.area, row.doorType);
+                lobWpEditorPart = parsed.subPart;
+                lobWpEditorDoorType = parsed.doorType;
+
+                const effectivePart = `Door (${lobWpEditorPart} - ${lobWpEditorDoorType})`;
+                const key = `${lobWpEditorModel}_${effectivePart}`;
+                const source = doorProcessDatabase[key];
+
+                lobWpEditorRows = Array.isArray(source)
+                    ? JSON.parse(JSON.stringify(source))
+                    : [];
+            }
+
+            if (!lobWpEditorRows.length) {
+                lobWpEditorRows = [{
+                    station: row.station || 'STA 10',
+                    p1: row.p1 || '-',
+                    p2: row.p2 || '-',
+                    p3: row.p3 || '-',
+                    wt1: Number(row.wt1 || 0),
+                    wt2: Number(row.wt2 || 0),
+                    wt3: Number(row.wt3 || 0),
+                    loss: Number(row.loss || 0)
+                }];
+            }
+
+            const context = document.getElementById('lobWpEditorContext');
+            if (context) {
+                context.textContent = lobWpEditorMode === 'door'
+                    ? `Model: ${lobWpEditorModel} · Process: ${lobWpEditorPart} · Door Type: ${lobWpEditorDoorType}`
+                    : `Model: ${lobWpEditorModel} · Part: ${lobWpEditorPart}`;
+            }
+
+            renderLobWpEditorTable();
+            document.getElementById('lobWorkProcessEditorModal')?.classList.remove('hidden');
+        }
+
+        function closeLobWpEditor() {
+            document.getElementById('lobWorkProcessEditorModal')?.classList.add('hidden');
+        }
+
+        function renderLobWpEditorTable() {
+            const tbody = document.getElementById('lobWpEditorBody');
+            if (!tbody) return;
+
+            if (!lobWpEditorRows.length) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-500">ไม่มีข้อมูล — กด + Add Station</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = lobWpEditorRows.map((item, index) => {
+                const wt1 = Number(item.wt1 || 0);
+                const wt2 = Number(item.wt2 || 0);
+                const wt3 = Number(item.wt3 || 0);
+                const loss = Number(item.loss || 0);
+                const ct = wt1 + wt2 + wt3 + loss;
+
+                return `
+                    <tr class="bg-slate-900/30">
+                        <td class="p-1.5"><input value="${lobEscape(item.station || '')}" oninput="updateLobWpEditorRow(${index},'station',this.value)" class="w-20 bg-slate-800 border border-bordercolor rounded px-1.5 py-1 text-center text-cyan-300"></td>
+                        <td class="p-1.5"><input value="${lobEscape(item.p1 || '')}" oninput="updateLobWpEditorRow(${index},'p1',this.value)" class="w-full bg-slate-800 border border-bordercolor rounded px-1.5 py-1"></td>
+                        <td class="p-1.5"><input value="${lobEscape(item.p2 || '')}" oninput="updateLobWpEditorRow(${index},'p2',this.value)" class="w-full bg-slate-800 border border-bordercolor rounded px-1.5 py-1"></td>
+                        <td class="p-1.5"><input value="${lobEscape(item.p3 || '')}" oninput="updateLobWpEditorRow(${index},'p3',this.value)" class="w-full bg-slate-800 border border-bordercolor rounded px-1.5 py-1"></td>
+                        <td class="p-1.5"><input type="number" step="0.1" value="${wt1}" oninput="updateLobWpEditorRow(${index},'wt1',parseFloat(this.value)||0)" class="w-16 bg-slate-800 border border-bordercolor rounded px-1 py-1 text-center text-amber-300"></td>
+                        <td class="p-1.5"><input type="number" step="0.1" value="${wt2}" oninput="updateLobWpEditorRow(${index},'wt2',parseFloat(this.value)||0)" class="w-16 bg-slate-800 border border-bordercolor rounded px-1 py-1 text-center text-amber-300"></td>
+                        <td class="p-1.5"><input type="number" step="0.1" value="${wt3}" oninput="updateLobWpEditorRow(${index},'wt3',parseFloat(this.value)||0)" class="w-16 bg-slate-800 border border-bordercolor rounded px-1 py-1 text-center text-amber-300"></td>
+                        <td class="p-1.5"><input type="number" step="0.1" value="${loss}" oninput="updateLobWpEditorRow(${index},'loss',parseFloat(this.value)||0)" class="w-16 bg-slate-800 border border-bordercolor rounded px-1 py-1 text-center text-rose-300"></td>
+                        <td id="lob-wp-ct-${index}" class="p-1.5 text-center font-black text-emerald-300">${ct.toFixed(1)}</td>
+                        <td class="p-1.5 text-center"><button type="button" onclick="removeLobWpEditorRow(${index})" class="text-rose-300 px-2 py-1 rounded bg-rose-950/40 border border-rose-500/30">×</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateLobWpEditorRow(index, field, value) {
+            if (!lobWpEditorRows[index]) return;
+            lobWpEditorRows[index][field] = value;
+
+            const item = lobWpEditorRows[index];
+            const ct = (Number(item.wt1) || 0) +
+                       (Number(item.wt2) || 0) +
+                       (Number(item.wt3) || 0) +
+                       (Number(item.loss) || 0);
+
+            const el = document.getElementById(`lob-wp-ct-${index}`);
+            if (el) el.textContent = ct.toFixed(1);
+        }
+
+        function addLobWpEditorRow() {
+            lobWpEditorRows.push({
+                station: `STA ${(lobWpEditorRows.length + 1) * 10}`,
+                p1: 'New Process',
+                p2: '-',
+                p3: '-',
+                wt1: 0,
+                wt2: 0,
+                wt3: 0,
+                loss: 0
+            });
+            renderLobWpEditorTable();
+        }
+
+        function removeLobWpEditorRow(index) {
+            lobWpEditorRows.splice(index, 1);
+            renderLobWpEditorTable();
+        }
+
+        function saveLobWpEditor() {
+            if (!lobWpEditorModel) return;
+
+            if (lobWpEditorMode === 'plate') {
+                const key = `${lobWpEditorModel}_${lobWpEditorPart}`;
+                processDatabase[key] = JSON.parse(JSON.stringify(lobWpEditorRows));
+                localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+
+                // Sync normal Work Process editor when it points to the same item.
+                if (selectedModel === lobWpEditorModel && selectedPartValue === lobWpEditorPart) {
+                    currentProcessData = JSON.parse(JSON.stringify(lobWpEditorRows));
+                    if (typeof renderProcessTableInputs === 'function') renderProcessTableInputs();
+                    if (typeof renderSavedDisplayTable === 'function') renderSavedDisplayTable();
+                    if (typeof updateLobChart === 'function') updateLobChart();
+                }
+            } else if (lobWpEditorMode === 'door') {
+                const effectivePart = `Door (${lobWpEditorPart} - ${lobWpEditorDoorType})`;
+                const key = `${lobWpEditorModel}_${effectivePart}`;
+                doorProcessDatabase[key] = JSON.parse(JSON.stringify(lobWpEditorRows));
+                localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+
+                if (selectedDoorModel === lobWpEditorModel &&
+                    selectedDoorSubPart === lobWpEditorPart &&
+                    selectedDoorType === lobWpEditorDoorType) {
+                    currentDoorProcessData = JSON.parse(JSON.stringify(lobWpEditorRows));
+                    if (typeof renderDoorProcessTableInputs === 'function') renderDoorProcessTableInputs();
+                    if (typeof renderDoorSavedDisplayTable === 'function') renderDoorSavedDisplayTable();
+                    if (typeof updateDoorLobChart === 'function') updateDoorLobChart();
+                }
+            }
+
+            // Refresh Line Balance, chart, layout, capacity immediately.
+            populateLobModelSelect();
+            renderLineBalancePage();
+            renderCapacityTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
+
+            closeLobWpEditor();
         }
 
         function renderLobSummary(rows, takt, balanceEff, targetUph) {
