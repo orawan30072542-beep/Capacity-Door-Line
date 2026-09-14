@@ -912,8 +912,11 @@
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                                <label class="text-[9px] text-slate-400 block mb-1">Product Group</label>
-                                <select id="lobModelSelect" multiple size="5" onchange="updateLobSelectedModelCount(); renderLineBalancePage()"
+                                <div class="flex items-center justify-between mb-1">
+                            <label class="text-[9px] text-slate-400">Product Group</label>
+                            <span class="text-[8px] text-cyan-400">เลือกได้หลาย Group</span>
+                        </div>
+                                <select id="lobModelSelect" multiple size="5" title="เลือก Product Group ได้มากกว่า 1 รายการ" onchange="updateLobSelectedModelCount(); renderLineBalancePage()"
                                     class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[220px] focus:outline-none">
                                 </select>
                                 <div class="flex items-center gap-1 mt-1.5">
@@ -922,6 +925,7 @@
                                     <button type="button" onclick="clearLobModels()"
                                         class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-slate-300">Clear</button>
                                     <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Group selected</span>
+                        <div class="text-[8px] text-slate-500 mt-1">เลือกหลาย Product Group แล้วกด Auto Layout เพื่อจัดรวมใน Layout เดียวกัน</div>
                                 </div>
                             </div>
 
@@ -1002,6 +1006,8 @@
                                     <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
                                     <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">COMMON LAYOUT</span>
                                     <span class="text-[9px] font-bold text-amber-300 bg-amber-950/30 border border-amber-500/20 px-3 py-1 rounded-lg">PRODUCT GROUP MAPPING</span>
+                                    <span class="text-[9px] font-bold text-fuchsia-300 bg-fuchsia-950/30 border border-fuchsia-500/20 px-3 py-1 rounded-lg">MULTI GROUP LAYOUT</span>
+                                    <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">STRICT MODEL MAPPING</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
                                         class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
                                     <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
@@ -1991,6 +1997,47 @@
 
 
         const LOB_PRODUCT_GROUP_MAP = {
+            "159": [
+                "159C",
+                "159F"
+            ],
+            "199": [
+                "199C",
+                "199F"
+            ],
+            "TM545": [
+                "TM545#212",
+                "TM545#235"
+            ],
+            "G3 ECO": [
+                "G3 ECO 320",
+                "G3 ECO 350"
+            ],
+            "TD 456": [
+                "T DOOR"
+            ],
+            "TM10/12": [
+                "TM10",
+                "TM12"
+            ],
+            "FUF14": [
+                "FUF14 D",
+                "FUF14 L",
+                "FUF14 Q",
+                "FUF14 S"
+            ],
+            "FUF18": [
+                "FUF18 D",
+                "FUF18 L",
+                "FUF18 Q",
+                "FUF18 S"
+            ],
+            "FUF22": [
+                "FUF22 D",
+                "FUF22 L",
+                "FUF22 Q",
+                "FUF22 S"
+            ],
             "TD 469": [
                 "T DOOR H Metal",
                 "T DOOR H Metal WD",
@@ -2028,10 +2075,6 @@
                 "BM T-Door 28 Café",
                 "BM T-Door 28"
             ],
-            "TM10/12": [
-                "TM10",
-                "TM12"
-            ],
             "TM14": [
                 "TM14"
             ],
@@ -2042,24 +2085,6 @@
             "TM21": [
                 "TM-21 K",
                 "TM-21 T"
-            ],
-            "FUF14": [
-                "FUF14 D",
-                "FUF14 L",
-                "FUF14 Q",
-                "FUF14 S"
-            ],
-            "FUF18": [
-                "FUF18 D",
-                "FUF18 L",
-                "FUF18 Q",
-                "FUF18 S"
-            ],
-            "FUF22": [
-                "FUF22 D",
-                "FUF22 L",
-                "FUF22 Q",
-                "FUF22 S"
             ]
         };
 
@@ -2076,88 +2101,39 @@
                     return group;
                 }
             }
-
-            // Fallback for Product Groups not yet listed in the manual mapping.
-            if (currentDailyData && Array.isArray(currentDailyData.groups)) {
-                for (const g of currentDailyData.groups) {
-                    if ((g.models || []).some(m => normalizeLobName(m.name) === target)) {
-                        return String(g.productGroup || '').trim();
-                    }
-                }
-            }
             return '';
         }
 
         function getLobProductGroupsForLine(lineName) {
             const result = [];
-            const seen = new Set();
 
-            // Manual Product Group mapping has priority.
             Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
                 const hasModelForLine = (models || []).some(model =>
                     modelMatchesLobLine(model, lineName)
                 );
-                if (hasModelForLine && !seen.has(group)) {
-                    seen.add(group);
-                    result.push(group);
-                }
+                if (hasModelForLine) result.push(group);
             });
-
-            // Fallback: keep any other Product Groups from imported Daily Plan.
-            if (currentDailyData && Array.isArray(currentDailyData.groups)) {
-                currentDailyData.groups.forEach(g => {
-                    const groupName = String(g.productGroup || '').trim();
-                    if (!groupName || seen.has(groupName)) return;
-
-                    const hasModelForLine = (g.models || []).some(m =>
-                        m && m.name && modelMatchesLobLine(String(m.name).trim(), lineName)
-                    );
-
-                    if (hasModelForLine) {
-                        seen.add(groupName);
-                        result.push(groupName);
-                    }
-                });
-            }
 
             return result;
         }
 
         function getModelsForLobProductGroups(lineName, productGroups) {
-            const wantedGroups = (productGroups || []).map(v => String(v).trim());
             const models = [];
             const seen = new Set();
 
-            wantedGroups.forEach(group => {
-                const mapped = LOB_PRODUCT_GROUP_MAP[group];
+            (productGroups || []).forEach(group => {
+                const mapped = LOB_PRODUCT_GROUP_MAP[String(group || '').trim()] || [];
 
-                if (Array.isArray(mapped)) {
-                    mapped.forEach(name => {
-                        const clean = String(name || '').trim();
-                        if (!clean || seen.has(clean)) return;
-                        if (modelMatchesLobLine(clean, lineName)) {
-                            seen.add(clean);
-                            models.push(clean);
-                        }
-                    });
-                    return;
-                }
+                mapped.forEach(name => {
+                    const clean = String(name || '').trim();
+                    if (!clean || seen.has(clean)) return;
 
-                // Fallback for groups not yet in manual mapping.
-                if (currentDailyData && Array.isArray(currentDailyData.groups)) {
-                    currentDailyData.groups.forEach(g => {
-                        if (String(g.productGroup || '').trim() !== group) return;
-
-                        (g.models || []).forEach(m => {
-                            const name = String(m?.name || '').trim();
-                            if (!name || seen.has(name)) return;
-                            if (modelMatchesLobLine(name, lineName)) {
-                                seen.add(name);
-                                models.push(name);
-                            }
-                        });
-                    });
-                }
+                    // Strict mapping prevents unrelated models from being pulled into a Product Group.
+                    if (modelMatchesLobLine(clean, lineName)) {
+                        seen.add(clean);
+                        models.push(clean);
+                    }
+                });
             });
 
             return models;
@@ -2438,7 +2414,11 @@
 
         function getLobLayoutKey() {
             const line = document.getElementById('lobLineSelect')?.value || 'ALL';
-            return `haier_lob_common_layout_v3::${line}`;
+            const groups = getSelectedLobModels().slice().sort();
+            // A layout can be created for one Product Group or for a combination
+            // of multiple Product Groups. The same combination reuses its saved layout.
+            const groupKey = groups.length ? groups.join('||') : 'NO_GROUP';
+            return `haier_lob_multi_group_layout_v2::${line}::${groupKey}`;
         }
 
         function getDefaultLobLayout(rows) {
