@@ -629,7 +629,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
                                 <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Actual</h2>
                             <p class="text-[10px] text-slate-400 mt-1">
-                                จัดข้อมูลเป็น 4 โซน: Order Plan → Capacity → Manpower → Result / Risk
+                                จัดข้อมูลเป็น 4 โซน: Order Plan → Capacity → Manpower (In + Out) → Result / Risk
                             </p>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
@@ -669,12 +669,12 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Avg Manpower / Day</div>
-                            <div class="text-[9px] text-slate-500">จาก Manpower Calculation</div>
+                            <div class="text-[9px] text-slate-500">รวม In Line + Out Line</div>
                             <div id="mpAvgManpower" class="text-lg font-bold text-amber-300 mt-1">0</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Peak Manpower</div>
-                            <div class="text-[9px] text-slate-500">จาก Manpower Calculation</div>
+                            <div class="text-[9px] text-slate-500">รวม In Line + Out Line</div>
                             <div id="mpPeakManpower" class="text-lg font-bold text-rose-300 mt-1">0</div>
                         </div>
                     </div>
@@ -5839,63 +5839,37 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
                 // ───────────── ZONE 3 : MANPOWER ─────────────
                 {
-                    key: 'manpowerPerHour',
+                    key: 'totalManpowerCombined',
                     zone: 'MANPOWER',
                     zoneNo: '3',
                     zoneStart: true,
                     zoneClass: 'cyan',
-                    label: 'Manpower / Hour',
-                    subLabel: 'In Line',
-                    cls: 'text-cyan-300',
-                    format: v => v > 0
-                        ? `<div class="font-bold">${Math.ceil(v).toLocaleString()} คน</div>`
-                        : '-'
+                    label: 'Manpower (In + Out)',
+                    subLabel: station === 'Bottom Plate'
+                        ? 'In Line + Out Line รวมในบรรทัดเดียว'
+                        : 'Total Manpower',
+                    cls: 'text-amber-300',
+                    format: (v, row) => {
+                        if (!(v > 0)) return '-';
+
+                        const inLine = Number(row.manpowerPerHour || 0) > 0
+                            ? Math.ceil(Number(row.manpowerPerHour || 0))
+                            : 0;
+                        const outLine = Number(row.outLineTotal || 0);
+
+                        if (station === 'Bottom Plate') {
+                            return `
+                                <div class="font-bold">${Math.round(v)} คน</div>
+                                <div class="text-[8px] text-slate-400 mt-0.5">
+                                    In ${inLine} + Out ${outLine}
+                                </div>
+                            `;
+                        }
+
+                        return `<div class="font-bold">${Math.round(v)} คน</div>`;
+                    }
                 }
             ];
-
-            if (station === 'Bottom Plate') {
-                metricDefs.push(
-                    {
-                        key: 'outLinePartSupply',
-                        zone: 'MANPOWER',
-                        zoneClass: 'cyan',
-                        singleLineSmall: true,
-                        compactRow: true,
-                        label: 'Out Line · Part Supply',
-                        cls: 'text-lime-300',
-                        format: v => v > 0 ? `${Math.round(v)} คน` : '-'
-                    },
-                    {
-                        key: 'outLineLoadToCart',
-                        zone: 'MANPOWER',
-                        zoneClass: 'cyan',
-                        singleLineSmall: true,
-                        compactRow: true,
-                        label: 'Out Line · Load Cart',
-                        cls: 'text-lime-300',
-                        format: v => v > 0 ? `${Math.round(v)} คน` : '-'
-                    },
-                    {
-                        key: 'outLineDelivery',
-                        zone: 'MANPOWER',
-                        zoneClass: 'cyan',
-                        singleLineSmall: true,
-                        compactRow: true,
-                        label: 'Out Line · Delivery',
-                        cls: 'text-lime-300',
-                        format: v => v > 0 ? `${Math.round(v)} คน` : '-'
-                    },
-                    {
-                        key: 'totalManpowerWithOutLine',
-                        zone: 'MANPOWER',
-                        zoneClass: 'cyan',
-                        label: 'Total Manpower',
-                        subLabel: 'In Line + Out Line',
-                        cls: 'text-amber-300',
-                        format: v => v > 0 ? `<div class="font-bold">${Math.round(v)} คน</div>` : '-'
-                    }
-                );
-            }
 
             metricDefs.push(
                 // ───────────── ZONE 4 : RESULT / RISK ─────────────
@@ -5943,6 +5917,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             outLineDelivery: 0,
                             outLineTotal: 0,
                             totalManpowerWithOutLine: 0,
+                            totalManpowerCombined: 0,
                             planUPH: 0,
                             actualUPH: 0,
                             actualCapacity: 0,
@@ -5973,8 +5948,18 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                     result.outLineLoadToCart = hasProduction ? outLine.loadToCart : 0;
                     result.outLineDelivery = hasProduction ? outLine.delivery : 0;
                     result.outLineTotal = hasProduction ? outLine.total : 0;
+                    const inLineManpower = hasProduction && result.manpowerPerHour > 0
+                        ? Math.ceil(result.manpowerPerHour)
+                        : 0;
+
                     result.totalManpowerWithOutLine = hasProduction
-                        ? (result.manpowerPerHour > 0 ? Math.ceil(result.manpowerPerHour) : 0) + result.outLineTotal
+                        ? inLineManpower + result.outLineTotal
+                        : 0;
+
+                    // Dashboard Manpower uses one combined value: In Line + Out Line.
+                    // For non-Bottom-Plate lines, Out Line = 0 so this remains the normal In Line manpower.
+                    result.totalManpowerCombined = hasProduction
+                        ? inLineManpower + result.outLineTotal
                         : 0;
 
                     const savedHourly = getManualHourlyOutput(station, groupName, day);
@@ -5996,7 +5981,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 dayResults.forEach((r, i) => {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
-                    dailyMpTotals[i] += r.manpowerCalc;
+                    dailyMpTotals[i] += Number(r.totalManpowerCombined || 0);
                 });
 
                 metricDefs.forEach((metric, metricIndex) => {
