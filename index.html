@@ -384,6 +384,62 @@
 }
 </style>
 
+
+<style>
+/* Compact Line Balance top controls */
+#tab-content-linebalance #lobLineSelect,
+#tab-content-linebalance #lobPlateLineSelect,
+#tab-content-linebalance #lobDoorCLineSelect {
+    min-width: 118px !important;
+    width: 118px !important;
+    height: 34px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    font-size: 11px !important;
+}
+
+#tab-content-linebalance #lobTargetUPH {
+    width: 80px !important;
+    min-width: 80px !important;
+    height: 32px !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+}
+
+/* Cards containing the line / plate-line / target controls */
+#tab-content-linebalance .lob-compact-control-card {
+    padding: 8px 10px !important;
+    min-height: 0 !important;
+}
+
+/* Product Group buttons: smaller and tighter */
+#tab-content-linebalance #lobGroupButtonContainer {
+    gap: 4px !important;
+}
+#tab-content-linebalance #lobGroupButtonContainer button {
+    padding: 4px 9px !important;
+    min-height: 25px !important;
+    font-size: 9px !important;
+    border-radius: 5px !important;
+}
+
+/* Product Group card and Data card */
+#tab-content-linebalance .lob-compact-wide-card {
+    padding: 8px 10px !important;
+    min-height: 0 !important;
+}
+
+/* Smaller labels/helper text in top filter area */
+#tab-content-linebalance .lob-compact-control-card label,
+#tab-content-linebalance .lob-compact-wide-card label {
+    font-size: 9px !important;
+}
+#tab-content-linebalance .lob-compact-control-card .text-\[9px\],
+#tab-content-linebalance .lob-compact-wide-card .text-\[9px\] {
+    line-height: 1.15 !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1044,7 +1100,7 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div class="lob-compact-control-card bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Production Line</label>
                                 <select id="lobLineSelect" onchange="onLobLineChange()"
                                     class="bg-slate-800 text-cyan-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
@@ -1057,7 +1113,7 @@
                                 </select>
                             </div>
 
-                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div id="lobPlateLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Plate Line</label>
                                 <select id="lobPlateLineSelect" onchange="onLobPlateLineChange()"
                                     class="bg-slate-800 text-emerald-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[110px] focus:outline-none">
@@ -1067,7 +1123,7 @@
                                 <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · หลาย Product Group ใช้พนักงานชุดเดียวกัน</div>
                             </div>
 
-                            <div id="lobDoorCLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div id="lobDoorCLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Door C Line</label>
                                 <select id="lobDoorCLineSelect" onchange="onLobDoorCLineChange()"
                                     class="bg-slate-800 text-violet-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[105px] focus:outline-none">
@@ -1078,7 +1134,7 @@
                                 <div class="text-[8px] text-slate-500 mt-1">Master Model กำหนด C-1/C-2/C-3 · Work Process กำหนด Station และ CT · แต่ละ C-Line ใช้จุดพนักงานร่วมกัน</div>
                             </div>
 
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div class="lob-compact-wide-card bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <div class="flex items-center justify-between mb-1">
                             <label class="text-[9px] text-slate-400">Product Group</label>
                             <span class="text-[8px] text-cyan-400">เลือกได้หลาย Group · 1 Group = 1 Model</span>
