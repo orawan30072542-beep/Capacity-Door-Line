@@ -355,135 +355,6 @@
 }
 </style>
 
-
-<style>
-/* Compact Page 5 Line Of Balance control panel */
-#tab-content-linebalance .lob-control-compact{
-    padding:.55rem .7rem !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-control-grid{
-    display:grid !important;
-    grid-template-columns:190px 118px minmax(360px,1fr) 190px 92px !important;
-    gap:.45rem !important;
-    align-items:center !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-control-title{
-    grid-row:1;
-}
-#tab-content-linebalance .lob-control-compact .lob-control-box{
-    padding:.35rem .5rem !important;
-    border-radius:.55rem !important;
-}
-#tab-content-linebalance .lob-control-compact label{
-    font-size:8px !important;
-    margin-bottom:2px !important;
-}
-#tab-content-linebalance .lob-control-compact select,
-#tab-content-linebalance .lob-control-compact input{
-    min-height:28px !important;
-    padding:.25rem .5rem !important;
-    font-size:10px !important;
-}
-#tab-content-linebalance .lob-control-compact #lobGroupButtonContainer{
-    max-height:56px !important;
-    gap:.25rem !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-group-btn{
-    padding:.2rem .45rem !important;
-    font-size:9px !important;
-    line-height:1rem !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-group-actions{
-    margin-top:.25rem !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-helper{
-    display:none !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-data-box{
-    min-width:0 !important;
-}
-@media (max-width:1450px){
-    #tab-content-linebalance .lob-control-compact .lob-control-grid{
-        grid-template-columns:170px 105px minmax(300px,1fr) 170px 85px !important;
-    }
-}
-@media (max-width:1100px){
-    #tab-content-linebalance .lob-control-compact .lob-control-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    }
-    #tab-content-linebalance .lob-control-compact .lob-product-group-box{
-        grid-column:1 / -1 !important;
-    }
-}
-</style>
-
-
-<style>
-@media (min-width:1101px){
-    #tab-content-linebalance .lob-control-compact .lob-control-grid{
-        grid-template-columns:150px 105px 105px minmax(300px,1fr) 170px 85px !important;
-    }
-}
-</style>
-
-
-<style>
-/* FIX: compact Page 5 header without overlapping controls */
-#tab-content-linebalance .lob-control-compact > .flex{
-    width:100%;
-}
-#tab-content-linebalance .lob-control-compact .lob-control-grid{
-    width:100% !important;
-    min-width:0 !important;
-    grid-template-columns:130px 95px minmax(280px,1fr) 155px 82px !important;
-    gap:.4rem !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-control-grid > div{
-    min-width:0 !important;
-}
-#tab-content-linebalance .lob-control-compact .lob-product-group-box{
-    min-width:0 !important;
-    max-width:none !important;
-}
-#tab-content-linebalance .lob-control-compact #lobGroupButtonContainer{
-    min-width:0 !important;
-    max-width:none !important;
-    max-height:46px !important;
-    overflow-y:auto !important;
-}
-#tab-content-linebalance .lob-control-compact #lobDataStatus{
-    min-width:0 !important;
-    white-space:nowrap;
-}
-@media (max-width:1400px){
-    #tab-content-linebalance .lob-control-compact > .flex{
-        flex-direction:column !important;
-        align-items:stretch !important;
-        gap:.45rem !important;
-    }
-    #tab-content-linebalance .lob-control-compact > .flex > div:first-child{
-        width:100%;
-    }
-    #tab-content-linebalance .lob-control-compact > .flex > div:first-child p{
-        display:none !important;
-    }
-    #tab-content-linebalance .lob-control-compact > .flex > div:first-child h2{
-        font-size:14px !important;
-    }
-    #tab-content-linebalance .lob-control-compact > .flex > div:first-child .w-1\.5{
-        height:20px !important;
-    }
-}
-@media (max-width:900px){
-    #tab-content-linebalance .lob-control-compact .lob-control-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    }
-    #tab-content-linebalance .lob-control-compact .lob-product-group-box{
-        grid-column:1 / -1 !important;
-    }
-}
-</style>
-
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -686,7 +557,7 @@
                     <section id="daily-order-summary" class="xl:col-span-6 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm min-w-0 h-full flex flex-col">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center space-x-2">
-                                <div class="w-1.5 h-6 bg-amber-400 rounded-full lob-helper"></div>
+                                <div class="w-1.5 h-6 bg-amber-400 rounded-full"></div>
                                 <h2 class="text-sm sm:text-base font-bold text-white tracking-wide">
                                     ยอดรวมออเดอร์รายวันที่ต้องผลิต
                                     <span class="text-[10px] sm:text-xs font-normal text-slate-400">
@@ -1129,7 +1000,7 @@
                 <div id="lob-workspace-panel-linebalance" class="space-y-5">
 
 
-                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm lob-control-compact">
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
                     <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2">
@@ -1143,8 +1014,8 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 lob-control-grid">
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Production Line</label>
                                 <select id="lobLineSelect" onchange="onLobLineChange()"
                                     class="bg-slate-800 text-cyan-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
@@ -1157,7 +1028,7 @@
                                 </select>
                             </div>
 
-                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box">
+                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Plate Line</label>
                                 <select id="lobPlateLineSelect" onchange="onLobPlateLineChange()"
                                     class="bg-slate-800 text-emerald-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[110px] focus:outline-none">
@@ -1165,17 +1036,6 @@
                                     <option value="Line#2">Line#2</option>
                                 </select>
                                 <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · หลาย Product Group ใช้พนักงานชุดเดียวกัน</div>
-                            </div>
-
-                            <div id="lobDoorCLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box">
-                                <label class="text-[9px] text-slate-400 block mb-1">Door C Line</label>
-                                <select id="lobDoorCLineSelect" onchange="onLobDoorCLineChange()"
-                                    class="bg-slate-800 text-violet-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[100px] focus:outline-none">
-                                    <option value="C-1">C-1</option>
-                                    <option value="C-2">C-2</option>
-                                    <option value="C-3">C-3</option>
-                                </select>
-                                <div class="text-[8px] text-slate-500 mt-1 lob-helper">อ้างอิง Assigned Routing จาก Master Model · ไม่ผูกกับประเภทฝา RR/RL/FR/FL/VEG/FB</div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1188,25 +1048,25 @@
 
                                 <!-- Product Group buttons: same interaction style as Work Process -->
                                 <div id="lobGroupButtonContainer"
-                                    class="flex flex-wrap gap-1.5 min-w-0 max-w-full lob-product-group-box">
+                                    class="flex flex-wrap gap-1.5 min-w-[220px] max-w-[620px]">
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-1 mt-1.5 lob-group-actions">
+                                <div class="flex flex-wrap items-center gap-1 mt-1.5">
                                     <button type="button" onclick="selectAllLobModels()"
                                         class="px-2 py-0.5 rounded text-[8px] font-medium transition border bg-slate-800 text-cyan-300 hover:bg-slate-700 border-bordercolor">Select all</button>
                                     <button type="button" onclick="clearLobModels()"
                                         class="px-2 py-0.5 rounded text-[8px] font-medium transition border bg-slate-800 text-slate-300 hover:bg-slate-700 border-bordercolor">Clear</button>
                                     <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Group selected</span>
                                 </div>
-                                <div class="text-[8px] text-slate-500 mt-1 lob-helper">
-                                    Product Group และ Model ดึงจาก Master/Daily Plan ตาม Line ที่กำหนด — รูปแบบการเลือกเป็นปุ่มเหมือน Work Process
+                                <div class="text-[8px] text-slate-500 mt-1">
+                                    Product Group แสดงตาม Line ที่กำหนดใน Master Model — รูปแบบการเลือกเป็นปุ่มเหมือน Work Process
                                 </div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Data</label>
                                 <div class="flex items-center gap-2">
-                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px] lob-data-box">-</div>
+                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px]">-</div>
                                     <button type="button" onclick="populateLobModelSelect(); renderLineBalancePage();"
                                         class="px-2 py-1 rounded-md bg-slate-800 border border-bordercolor text-[9px] text-cyan-300 hover:bg-slate-700">
                                         Refresh
@@ -2292,27 +2152,20 @@
             return document.getElementById('lobPlateLineSelect')?.value || 'Line#1';
         }
 
-        function getSelectedLobDoorCLine() {
-            return document.getElementById('lobDoorCLineSelect')?.value || 'C-1';
-        }
-
-        function updateLobSubLineVisibility() {
-            const line = document.getElementById('lobLineSelect')?.value || '';
-            const plateWrap = document.getElementById('lobPlateLineWrap');
-            const doorCWrap = document.getElementById('lobDoorCLineWrap');
-
-            if (plateWrap) plateWrap.classList.toggle('hidden', !isLobPlateStation(line));
-            if (doorCWrap) doorCWrap.classList.toggle('hidden', line !== 'Door C');
-        }
-
         function updateLobPlateLineVisibility() {
-            updateLobSubLineVisibility();
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            const wrap = document.getElementById('lobPlateLineWrap');
+            if (!wrap) return;
+            wrap.classList.toggle('hidden', !isLobPlateStation(line));
         }
 
         function modelMatchesLobLine(modelName, lineName) {
-            const actualModel = resolveLobActualModelName(modelName);
-            const cfg = getMasterConfigForModel(actualModel);
+            const cfg = getMasterConfigForModel(modelName);
 
+            // IMPORTANT:
+            // Product Group shown on Page 5 must follow Master Model assignment only.
+            // The button UI is only a display/input style change and must not change
+            // which Product Groups belong to each production line.
             if (lineName === 'Back Plate') {
                 return cfg.backPlateSource === 'ผลิตเอง' &&
                        (cfg.backPlateLine || 'Line#1') === getSelectedLobPlateLine();
@@ -2323,30 +2176,13 @@
                        (cfg.bottomLine || 'Line#1') === getSelectedLobPlateLine();
             }
 
-            // Door C:
-            // C-1 / C-2 / C-3 membership comes ONLY from Assigned Routing in Master Model.
-            // Door type (RR/RL/FR/FL/VEG/FB) and manual ratio must NOT hide the Product Group.
-            if (lineName === 'Door C') {
-                if (cfg.station !== 'Door C') return false;
-
-                const selectedSubLine = getSelectedLobDoorCLine();
-                const routes = getDoorCRoutingDetails(actualModel) || [];
-
-                return routes.some(route => route.line === selectedSubLine);
-            }
-
+            // Door A / Door B / Door C / Door Glass:
+            // use Station selected in Master Model strictly; do not pull a model
+            // into another line just because old Work Process data exists there.
             return cfg.station === lineName;
         }
 
         function onLobPlateLineChange() {
-            populateLobModelSelect();
-            renderLineBalancePage();
-        }
-
-        function onLobDoorCLineChange() {
-            // Rebuild Product Group buttons strictly from the selected Master Door C line.
-            const sel = document.getElementById('lobModelSelect');
-            if (sel) Array.from(sel.options || []).forEach(o => o.selected = false);
             populateLobModelSelect();
             renderLineBalancePage();
         }
@@ -2371,25 +2207,17 @@
                 const cfg = getMasterConfigForModel(selectedDoorModel);
                 if (['Door A', 'Door B', 'Door C', 'Door Glass'].includes(cfg.station)) {
                     lineSel.value = cfg.station;
-
-                    if (cfg.station === 'Door C') {
-                        const doorCLineSel = document.getElementById('lobDoorCLineSelect');
-                        const firstRoute = (getDoorCRoutingDetails(selectedDoorModel) || [])[0];
-                        if (doorCLineSel && firstRoute?.line) {
-                            doorCLineSel.value = firstRoute.line;
-                        }
-                    }
                 }
             }
 
-            updateLobSubLineVisibility();
+            updateLobPlateLineVisibility();
             populateLobModelSelect();
             ensureLineBalanceChart();
             renderLineBalancePage();
         }
 
         function onLobLineChange() {
-            updateLobSubLineVisibility();
+            updateLobPlateLineVisibility();
             populateLobModelSelect();
             renderLineBalancePage();
         }
@@ -2558,191 +2386,27 @@
             return String(value || '').trim().toLowerCase();
         }
 
-        function resolveLobActualModelName(modelName) {
-            const target = normalizeModelName(modelName);
-            if (!target) return String(modelName || '').trim();
-
-            // 1) Master Model keys are the authoritative names for routing/station.
-            const masterKey = Object.keys(masterModelConfig || {}).find(
-                key => normalizeModelName(key) === target
-            );
-            if (masterKey) return masterKey;
-
-            // 2) Use the actual model name from imported Daily Plan / Master table.
-            for (const group of (currentDailyData?.groups || [])) {
-                const found = (group.models || []).find(
-                    m => normalizeModelName(m?.name) === target
-                );
-                if (found?.name) return found.name;
-            }
-
-            return String(modelName || '').trim();
-        }
-
         function getLobProductGroupForModel(modelName) {
-            const target = normalizeModelName(modelName);
+            const target = normalizeLobName(modelName);
             if (!target) return '';
 
-            // 1) Use Product Group from the actual imported/Master data first.
-            for (const group of (currentDailyData?.groups || [])) {
-                const found = (group.models || []).some(
-                    m => normalizeModelName(m?.name) === target
-                );
-                if (found) return String(group.productGroup || '').trim();
-            }
-
-            // 2) Manual mapping is only fallback.
             for (const [group, models] of Object.entries(LOB_PRODUCT_GROUP_MAP)) {
-                if ((models || []).some(m => normalizeModelName(m) === target)) {
+                if ((models || []).some(m => normalizeLobName(m) === target)) {
                     return group;
                 }
             }
-
             return '';
-        }
-
-        function getAllModelsForProductGroup(productGroup) {
-            const groupName = String(productGroup || '').trim();
-            const result = [];
-            const seen = new Set();
-
-            // 1) Real models from Daily Plan / Master table.
-            (currentDailyData?.groups || []).forEach(g => {
-                if (String(g?.productGroup || '').trim() !== groupName) return;
-
-                (g.models || []).forEach(m => {
-                    const name = resolveLobActualModelName(m?.name || '');
-                    const key = normalizeModelName(name);
-                    if (name && !seen.has(key)) {
-                        seen.add(key);
-                        result.push(name);
-                    }
-                });
-            });
-
-            // 2) Fallback manual mapping for groups not present in currentDailyData.
-            if (!result.length) {
-                (LOB_PRODUCT_GROUP_MAP[groupName] || []).forEach(name => {
-                    const actual = resolveLobActualModelName(name);
-                    const key = normalizeModelName(actual);
-                    if (actual && !seen.has(key)) {
-                        seen.add(key);
-                        result.push(actual);
-                    }
-                });
-            }
-
-            return result;
         }
 
         function getLobProductGroupsForLine(lineName) {
             const result = [];
-            const seen = new Set();
 
-            // A) Main source: Master/Daily Plan.
-            (currentDailyData?.groups || []).forEach(g => {
-                const groupName = String(g?.productGroup || '').trim();
-                if (!groupName || seen.has(groupName)) return;
-
-                const models = (g.models || []).map(m =>
-                    resolveLobActualModelName(m?.name || '')
+            Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
+                const hasModelForLine = (models || []).some(model =>
+                    modelMatchesLobLine(model, lineName)
                 );
-
-                if (models.some(model => model && modelMatchesLobLine(model, lineName))) {
-                    seen.add(groupName);
-                    result.push(groupName);
-                }
+                if (hasModelForLine) result.push(group);
             });
-
-            // B) Back/Bottom Plate: also discover Product Groups from SAVED Work Process.
-            // This prevents Line Balance from showing 0 Process when the process exists
-            // but today's Daily Plan does not contain that model/group.
-            if (isLobPlateStation(lineName)) {
-                const suffix = `_${lineName}`;
-
-                Object.keys(processDatabase || {}).forEach(key => {
-                    if (!key.endsWith(suffix)) return;
-
-                    const storedModel = key.slice(0, -suffix.length);
-                    const rows = processDatabase[key];
-                    if (!storedModel || !Array.isArray(rows) || !rows.length) return;
-
-                    const actualModel = resolveLobActualModelName(storedModel);
-                    if (!modelMatchesLobLine(actualModel, lineName)) return;
-
-                    const groupName = getLobProductGroupForModel(actualModel);
-                    if (groupName && !seen.has(groupName)) {
-                        seen.add(groupName);
-                        result.push(groupName);
-                    }
-                });
-            }
-
-            // C) Manual mapping fallback.
-            Object.keys(LOB_PRODUCT_GROUP_MAP).forEach(groupName => {
-                if (seen.has(groupName)) return;
-
-                const models = getAllModelsForProductGroup(groupName);
-                if (models.some(model => modelMatchesLobLine(model, lineName))) {
-                    seen.add(groupName);
-                    result.push(groupName);
-                }
-            });
-
-            return result;
-        }
-
-        function getSavedPlateModelsForLob(lineName, productGroups) {
-            if (!isLobPlateStation(lineName)) return [];
-
-            const selectedGroups = new Set(
-                (productGroups || []).map(g => String(g || '').trim())
-            );
-            const suffix = `_${lineName}`;
-            const result = [];
-            const seen = new Set();
-
-            Object.keys(processDatabase || {}).forEach(key => {
-                if (!key.endsWith(suffix)) return;
-
-                const storedModel = key.slice(0, -suffix.length);
-                const savedRows = processDatabase[key];
-                if (!storedModel || !Array.isArray(savedRows) || !savedRows.length) return;
-
-                const actualModel = resolveLobActualModelName(storedModel);
-                const group = getLobProductGroupForModel(actualModel);
-
-                // Follow Line#1 / Line#2 from Master Model.
-                if (!modelMatchesLobLine(actualModel, lineName)) return;
-
-                if (selectedGroups.size && !selectedGroups.has(group)) return;
-
-                const modelKey = normalizeModelName(actualModel);
-                if (!seen.has(modelKey)) {
-                    seen.add(modelKey);
-                    result.push(actualModel);
-                }
-            });
-
-            // Include current Work Process editor data too.
-            if (selectedModel &&
-                selectedPartValue === lineName &&
-                Array.isArray(currentProcessData) &&
-                currentProcessData.length) {
-
-                const actualModel = resolveLobActualModelName(selectedModel);
-                const group = getLobProductGroupForModel(actualModel);
-
-                if (modelMatchesLobLine(actualModel, lineName) &&
-                    (!selectedGroups.size || selectedGroups.has(group))) {
-
-                    const modelKey = normalizeModelName(actualModel);
-                    if (!seen.has(modelKey)) {
-                        seen.add(modelKey);
-                        result.push(actualModel);
-                    }
-                }
-            }
 
             return result;
         }
@@ -2752,14 +2416,16 @@
             const seen = new Set();
 
             (productGroups || []).forEach(group => {
-                getAllModelsForProductGroup(group).forEach(model => {
-                    const actualModel = resolveLobActualModelName(model);
-                    const key = normalizeModelName(actualModel);
-                    if (!actualModel || seen.has(key)) return;
+                const mapped = LOB_PRODUCT_GROUP_MAP[String(group || '').trim()] || [];
 
-                    if (modelMatchesLobLine(actualModel, lineName)) {
-                        seen.add(key);
-                        models.push(actualModel);
+                mapped.forEach(name => {
+                    const clean = String(name || '').trim();
+                    if (!clean || seen.has(clean)) return;
+
+                    // Strict mapping prevents unrelated models from being pulled into a Product Group.
+                    if (modelMatchesLobLine(clean, lineName)) {
+                        seen.add(clean);
+                        models.push(clean);
                     }
                 });
             });
@@ -2853,10 +2519,9 @@
             const keep = previous.filter(g => groups.includes(g));
 
             if (keep.length) {
-                Array.from(sel.options).forEach(o => {
-                    o.selected = keep.includes(o.value);
-                });
+                Array.from(sel.options).forEach(o => o.selected = keep.includes(o.value));
             } else {
+                // Follow Product Group currently selected in Work Process / Door Part where possible.
                 const preferredModel =
                     (line === 'Back Plate' || line === 'Bottom Plate')
                         ? selectedModel
@@ -2865,11 +2530,8 @@
                 const preferredGroup = getLobProductGroupForModel(preferredModel);
 
                 if (preferredGroup && groups.includes(preferredGroup)) {
-                    Array.from(sel.options).forEach(o => {
-                        o.selected = (o.value === preferredGroup);
-                    });
+                    Array.from(sel.options).forEach(o => o.selected = (o.value === preferredGroup));
                 } else if (sel.options.length) {
-                    // Always select one valid group so Page 5 renders immediately.
                     sel.options[0].selected = true;
                 }
             }
@@ -2881,17 +2543,15 @@
         function getLobProcessRows(lineName, modelName) {
             if (!modelName) return [];
 
-            const actualModel = resolveLobActualModelName(modelName);
             const rows = [];
-            const targetModel = normalizeModelName(actualModel);
+            const targetModel = normalizeModelName(modelName);
 
-            const pushRows = (list, area, sourceType = '') => {
+            const pushRows = (list, area) => {
                 if (!Array.isArray(list)) return;
                 list.forEach((item, idx) => {
                     rows.push({
-                        model: actualModel,
+                        model: modelName,
                         area: area || '-',
-                        sourceType,
                         station: item.station || `STA ${idx + 1}`,
                         p1: item.p1 || '-',
                         p2: item.p2 || '-',
@@ -2905,122 +2565,53 @@
             };
 
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
-                const suffix = `_${lineName}`;
-
+                // A) Saved Work Process DB
                 Object.keys(processDatabase || {}).forEach(key => {
+                    const suffix = `_${lineName}`;
                     if (!key.endsWith(suffix)) return;
-
                     const storedModel = key.slice(0, -suffix.length);
-                    const storedActual = resolveLobActualModelName(storedModel);
-
-                    if (normalizeModelName(storedActual) !== targetModel) return;
-
-                    pushRows(processDatabase[key], lineName, 'work-process');
+                    if (normalizeModelName(storedModel) !== targetModel) return;
+                    pushRows(processDatabase[key], lineName);
                 });
 
-                // Current editor data is valid even if it has not yet been reloaded from localStorage.
+                // B) Current editor data that is already visible in Work Process page
                 if (!rows.length &&
-                    normalizeModelName(resolveLobActualModelName(selectedModel || '')) === targetModel &&
+                    normalizeModelName(selectedModel || '') === targetModel &&
                     selectedPartValue === lineName &&
-                    Array.isArray(currentProcessData) &&
-                    currentProcessData.length) {
-                    pushRows(currentProcessData, lineName, 'work-process-current');
+                    Array.isArray(currentProcessData)) {
+                    pushRows(currentProcessData, lineName);
                 }
 
                 return rows;
             }
 
-            // DOOR C SPECIAL:
-            // Do not bind Line Balance availability to Door Type.
-            // RR/RL/FR/FL/VEG/FB are detail categories from Door Part page,
-            // not physical C-1/C-2/C-3 line membership.
-            if (lineName === 'Door C') {
-                // A) Prefer normal Work Process rows if they exist for this model.
-                Object.keys(processDatabase || {}).forEach(key => {
-                    const split = key.lastIndexOf('_');
-                    if (split <= 0) return;
-
-                    const storedModel = key.slice(0, split);
-                    if (normalizeModelName(storedModel) !== targetModel) return;
-
-                    const part = key.slice(split + 1);
-                    if (['Back Plate', 'Bottom Plate', 'Gasket'].includes(part)) return;
-
-                    pushRows(processDatabase[key], part || 'Door C', 'work-process');
-                });
-
-                // B) Door Part rows can still be used as data,
-                // but Door Type is ignored and duplicates are removed afterwards.
-                if (!rows.length) {
-                    Object.keys(doorProcessDatabase || {}).forEach(key => {
-                        const idx = key.indexOf('_Door (');
-                        if (idx <= 0) return;
-
-                        const storedModel = key.slice(0, idx);
-                        if (normalizeModelName(storedModel) !== targetModel) return;
-
-                        pushRows(doorProcessDatabase[key], 'Door C', 'door-part');
-                    });
-                }
-
-                // C) Current Door Part editor fallback.
-                if (!rows.length &&
-                    normalizeModelName(resolveLobActualModelName(selectedDoorModel || '')) === targetModel &&
-                    Array.isArray(currentDoorProcessData)) {
-                    pushRows(currentDoorProcessData, 'Door C', 'door-part-current');
-                }
-
-                // Remove duplicates caused by the same station/process being stored
-                // under several Door Types.
-                const dedup = new Map();
-                rows.forEach((r, i) => {
-                    const key = [
-                        normalizeModelName(r.model),
-                        String(r.station || '').trim().toUpperCase(),
-                        String(r.p1 || '').trim().toUpperCase(),
-                        String(r.p2 || '').trim().toUpperCase(),
-                        String(r.p3 || '').trim().toUpperCase(),
-                        Number(r.wt1 || 0).toFixed(3),
-                        Number(r.wt2 || 0).toFixed(3),
-                        Number(r.wt3 || 0).toFixed(3),
-                        Number(r.loss || 0).toFixed(3)
-                    ].join('||');
-
-                    if (!dedup.has(key)) dedup.set(key, r);
-                });
-
-                return Array.from(dedup.values());
-            }
-
-            // Door A / Door B / Door Glass keep Door Part behavior.
+            // Door A / B / C / Door Glass:
+            // saved Door Process DB uses keys MODEL_Door (Sub Part - Door Type)
             Object.keys(doorProcessDatabase || {}).forEach(key => {
                 const idx = key.indexOf('_Door (');
                 if (idx <= 0) return;
-
                 const storedModel = key.slice(0, idx);
                 if (normalizeModelName(storedModel) !== targetModel) return;
-
-                pushRows(doorProcessDatabase[key], key.slice(idx + 1), 'door-part');
+                pushRows(doorProcessDatabase[key], key.slice(idx + 1));
             });
 
+            // Current Door Part editor rows as fallback
             if (!rows.length &&
-                normalizeModelName(resolveLobActualModelName(selectedDoorModel || '')) === targetModel &&
+                normalizeModelName(selectedDoorModel || '') === targetModel &&
                 Array.isArray(currentDoorProcessData)) {
                 const area = `Door (${selectedDoorSubPart || '-'} - ${selectedDoorType || '-'})`;
-                pushRows(currentDoorProcessData, area, 'door-part-current');
+                pushRows(currentDoorProcessData, area);
             }
 
+            // Final fallback:
+            // If this model only has normal Work Process data, show it rather than a blank page.
             if (!rows.length) {
                 Object.keys(processDatabase || {}).forEach(key => {
-                    // Match by model prefix instead of splitting on the last "_",
-                    // because some model names themselves may contain underscores.
-                    const normalizedKey = normalizeModelName(key);
-                    const normalizedPrefix = normalizeModelName(actualModel + '_');
-
-                    if (!normalizedKey.startsWith(normalizedPrefix)) return;
-
-                    const part = key.slice(actualModel.length + 1) || lineName;
-                    pushRows(processDatabase[key], part, 'work-process-fallback');
+                    const split = key.lastIndexOf('_');
+                    if (split <= 0) return;
+                    const storedModel = key.slice(0, split);
+                    if (normalizeModelName(storedModel) !== targetModel) return;
+                    pushRows(processDatabase[key], key.slice(split + 1));
                 });
             }
 
@@ -3119,25 +2710,7 @@
 
             const line = lineSel.value;
             const productGroups = getSelectedLobModels();
-
-            let models = getModelsForLobProductGroups(line, productGroups);
-
-            // Back/Bottom Plate:
-            // Work Process database is the authoritative CT source.
-            // Add models that actually have saved process data on the selected Master Line.
-            if (isLobPlateStation(line)) {
-                const savedModels = getSavedPlateModelsForLob(line, productGroups);
-                const seenModels = new Set(models.map(m => normalizeModelName(m)));
-
-                savedModels.forEach(model => {
-                    const key = normalizeModelName(model);
-                    if (!seenModels.has(key)) {
-                        seenModels.add(key);
-                        models.push(model);
-                    }
-                });
-            }
-
+            const models = getModelsForLobProductGroups(line, productGroups);
             updateLobSelectedModelCount();
 
             const targetUph = Math.max(1, parseFloat(uphInput.value) || 120);
@@ -3155,21 +2728,11 @@
             if (dataStatus) {
                 if (rawRows.length > 0) {
                     dataStatus.textContent = isLobPlateStation(line)
-                        ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group / ${models.length} Model`
-                        : (line === 'Door C'
-                            ? `${getSelectedLobDoorCLine()} · ${rawRows.length} Process / ${productGroups.length} Group · ไม่แยกประเภทฝา`
-                            : `${rawRows.length} Process / ${productGroups.length} Group`);
+                        ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
+                        : `${rawRows.length} Process / ${productGroups.length} Group`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
-                    dataStatus.textContent = productGroups.length
-                        ? (line === 'Door C'
-                            ? `${getSelectedLobDoorCLine()} · ${models.length} Model · No Process Data`
-                            : (isLobPlateStation(line)
-                            ? `${getSelectedLobPlateLine()} · ${models.length} Model · No Process Data`
-                            : 'No Process Data'))
-                        : (line === 'Door C'
-                            ? `${getSelectedLobDoorCLine()} · No Product Group`
-                            : 'Select Product Group');
+                    dataStatus.textContent = productGroups.length ? 'No Process Data' : 'Select Product Group';
                     dataStatus.className = 'text-[10px] font-bold text-rose-300 py-1.5 min-w-[90px]';
                 }
             }
@@ -3188,9 +2751,7 @@
 
             const lineDisplay = isLobPlateStation(line)
                 ? `${line} · ${getSelectedLobPlateLine()}`
-                : (line === 'Door C'
-                    ? `${line} · ${getSelectedLobDoorCLine()}`
-                    : line);
+                : line;
 
             const groupLabel = productGroups.length > 1
                 ? `${lineDisplay} · ${productGroups.length} Groups`
@@ -3218,15 +2779,55 @@
             const groups = getSelectedLobModels().slice().sort();
             const groupKey = groups.length ? groups.join('||') : 'NO_GROUP';
 
+            // Back Plate / Bottom Plate:
+            // Line#1 employees and Line#2 employees are shared across Product Groups.
+            // Therefore the saved layout is COMMON per physical plate line.
             if (isLobPlateStation(line)) {
-                return `haier_lob_master_physical_line_v4::${line}::${getSelectedLobPlateLine()}::COMMON`;
+                return `haier_lob_plate_shared_employee_v2::${line}::${getSelectedLobPlateLine()}::COMMON`;
             }
 
-            if (line === 'Door C') {
-                return `haier_lob_master_physical_line_v4::Door C::${getSelectedLobDoorCLine()}::COMMON`;
-            }
+            // Door lines can still have a different layout by selected Product Group set.
+            return `haier_lob_plate_shared_employee_v2::${line}::${groupKey}`;
+        }
 
-            return `haier_lob_master_physical_line_v4::${line}::${groupKey}`;
+        function getUniqueLobLayoutRows(rows) {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+
+            // Door layouts keep the original behavior.
+            if (!isLobPlateStation(line)) return Array.isArray(rows) ? rows : [];
+
+            // Back/Bottom Plate:
+            // Multiple Product Groups on the same Line#1 or Line#2 use the same workers.
+            // Keep only one physical work point per station. If the same station has
+            // different CT between groups, retain the row with the highest CT.
+            const byStation = new Map();
+
+            (rows || []).forEach((row, index) => {
+                const station = String(row?.station || row?.part || row?.area || `Point ${index + 1}`).trim();
+                const key = station.toLowerCase().replace(/\s+/g, ' ');
+                const ct = Number(row?.ct ?? (
+                    (Number(row?.wt1) || 0) +
+                    (Number(row?.wt2) || 0) +
+                    (Number(row?.wt3) || 0) +
+                    (Number(row?.loss) || 0)
+                )) || 0;
+
+                if (!byStation.has(key)) {
+                    byStation.set(key, { ...row, station, ct });
+                    return;
+                }
+
+                const current = byStation.get(key);
+                const currentCt = Number(current?.ct) || 0;
+                if (ct > currentCt) {
+                    byStation.set(key, { ...row, station, ct });
+                }
+            });
+
+            return Array.from(byStation.values()).map((row, i) => ({
+                ...row,
+                no: i + 1
+            }));
         }
 
         function getDefaultLobLayout(rows) {
