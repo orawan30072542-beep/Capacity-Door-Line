@@ -911,6 +911,16 @@
                                 </select>
                             </div>
 
+                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Plate Line</label>
+                                <select id="lobPlateLineSelect" onchange="onLobPlateLineChange()"
+                                    class="bg-slate-800 text-emerald-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[110px] focus:outline-none">
+                                    <option value="Line#1">Line#1</option>
+                                    <option value="Line#2">Line#2</option>
+                                </select>
+                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model</div>
+                            </div>
+
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <div class="flex items-center justify-between mb-1">
                             <label class="text-[9px] text-slate-400">Product Group</label>
@@ -1008,6 +1018,7 @@
                                     <span class="text-[9px] font-bold text-amber-300 bg-amber-950/30 border border-amber-500/20 px-3 py-1 rounded-lg">PRODUCT GROUP MAPPING</span>
                                     <span class="text-[9px] font-bold text-fuchsia-300 bg-fuchsia-950/30 border border-fuchsia-500/20 px-3 py-1 rounded-lg">MULTI GROUP LAYOUT</span>
                                     <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">STRICT MODEL MAPPING</span>
+                                    <span class="text-[9px] font-bold text-orange-300 bg-orange-950/30 border border-orange-500/20 px-3 py-1 rounded-lg">PLATE LINE SEPARATED</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
                                         class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
                                     <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
@@ -1956,27 +1967,60 @@
             });
         }
 
+        function isLobPlateStation(lineName) {
+            return lineName === 'Back Plate' || lineName === 'Bottom Plate';
+        }
+
+        function getSelectedLobPlateLine() {
+            return document.getElementById('lobPlateLineSelect')?.value || 'Line#1';
+        }
+
+        function updateLobPlateLineVisibility() {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            const wrap = document.getElementById('lobPlateLineWrap');
+            if (!wrap) return;
+            wrap.classList.toggle('hidden', !isLobPlateStation(line));
+        }
+
         function modelMatchesLobLine(modelName, lineName) {
             const cfg = getMasterConfigForModel(modelName);
 
+            // Back / Bottom Plate: use Master Model assignment only.
+            // Line#1 and Line#2 are treated as completely separate Line Balance layouts.
             if (lineName === 'Back Plate') {
-                return cfg.backPlateSource === 'ผลิตเอง' || modelHasLobProcessData(modelName, lineName);
+                return cfg.backPlateSource === 'ผลิตเอง' &&
+                       (cfg.backPlateLine || 'Line#1') === getSelectedLobPlateLine();
             }
             if (lineName === 'Bottom Plate') {
-                return cfg.bottomSource === 'ผลิตเอง' || modelHasLobProcessData(modelName, lineName);
+                return cfg.bottomSource === 'ผลิตเอง' &&
+                       (cfg.bottomLine || 'Line#1') === getSelectedLobPlateLine();
             }
 
-            // Master Model is primary; saved Door Process is fallback so old data is not hidden.
+            // Door lines: Master Model is primary; saved process is fallback for old data.
             return cfg.station === lineName || modelHasLobProcessData(modelName, lineName);
+        }
+
+        function onLobPlateLineChange() {
+            populateLobModelSelect();
+            renderLineBalancePage();
         }
 
         function initLineBalancePage() {
             const lineSel = document.getElementById('lobLineSelect');
+            const plateLineSel = document.getElementById('lobPlateLineSelect');
             if (!lineSel) return;
 
             // Open with the process context the user was working on.
             if (selectedPartValue === 'Back Plate' || selectedPartValue === 'Bottom Plate') {
                 lineSel.value = selectedPartValue;
+
+                // Follow Line#1 / Line#2 from Master Model for the selected model.
+                if (selectedModel && plateLineSel) {
+                    const cfg = getMasterConfigForModel(selectedModel);
+                    plateLineSel.value = selectedPartValue === 'Back Plate'
+                        ? (cfg.backPlateLine || 'Line#1')
+                        : (cfg.bottomLine || 'Line#1');
+                }
             } else if (selectedDoorModel) {
                 const cfg = getMasterConfigForModel(selectedDoorModel);
                 if (['Door A', 'Door B', 'Door C', 'Door Glass'].includes(cfg.station)) {
@@ -1984,12 +2028,14 @@
                 }
             }
 
+            updateLobPlateLineVisibility();
             populateLobModelSelect();
             ensureLineBalanceChart();
             renderLineBalancePage();
         }
 
         function onLobLineChange() {
+            updateLobPlateLineVisibility();
             populateLobModelSelect();
             renderLineBalancePage();
         }
@@ -2371,7 +2417,9 @@
             const dataStatus = document.getElementById('lobDataStatus');
             if (dataStatus) {
                 if (rawRows.length > 0) {
-                    dataStatus.textContent = `${rawRows.length} Process / ${productGroups.length} Group`;
+                    dataStatus.textContent = isLobPlateStation(line)
+                        ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
+                        : `${rawRows.length} Process / ${productGroups.length} Group`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
                     dataStatus.textContent = productGroups.length ? 'No Process Data' : 'Select Product Group';
@@ -2391,9 +2439,13 @@
             const totalMp = rows.reduce((s, r) => s + r.reqMp, 0);
             const balanceEff = totalMp > 0 && takt > 0 ? (totalLead / (totalMp * takt)) * 100 : 0;
 
+            const lineDisplay = isLobPlateStation(line)
+                ? `${line} · ${getSelectedLobPlateLine()}`
+                : line;
+
             const groupLabel = productGroups.length > 1
-                ? `${line} · ${productGroups.length} Groups`
-                : (productGroups.length === 1 ? `${line} · Group ${productGroups[0]}` : line);
+                ? `${lineDisplay} · ${productGroups.length} Groups`
+                : (productGroups.length === 1 ? `${lineDisplay} · Group ${productGroups[0]}` : lineDisplay);
 
             document.getElementById('lobKpiLine').textContent = groupLabel || '-';
             document.getElementById('lobKpiTakt').textContent = `${takt.toFixed(1)} s`;
@@ -2415,10 +2467,14 @@
         function getLobLayoutKey() {
             const line = document.getElementById('lobLineSelect')?.value || 'ALL';
             const groups = getSelectedLobModels().slice().sort();
-            // A layout can be created for one Product Group or for a combination
-            // of multiple Product Groups. The same combination reuses its saved layout.
             const groupKey = groups.length ? groups.join('||') : 'NO_GROUP';
-            return `haier_lob_multi_group_layout_v2::${line}::${groupKey}`;
+
+            // Back Plate / Bottom Plate are split by Master Model Line#1 / Line#2.
+            const plateLineKey = isLobPlateStation(line)
+                ? `::${getSelectedLobPlateLine()}`
+                : '';
+
+            return `haier_lob_plate_line_layout_v1::${line}${plateLineKey}::${groupKey}`;
         }
 
         function getDefaultLobLayout(rows) {
