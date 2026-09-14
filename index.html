@@ -286,6 +286,61 @@
 }
 </style>
 
+
+<style>
+/* Compact Balance Summary integrated into Work Process panel */
+#tab-content-linebalance .lob-compact-summary{
+    border:1px solid rgba(34,211,238,.18);
+    background:rgba(2,6,23,.48);
+    border-radius:.75rem;
+    padding:.55rem;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:.35rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary > *{
+    margin:0 !important;
+    min-height:0 !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .p-3,
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .p-4{
+    padding:.45rem .55rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .rounded-xl{
+    border-radius:.5rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .text-sm{
+    font-size:10px !important;
+    line-height:1rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .text-xs{
+    font-size:9px !important;
+    line-height:.9rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .text-\[10px\],
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .text-\[9px\]{
+    font-size:8px !important;
+    line-height:.8rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .mt-1,
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .mt-2,
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .mt-3{
+    margin-top:.2rem !important;
+}
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .mb-1,
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .mb-2,
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary .mb-3{
+    margin-bottom:.2rem !important;
+}
+@media (max-width:1279px){
+    #tab-content-linebalance .lob-compact-summary #lobBalanceSummary{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1036,17 +1091,6 @@
                     </div>
                 </section>
 
-                <!-- BALANCE SUMMARY : TOP -->
-                <section class="bg-cardbg p-4 rounded-2xl border border-bordercolor shadow-sm">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <div>
-                            <h3 class="text-sm font-bold text-white">Balance Summary</h3>
-                            <p class="text-[9px] text-slate-400 mt-0.5">สรุปสถานะ Line Balance ของ Product Group ที่เลือก</p>
-                        </div>
-                    </div>
-                    <div id="lobBalanceSummary" class="space-y-2 text-xs"></div>
-                </section>
-
                 <!-- MAIN 60 / 40 -->
                 <section class="grid grid-cols-1 xl:grid-cols-10 gap-4 items-stretch">
                     <!-- LEFT 60% -->
@@ -1148,8 +1192,18 @@
                         </section>
                     </div>
 
-                    <!-- RIGHT 40%: same table style as Page 3 / Page 4 -->
+                    <!-- RIGHT 40%: Work Process + compact Balance Summary -->
                     <section class="xl:col-span-4 bg-cardbg p-4 rounded-2xl border border-bordercolor shadow-sm flex flex-col min-h-[830px]">
+                        <div class="lob-compact-summary shrink-0 mb-3">
+<div class="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Balance Summary</h3>
+                            <p class="text-[9px] text-slate-400 mt-0.5">สรุปสถานะ Line Balance ของ Product Group ที่เลือก</p>
+                        </div>
+                    </div>
+                    <div id="lobBalanceSummary" class="space-y-2 text-xs"></div>
+                        </div>
+
                         <div class="flex items-center justify-between gap-2 mb-3 shrink-0">
                             <div class="flex items-center gap-2">
                                 <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
