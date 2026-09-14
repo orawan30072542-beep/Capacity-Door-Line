@@ -270,6 +270,22 @@
 }
 </style>
 
+
+<style>
+/* Page 5 graph/table use the same visual language as Page 3 / Page 4 */
+#tab-content-linebalance .lob-page5-chart-wrapper{
+    position:relative;
+    width:100%;
+    height:320px;
+}
+#tab-content-linebalance #lobProcessTableBody td{
+    vertical-align:middle;
+}
+#tab-content-linebalance #lobProcessTableBody tr:hover{
+    background:rgba(30,41,59,.45);
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1109,44 +1125,53 @@
                             </div>
                         </section>
 
-                        <!-- GRAPH -->
+                        <!-- GRAPH: same style as Page 3 / Page 4 -->
                         <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-                                <div>
-                                    <h3 class="text-sm font-bold text-cyan-300">Line Balance Chart</h3>
-                                    <p class="text-[9px] text-slate-400 mt-0.5">Cycle Time เทียบกับ Takt Time</p>
+                            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">รูปแบบเดียวกับ Work Process และ Door Part</p>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2 text-[9px]">
-                                    <span class="px-2 py-1 rounded bg-blue-950/40 border border-blue-500/20 text-blue-300">CT</span>
-                                    <span class="px-2 py-1 rounded bg-yellow-950/40 border border-yellow-500/20 text-yellow-300">Takt Time</span>
+                                <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded border border-bordercolor flex items-center gap-3">
+                                    <span><span class="inline-block w-2 h-2 rounded-sm bg-blue-500 mr-1"></span>Cycle Time</span>
+                                    <span><span class="inline-block w-5 h-[2px] bg-yellow-400 align-middle mr-1"></span>Takt 100%</span>
+                                    <span><span class="inline-block w-5 h-[2px] bg-rose-400 align-middle mr-1"></span>Takt 85%</span>
                                 </div>
                             </div>
-                            <div class="h-[300px]">
+                            <div class="lob-page5-chart-wrapper bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80">
                                 <canvas id="lineBalancePageChart"></canvas>
                             </div>
                         </section>
                     </div>
 
-                    <!-- RIGHT 40% -->
+                    <!-- RIGHT 40%: same table style as Page 3 / Page 4 -->
                     <section class="xl:col-span-4 bg-cardbg p-4 rounded-2xl border border-bordercolor shadow-sm flex flex-col min-h-[830px]">
                         <div class="flex items-center justify-between gap-2 mb-3 shrink-0">
-                            <div>
-                                <h3 class="text-sm font-bold text-white">Process Detail</h3>
-                                <p class="text-[9px] text-slate-400 mt-0.5">แสดงจุดงานและ CT — กด Detail เพื่อดูข้อมูลทั้งหมด</p>
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-cyan-400">Work Process & Cycle Time</h3>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">ตารางรูปแบบเดียวกับหน้า 3 และหน้า 4</p>
+                                </div>
                             </div>
                             <span id="lobProcessCount" class="text-[10px] text-cyan-300 font-bold whitespace-nowrap">0 Process</span>
                         </div>
 
-                        <div class="flex-1 min-h-0 overflow-auto rounded-xl border border-bordercolor/70">
-                            <table class="w-full text-left border-collapse text-[10px]">
-                                <thead class="sticky top-0 z-20 bg-slate-900">
-                                    <tr class="text-slate-300 border-b border-bordercolor">
-                                        <th class="px-3 py-2.5">จุดงาน</th>
-                                        <th class="px-2 py-2.5 text-center text-cyan-300 w-20">เวลา CT</th>
-                                        <th class="px-2 py-2.5 text-center w-16">Detail</th>
+                        <div class="flex-1 min-h-0 overflow-auto rounded-xl border border-bordercolor/70 bg-slate-950/40">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead class="sticky top-0 z-20">
+                                    <tr class="border-b border-bordercolor text-slate-300 bg-slate-900">
+                                        <th class="p-1.5 text-center w-16">Station</th>
+                                        <th class="p-1.5">Process 1</th>
+                                        <th class="p-1.5 text-center">WT Tot</th>
+                                        <th class="p-1.5 text-center">Loss</th>
+                                        <th class="p-1.5 text-center text-cyan-300">CT</th>
                                     </tr>
                                 </thead>
-                                <tbody id="lobProcessTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
+                                <tbody id="lobProcessTableBody" class="divide-y divide-bordercolor/40 text-slate-300 text-[11px]"></tbody>
                             </table>
                         </div>
                     </section>
@@ -2483,21 +2508,32 @@
                     datasets: [
                         {
                             type: 'bar',
-                            label: 'Cycle Time',
+                            label: 'Cycle Time (CT)',
                             data: [],
-                            backgroundColor: '#0ea5e9',
-                            borderRadius: 5,
-                            order: 2
+                            backgroundColor: '#0066FF',
+                            borderRadius: 4,
+                            order: 3
                         },
                         {
                             type: 'line',
-                            label: 'Takt Time',
+                            label: 'Takt Time 100%',
                             data: [],
                             borderColor: '#facc15',
                             borderWidth: 3,
                             pointRadius: 0,
                             tension: 0,
                             order: 1
+                        },
+                        {
+                            type: 'line',
+                            label: 'Takt Time 85%',
+                            data: [],
+                            borderColor: '#fb7185',
+                            borderDash: [6, 6],
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            tension: 0,
+                            order: 2
                         }
                     ]
                 },
@@ -2521,12 +2557,12 @@
                         y: {
                             beginAtZero: true,
                             grid: { color: '#1e293b' },
-                            title: { display: true, text: 'Seconds' }
+                            title: { display: true, text: 'Time (Seconds)' }
                         },
                         x: {
                             grid: { display: false },
                             ticks: { maxRotation: 45, minRotation: 0 },
-                            title: { display: true, text: 'Work Point' }
+                            title: { display: true, text: 'Work Stations' }
                         }
                     }
                 }
@@ -3075,72 +3111,34 @@
             count.textContent = `${rows.length} Process`;
 
             if (!rows.length) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = rows.map(r => {
-                const over = r.ct > takt;
-                const processes = [r.p1, r.p2, r.p3].filter(p => p && p !== '-').join(' / ') || '-';
+                const over = Number(r.ct || 0) > Number(takt || 0);
+                const process1 = r.p1 && r.p1 !== '-' ? r.p1 : '-';
+                const groupText = r.productGroup
+                    ? `<div class="text-[8px] text-slate-500 mt-0.5">Group ${lobEscape(r.productGroup)}</div>`
+                    : '';
 
                 return `
                     <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="px-3 py-3">
-                            <div class="font-bold text-cyan-300">${lobEscape(r.station || '-')}</div>
-                            ${r.productGroup ? `<div class="text-[8px] text-slate-500 mt-0.5">Group ${lobEscape(r.productGroup)}</div>` : ''}
+                        <td class="p-1.5 text-center font-bold text-cyan-300 whitespace-nowrap">
+                            ${lobEscape(r.station || '-')}
+                            ${groupText}
                         </td>
-                        <td class="px-2 py-3 text-center">
-                            <div class="font-black text-sm ${over ? 'text-rose-300' : 'text-cyan-300'}">${r.ct.toFixed(1)}</div>
-                            <div class="text-[8px] text-slate-500">sec</div>
+                        <td class="p-1.5 text-slate-200">
+                            ${lobEscape(process1)}
                         </td>
-                        <td class="px-2 py-3 text-center">
-                            <button type="button" onclick="toggleLobProcessDetail(${r.no})"
-                                class="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-blue-950/50 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 text-[9px] font-bold">
-                                <span id="lob-detail-icon-${r.no}" class="text-sm leading-none">+</span>
-                                Detail
-                            </button>
+                        <td class="p-1.5 text-center text-slate-300 font-medium">
+                            ${Number(r.wtTotal || 0).toFixed(1)}
                         </td>
-                    </tr>
-                    <tr id="lob-detail-${r.no}" class="hidden bg-slate-950/55">
-                        <td colspan="3" class="p-3">
-                            <div class="grid grid-cols-2 gap-2 text-[9px]">
-                                <div class="col-span-2 rounded-lg border border-slate-700/70 bg-slate-900/70 p-2">
-                                    <div class="text-slate-500 mb-1">Process</div>
-                                    <div class="text-slate-200 leading-4">${lobEscape(processes)}</div>
-                                </div>
-
-                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
-                                    <div class="text-slate-500">Product Group</div>
-                                    <div class="text-amber-300 font-bold mt-0.5">${lobEscape(r.productGroup || '-')}</div>
-                                </div>
-                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
-                                    <div class="text-slate-500">Part / Area</div>
-                                    <div class="text-violet-300 font-bold mt-0.5">${lobEscape(r.area || '-')}</div>
-                                </div>
-
-                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
-                                    <div class="text-slate-500">WT1 / WT2 / WT3</div>
-                                    <div class="text-white font-bold mt-0.5">${r.wt1.toFixed(1)} / ${r.wt2.toFixed(1)} / ${r.wt3.toFixed(1)}</div>
-                                </div>
-                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
-                                    <div class="text-slate-500">Loss</div>
-                                    <div class="text-rose-300 font-bold mt-0.5">${r.loss.toFixed(1)} sec</div>
-                                </div>
-
-                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
-                                    <div class="text-slate-500">Takt Time</div>
-                                    <div class="text-yellow-300 font-bold mt-0.5">${takt.toFixed(1)} sec</div>
-                                </div>
-                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
-                                    <div class="text-slate-500">Required MP</div>
-                                    <div class="text-emerald-300 font-bold mt-0.5">${r.reqMp} คน</div>
-                                </div>
-
-                                <div class="col-span-2 rounded-lg border ${over ? 'border-rose-500/30 bg-rose-950/20' : 'border-emerald-500/30 bg-emerald-950/20'} p-2 flex items-center justify-between">
-                                    <span class="text-slate-400">Status</span>
-                                    <span class="font-bold ${over ? 'text-rose-300' : 'text-emerald-300'}">${over ? 'OVER TAKT' : 'OK'}</span>
-                                </div>
-                            </div>
+                        <td class="p-1.5 text-center ${Number(r.loss || 0) > 0 ? 'text-rose-300' : 'text-slate-400'}">
+                            ${Number(r.loss || 0).toFixed(1)}
+                        </td>
+                        <td class="p-1.5 text-center font-black ${over ? 'text-rose-300' : 'text-cyan-300'}">
+                            ${Number(r.ct || 0).toFixed(1)}
                         </td>
                     </tr>
                 `;
@@ -3200,10 +3198,16 @@
             ensureLineBalanceChart();
             if (!lineBalancePageChart) return;
 
-            lineBalancePageChart.data.labels = rows.map(r => r.productGroup ? `G${r.productGroup} · ${r.station}` : r.station);
+            const takt85 = Number(takt || 0) * 0.85;
+
+            lineBalancePageChart.data.labels = rows.map(r =>
+                r.productGroup ? `G${r.productGroup} · ${r.station}` : r.station
+            );
             lineBalancePageChart.data.datasets[0].data = rows.map(r => Number(r.ct.toFixed(2)));
             lineBalancePageChart.data.datasets[1].data = rows.map(() => Number(takt.toFixed(2)));
-            lineBalancePageChart.data.datasets[1].label = `Takt Time (${takt.toFixed(1)}s)`;
+            lineBalancePageChart.data.datasets[1].label = `Takt Time 100% (${takt.toFixed(1)}s)`;
+            lineBalancePageChart.data.datasets[2].data = rows.map(() => Number(takt85.toFixed(2)));
+            lineBalancePageChart.data.datasets[2].label = `Takt Time 85% (${takt85.toFixed(1)}s)`;
             lineBalancePageChart._requiredMp = rows.map(r => r.reqMp);
             lineBalancePageChart.update();
         }
