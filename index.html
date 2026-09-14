@@ -440,6 +440,10 @@
 }
 </style>
 
+
+<style>
+#tab-content-linebalance #lobSummaryTargetUph{width:72px!important;height:30px!important;}
+</style>
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1159,7 +1163,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Data</label>
                                 <div class="flex items-center gap-2">
                                     <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px]">-</div>
@@ -1170,7 +1174,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <div class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Target UPH</label>
                                 <input id="lobTargetUph" type="number" min="1" step="1" value="120"
                                     oninput="renderLineBalancePage()"
@@ -1318,7 +1322,15 @@
                         <div class="lob-compact-summary shrink-0 mb-3">
 <div class="flex items-center justify-between gap-3 mb-3">
                         <div>
-                            <h3 class="text-sm font-bold text-white">Balance Summary</h3>
+                            <div class="flex items-center justify-between gap-3">
+                                <h3 class="text-sm font-bold text-white">Balance Summary</h3>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-[9px] text-slate-400 whitespace-nowrap">Target UPH</label>
+                                    <input id="lobSummaryTargetUph" type="number" min="1" step="1" value="120"
+                                        oninput="setLobTargetUphFromSummary(this.value)"
+                                        class="w-20 h-8 bg-slate-800 border border-cyan-500/30 rounded-lg px-2 text-center text-cyan-300 text-[11px] font-black focus:outline-none focus:border-cyan-400">
+                                </div>
+                            </div>
                             <p class="text-[9px] text-slate-400 mt-0.5">สรุปสถานะ Line Balance ของ Product Group ที่เลือก</p>
                         </div>
                     </div>
@@ -3034,7 +3046,25 @@
             });
         }
 
+        function setLobTargetUphFromSummary(value) {
+            const mainInput = document.getElementById('lobTargetUph');
+            const summaryInput = document.getElementById('lobSummaryTargetUph');
+            const uph = Math.max(1, Number(value) || 1);
+            if (mainInput) mainInput.value = uph;
+            if (summaryInput && Number(summaryInput.value) !== uph) summaryInput.value = uph;
+            renderLineBalancePage();
+        }
+
+        function syncLobSummaryTargetUph() {
+            const mainInput = document.getElementById('lobTargetUph');
+            const summaryInput = document.getElementById('lobSummaryTargetUph');
+            if (mainInput && summaryInput && document.activeElement !== summaryInput) {
+                summaryInput.value = mainInput.value || 120;
+            }
+        }
+
         function renderLineBalancePage() {
+            syncLobSummaryTargetUph();
             const lineSel = document.getElementById('lobLineSelect');
             const groupSel = document.getElementById('lobModelSelect');
             const uphInput = document.getElementById('lobTargetUph');
@@ -3774,7 +3804,7 @@
 
             refreshLobDirectEditButtons();
 
-            const target = Number(document.getElementById('lobTargetUPH')?.value) || 120;
+            const target = Number(document.getElementById('lobTargetUph')?.value) || 120;
             const takt = target > 0 ? 3600 / target : 0;
             renderLobProcessTable(lobDirectEditRows, takt);
         }
@@ -3789,7 +3819,7 @@
 
             refreshLobDirectEditButtons();
 
-            const target = Number(document.getElementById('lobTargetUPH')?.value) || 120;
+            const target = Number(document.getElementById('lobTargetUph')?.value) || 120;
             const takt = target > 0 ? 3600 / target : 0;
             renderLobProcessTable(lobDirectEditRows, takt);
         }
@@ -3800,7 +3830,7 @@
             const model = document.getElementById('lobDirectModelSelect')?.value || '';
             lobDirectEditRows = JSON.parse(JSON.stringify(getLobRowsForModel(model)));
 
-            const target = Number(document.getElementById('lobTargetUPH')?.value) || 120;
+            const target = Number(document.getElementById('lobTargetUph')?.value) || 120;
             const takt = target > 0 ? 3600 / target : 0;
             renderLobProcessTable(lobDirectEditRows, takt);
         }
