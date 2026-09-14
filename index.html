@@ -455,6 +455,49 @@
 }
 </style>
 
+
+<style>
+/* Integrated KPI cards inside Balance Summary */
+#tab-content-linebalance .lob-compact-summary #lobBalanceSummary{
+    display:block !important;
+}
+#tab-content-linebalance .lob-summary-kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+}
+#tab-content-linebalance .lob-summary-kpi-card{
+    background:rgba(15,23,42,.78);
+    border:1px solid rgba(51,65,85,.8);
+    border-radius:8px;
+    padding:7px 8px;
+    min-width:0;
+}
+#tab-content-linebalance .lob-summary-kpi-card .lob-kpi-label{
+    font-size:8px;
+    color:#94a3b8;
+    line-height:1.1;
+}
+#tab-content-linebalance .lob-summary-kpi-card .lob-kpi-value{
+    font-size:11px;
+    font-weight:800;
+    margin-top:3px;
+    line-height:1.15;
+    word-break:break-word;
+}
+#tab-content-linebalance .lob-summary-details{
+    margin-top:6px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+}
+@media (min-width:1500px){
+    #tab-content-linebalance .lob-summary-kpi-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1194,36 +1237,7 @@
                             </div>
                         </div>
                 </section>
-
-                <!-- KPI -->
-                <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
-                        <div class="text-[9px] text-slate-400">Selected Line</div>
-                        <div id="lobKpiLine" class="text-sm font-bold text-cyan-300 mt-1">-</div>
-                    </div>
-                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
-                        <div class="text-[9px] text-slate-400">Takt Time</div>
-                        <div id="lobKpiTakt" class="text-sm font-bold text-yellow-300 mt-1">-</div>
-                    </div>
-                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
-                        <div class="text-[9px] text-slate-400">Max CT</div>
-                        <div id="lobKpiMaxCt" class="text-sm font-bold text-rose-300 mt-1">-</div>
-                    </div>
-                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
-                        <div class="text-[9px] text-slate-400">Total Lead Time</div>
-                        <div id="lobKpiLead" class="text-sm font-bold text-emerald-300 mt-1">-</div>
-                    </div>
-                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
-                        <div class="text-[9px] text-slate-400">Required Manpower</div>
-                        <div id="lobKpiMp" class="text-sm font-bold text-cyan-300 mt-1">-</div>
-                    </div>
-                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
-                        <div class="text-[9px] text-slate-400">Balance Efficiency</div>
-                        <div id="lobKpiEff" class="text-sm font-bold text-violet-300 mt-1">-</div>
-                    </div>
-                </section>
-
-                <!-- MAIN 60 / 40 -->
+<!-- MAIN 60 / 40 -->
                 <section class="grid grid-cols-1 xl:grid-cols-10 gap-4 items-stretch">
                     <!-- LEFT 60% -->
                     <div class="xl:col-span-6 flex flex-col gap-4">
@@ -3132,12 +3146,12 @@
                 ? `${lineDisplay} · ${productGroups.length} Groups`
                 : (productGroups.length === 1 ? `${lineDisplay} · Group ${productGroups[0]}` : lineDisplay);
 
-            document.getElementById('lobKpiLine').textContent = groupLabel || '-';
-            document.getElementById('lobKpiTakt').textContent = `${takt.toFixed(1)} s`;
-            document.getElementById('lobKpiMaxCt').textContent = maxCt ? `${maxCt.toFixed(1)} s` : '-';
-            document.getElementById('lobKpiLead').textContent = totalLead ? `${totalLead.toFixed(1)} s` : '-';
-            document.getElementById('lobKpiMp').textContent = totalMp ? `${totalMp} คน` : '-';
-            document.getElementById('lobKpiEff').textContent = balanceEff ? `${balanceEff.toFixed(1)}%` : '-';
+            if (document.getElementById('lobKpiLine')) document.getElementById('lobKpiLine').textContent = groupLabel || '-';
+            if (document.getElementById('lobKpiTakt')) document.getElementById('lobKpiTakt').textContent = `${takt.toFixed(1)} s`;
+            if (document.getElementById('lobKpiMaxCt')) document.getElementById('lobKpiMaxCt').textContent = maxCt ? `${maxCt.toFixed(1)} s` : '-';
+            if (document.getElementById('lobKpiLead')) document.getElementById('lobKpiLead').textContent = totalLead ? `${totalLead.toFixed(1)} s` : '-';
+            if (document.getElementById('lobKpiMp')) document.getElementById('lobKpiMp').textContent = totalMp ? `${totalMp} คน` : '-';
+            if (document.getElementById('lobKpiEff')) document.getElementById('lobKpiEff').textContent = balanceEff ? `${balanceEff.toFixed(1)}%` : '-';
 
             renderLobEmployeeLayout(rows, takt);
             renderLobProcessTable(rows, takt);
@@ -4148,47 +4162,112 @@
             const box = document.getElementById('lobBalanceSummary');
             if (!box) return;
 
-            const overRows = rows.filter(r => r.ct > takt);
-            const maxRow = rows.length
-                ? rows.reduce((a, b) => a.ct >= b.ct ? a : b)
+            const line = document.getElementById('lobLineSelect')?.value || '-';
+            const selectedGroups = getSelectedLobProductGroups?.() || [];
+            const plateLine = isLobPlateStation(line) ? getSelectedLobPlateLine() : '';
+            const doorCLine = line === 'Door C' ? getSelectedLobDoorCLine() : '';
+
+            let lineLabel = line;
+            if (plateLine) lineLabel += ` · ${plateLine}`;
+            if (doorCLine) lineLabel += ` · ${doorCLine}`;
+            if (selectedGroups.length) {
+                lineLabel += ` · ${selectedGroups.map(g => `Group ${g}`).join(', ')}`;
+            }
+
+            const validRows = Array.isArray(rows) ? rows : [];
+            const maxCt = validRows.length
+                ? Math.max(...validRows.map(r => Number(r.ct || 0)))
+                : 0;
+            const totalLead = validRows.reduce((sum, r) => sum + Number(r.ct || 0), 0);
+
+            // Required manpower follows the same station logic used by Line Balance.
+            const totalMp = validRows.reduce((sum, r) => {
+                const ct = Number(r.ct || 0);
+                if (ct <= 0 || takt <= 0) return sum;
+                return sum + Math.max(1, Math.ceil(ct / takt));
+            }, 0);
+
+            // Average working time per person = Total Lead Time / Required Manpower.
+            const avgWorkPerPerson = totalMp > 0 ? totalLead / totalMp : 0;
+
+            const overRows = validRows.filter(r => Number(r.ct || 0) > Number(takt || 0));
+            const maxRow = validRows.length
+                ? validRows.reduce((a, b) => Number(a.ct || 0) >= Number(b.ct || 0) ? a : b)
                 : null;
 
             box.innerHTML = `
-                <div class="grid grid-cols-2 gap-2">
+                <div class="lob-summary-kpi-grid">
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Selected Line</div>
+                        <div class="lob-kpi-value text-cyan-300">${lobEscape(lineLabel || '-')}</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Target UPH</div>
+                        <div class="lob-kpi-value text-cyan-300">${Math.round(targetUph)} UPH</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Takt Time</div>
+                        <div class="lob-kpi-value text-yellow-300">${takt > 0 ? takt.toFixed(1) + ' s' : '-'}</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Max CT</div>
+                        <div class="lob-kpi-value text-rose-300">${maxCt > 0 ? maxCt.toFixed(1) + ' s' : '-'}</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Total Lead Time</div>
+                        <div class="lob-kpi-value text-emerald-300">${totalLead > 0 ? totalLead.toFixed(1) + ' s' : '-'}</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Required Manpower</div>
+                        <div class="lob-kpi-value text-cyan-300">${totalMp > 0 ? totalMp + ' คน' : '-'}</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Average Work Time / Person</div>
+                        <div class="lob-kpi-value text-fuchsia-300">${avgWorkPerPerson > 0 ? avgWorkPerPerson.toFixed(1) + ' s/คน' : '-'}</div>
+                    </div>
+
+                    <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">Balance Efficiency</div>
+                        <div class="lob-kpi-value ${balanceEff >= 85 ? 'text-emerald-300' : 'text-violet-300'}">${Number(balanceEff || 0).toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                <div class="lob-summary-details">
                     <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-2.5">
-                        <div class="text-[9px] text-slate-500">Target</div>
-                        <div class="font-bold text-cyan-300 mt-0.5">${Math.round(targetUph)} UPH</div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Balance Efficiency</span>
+                            <span class="font-bold ${balanceEff >= 85 ? 'text-emerald-300' : 'text-amber-300'}">${Number(balanceEff || 0).toFixed(1)}%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full" style="width:${Math.min(100, Math.max(0, Number(balanceEff || 0)))}%"></div>
+                        </div>
                     </div>
+
                     <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-2.5">
-                        <div class="text-[9px] text-slate-500">Takt</div>
-                        <div class="font-bold text-yellow-300 mt-0.5">${takt.toFixed(1)}s</div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Over Takt Point</span>
+                            <span class="font-bold ${overRows.length ? 'text-rose-300' : 'text-emerald-300'}">${overRows.length}</span>
+                        </div>
+                        <div class="text-[9px] text-slate-500 mt-1">
+                            ${overRows.length ? overRows.map(r => lobEscape(r.station || '-')).join(', ') : 'ไม่มีจุดที่เกิน Takt Time'}
+                        </div>
                     </div>
-                </div>
 
-                <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">Balance Efficiency</span>
-                        <span class="font-bold ${balanceEff >= 85 ? 'text-emerald-300' : 'text-amber-300'}">${balanceEff.toFixed(1)}%</span>
+                    <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-2.5">
+                        <div class="text-[9px] text-slate-500">Bottleneck</div>
+                        <div class="font-bold text-rose-300 mt-1">
+                            ${maxRow ? `${maxRow.productGroup ? 'Group ' + lobEscape(maxRow.productGroup) + ' · ' : ''}${lobEscape(maxRow.station || '-')}` : '-'}
+                        </div>
+                        <div class="text-[9px] text-slate-400 mt-0.5">
+                            ${maxRow ? `${Number(maxRow.ct || 0).toFixed(1)}s · ${lobEscape(maxRow.area || '-')}` : '-'}
+                        </div>
                     </div>
-                    <div class="w-full h-2 bg-slate-800 rounded-full mt-2 overflow-hidden">
-                        <div class="h-full bg-emerald-500 rounded-full" style="width:${Math.min(100, Math.max(0, balanceEff))}%"></div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">Over Takt Point</span>
-                        <span class="font-bold ${overRows.length ? 'text-rose-300' : 'text-emerald-300'}">${overRows.length}</span>
-                    </div>
-                    <div class="text-[9px] text-slate-500 mt-1">
-                        ${overRows.length ? overRows.map(r => r.station).join(', ') : 'ไม่มีจุดที่เกิน Takt Time'}
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
-                    <div class="text-[9px] text-slate-500">Bottleneck</div>
-                    <div class="font-bold text-rose-300 mt-1">${maxRow ? `${maxRow.productGroup ? 'Group ' + maxRow.productGroup + ' · ' : ''}${maxRow.station}` : '-'}</div>
-                    <div class="text-[9px] text-slate-400 mt-0.5">${maxRow ? `${maxRow.ct.toFixed(1)}s · ${maxRow.area}` : '-'}</div>
                 </div>
             `;
         }
