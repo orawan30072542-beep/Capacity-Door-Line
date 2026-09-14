@@ -3255,13 +3255,24 @@
                         },
                         {
                             type: 'line',
-                            label: 'TT 85%',
+                            label: 'TT 100%',
                             data: [],
                             borderColor: '#facc15',
                             borderWidth: 3,
                             pointRadius: 0,
                             tension: 0,
                             order: 1
+                        },
+                        {
+                            type: 'line',
+                            label: 'TT 85%',
+                            data: [],
+                            borderColor: '#fb7185',
+                            borderDash: [6, 6],
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            tension: 0,
+                            order: 2
                         }
                     ]
                 },
@@ -4470,8 +4481,12 @@
                     </div>
 
                     <div class="lob-summary-kpi-card">
+                        <div class="lob-kpi-label">TT 100%</div>
+                        <div class="lob-kpi-value text-yellow-300">${takt > 0 ? takt.toFixed(1) + ' s' : '-'}</div>
+                    </div>
+                    <div class="lob-summary-kpi-card">
                         <div class="lob-kpi-label">TT 85%</div>
-                        <div class="lob-kpi-value text-yellow-300">${takt > 0 ? (takt * 0.85).toFixed(1) + ' s' : '-'}</div>
+                        <div class="lob-kpi-value text-rose-300">${takt > 0 ? (takt * 0.85).toFixed(1) + ' s' : '-'}</div>
                     </div>
 
                     <div class="lob-summary-kpi-card">
@@ -4558,10 +4573,15 @@
             const chartRows=aggregateLobChartRowsByStation(rows,takt);
             lineBalancePageChart.data.labels=chartRows.map(r=>r.station);
             lineBalancePageChart.data.datasets[0].data=chartRows.map(r=>Number(Number(r.ct || 0).toFixed(2)));
+            // TT lines are linked directly to the current Target UPH.
+            // TT100 = 3600 / UPH, TT85 = TT100 × 0.85.
+            const tt100 = Number(takt || 0);
+            const tt85 = tt100 * 0.85;
+            lineBalancePageChart.data.datasets[1].data = chartRows.map(() => Number(tt100.toFixed(2)));
+            lineBalancePageChart.data.datasets[2].data = chartRows.map(() => Number(tt85.toFixed(2)));
             lineBalancePageChart.data.datasets[0].label='Average Cycle Time by Station';
-            lineBalancePageChart.data.datasets[1].data=chartRows.map(()=>Number(Number(takt || 0).toFixed(2)));
-            lineBalancePageChart.data.datasets[1].label=`Takt Time 100% (${takt.toFixed(1)}s)`;
-            lineBalancePageChart.data.datasets[2].label=`Takt Time 85% (${takt85.toFixed(1)}s)`;
+            lineBalancePageChart.data.datasets[1].label=`TT 100% (${takt.toFixed(1)}s)`;
+            lineBalancePageChart.data.datasets[2].label=`TT 85% (${takt85.toFixed(1)}s)`;
             lineBalancePageChart._requiredMp=chartRows.map(r=>r.reqMp);
             lineBalancePageChart._stationBreakdown=chartRows.map(r=>r.breakdown);
             lineBalancePageChart._stationAverageCount=chartRows.map(r=>r.averageCount);
@@ -4610,8 +4630,8 @@
                 labels: [],
                 datasets: [
                     { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#0066FF', borderRadius: 4, order: 2 },
-                    { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
-                    { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
+                    { type: 'line', label: 'TT 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
+                    { type: 'line', label: 'TT 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
                 ]
             },
             options: {
@@ -4632,8 +4652,8 @@
                 labels: [],
                 datasets: [
                     { type: 'bar', label: 'Cycle Time (CT)', data: [], backgroundColor: '#d97706', borderRadius: 4, order: 2 },
-                    { type: 'line', label: 'Takt Time 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
-                    { type: 'line', label: 'Takt Time 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
+                    { type: 'line', label: 'TT 100%', data: [], borderColor: '#facc15', borderWidth: 3, pointRadius: 0, order: 1 },
+                    { type: 'line', label: 'TT 85%', data: [], borderColor: '#fb7185', borderDash: [6, 6], borderWidth: 3, pointRadius: 0, order: 1 }
                 ]
             },
             options: {
@@ -4678,9 +4698,9 @@
             lobChart.data.labels = labels;
             lobChart.data.datasets[0].data = ctData;
             lobChart.data.datasets[1].data = ttLine1;
-            lobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
+            lobChart.data.datasets[1].label = `TT 100% (${taktTime100.toFixed(2)}s)`;
             lobChart.data.datasets[2].data = ttLine2;
-            lobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;
+            lobChart.data.datasets[2].label = `TT 85% (${taktTime85.toFixed(2)}s)`;
             lobChart.update();
         }
 
@@ -4715,9 +4735,9 @@
             doorLobChart.data.labels = labels;
             doorLobChart.data.datasets[0].data = ctData;
             doorLobChart.data.datasets[1].data = ttLine1;
-            doorLobChart.data.datasets[1].label = `Takt Time 100% (${taktTime100.toFixed(2)}s)`;
+            doorLobChart.data.datasets[1].label = `TT 100% (${taktTime100.toFixed(2)}s)`;
             doorLobChart.data.datasets[2].data = ttLine2;
-            doorLobChart.data.datasets[2].label = `Takt Time 85% (${taktTime85.toFixed(2)}s)`;
+            doorLobChart.data.datasets[2].label = `TT 85% (${taktTime85.toFixed(2)}s)`;
             doorLobChart.update();
         }
 
