@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haier Door Line - Product Groupion Dashboard (Merged)</title>
+    <title>Haier Door Line - Production Dashboard (Merged)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -921,7 +921,7 @@
                                         class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-cyan-300">Select all</button>
                                     <button type="button" onclick="clearLobModels()"
                                         class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-slate-300">Clear</button>
-                                    <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 selected</span>
+                                    <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Group selected</span>
                                 </div>
                             </div>
 
@@ -1000,7 +1000,8 @@
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
-                                    <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">COMMON LAYOUT / LINE</span>
+                                    <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">COMMON LAYOUT</span>
+                                    <span class="text-[9px] font-bold text-amber-300 bg-amber-950/30 border border-amber-500/20 px-3 py-1 rounded-lg">PRODUCT GROUP MAPPING</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
                                         class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
                                     <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
@@ -1989,34 +1990,190 @@
 
 
 
-        function getLobProductGroup(modelName) {
-            const cfg = masterModelConfig?.[modelName] || {};
-            return String(cfg.productGroup || cfg.group || modelName || '').trim();
+        const LOB_PRODUCT_GROUP_MAP = {
+            "TD 469": [
+                "T DOOR H Metal",
+                "T DOOR H Metal WD",
+                "T DOOR H Glass",
+                "T DOOR H Glass WD"
+            ],
+            "TD 520": [
+                "T DOOR 520",
+                "T DOOR 520 U1",
+                "T DOOR 520 WD"
+            ],
+            "SBS 550": [
+                "SBS 550",
+                "SBS 550 WD"
+            ],
+            "SBS 620": [
+                "SBS 620",
+                "SBS 620 WD",
+                "SBS 620 Glass",
+                "SBS 620 Glass WD"
+            ],
+            "BM23": [
+                "BM23",
+                "BM23 Café",
+                "BM23 DND"
+            ],
+            "BM29": [
+                "BM29",
+                "BM29 Café",
+                "BM29 DND"
+            ],
+            "BM T-Door": [
+                "BM T-Door 23 Café",
+                "BM T-Door 23",
+                "BM T-Door 28 Café",
+                "BM T-Door 28"
+            ],
+            "TM10/12": [
+                "TM10",
+                "TM12"
+            ],
+            "TM14": [
+                "TM14"
+            ],
+            "TM19": [
+                "TM-19 K",
+                "TM-19 L"
+            ],
+            "TM21": [
+                "TM-21 K",
+                "TM-21 T"
+            ],
+            "FUF14": [
+                "FUF14 D",
+                "FUF14 L",
+                "FUF14 Q",
+                "FUF14 S"
+            ],
+            "FUF18": [
+                "FUF18 D",
+                "FUF18 L",
+                "FUF18 Q",
+                "FUF18 S"
+            ],
+            "FUF22": [
+                "FUF22 D",
+                "FUF22 L",
+                "FUF22 Q",
+                "FUF22 S"
+            ]
+        };
+
+        function normalizeLobName(value) {
+            return String(value || '').trim().toLowerCase();
         }
 
-        function getSelectedLobProductGroups() {
+        function getLobProductGroupForModel(modelName) {
+            const target = normalizeLobName(modelName);
+            if (!target) return '';
+
+            for (const [group, models] of Object.entries(LOB_PRODUCT_GROUP_MAP)) {
+                if ((models || []).some(m => normalizeLobName(m) === target)) {
+                    return group;
+                }
+            }
+
+            // Fallback for Product Groups not yet listed in the manual mapping.
+            if (currentDailyData && Array.isArray(currentDailyData.groups)) {
+                for (const g of currentDailyData.groups) {
+                    if ((g.models || []).some(m => normalizeLobName(m.name) === target)) {
+                        return String(g.productGroup || '').trim();
+                    }
+                }
+            }
+            return '';
+        }
+
+        function getLobProductGroupsForLine(lineName) {
+            const result = [];
+            const seen = new Set();
+
+            // Manual Product Group mapping has priority.
+            Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
+                const hasModelForLine = (models || []).some(model =>
+                    modelMatchesLobLine(model, lineName)
+                );
+                if (hasModelForLine && !seen.has(group)) {
+                    seen.add(group);
+                    result.push(group);
+                }
+            });
+
+            // Fallback: keep any other Product Groups from imported Daily Plan.
+            if (currentDailyData && Array.isArray(currentDailyData.groups)) {
+                currentDailyData.groups.forEach(g => {
+                    const groupName = String(g.productGroup || '').trim();
+                    if (!groupName || seen.has(groupName)) return;
+
+                    const hasModelForLine = (g.models || []).some(m =>
+                        m && m.name && modelMatchesLobLine(String(m.name).trim(), lineName)
+                    );
+
+                    if (hasModelForLine) {
+                        seen.add(groupName);
+                        result.push(groupName);
+                    }
+                });
+            }
+
+            return result;
+        }
+
+        function getModelsForLobProductGroups(lineName, productGroups) {
+            const wantedGroups = (productGroups || []).map(v => String(v).trim());
+            const models = [];
+            const seen = new Set();
+
+            wantedGroups.forEach(group => {
+                const mapped = LOB_PRODUCT_GROUP_MAP[group];
+
+                if (Array.isArray(mapped)) {
+                    mapped.forEach(name => {
+                        const clean = String(name || '').trim();
+                        if (!clean || seen.has(clean)) return;
+                        if (modelMatchesLobLine(clean, lineName)) {
+                            seen.add(clean);
+                            models.push(clean);
+                        }
+                    });
+                    return;
+                }
+
+                // Fallback for groups not yet in manual mapping.
+                if (currentDailyData && Array.isArray(currentDailyData.groups)) {
+                    currentDailyData.groups.forEach(g => {
+                        if (String(g.productGroup || '').trim() !== group) return;
+
+                        (g.models || []).forEach(m => {
+                            const name = String(m?.name || '').trim();
+                            if (!name || seen.has(name)) return;
+                            if (modelMatchesLobLine(name, lineName)) {
+                                seen.add(name);
+                                models.push(name);
+                            }
+                        });
+                    });
+                }
+            });
+
+            return models;
+        }
+
+        function getSelectedLobModels() {
+            // Selector stores Product Group values on the Line Of Balance page.
             const sel = document.getElementById('lobModelSelect');
             if (!sel) return [];
             return Array.from(sel.selectedOptions || []).map(o => o.value).filter(Boolean);
         }
 
-        function getModelsForLobProductGroups(line, groups) {
-            const wanted = new Set((groups || []).map(v => String(v).trim()));
-            return getAllCurrentModels().filter(model => {
-                if (!modelMatchesLobLine(model, line)) return false;
-                return wanted.has(getLobProductGroup(model));
-            });
-        }
-
-        function getSelectedLobModels() {
-            // Backward-compatible alias: selector now stores Product Group values.
-            return getSelectedLobProductGroups();
-        }
-
         function updateLobSelectedModelCount() {
             const el = document.getElementById('lobSelectedModelCount');
             if (!el) return;
-            el.textContent = `${getSelectedLobProductGroups().length} Product Group selected`;
+            el.textContent = `${getSelectedLobModels().length} Group selected`;
         }
 
         function selectAllLobModels() {
@@ -2037,32 +2194,33 @@
 
         function populateLobModelSelect() {
             const lineSel = document.getElementById('lobLineSelect');
-            const groupSel = document.getElementById('lobModelSelect');
-            if (!lineSel || !groupSel) return;
+            const sel = document.getElementById('lobModelSelect');
+            if (!lineSel || !sel) return;
 
             const line = lineSel.value;
-            const previous = getSelectedLobProductGroups();
-            const models = getAllCurrentModels().filter(name => modelMatchesLobLine(name, line));
+            const previous = getSelectedLobModels();
+            const groups = getLobProductGroupsForLine(line);
 
-            const groups = [...new Set(
-                models.map(name => getLobProductGroup(name)).filter(Boolean)
-            )].sort((a,b)=>a.localeCompare(b));
-
-            groupSel.innerHTML = groups.map(group =>
-                `<option value="${group.replace(/"/g, '&quot;')}">${group}</option>`
+            sel.innerHTML = groups.map(group =>
+                `<option value="${lobEscape(group)}">${lobEscape(group)}</option>`
             ).join('');
 
             const keep = previous.filter(g => groups.includes(g));
             if (keep.length) {
-                Array.from(groupSel.options).forEach(o => o.selected = keep.includes(o.value));
+                Array.from(sel.options).forEach(o => o.selected = keep.includes(o.value));
             } else {
-                // Prefer Product Group of current editor model when available.
-                const preferredModel = (line === 'Back Plate' || line === 'Bottom Plate') ? selectedModel : selectedDoorModel;
-                const preferredGroup = preferredModel ? getLobProductGroup(preferredModel) : '';
+                // Try to follow the group of the model currently used in Work Process.
+                const preferredModel =
+                    (line === 'Back Plate' || line === 'Bottom Plate')
+                    ? selectedModel
+                    : selectedDoorModel;
+
+                const preferredGroup = getLobProductGroupForModel(preferredModel);
+
                 if (preferredGroup && groups.includes(preferredGroup)) {
-                    Array.from(groupSel.options).forEach(o => o.selected = (o.value === preferredGroup));
-                } else if (groups.length) {
-                    groupSel.options[0].selected = true;
+                    Array.from(sel.options).forEach(o => o.selected = (o.value === preferredGroup));
+                } else if (sel.options.length) {
+                    sel.options[0].selected = true;
                 }
             }
 
@@ -2219,7 +2377,7 @@
             if (!lineSel || !groupSel || !uphInput) return;
 
             const line = lineSel.value;
-            const productGroups = getSelectedLobProductGroups();
+            const productGroups = getSelectedLobModels();
             const models = getModelsForLobProductGroups(line, productGroups);
             updateLobSelectedModelCount();
 
@@ -2228,14 +2386,16 @@
 
             const rawRows = [];
             models.forEach(model => {
-                const pg = getLobProductGroup(model);
-                getLobProcessRows(line, model).forEach(r => rawRows.push({ ...r, model, productGroup: pg }));
+                const productGroup = getLobProductGroupForModel(model);
+                getLobProcessRows(line, model).forEach(r => {
+                    rawRows.push({ ...r, model, productGroup });
+                });
             });
 
             const dataStatus = document.getElementById('lobDataStatus');
             if (dataStatus) {
                 if (rawRows.length > 0) {
-                    dataStatus.textContent = `${rawRows.length} Process / ${productGroups.length} Product Group`;
+                    dataStatus.textContent = `${rawRows.length} Process / ${productGroups.length} Group`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
                     dataStatus.textContent = productGroups.length ? 'No Process Data' : 'Select Product Group';
@@ -2255,8 +2415,11 @@
             const totalMp = rows.reduce((s, r) => s + r.reqMp, 0);
             const balanceEff = totalMp > 0 && takt > 0 ? (totalLead / (totalMp * takt)) * 100 : 0;
 
-            document.getElementById('lobKpiLine').textContent =
-                productGroups.length > 1 ? `${line} · ${productGroups.length} Groups` : (line || '-');
+            const groupLabel = productGroups.length > 1
+                ? `${line} · ${productGroups.length} Groups`
+                : (productGroups.length === 1 ? `${line} · Group ${productGroups[0]}` : line);
+
+            document.getElementById('lobKpiLine').textContent = groupLabel || '-';
             document.getElementById('lobKpiTakt').textContent = `${takt.toFixed(1)} s`;
             document.getElementById('lobKpiMaxCt').textContent = maxCt ? `${maxCt.toFixed(1)} s` : '-';
             document.getElementById('lobKpiLead').textContent = totalLead ? `${totalLead.toFixed(1)} s` : '-';
@@ -2274,10 +2437,8 @@
         let lobDragState = null;
 
         function getLobLayoutKey() {
-            const line = document.getElementById('lobLineSelect')?.value || '';
-            // Common Layout: one saved layout per production line.
-            // Changing Product Group on the same line reuses the same layout.
-            return `haier_lob_common_layout_v1::${line}`;
+            const line = document.getElementById('lobLineSelect')?.value || 'ALL';
+            return `haier_lob_common_layout_v3::${line}`;
         }
 
         function getDefaultLobLayout(rows) {
@@ -2562,20 +2723,22 @@
 
         function getCurrentLobRowsForLayout() {
             const line = document.getElementById('lobLineSelect')?.value || '';
-            const groups = getSelectedLobProductGroups();
+            const groups = getSelectedLobModels();
             const models = getModelsForLobProductGroups(line, groups);
             const all = [];
 
             models.forEach(model => {
-                const productGroup = getLobProductGroup(model);
-                getLobProcessRows(line, model).forEach(r => all.push({ ...r, model, productGroup }));
+                const productGroup = getLobProductGroupForModel(model);
+                getLobProcessRows(line, model).forEach(r => {
+                    all.push({ ...r, model, productGroup });
+                });
             });
 
-            return all.map((r,i)=>({
+            return all.map((r, i) => ({
                 ...r,
-                no:i+1,
-                wtTotal:(r.wt1||0)+(r.wt2||0)+(r.wt3||0),
-                ct:(r.wt1||0)+(r.wt2||0)+(r.wt3||0)+(r.loss||0)
+                no: i + 1,
+                wtTotal: (r.wt1 || 0) + (r.wt2 || 0) + (r.wt3 || 0),
+                ct: (r.wt1 || 0) + (r.wt2 || 0) + (r.wt3 || 0) + (r.loss || 0)
             }));
         }
 
@@ -2699,7 +2862,7 @@
                     <tr class="hover:bg-slate-800/40 transition-colors">
                         <td class="px-3 py-3">
                             <div class="font-bold text-cyan-300">${lobEscape(r.station || '-')}</div>
-                            ${r.productGroup ? `<div class="text-[8px] text-slate-500 mt-0.5">${lobEscape(r.productGroup)}</div>` : ''}
+                            ${r.productGroup ? `<div class="text-[8px] text-slate-500 mt-0.5">Group ${lobEscape(r.productGroup)}</div>` : ''}
                         </td>
                         <td class="px-2 py-3 text-center">
                             <div class="font-black text-sm ${over ? 'text-rose-300' : 'text-cyan-300'}">${r.ct.toFixed(1)}</div>
@@ -2802,7 +2965,7 @@
 
                 <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
                     <div class="text-[9px] text-slate-500">Bottleneck</div>
-                    <div class="font-bold text-rose-300 mt-1">${maxRow ? `${maxRow.productGroup ? maxRow.productGroup + ' · ' : ''}${maxRow.station}` : '-'}</div>
+                    <div class="font-bold text-rose-300 mt-1">${maxRow ? `${maxRow.productGroup ? 'Group ' + maxRow.productGroup + ' · ' : ''}${maxRow.station}` : '-'}</div>
                     <div class="text-[9px] text-slate-400 mt-0.5">${maxRow ? `${maxRow.ct.toFixed(1)}s · ${maxRow.area}` : '-'}</div>
                 </div>
             `;
@@ -2812,7 +2975,7 @@
             ensureLineBalanceChart();
             if (!lineBalancePageChart) return;
 
-            lineBalancePageChart.data.labels = rows.map(r => r.productGroup ? `${r.productGroup} · ${r.station}` : r.station);
+            lineBalancePageChart.data.labels = rows.map(r => r.productGroup ? `G${r.productGroup} · ${r.station}` : r.station);
             lineBalancePageChart.data.datasets[0].data = rows.map(r => Number(r.ct.toFixed(2)));
             lineBalancePageChart.data.datasets[1].data = rows.map(() => Number(takt.toFixed(2)));
             lineBalancePageChart.data.datasets[1].label = `Takt Time (${takt.toFixed(1)}s)`;
@@ -3093,7 +3256,7 @@
             const groups = data.groups;
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            // รูปแบบใหม่: Product Groupion Status | Product Group | ยอดรวม Order รายวัน
+            // รูปแบบใหม่: Production Status | Product Group | ยอดรวม Order รายวัน
             let headerHtml = `<th class="p-3 font-medium w-40 text-slate-300 bg-slate-900 sticky top-0 z-30">Production Status</th><th class="p-3 font-medium w-40 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-10">${day}</th>`;
@@ -3176,7 +3339,7 @@
                 tbody.appendChild(tr);
             }
 
-            // รวม Order ตาม Product Group และ Product Groupion Status
+            // รวม Order ตาม Product Group และ Production Status
             const summaryRows = [];
             groups.forEach(g => {
                 const buckets = new Map();
@@ -3463,7 +3626,7 @@
 
             const planUPH = hours > 0 ? totalOrder / hours : 0;
 
-            // Effective / weighted Actual UPH ของ Product Group Mix ในวันนั้น
+            // Effective / weighted Actual UPH ของ Product Mix ในวันนั้น
             // = Total Order ÷ Σ(Order ของแต่ละ Model ÷ Actual UPH ของ Model)
             const actualUPH =
                 totalOrder > 0 && requiredHoursAtActualUPH > 0
