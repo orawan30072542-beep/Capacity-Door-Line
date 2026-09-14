@@ -1333,7 +1333,7 @@
                                     <span><span class="inline-block w-2 h-2 rounded-sm bg-blue-500 mr-1"></span>Cycle Time</span>
                                     <span><span class="inline-block w-5 h-[2px] bg-yellow-400 align-middle mr-1"></span>Takt 100%</span>
                                     <span><span class="inline-block w-5 h-[2px] bg-rose-400 align-middle mr-1"></span>Takt 85%</span>
-                                    <span class="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-500/20 text-cyan-300">หลาย Model = รวม CT ตาม Station</span>
+                                    <span class="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-500/20 text-cyan-300">Station ซ้ำ = Average CT</span>
                                 </div>
                             </div>
                             <div class="lob-page5-chart-wrapper bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80">
@@ -2989,11 +2989,20 @@
 
         function ensureLineBalanceChart() {
             const canvas = document.getElementById('lineBalancePageChart');
-            if (!canvas || lineBalancePageChart) return;
+            if (!canvas) return;
+
             if (typeof Chart === 'undefined') {
                 console.warn('Chart.js not available; Line Balance layout/table will still render.');
                 return;
             }
+
+            // If the DOM canvas changed, discard the old chart instance.
+            if (lineBalancePageChart && lineBalancePageChart.canvas !== canvas) {
+                try { lineBalancePageChart.destroy(); } catch (e) {}
+                lineBalancePageChart = null;
+            }
+
+            if (lineBalancePageChart) return;
 
             lineBalancePageChart = new Chart(canvas.getContext('2d'), {
                 type: 'bar',
@@ -3002,7 +3011,7 @@
                     datasets: [
                         {
                             type: 'bar',
-                            label: 'Cycle Time (CT)',
+                            label: 'Average Cycle Time (CT)',
                             data: [],
                             backgroundColor: '#0066FF',
                             borderRadius: 4,
@@ -3044,11 +3053,14 @@
                                     const mp = lineBalancePageChart._requiredMp || [];
                                     const breakdown = (lineBalancePageChart._stationBreakdown || [])[idx] || [];
 
-                                    const details = breakdown.map(x =>
-                                        `${x.model}: ${Number(x.ct || 0).toFixed(1)}s`
-                                    );
+                                    const details = breakdown.map(x => {
+                                        const type = x.doorType && x.doorType !== '-' ? ` [${x.doorType}]` : '';
+                                        return `${x.model || '-'}${type}: ${Number(x.ct || 0).toFixed(1)}s`;
+                                    });
 
-                                    const avg = breakdown.length ? breakdown.reduce((s, x) => s + Number(x.ct || 0), 0) / breakdown.length : 0; details.push(`Average CT: ${avg.toFixed(1)}s (${breakdown.length} data)`);
+                                    const total = breakdown.reduce((s, x) => s + Number(x.ct || 0), 0);
+                                    const avg = breakdown.length ? total / breakdown.length : 0;
+                                    details.push(`Average CT: ${avg.toFixed(1)}s (${breakdown.length} data)`);
                                     details.push(`Required MP: ${mp[idx] || 0}`);
                                     return details;
                                 }
@@ -3063,13 +3075,17 @@
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { maxRotation: 45, minRotation: 0 },
-                            title: { display: true, text: 'Work Stations' }
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 0,
+                                autoSkip: false
+                            }
                         }
                     }
                 }
             });
         }
+
 
         function setLobTargetUphFromSummary(value) {
             const mainInput = document.getElementById('lobTargetUph');
@@ -3155,8 +3171,25 @@
 
             renderLobEmployeeLayout(rows, takt);
             renderLobProcessTable(rows, takt);
-            renderLobSummary(rows, takt, balanceEff, targetUph);
-            renderLobMainChart(rows, takt);
+
+            // Render CT graph independently so Summary errors cannot stop the chart.
+            try {
+                renderLobMainChart(rows, takt);
+            } catch (chartErr) {
+                console.error('Line Balance CT graph error:', chartErr);
+            }
+
+            try {
+                renderLobSummary(rows, takt, balanceEff, targetUph);
+            } catch (summaryErr) {
+                console.error('Balance Summary error:', summaryErr);
+                const box = document.getElementById('lobBalanceSummary');
+                if (box) {
+                    box.innerHTML = `<div class="p-3 rounded-lg border border-rose-500/30 bg-rose-950/20 text-[10px] text-rose-300">
+                        Balance Summary Error: ${lobEscape(String(summaryErr?.message || summaryErr))}
+                    </div>`;
+                }
+            }
         }
 
         let lobLayoutEditMode = false;
@@ -3765,7 +3798,7 @@
 
         function getLobDirectAvailableModels() {
             const line = document.getElementById('lobLineSelect')?.value || '';
-            const selectedGroups = getSelectedLobProductGroups();
+            const selectedGroups = (typeof getSelectedLobModels === 'function') ? getSelectedLobModels() : [];
             const models = [];
             const seen = new Set();
 
@@ -4163,9 +4196,9 @@
             if (!box) return;
 
             const line = document.getElementById('lobLineSelect')?.value || '-';
-            const selectedGroups = getSelectedLobProductGroups?.() || [];
-            const plateLine = isLobPlateStation(line) ? getSelectedLobPlateLine() : '';
-            const doorCLine = line === 'Door C' ? getSelectedLobDoorCLine() : '';
+            const selectedGroups = (typeof getSelectedLobModels === 'function') ? getSelectedLobModels() : [];
+            const plateLine = (typeof isLobPlateStation === 'function' && isLobPlateStation(line) && typeof getSelectedLobPlateLine === 'function') ? getSelectedLobPlateLine() : '';
+            const doorCLine = (line === 'Door C' && typeof getSelectedLobDoorCLine === 'function') ? getSelectedLobDoorCLine() : '';
 
             let lineLabel = line;
             if (plateLine) lineLabel += ` · ${plateLine}`;
@@ -4295,9 +4328,9 @@
             const takt85=Number(takt||0)*0.85;
             const chartRows=aggregateLobChartRowsByStation(rows,takt);
             lineBalancePageChart.data.labels=chartRows.map(r=>r.station);
-            lineBalancePageChart.data.datasets[0].data=chartRows.map(r=>Number(r.ct.toFixed(2)));
+            lineBalancePageChart.data.datasets[0].data=chartRows.map(r=>Number(Number(r.ct || 0).toFixed(2)));
             lineBalancePageChart.data.datasets[0].label='Average Cycle Time by Station';
-            lineBalancePageChart.data.datasets[1].data=chartRows.map(()=>Number(takt.toFixed(2)));
+            lineBalancePageChart.data.datasets[1].data=chartRows.map(()=>Number(Number(takt || 0).toFixed(2)));
             lineBalancePageChart.data.datasets[1].label=`Takt Time 100% (${takt.toFixed(1)}s)`;
             lineBalancePageChart.data.datasets[2].data=chartRows.map(()=>Number(takt85.toFixed(2)));
             lineBalancePageChart.data.datasets[2].label=`Takt Time 85% (${takt85.toFixed(1)}s)`;
