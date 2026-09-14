@@ -1081,7 +1081,7 @@
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <div class="flex items-center justify-between mb-1">
                             <label class="text-[9px] text-slate-400">Product Group</label>
-                            <span class="text-[8px] text-cyan-400">เลือกได้หลาย Group</span>
+                            <span class="text-[8px] text-cyan-400">เลือกได้หลาย Group · 1 Group = 1 Model</span>
                         </div>
                                 <!-- hidden select kept for compatibility with existing Line Balance logic -->
                                 <select id="lobModelSelect" multiple class="hidden" aria-hidden="true"></select>
@@ -2635,23 +2635,34 @@
             (productGroups || []).forEach(group => {
                 const mapped = LOB_PRODUCT_GROUP_MAP[String(group || '').trim()] || [];
 
-                mapped.forEach(name => {
+                // 1 Product Group may contain many Models, but Line Balance displays
+                // only ONE Model from that Group.
+                // Priority = first model in mapping that:
+                //   1) belongs to selected line in Master Model
+                //   2) has saved Work Process data.
+                const selectedModel = mapped.find(name => {
                     const clean = String(name || '').trim();
-                    const key = normalizeModelName(clean);
-
-                    if (!clean || seen.has(key)) return;
-
-                    // Show only data that passes BOTH:
-                    // 1) Master Model line/routing
-                    // 2) Work Process has saved CT/process
-                    if (modelMatchesMasterAndWorkProcess(clean, lineName)) {
-                        seen.add(key);
-                        models.push(clean);
-                    }
+                    return clean && modelMatchesMasterAndWorkProcess(clean, lineName);
                 });
+
+                if (!selectedModel) return;
+
+                const clean = String(selectedModel).trim();
+                const key = normalizeModelName(clean);
+                if (seen.has(key)) return;
+
+                seen.add(key);
+                models.push(clean);
             });
 
             return models;
+        }
+
+        function getDisplayedLobModelForGroup(groupName, lineName) {
+            const mapped = LOB_PRODUCT_GROUP_MAP[String(groupName || '').trim()] || [];
+            return mapped.find(name =>
+                modelMatchesMasterAndWorkProcess(String(name || '').trim(), lineName)
+            ) || '';
         }
 
         function getSelectedLobModels() {
