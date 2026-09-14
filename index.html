@@ -633,7 +633,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </p>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Bottom Plate Line#1 / Line#2: Out Line = เสิร์ฟพาร์ท 1 + ยกชิ้นงานใส่รถ 1 + Delivery 1 (รวม +3 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
+                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Back Plate / Bottom Plate Line#1 / Line#2: Load to Cart 1 คน รวมอยู่ใน In Line | Out Line = Part Supply 1 + Delivery 1 (รวม 2 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -5276,10 +5276,12 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
         }
 
         function getBottomOutLineManpower(station, groupName) {
-            // Bottom Plate Line#1 และ Line#2 เพิ่ม Out Line คงที่ไลน์ละ 3 คน
-            // Part Supply 1 + Load to Cart 1 + Delivery 1
-            if (station === 'Bottom Plate' && (groupName === 'Line#1' || groupName === 'Line#2')) {
-                return { partSupply: 1, loadToCart: 1, delivery: 1, total: 3 };
+            // Back Plate และ Bottom Plate ใช้ Support เหมือนกัน
+            // Load to Cart จัดเป็น In Line
+            // Out Line เหลือ Part Supply 1 + Delivery 1 = 2 คน/ไลน์
+            const isPlateLine = station === 'Bottom Plate' || station === 'Back Plate';
+            if (isPlateLine && (groupName === 'Line#1' || groupName === 'Line#2')) {
+                return { partSupply: 1, loadToCart: 1, delivery: 1, total: 2 };
             }
             return { partSupply: 0, loadToCart: 0, delivery: 0, total: 0 };
         }
@@ -5845,19 +5847,23 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                     zoneStart: true,
                     zoneClass: 'cyan',
                     label: 'Manpower (In + Out)',
-                    subLabel: station === 'Bottom Plate'
+                    subLabel: (station === 'Bottom Plate' || station === 'Back Plate')
                         ? 'In Line + Out Line รวมในบรรทัดเดียว'
                         : 'Total Manpower',
                     cls: 'text-amber-300',
                     format: (v, row) => {
                         if (!(v > 0)) return '-';
 
-                        const inLine = Number(row.manpowerPerHour || 0) > 0
+                        const baseInLine = Number(row.manpowerPerHour || 0) > 0
                             ? Math.ceil(Number(row.manpowerPerHour || 0))
                             : 0;
+                        const loadToCartInLine = (station === 'Bottom Plate' || station === 'Back Plate')
+                            ? Number(row.outLineLoadToCart || 0)
+                            : 0;
+                        const inLine = baseInLine + loadToCartInLine;
                         const outLine = Number(row.outLineTotal || 0);
 
-                        if (station === 'Bottom Plate') {
+                        if (station === 'Bottom Plate' || station === 'Back Plate') {
                             return `
                                 <div class="font-bold">${Math.round(v)} คน</div>
                                 <div class="text-[8px] text-slate-400 mt-0.5">
@@ -5940,7 +5946,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                     result.capacityGapPerHour = capResult.gapPerHour;
                     result.capacityStatus = capResult.status;
 
-                    // Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
+                    // Back Plate / Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
                     const outLine = getBottomOutLineManpower(station, groupName);
                     const hasProduction = Number(result.shortageOrder || result.doorOrder || result.totalOrder || 0) > 0;
 
@@ -5948,16 +5954,19 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                     result.outLineLoadToCart = hasProduction ? outLine.loadToCart : 0;
                     result.outLineDelivery = hasProduction ? outLine.delivery : 0;
                     result.outLineTotal = hasProduction ? outLine.total : 0;
-                    const inLineManpower = hasProduction && result.manpowerPerHour > 0
+                    const baseInLineManpower = hasProduction && result.manpowerPerHour > 0
                         ? Math.ceil(result.manpowerPerHour)
                         : 0;
+
+                    // Load to Cart belongs to In Line for Back Plate / Bottom Plate.
+                    const loadToCartInLine = hasProduction ? Number(outLine.loadToCart || 0) : 0;
+                    const inLineManpower = baseInLineManpower + loadToCartInLine;
 
                     result.totalManpowerWithOutLine = hasProduction
                         ? inLineManpower + result.outLineTotal
                         : 0;
 
-                    // Dashboard Manpower uses one combined value: In Line + Out Line.
-                    // For non-Bottom-Plate lines, Out Line = 0 so this remains the normal In Line manpower.
+                    // Combined = In Line (including Load to Cart) + Out Line (Part Supply + Delivery).
                     result.totalManpowerCombined = hasProduction
                         ? inLineManpower + result.outLineTotal
                         : 0;
