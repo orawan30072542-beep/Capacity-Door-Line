@@ -341,6 +341,20 @@
 }
 </style>
 
+
+<style>
+#lobGroupButtonContainer{
+    max-height:92px;
+    overflow-y:auto;
+    padding-right:2px;
+}
+#lobGroupButtonContainer::-webkit-scrollbar{width:5px}
+#lobGroupButtonContainer::-webkit-scrollbar-thumb{
+    background:#334155;
+    border-radius:999px;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1029,16 +1043,23 @@
                             <label class="text-[9px] text-slate-400">Product Group</label>
                             <span class="text-[8px] text-cyan-400">เลือกได้หลาย Group</span>
                         </div>
-                                <select id="lobModelSelect" multiple size="5" title="เลือก Product Group ได้มากกว่า 1 รายการ" onchange="updateLobSelectedModelCount(); renderLineBalancePage()"
-                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[220px] focus:outline-none">
-                                </select>
-                                <div class="flex items-center gap-1 mt-1.5">
+                                <!-- hidden select kept for compatibility with existing Line Balance logic -->
+                                <select id="lobModelSelect" multiple class="hidden" aria-hidden="true"></select>
+
+                                <!-- Product Group buttons: same interaction style as Work Process -->
+                                <div id="lobGroupButtonContainer"
+                                    class="flex flex-wrap gap-1.5 min-w-[220px] max-w-[620px]">
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-1 mt-1.5">
                                     <button type="button" onclick="selectAllLobModels()"
-                                        class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-cyan-300">Select all</button>
+                                        class="px-2 py-0.5 rounded text-[8px] font-medium transition border bg-slate-800 text-cyan-300 hover:bg-slate-700 border-bordercolor">Select all</button>
                                     <button type="button" onclick="clearLobModels()"
-                                        class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-slate-300">Clear</button>
+                                        class="px-2 py-0.5 rounded text-[8px] font-medium transition border bg-slate-800 text-slate-300 hover:bg-slate-700 border-bordercolor">Clear</button>
                                     <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Group selected</span>
-                        <div class="text-[8px] text-slate-500 mt-1">เลือกหลาย Product Group แล้วกด Auto Layout เพื่อจัดรวมใน Layout เดียวกัน</div>
+                                </div>
+                                <div class="text-[8px] text-slate-500 mt-1">
+                                    Product Group แสดงตาม Line ที่กำหนดใน Master Model — รูปแบบการเลือกเป็นปุ่มเหมือน Work Process
                                 </div>
                             </div>
 
@@ -1110,6 +1131,7 @@
                                     <span class="text-[9px] font-bold text-amber-300 bg-amber-950/30 border border-amber-500/20 px-3 py-1 rounded-lg">PRODUCT GROUP MAPPING</span>
                                     <span class="text-[9px] font-bold text-fuchsia-300 bg-fuchsia-950/30 border border-fuchsia-500/20 px-3 py-1 rounded-lg">MULTI GROUP LAYOUT</span>
                                     <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">STRICT MODEL MAPPING</span>
+                                    <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">MASTER LINE FILTER</span>
                                     <span class="text-[9px] font-bold text-orange-300 bg-orange-950/30 border border-orange-500/20 px-3 py-1 rounded-lg">PLATE LINE SEPARATED</span>
                                     <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
@@ -2140,19 +2162,24 @@
         function modelMatchesLobLine(modelName, lineName) {
             const cfg = getMasterConfigForModel(modelName);
 
-            // Back / Bottom Plate: use Master Model assignment only.
-            // Line#1 and Line#2 are treated as completely separate Line Balance layouts.
+            // IMPORTANT:
+            // Product Group shown on Page 5 must follow Master Model assignment only.
+            // The button UI is only a display/input style change and must not change
+            // which Product Groups belong to each production line.
             if (lineName === 'Back Plate') {
                 return cfg.backPlateSource === 'ผลิตเอง' &&
                        (cfg.backPlateLine || 'Line#1') === getSelectedLobPlateLine();
             }
+
             if (lineName === 'Bottom Plate') {
                 return cfg.bottomSource === 'ผลิตเอง' &&
                        (cfg.bottomLine || 'Line#1') === getSelectedLobPlateLine();
             }
 
-            // Door lines: Master Model is primary; saved process is fallback for old data.
-            return cfg.station === lineName || modelHasLobProcessData(modelName, lineName);
+            // Door A / Door B / Door C / Door Glass:
+            // use Station selected in Master Model strictly; do not pull a model
+            // into another line just because old Work Process data exists there.
+            return cfg.station === lineName;
         }
 
         function onLobPlateLineChange() {
@@ -2407,22 +2434,61 @@
         }
 
         function getSelectedLobModels() {
-            // Selector stores Product Group values on the Line Of Balance page.
+            // Hidden selector stores selected Product Group values.
             const sel = document.getElementById('lobModelSelect');
             if (!sel) return [];
-            return Array.from(sel.selectedOptions || []).map(o => o.value).filter(Boolean);
+            return Array.from(sel.options || [])
+                .filter(o => o.selected)
+                .map(o => o.value)
+                .filter(Boolean);
         }
 
         function updateLobSelectedModelCount() {
             const el = document.getElementById('lobSelectedModelCount');
             if (!el) return;
-            el.textContent = `${getSelectedLobModels().length} Group selected`;
+            const count = getSelectedLobModels().length;
+            el.textContent = `${count} Group selected`;
+        }
+
+        function renderLobGroupButtons() {
+            const sel = document.getElementById('lobModelSelect');
+            const container = document.getElementById('lobGroupButtonContainer');
+            if (!sel || !container) return;
+
+            container.innerHTML = '';
+
+            Array.from(sel.options).forEach(option => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.group = option.value;
+                btn.className = `lob-group-btn px-2 py-0.5 rounded text-[10px] font-medium transition border ${
+                    option.selected
+                        ? 'bg-amber-600 text-white border-amber-500 shadow'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border-bordercolor'
+                }`;
+                btn.textContent = `Group ${option.value}`;
+
+                btn.onclick = () => {
+                    option.selected = !option.selected;
+                    renderLobGroupButtons();
+                    updateLobSelectedModelCount();
+                    renderLineBalancePage();
+                };
+
+                container.appendChild(btn);
+            });
+
+            if (!sel.options.length) {
+                container.innerHTML = `<span class="text-[10px] text-slate-400 p-1">ไม่พบ Product Group สำหรับ Line นี้</span>`;
+            }
         }
 
         function selectAllLobModels() {
             const sel = document.getElementById('lobModelSelect');
             if (!sel) return;
+
             Array.from(sel.options).forEach(o => o.selected = true);
+            renderLobGroupButtons();
             updateLobSelectedModelCount();
             renderLineBalancePage();
         }
@@ -2430,7 +2496,9 @@
         function clearLobModels() {
             const sel = document.getElementById('lobModelSelect');
             if (!sel) return;
+
             Array.from(sel.options).forEach(o => o.selected = false);
+            renderLobGroupButtons();
             updateLobSelectedModelCount();
             renderLineBalancePage();
         }
@@ -2449,14 +2517,15 @@
             ).join('');
 
             const keep = previous.filter(g => groups.includes(g));
+
             if (keep.length) {
                 Array.from(sel.options).forEach(o => o.selected = keep.includes(o.value));
             } else {
-                // Try to follow the group of the model currently used in Work Process.
+                // Follow Product Group currently selected in Work Process / Door Part where possible.
                 const preferredModel =
                     (line === 'Back Plate' || line === 'Bottom Plate')
-                    ? selectedModel
-                    : selectedDoorModel;
+                        ? selectedModel
+                        : selectedDoorModel;
 
                 const preferredGroup = getLobProductGroupForModel(preferredModel);
 
@@ -2467,6 +2536,7 @@
                 }
             }
 
+            renderLobGroupButtons();
             updateLobSelectedModelCount();
         }
 
