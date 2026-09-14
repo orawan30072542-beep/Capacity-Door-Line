@@ -417,6 +417,15 @@
 }
 </style>
 
+
+<style>
+@media (min-width:1101px){
+    #tab-content-linebalance .lob-control-compact .lob-control-grid{
+        grid-template-columns:150px 105px 105px minmax(300px,1fr) 170px 85px !important;
+    }
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1077,7 +1086,7 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2 lob-control-grid">
-                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box>
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box">
                                 <label class="text-[9px] text-slate-400 block mb-1">Production Line</label>
                                 <select id="lobLineSelect" onchange="onLobLineChange()"
                                     class="bg-slate-800 text-cyan-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
@@ -1090,7 +1099,7 @@
                                 </select>
                             </div>
 
-                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box>
+                            <div id="lobPlateLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box">
                                 <label class="text-[9px] text-slate-400 block mb-1">Plate Line</label>
                                 <select id="lobPlateLineSelect" onchange="onLobPlateLineChange()"
                                     class="bg-slate-800 text-emerald-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[110px] focus:outline-none">
@@ -1098,6 +1107,17 @@
                                     <option value="Line#2">Line#2</option>
                                 </select>
                                 <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · หลาย Product Group ใช้พนักงานชุดเดียวกัน</div>
+                            </div>
+
+                            <div id="lobDoorCLineWrap" class="hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2 lob-control-box">
+                                <label class="text-[9px] text-slate-400 block mb-1">Door C Line</label>
+                                <select id="lobDoorCLineSelect" onchange="onLobDoorCLineChange()"
+                                    class="bg-slate-800 text-violet-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[100px] focus:outline-none">
+                                    <option value="C-1">C-1</option>
+                                    <option value="C-2">C-2</option>
+                                    <option value="C-3">C-3</option>
+                                </select>
+                                <div class="text-[8px] text-slate-500 mt-1 lob-helper">อ้างอิง Assigned Routing จาก Master Model</div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1110,7 +1130,7 @@
 
                                 <!-- Product Group buttons: same interaction style as Work Process -->
                                 <div id="lobGroupButtonContainer"
-                                    class="flex flex-wrap gap-1.5 min-w-[220px] max-w-[620px] lob-product-group-box>
+                                    class="flex flex-wrap gap-1.5 min-w-[220px] max-w-[620px] lob-product-group-box">
                                 </div>
 
                                 <div class="flex flex-wrap items-center gap-1 mt-1.5 lob-group-actions">
@@ -1128,7 +1148,7 @@
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Data</label>
                                 <div class="flex items-center gap-2">
-                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px] lob-data-box>-</div>
+                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px] lob-data-box">-</div>
                                     <button type="button" onclick="populateLobModelSelect(); renderLineBalancePage();"
                                         class="px-2 py-1 rounded-md bg-slate-800 border border-bordercolor text-[9px] text-cyan-300 hover:bg-slate-700">
                                         Refresh
@@ -2214,20 +2234,26 @@
             return document.getElementById('lobPlateLineSelect')?.value || 'Line#1';
         }
 
-        function updateLobPlateLineVisibility() {
+        function getSelectedLobDoorCLine() {
+            return document.getElementById('lobDoorCLineSelect')?.value || 'C-1';
+        }
+
+        function updateLobSubLineVisibility() {
             const line = document.getElementById('lobLineSelect')?.value || '';
-            const wrap = document.getElementById('lobPlateLineWrap');
-            if (!wrap) return;
-            wrap.classList.toggle('hidden', !isLobPlateStation(line));
+            const plateWrap = document.getElementById('lobPlateLineWrap');
+            const doorCWrap = document.getElementById('lobDoorCLineWrap');
+
+            if (plateWrap) plateWrap.classList.toggle('hidden', !isLobPlateStation(line));
+            if (doorCWrap) doorCWrap.classList.toggle('hidden', line !== 'Door C');
+        }
+
+        function updateLobPlateLineVisibility() {
+            updateLobSubLineVisibility();
         }
 
         function modelMatchesLobLine(modelName, lineName) {
             const cfg = getMasterConfigForModel(modelName);
 
-            // IMPORTANT:
-            // Product Group shown on Page 5 must follow Master Model assignment only.
-            // The button UI is only a display/input style change and must not change
-            // which Product Groups belong to each production line.
             if (lineName === 'Back Plate') {
                 return cfg.backPlateSource === 'ผลิตเอง' &&
                        (cfg.backPlateLine || 'Line#1') === getSelectedLobPlateLine();
@@ -2238,13 +2264,24 @@
                        (cfg.bottomLine || 'Line#1') === getSelectedLobPlateLine();
             }
 
-            // Door A / Door B / Door C / Door Glass:
-            // use Station selected in Master Model strictly; do not pull a model
-            // into another line just because old Work Process data exists there.
+            // Door C is separated by physical C-1 / C-2 / C-3 line.
+            // Membership comes from Assigned Routing in Master Model.
+            if (lineName === 'Door C') {
+                if (cfg.station !== 'Door C') return false;
+                const selectedSubLine = getSelectedLobDoorCLine();
+                return (getDoorCRoutingDetails(modelName) || [])
+                    .some(route => route.line === selectedSubLine);
+            }
+
             return cfg.station === lineName;
         }
 
         function onLobPlateLineChange() {
+            populateLobModelSelect();
+            renderLineBalancePage();
+        }
+
+        function onLobDoorCLineChange() {
             populateLobModelSelect();
             renderLineBalancePage();
         }
@@ -2269,17 +2306,25 @@
                 const cfg = getMasterConfigForModel(selectedDoorModel);
                 if (['Door A', 'Door B', 'Door C', 'Door Glass'].includes(cfg.station)) {
                     lineSel.value = cfg.station;
+
+                    if (cfg.station === 'Door C') {
+                        const doorCLineSel = document.getElementById('lobDoorCLineSelect');
+                        const firstRoute = (getDoorCRoutingDetails(selectedDoorModel) || [])[0];
+                        if (doorCLineSel && firstRoute?.line) {
+                            doorCLineSel.value = firstRoute.line;
+                        }
+                    }
                 }
             }
 
-            updateLobPlateLineVisibility();
+            updateLobSubLineVisibility();
             populateLobModelSelect();
             ensureLineBalanceChart();
             renderLineBalancePage();
         }
 
         function onLobLineChange() {
-            updateLobPlateLineVisibility();
+            updateLobSubLineVisibility();
             populateLobModelSelect();
             renderLineBalancePage();
         }
@@ -2791,7 +2836,9 @@
                 if (rawRows.length > 0) {
                     dataStatus.textContent = isLobPlateStation(line)
                         ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
-                        : `${rawRows.length} Process / ${productGroups.length} Group`;
+                        : (line === 'Door C'
+                            ? `${getSelectedLobDoorCLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
+                            : `${rawRows.length} Process / ${productGroups.length} Group`);
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
                     dataStatus.textContent = productGroups.length ? 'No Process Data' : 'Select Product Group';
@@ -2813,7 +2860,9 @@
 
             const lineDisplay = isLobPlateStation(line)
                 ? `${line} · ${getSelectedLobPlateLine()}`
-                : line;
+                : (line === 'Door C'
+                    ? `${line} · ${getSelectedLobDoorCLine()}`
+                    : line);
 
             const groupLabel = productGroups.length > 1
                 ? `${lineDisplay} · ${productGroups.length} Groups`
@@ -2841,55 +2890,15 @@
             const groups = getSelectedLobModels().slice().sort();
             const groupKey = groups.length ? groups.join('||') : 'NO_GROUP';
 
-            // Back Plate / Bottom Plate:
-            // Line#1 employees and Line#2 employees are shared across Product Groups.
-            // Therefore the saved layout is COMMON per physical plate line.
             if (isLobPlateStation(line)) {
-                return `haier_lob_plate_shared_employee_v2::${line}::${getSelectedLobPlateLine()}::COMMON`;
+                return `haier_lob_master_physical_line_v4::${line}::${getSelectedLobPlateLine()}::COMMON`;
             }
 
-            // Door lines can still have a different layout by selected Product Group set.
-            return `haier_lob_plate_shared_employee_v2::${line}::${groupKey}`;
-        }
+            if (line === 'Door C') {
+                return `haier_lob_master_physical_line_v4::Door C::${getSelectedLobDoorCLine()}::COMMON`;
+            }
 
-        function getUniqueLobLayoutRows(rows) {
-            const line = document.getElementById('lobLineSelect')?.value || '';
-
-            // Door layouts keep the original behavior.
-            if (!isLobPlateStation(line)) return Array.isArray(rows) ? rows : [];
-
-            // Back/Bottom Plate:
-            // Multiple Product Groups on the same Line#1 or Line#2 use the same workers.
-            // Keep only one physical work point per station. If the same station has
-            // different CT between groups, retain the row with the highest CT.
-            const byStation = new Map();
-
-            (rows || []).forEach((row, index) => {
-                const station = String(row?.station || row?.part || row?.area || `Point ${index + 1}`).trim();
-                const key = station.toLowerCase().replace(/\s+/g, ' ');
-                const ct = Number(row?.ct ?? (
-                    (Number(row?.wt1) || 0) +
-                    (Number(row?.wt2) || 0) +
-                    (Number(row?.wt3) || 0) +
-                    (Number(row?.loss) || 0)
-                )) || 0;
-
-                if (!byStation.has(key)) {
-                    byStation.set(key, { ...row, station, ct });
-                    return;
-                }
-
-                const current = byStation.get(key);
-                const currentCt = Number(current?.ct) || 0;
-                if (ct > currentCt) {
-                    byStation.set(key, { ...row, station, ct });
-                }
-            });
-
-            return Array.from(byStation.values()).map((row, i) => ({
-                ...row,
-                no: i + 1
-            }));
+            return `haier_lob_master_physical_line_v4::${line}::${groupKey}`;
         }
 
         function getDefaultLobLayout(rows) {
