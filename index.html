@@ -529,6 +529,16 @@
 }
 </style>
 
+
+<style>
+.owner-data-locked{position:relative}
+.owner-locked-control{opacity:.45!important;cursor:not-allowed!important;filter:saturate(.45)}
+.owner-lock-note{display:none}
+body.owner-locked #tab-content-mastermodel .owner-lock-note,
+body.owner-locked #lob-workspace-panel-workprocess .owner-lock-note,
+body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -581,6 +591,14 @@
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white md:hidden">H</div>
                     <h1 id="headerTitle" class="text-base sm:text-lg font-bold text-white tracking-wide">Haier Manufacturing Intelligence Dashboard</h1>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="ownerAccessBtn" type="button" onclick="toggleOwnerAccess()"
+                        class="px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-[10px] font-bold transition flex items-center gap-2">
+                        <span id="ownerAccessIcon">🔒</span>
+                        <span id="ownerAccessText">Owner Locked</span>
+                    </button>
                 </div>
 
                 <!-- ส่วนกรอกชั่วโมงการทำงาน -->
@@ -817,6 +835,7 @@
 
             <!-- MASTER MODEL & ROUTING TAB -->
             <div id="tab-content-mastermodel" class="p-6 space-y-6 w-full hidden"> 
+                <div class="owner-lock-note items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-300 font-bold">🔒 Data Locked · Owner only can edit</div>
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
                     <div class="flex items-center space-x-3">
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
@@ -882,6 +901,7 @@
                 </section>
 
                 <div id="lob-workspace-panel-workprocess" class="hidden space-y-5">
+                    <div class="owner-lock-note items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-300 font-bold">🔒 Data Locked · Owner only can edit Work Process</div>
                     <div id="tab-content-workprocess" class="space-y-5 w-full">
  
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-500/30 shadow-lg space-y-1.5">
@@ -1022,6 +1042,7 @@
                 </div>
 
                 <div id="lob-workspace-panel-doorparts" class="hidden space-y-5">
+                    <div class="owner-lock-note items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-300 font-bold">🔒 Data Locked · Owner only can edit Door Process</div>
                     <div id="tab-content-doorparts" class="space-y-5 w-full">
  
                 <div class="sticky top-16 z-20 bg-cardbg/95 backdrop-blur-md px-3 py-2 rounded-xl border border-amber-500/30 shadow-lg space-y-1.5">
@@ -1509,8 +1530,157 @@
         </main>
     </div>
 
+
+    <!-- OWNER ACCESS MODAL -->
+    <div id="ownerAccessModal" class="hidden fixed inset-0 z-[200] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-cardbg border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-bordercolor bg-slate-900/90 flex items-center justify-between gap-3">
+                <div>
+                    <div class="text-sm font-bold text-amber-300">Owner Access</div>
+                    <div class="text-[10px] text-slate-400 mt-1">ปลดล็อกเพื่อแก้ไขข้อมูลหน้า 2, 3 และ 4</div>
+                </div>
+                <button type="button" onclick="closeOwnerAccessModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+            <div class="p-5 space-y-3">
+                <label class="text-[10px] text-slate-400 block">Owner Password</label>
+                <input id="ownerPasswordInput" type="password" autocomplete="current-password"
+                    onkeydown="if(event.key==='Enter') submitOwnerPassword()"
+                    class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400"
+                    placeholder="Enter owner password">
+                <div id="ownerPasswordError" class="hidden text-[10px] text-rose-400 font-bold">Password ไม่ถูกต้อง</div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeOwnerAccessModal()" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-300 text-[10px] font-bold border border-bordercolor">Cancel</button>
+                    <button type="button" onclick="submitOwnerPassword()" class="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black">Unlock</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script>
+
+        const OWNER_PASSWORD_SHA256 = '699ada6c06ad872c69eca83a1884e953182beab7ebd76ea201046b765dea1c7f';
+        let ownerEditUnlocked = sessionStorage.getItem('haier_owner_edit_unlocked') === '1';
+
+        async function sha256Hex(value) {
+            const bytes = new TextEncoder().encode(String(value || ''));
+            const digest = await crypto.subtle.digest('SHA-256', bytes);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        function openOwnerAccessModal() {
+            const modal = document.getElementById('ownerAccessModal');
+            const input = document.getElementById('ownerPasswordInput');
+            const error = document.getElementById('ownerPasswordError');
+            if (error) error.classList.add('hidden');
+            if (input) input.value = '';
+            modal?.classList.remove('hidden');
+            setTimeout(() => input?.focus(), 30);
+        }
+
+        function closeOwnerAccessModal() {
+            document.getElementById('ownerAccessModal')?.classList.add('hidden');
+        }
+
+        async function submitOwnerPassword() {
+            const input = document.getElementById('ownerPasswordInput');
+            const error = document.getElementById('ownerPasswordError');
+            const hash = await sha256Hex(input?.value || '');
+            if (hash !== OWNER_PASSWORD_SHA256) {
+                error?.classList.remove('hidden');
+                input?.focus();
+                input?.select();
+                return;
+            }
+            ownerEditUnlocked = true;
+            sessionStorage.setItem('haier_owner_edit_unlocked', '1');
+            closeOwnerAccessModal();
+            applyOwnerDataLock();
+        }
+
+        function lockOwnerAccess() {
+            ownerEditUnlocked = false;
+            sessionStorage.removeItem('haier_owner_edit_unlocked');
+            applyOwnerDataLock();
+        }
+
+        function toggleOwnerAccess() {
+            if (ownerEditUnlocked) {
+                lockOwnerAccess();
+            } else {
+                openOwnerAccessModal();
+            }
+        }
+
+        function requireOwnerEdit() {
+            if (ownerEditUnlocked) return true;
+            openOwnerAccessModal();
+            return false;
+        }
+
+        function setOwnerControlLocked(el, locked) {
+            if (!el) return;
+            if (locked) {
+                if (!el.dataset.ownerPrevDisabled) el.dataset.ownerPrevDisabled = el.disabled ? '1' : '0';
+                el.disabled = true;
+                el.classList.add('owner-locked-control');
+            } else {
+                if (el.dataset.ownerPrevDisabled === '0') el.disabled = false;
+                el.classList.remove('owner-locked-control');
+                delete el.dataset.ownerPrevDisabled;
+            }
+        }
+
+        function applyOwnerDataLock() {
+            const locked = !ownerEditUnlocked;
+            document.body.classList.toggle('owner-locked', locked);
+
+            const btn = document.getElementById('ownerAccessBtn');
+            const icon = document.getElementById('ownerAccessIcon');
+            const label = document.getElementById('ownerAccessText');
+            if (icon) icon.textContent = locked ? '🔒' : '🔓';
+            if (label) label.textContent = locked ? 'Owner Locked' : 'Owner Unlocked';
+            if (btn) {
+                btn.classList.toggle('bg-amber-500/10', locked);
+                btn.classList.toggle('text-amber-300', locked);
+                btn.classList.toggle('border-amber-500/30', locked);
+                btn.classList.toggle('bg-emerald-500/10', !locked);
+                btn.classList.toggle('text-emerald-300', !locked);
+                btn.classList.toggle('border-emerald-500/30', !locked);
+            }
+
+            // Page 2: Master Model table + save button.
+            document.querySelectorAll('#tableMasterModel input, #tableMasterModel select, #tableMasterModel textarea, #tableMasterModel button').forEach(el => setOwnerControlLocked(el, locked));
+            document.querySelectorAll('#tab-content-mastermodel button[onclick*="saveMasterModelConfig"], #tab-content-mastermodel input[type="file"]').forEach(el => setOwnerControlLocked(el, locked));
+
+            // Page 3: keep model/part selectors available for viewing; lock editable process table and mutation actions.
+            document.querySelectorAll('#processTableBody input, #processTableBody select, #processTableBody textarea, #processTableBody button').forEach(el => setOwnerControlLocked(el, locked));
+            document.querySelectorAll('#lob-workspace-panel-workprocess input[type="file"]').forEach(el => setOwnerControlLocked(el, locked));
+
+            // Page 4: same rule for Door Process.
+            document.querySelectorAll('#doorProcessTableBody input, #doorProcessTableBody select, #doorProcessTableBody textarea, #doorProcessTableBody button').forEach(el => setOwnerControlLocked(el, locked));
+            document.querySelectorAll('#lob-workspace-panel-doorparts input[type="file"]').forEach(el => setOwnerControlLocked(el, locked));
+
+            const mutationRegex = /(save|addNewStation|addDoorNewStation|removeProcess|removeDoorProcess|clearProcess|clearDoorProcess|importProcess|importDoorProcess)/i;
+            ['lob-workspace-panel-workprocess','lob-workspace-panel-doorparts'].forEach(id => {
+                const root = document.getElementById(id);
+                root?.querySelectorAll('button[onclick]').forEach(button => {
+                    const action = button.getAttribute('onclick') || '';
+                    if (mutationRegex.test(action)) setOwnerControlLocked(button, locked);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyOwnerDataLock();
+            // Re-apply after dynamic tables are rendered.
+            const observer = new MutationObserver(() => applyOwnerDataLock());
+            ['tableMasterModel','processTableBody','doorProcessTableBody'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el, {childList:true, subtree:true});
+            });
+        });
+
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#1e293b';
 
@@ -1908,6 +2078,7 @@
         }
 
         function saveDoorCManualRatio(modelName, line, value) {
+            if (!requireOwnerEdit()) return;
             const ratio = Math.max(0, Number(value) || 0);
             localStorage.setItem(getDoorCRatioKey(modelName, line), String(ratio));
             renderDailyOrderSummaryTable(currentDailyData);
@@ -2097,6 +2268,8 @@
                     tbody.appendChild(tr);
                 });
             });
+        
+            setTimeout(applyOwnerDataLock, 0);
         }
 
         function normalizeModelName(modelName) {
@@ -2116,6 +2289,7 @@
         }
 
         function updateMasterModelField(modelName, field, value) {
+            if (!requireOwnerEdit()) return;
             if (!masterModelConfig[modelName]) {
                 masterModelConfig[modelName] = { ...getMasterConfigForModel(modelName) };
             }
@@ -2158,6 +2332,7 @@
         }
 
         function saveMasterModelConfig() {
+            if (!requireOwnerEdit()) return;
             localStorage.setItem('haier_master_model_config_v2', JSON.stringify(masterModelConfig));
             renderDailyOrderSummaryTable(currentDailyData);
             alert('บันทึกข้อมูล Master Model & Routing เรียบร้อยแล้ว!');
@@ -4016,6 +4191,7 @@
         }
 
         function toggleLobDirectWorkProcessEdit() {
+            if (!requireOwnerEdit()) return;
             lobDirectEditMode = true;
 
             const currentDisplayed = (window.lobRenderedProcessRows || [])[0]?.model || '';
@@ -4058,6 +4234,7 @@
         }
 
         function updateLobDirectEditRow(index, field, value) {
+            if (!requireOwnerEdit()) return;
             if (!lobDirectEditRows[index]) return;
 
             lobDirectEditRows[index][field] = value;
@@ -4098,6 +4275,7 @@
         }
 
         function saveLobDirectWorkProcessEdit() {
+            if (!requireOwnerEdit()) return;
             if (!lobDirectEditMode) return;
 
             const selectedModel = document.getElementById('lobDirectModelSelect')?.value || '';
@@ -4279,6 +4457,7 @@
         }
 
         function openLobFullWorkProcessEditor() {
+            if (!requireOwnerEdit()) return;
             const firstRow = (window.lobRenderedProcessRows || [])[0];
             if (!firstRow) {
                 alert('ไม่มีข้อมูล Work Process สำหรับ Line / Product Group ที่เลือก');
@@ -4359,6 +4538,7 @@
         }
 
         function updateLobWpEditorRow(index, field, value) {
+            if (!requireOwnerEdit()) return;
             if (!lobWpEditorRows[index]) return;
             lobWpEditorRows[index][field] = value;
 
@@ -4373,6 +4553,7 @@
         }
 
         function addLobWpEditorRow() {
+            if (!requireOwnerEdit()) return;
             lobWpEditorRows.push({
                 station: `STA ${(lobWpEditorRows.length + 1) * 10}`,
                 p1: 'New Process',
@@ -4387,11 +4568,13 @@
         }
 
         function removeLobWpEditorRow(index) {
+            if (!requireOwnerEdit()) return;
             lobWpEditorRows.splice(index, 1);
             renderLobWpEditorTable();
         }
 
         function saveLobWpEditor() {
+            if (!requireOwnerEdit()) return;
             if (!lobWpEditorModel) return;
 
             if (lobWpEditorMode === 'plate') {
@@ -6447,9 +6630,12 @@
                 `;
                 tbody.appendChild(tr);
             });
+        
+            setTimeout(applyOwnerDataLock, 0);
         }
 
         function updateProcessRow(index, field, value) {
+            if (!requireOwnerEdit()) return;
             currentProcessData[index][field] = value;
             let item = currentProcessData[index];
             let w1 = parseFloat(item.wt1) || 0;
@@ -6466,16 +6652,19 @@
         }
 
         function addNewStationRow() {
+            if (!requireOwnerEdit()) return;
             currentProcessData.push({ station: `STA ${ (currentProcessData.length + 1) * 10 }`, p1: 'New Process', p2: '-', p3: '-', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
             renderProcessTableInputs();
         }
 
         function removeProcessRow(index) {
+            if (!requireOwnerEdit()) return;
             currentProcessData.splice(index, 1);
             renderProcessTableInputs();
         }
 
         function saveProcessAndStationData() {
+            if (!requireOwnerEdit()) return;
             let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
             processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
@@ -6494,6 +6683,7 @@
         }
 
         function clearProcessAndStationData() {
+            if (!requireOwnerEdit()) return;
             const modelName = selectedModel || '-';
             const partName = selectedPartValue || '-';
 
@@ -6588,9 +6778,12 @@
                 `;
                 tbody.appendChild(tr);
             });
+        
+            setTimeout(applyOwnerDataLock, 0);
         }
 
         function updateDoorProcessRow(index, field, value) {
+            if (!requireOwnerEdit()) return;
             currentDoorProcessData[index][field] = value;
             let item = currentDoorProcessData[index];
             let w1 = parseFloat(item.wt1) || 0;
@@ -6607,16 +6800,19 @@
         }
 
         function addDoorNewStationRow() {
+            if (!requireOwnerEdit()) return;
             currentDoorProcessData.push({ station: `STA ${ (currentDoorProcessData.length + 1) * 10 }`, p1: 'New Door Process', p2: '-', p3: '-', wt1: 10, wt2: 0, wt3: 0, loss: 1 });
             renderDoorProcessTableInputs();
         }
 
         function removeDoorProcessRow(index) {
+            if (!requireOwnerEdit()) return;
             currentDoorProcessData.splice(index, 1);
             renderDoorProcessTableInputs();
         }
 
         function saveDoorProcessAndStationData() {
+            if (!requireOwnerEdit()) return;
             let effectivePart = `Door (${selectedDoorSubPart} - ${selectedDoorType})`;
             let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
             doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
@@ -6636,6 +6832,7 @@
         }
 
         function clearDoorProcessAndStationData() {
+            if (!requireOwnerEdit()) return;
             const modelName = selectedDoorModel || '-';
             const processName = selectedDoorSubPart || '-';
             const doorType = selectedDoorType || '-';
@@ -6746,6 +6943,7 @@
         }
 
         function importProcessExcelData(event) {
+            if (!requireOwnerEdit()) return;
             let file = event.target.files[0];
             if (!file) return;
             let reader = new FileReader();
@@ -6781,6 +6979,7 @@
         }
 
         function importDoorProcessExcelData(event) {
+            if (!requireOwnerEdit()) return;
             let file = event.target.files[0];
             if (!file) return;
             let reader = new FileReader();
