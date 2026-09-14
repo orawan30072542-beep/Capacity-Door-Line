@@ -675,6 +675,7 @@
                         </div>
                     </div>
                 </section>
+            </div>
 
             <!-- 5. LINE OF BALANCE PAGE -->
             <div id="tab-content-linebalance" class="hidden p-4 sm:p-6 space-y-5">
@@ -857,7 +858,6 @@
                 </section>
             </div>
 
-            </div>
         </main>
     </div>
 
@@ -1868,6 +1868,10 @@
         function ensureLineBalanceChart() {
             const canvas = document.getElementById('lineBalancePageChart');
             if (!canvas || lineBalancePageChart) return;
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not available; Line Balance layout/table will still render.');
+                return;
+            }
 
             lineBalancePageChart = new Chart(canvas.getContext('2d'), {
                 type: 'bar',
