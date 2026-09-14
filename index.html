@@ -1055,7 +1055,7 @@
                                     <option value="C-2">C-2</option>
                                     <option value="C-3">C-3</option>
                                 </select>
-                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิง Assigned Routing จาก Master Model</div>
+                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิง Assigned Routing จาก Master Model · แต่ละ C-Line ใช้จุดพนักงานร่วมกันทุก Product Group</div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1153,6 +1153,7 @@
                                     <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">STRICT MODEL MAPPING</span>
                                     <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">MASTER LINE FILTER</span>
                                     <span class="text-[9px] font-bold text-violet-300 bg-violet-950/30 border border-violet-500/20 px-3 py-1 rounded-lg">DOOR C C-1/C-2/C-3</span>
+                                    <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE PER C-LINE</span>
                                     <span class="text-[9px] font-bold text-orange-300 bg-orange-950/30 border border-orange-500/20 px-3 py-1 rounded-lg">PLATE LINE SEPARATED</span>
                                     <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
@@ -2844,33 +2845,40 @@
 
             // Back / Bottom Plate share one physical Layout per Line#1 / Line#2.
             if (isLobPlateStation(line)) {
-                return `haier_lob_master_line_v1::${line}::${getSelectedLobPlateLine()}::COMMON`;
+                return `haier_lob_master_line_v2::${line}::${getSelectedLobPlateLine()}::COMMON`;
             }
 
             // Door C: save a completely separate Layout for C-1 / C-2 / C-3.
             if (line === 'Door C') {
-                return `haier_lob_master_line_v1::Door C::${getSelectedLobDoorCLine()}::COMMON`;
+                return `haier_lob_master_line_v2::Door C::${getSelectedLobDoorCLine()}::COMMON`;
             }
 
-            return `haier_lob_master_line_v1::${line}::${groupKey}`;
+            return `haier_lob_master_line_v2::${line}::${groupKey}`;
         }
 
         function getUniqueLobLayoutRows(rows) {
             const line = document.getElementById('lobLineSelect')?.value || '';
 
-            // Back/Bottom and Door C C-1/C-2/C-3 are physical production lines.
-            // Multiple Product Groups on the same physical line use the same worker positions.
+            // Back/Bottom Line#1/Line#2 and Door C C-1/C-2/C-3 are physical lines.
+            // Multiple Product Groups / Models on the SAME physical line share
+            // the same employee point at the same station.
             const sharedPhysicalLine = isLobPlateStation(line) || line === 'Door C';
             if (!sharedPhysicalLine) return Array.isArray(rows) ? rows : [];
 
-            // Keep one physical work point per Station.
-            // Keep only one physical work point per station. If the same station has
-            // different CT between groups, retain the row with the highest CT.
             const byStation = new Map();
 
             (rows || []).forEach((row, index) => {
-                const station = String(row?.station || row?.part || row?.area || `Point ${index + 1}`).trim();
-                const key = station.toLowerCase().replace(/\s+/g, ' ');
+                // IMPORTANT: employee point is keyed ONLY by physical Station.
+                // Product Group / Model / Door Type are intentionally not part of the key.
+                const station = String(
+                    row?.station || row?.part || row?.area || `Point ${index + 1}`
+                ).trim();
+
+                const stationKey = station
+                    .toLowerCase()
+                    .replace(/\s+/g, ' ')
+                    .trim();
+
                 const ct = Number(row?.ct ?? (
                     (Number(row?.wt1) || 0) +
                     (Number(row?.wt2) || 0) +
@@ -2878,21 +2886,44 @@
                     (Number(row?.loss) || 0)
                 )) || 0;
 
-                if (!byStation.has(key)) {
-                    byStation.set(key, { ...row, station, ct });
+                if (!byStation.has(stationKey)) {
+                    byStation.set(stationKey, {
+                        ...row,
+                        station,
+                        ct,
+                        sharedModels: row?.model ? [row.model] : [],
+                        sharedGroups: row?.productGroup ? [row.productGroup] : []
+                    });
                     return;
                 }
 
-                const current = byStation.get(key);
-                const currentCt = Number(current?.ct) || 0;
-                if (ct > currentCt) {
-                    byStation.set(key, { ...row, station, ct });
+                const current = byStation.get(stationKey);
+
+                if (row?.model && !current.sharedModels.includes(row.model)) {
+                    current.sharedModels.push(row.model);
+                }
+                if (row?.productGroup && !current.sharedGroups.includes(row.productGroup)) {
+                    current.sharedGroups.push(row.productGroup);
+                }
+
+                // Layout needs only one employee object for this station.
+                // Retain the largest CT row as the representative workload.
+                if (ct > Number(current.ct || 0)) {
+                    byStation.set(stationKey, {
+                        ...current,
+                        ...row,
+                        station,
+                        ct,
+                        sharedModels: current.sharedModels,
+                        sharedGroups: current.sharedGroups
+                    });
                 }
             });
 
             return Array.from(byStation.values()).map((row, i) => ({
                 ...row,
-                no: i + 1
+                no: i + 1,
+                sharedEmployee: true
             }));
         }
 
@@ -3005,8 +3036,11 @@
             if (!canvas || !summary) return;
 
             rows = getUniqueLobLayoutRows(rows);
-            summary.textContent = isLobPlateStation(document.getElementById('lobLineSelect')?.value || '')
-                ? `${rows.length} Shared Point`
+            const currentLine = document.getElementById('lobLineSelect')?.value || '';
+            const isSharedLine = isLobPlateStation(currentLine) || currentLine === 'Door C';
+
+            summary.textContent = isSharedLine
+                ? `${rows.length} Shared Employee Point`
                 : `${rows.length} Point`;
             updateLobLayoutEditUI();
 
