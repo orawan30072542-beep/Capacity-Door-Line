@@ -364,6 +364,21 @@
 }
 </style>
 
+
+<style>
+/* Compact Line Balance layout header: only Edit / Save / Auto */
+#tab-content-linebalance .lob-layout-card > div:first-child {
+    min-height: 42px !important;
+}
+#tab-content-linebalance .lob-layout-card > div:first-child h3,
+#tab-content-linebalance .lob-layout-card > div:first-child h4 {
+    margin-bottom: 0 !important;
+}
+#tab-content-linebalance .lob-layout-card > div:first-child {
+    gap: 8px !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1141,22 +1156,19 @@
                             <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
                                 <div>
                                     <h3 class="text-sm font-bold text-white">Editable Line Layout</h3>
-                                    <p class="text-[9px] text-slate-400 mt-0.5">
-                                        Table, Conveyor และ Employee สามารถลากย้าย ปรับขนาด เปลี่ยนสี และบันทึก Layout ได้
-                                    </p>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
-                                    <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">COMMON LAYOUT</span>
-                                    <span class="text-[9px] font-bold text-amber-300 bg-amber-950/30 border border-amber-500/20 px-3 py-1 rounded-lg">PRODUCT GROUP MAPPING</span>
-                                    <span class="text-[9px] font-bold text-fuchsia-300 bg-fuchsia-950/30 border border-fuchsia-500/20 px-3 py-1 rounded-lg">MULTI GROUP LAYOUT</span>
-                                    <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">STRICT MODEL MAPPING</span>
-                                    <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">MASTER LINE FILTER</span>
-                                    <span class="text-[9px] font-bold text-violet-300 bg-violet-950/30 border border-violet-500/20 px-3 py-1 rounded-lg">DOOR C C-1/C-2/C-3</span>
-                                    <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE PER C-LINE</span>
-                                    <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">MASTER + WORK PROCESS</span>
-                                    <span class="text-[9px] font-bold text-orange-300 bg-orange-950/30 border border-orange-500/20 px-3 py-1 rounded-lg">PLATE LINE SEPARATED</span>
-                                    <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE</span>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
                                         class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
                                     <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
@@ -1166,7 +1178,7 @@
                                 </div>
                             </div>
 
-                            <div id="lobLayoutToolbar" class="hidden mb-3 p-3 rounded-xl bg-slate-950/90 border border-blue-900/60">
+                            <div id="lobLayoutToolbar" class="hidden mb-3 p-3 rounded-xl bg-slate-950/90 border border-blue-900/60 hidden">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="text-[9px] text-slate-400 font-semibold">Add:</span>
                                     <button onclick="addLobLayoutObject('table')" class="px-2.5 py-1 rounded-lg border border-blue-800 bg-slate-900 text-[9px] text-blue-200">+ Table</button>
@@ -1254,7 +1266,7 @@
                                 <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
                                 <div>
                                     <h3 class="text-sm font-bold text-cyan-400">Work Process & Cycle Time</h3>
-                                    <p class="text-[9px] text-slate-400 mt-0.5">ตารางรูปแบบเดียวกับหน้า 3 และหน้า 4</p>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Door C แสดง Door Type (RR/RL/FR/FL/VEG/FB) เพื่อแยกกระบวนการ</p>
                                 </div>
                             </div>
                             <span id="lobProcessCount" class="text-[10px] text-cyan-300 font-bold whitespace-nowrap">0 Process</span>
@@ -1265,6 +1277,7 @@
                                 <thead class="sticky top-0 z-20">
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-900">
                                         <th class="p-1.5 text-center w-16">Station</th>
+                                        <th id="lobDoorTypeHeader" class="hidden p-1.5 text-center text-amber-300 w-16">Door Type</th>
                                         <th class="p-1.5">Process 1</th>
                                         <th class="p-1.5 text-center">WT Tot</th>
                                         <th class="p-1.5 text-center">Loss</th>
@@ -2666,20 +2679,33 @@
             updateLobSelectedModelCount();
         }
 
+        function extractLobDoorType(value) {
+            const text = String(value || '').trim();
+            if (!text) return '-';
+
+            // Typical saved key/area examples:
+            // Door (Bending - RR), Door (Foaming - RL), Door (... - FB)
+            const direct = text.match(/\b(RR|RL|FR|FL|VEG|FB)\b/i);
+            return direct ? direct[1].toUpperCase() : '-';
+        }
+
         function getLobProcessRows(lineName, modelName) {
             if (!modelName) return [];
 
             const rows = [];
             const targetModel = normalizeModelName(modelName);
 
-            const pushRows = (list, area, source = '') => {
+            const pushRows = (list, area, source = '', doorType = '') => {
                 if (!Array.isArray(list)) return;
+
+                const resolvedDoorType = doorType || extractLobDoorType(area);
 
                 list.forEach((item, idx) => {
                     rows.push({
                         model: modelName,
                         area: area || '-',
                         source,
+                        doorType: item.doorType || resolvedDoorType || '-',
                         station: item.station || `STA ${idx + 1}`,
                         p1: item.p1 || '-',
                         p2: item.p2 || '-',
@@ -2725,7 +2751,9 @@
                 const storedModel = key.slice(0, cut);
                 if (normalizeModelName(storedModel) !== targetModel) return;
 
-                pushRows(doorProcessDatabase[key], key.slice(cut + 1), 'Work Process');
+                const area = key.slice(cut + 1);
+                const doorType = extractLobDoorType(area);
+                pushRows(doorProcessDatabase[key], area, 'Work Process', doorType);
             });
 
             // Current door work-process editor.
@@ -2733,7 +2761,7 @@
                 normalizeModelName(selectedDoorModel || '') === targetModel &&
                 Array.isArray(currentDoorProcessData)) {
                 const area = `Door (${selectedDoorSubPart || '-'} - ${selectedDoorType || '-'})`;
-                pushRows(currentDoorProcessData, area, 'Current Work Process');
+                pushRows(currentDoorProcessData, area, 'Current Work Process', selectedDoorType || '-');
             }
 
             // Legacy/general Work Process fallback.
@@ -2753,6 +2781,7 @@
 
             rows.forEach(r => {
                 const key = [
+                    String(r.doorType || '-').trim().toUpperCase(),
                     String(r.station || '').trim().toUpperCase(),
                     String(r.p1 || '').trim().toUpperCase(),
                     String(r.p2 || '').trim().toUpperCase(),
@@ -3428,12 +3457,20 @@
         function renderLobProcessTable(rows, takt) {
             const tbody = document.getElementById('lobProcessTableBody');
             const count = document.getElementById('lobProcessCount');
+            const doorTypeHeader = document.getElementById('lobDoorTypeHeader');
             if (!tbody || !count) return;
+
+            const currentLine = document.getElementById('lobLineSelect')?.value || '';
+            const showDoorType = currentLine === 'Door C';
+
+            if (doorTypeHeader) {
+                doorTypeHeader.classList.toggle('hidden', !showDoorType);
+            }
 
             count.textContent = `${rows.length} Process`;
 
             if (!rows.length) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${showDoorType ? 6 : 5}" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
                 return;
             }
 
@@ -3444,12 +3481,19 @@
                     ? `<div class="text-[8px] text-slate-500 mt-0.5">Group ${lobEscape(r.productGroup)}</div>`
                     : '';
 
+                const doorTypeCell = showDoorType
+                    ? `<td class="p-1.5 text-center font-black text-amber-300 whitespace-nowrap">
+                           ${lobEscape(r.doorType || '-')}
+                       </td>`
+                    : '';
+
                 return `
                     <tr class="hover:bg-slate-800/40 transition-colors">
                         <td class="p-1.5 text-center font-bold text-cyan-300 whitespace-nowrap">
                             ${lobEscape(r.station || '-')}
                             ${groupText}
                         </td>
+                        ${doorTypeCell}
                         <td class="p-1.5 text-slate-200">
                             ${lobEscape(process1)}
                         </td>
