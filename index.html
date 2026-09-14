@@ -512,6 +512,16 @@
 }
 </style>
 
+
+<style>
+#tab-content-linebalance #lobDoorCTypeSelect{
+    min-width:90px !important;
+    width:90px !important;
+    height:34px !important;
+    font-size:11px !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1207,6 +1217,14 @@
                                 <div class="text-[8px] text-slate-500 mt-1">Master Model กำหนด C-1/C-2/C-3 · Work Process กำหนด Station และ CT · แต่ละ C-Line ใช้จุดพนักงานร่วมกัน</div>
                             </div>
 
+                            <div id="lobDoorCTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Door Type</label>
+                                <select id="lobDoorCTypeSelect" onchange="onLobDoorCTypeChange()"
+                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[105px] focus:outline-none">
+                                </select>
+                                <div id="lobDoorCTypeHint" class="text-[8px] text-slate-500 mt-1">C-1 = RL/RR · C-2 = VEG/FB · C-3 = FUF/TM</div>
+                            </div>
+
                             <div class="lob-compact-wide-card flex-1 min-w-[320px] bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <div class="flex items-center justify-between mb-1">
                             <label class="text-[9px] text-slate-400">Product Group</label>
@@ -1381,7 +1399,7 @@
                                 <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
                                 <div>
                                     <h3 class="text-sm font-bold text-cyan-400">Work Process & Cycle Time</h3>
-                                    <p class="text-[9px] text-slate-400 mt-0.5">ด้านนอกแสดงเฉพาะ Work Time Total และ Loss · กด Edit เพื่อดูและแก้ไข Process แบบเต็ม</p>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Door C: C-1 เลือก RL/RR · C-2 เลือก VEG/FB · C-3 เลือก FUF/TM · ด้านนอกแสดง Work Time Total และ Loss</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
@@ -2390,10 +2408,89 @@
             return document.getElementById('lobDoorCLineSelect')?.value || 'C-1';
         }
 
+        function getDoorCTypeOptions(cLine = getSelectedLobDoorCLine()) {
+            if (cLine === 'C-1') return ['RL', 'RR'];
+            if (cLine === 'C-2') return ['VEG', 'FB'];
+            if (cLine === 'C-3') return ['FUF', 'TM'];
+            return [];
+        }
+
+        function getSelectedLobDoorCType() {
+            const sel = document.getElementById('lobDoorCTypeSelect');
+            const options = getDoorCTypeOptions();
+            return sel?.value || options[0] || '';
+        }
+
+        function populateLobDoorCTypeSelect(preferredValue = '') {
+            const sel = document.getElementById('lobDoorCTypeSelect');
+            const hint = document.getElementById('lobDoorCTypeHint');
+            if (!sel) return;
+
+            const cLine = getSelectedLobDoorCLine();
+            const options = getDoorCTypeOptions(cLine);
+            const current = preferredValue || sel.value;
+
+            sel.innerHTML = options.map(value =>
+                `<option value="${value}">${value}</option>`
+            ).join('');
+
+            if (current && options.includes(current)) {
+                sel.value = current;
+            } else if (options.length) {
+                sel.value = options[0];
+            }
+
+            if (hint) {
+                hint.textContent = cLine === 'C-1'
+                    ? 'C-1 ใช้เฉพาะ RL / RR'
+                    : cLine === 'C-2'
+                        ? 'C-2 ใช้เฉพาะ VEG / FB'
+                        : 'C-3 แยกตามกลุ่ม Model FUF / TM';
+            }
+        }
+
+        function onLobDoorCTypeChange() {
+            const modelSel = document.getElementById('lobModelSelect');
+            if (modelSel) {
+                Array.from(modelSel.options || []).forEach(o => o.selected = false);
+            }
+            populateLobModelSelect();
+            renderLineBalancePage();
+        }
+
+        function modelMatchesSelectedDoorCType(modelName) {
+            const cLine = getSelectedLobDoorCLine();
+            const selectedType = getSelectedLobDoorCType();
+
+            if (cLine !== 'C-3') return true;
+
+            const model = normalizeModelName(modelName || '');
+            if (selectedType === 'FUF') return model.startsWith('FUF');
+            if (selectedType === 'TM') return model.startsWith('TM');
+            return true;
+        }
+
+        function filterDoorCRowsBySelectedType(rows) {
+            if (!Array.isArray(rows)) return [];
+            const cLine = getSelectedLobDoorCLine();
+            const selectedType = getSelectedLobDoorCType();
+
+            // C-1 / C-2 are true Door Type filters.
+            if (cLine === 'C-1' || cLine === 'C-2') {
+                return rows.filter(r =>
+                    String(r?.doorType || '').toUpperCase() === selectedType
+                );
+            }
+
+            // C-3 selection is model family (FUF / TM), so process rows are kept.
+            return rows;
+        }
+
         function updateLobSubLineVisibility() {
             const line = document.getElementById('lobLineSelect')?.value || '';
             const plateWrap = document.getElementById('lobPlateLineWrap');
             const doorCWrap = document.getElementById('lobDoorCLineWrap');
+            const doorCTypeWrap = document.getElementById('lobDoorCTypeWrap');
 
             if (plateWrap) {
                 plateWrap.classList.toggle('hidden', !isLobPlateStation(line));
@@ -2401,6 +2498,14 @@
 
             if (doorCWrap) {
                 doorCWrap.classList.toggle('hidden', line !== 'Door C');
+            }
+
+            if (doorCTypeWrap) {
+                doorCTypeWrap.classList.toggle('hidden', line !== 'Door C');
+            }
+
+            if (line === 'Door C') {
+                populateLobDoorCTypeSelect();
             }
         }
 
@@ -2443,7 +2548,9 @@
         }
 
         function onLobDoorCLineChange() {
-            // Rebuild Product Group list from the selected C-1/C-2/C-3 routing.
+            // C-1 = RL/RR, C-2 = VEG/FB, C-3 = FUF/TM
+            populateLobDoorCTypeSelect();
+
             const sel = document.getElementById('lobModelSelect');
             if (sel) {
                 Array.from(sel.options || []).forEach(o => o.selected = false);
@@ -2735,7 +2842,8 @@
 
             Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
                 const hasValidModel = (models || []).some(model =>
-                    modelMatchesMasterAndWorkProcess(model, lineName)
+                    modelMatchesMasterAndWorkProcess(model, lineName) &&
+                    (lineName !== 'Door C' || modelMatchesSelectedDoorCType(model))
                 );
 
                 if (hasValidModel) result.push(group);
@@ -2758,7 +2866,9 @@
                 //   2) has saved Work Process data.
                 const selectedModel = mapped.find(name => {
                     const clean = String(name || '').trim();
-                    return clean && modelMatchesMasterAndWorkProcess(clean, lineName);
+                    return clean &&
+                           modelMatchesMasterAndWorkProcess(clean, lineName) &&
+                           (lineName !== 'Door C' || modelMatchesSelectedDoorCType(clean));
                 });
 
                 if (!selectedModel) return;
@@ -2776,9 +2886,11 @@
 
         function getDisplayedLobModelForGroup(groupName, lineName) {
             const mapped = LOB_PRODUCT_GROUP_MAP[String(groupName || '').trim()] || [];
-            return mapped.find(name =>
-                modelMatchesMasterAndWorkProcess(String(name || '').trim(), lineName)
-            ) || '';
+            return mapped.find(name => {
+                const clean = String(name || '').trim();
+                return modelMatchesMasterAndWorkProcess(clean, lineName) &&
+                       (lineName !== 'Door C' || modelMatchesSelectedDoorCType(clean));
+            }) || '';
         }
 
         function getSelectedLobModels() {
@@ -3131,7 +3243,11 @@
             const rawRows = [];
             models.forEach(model => {
                 const productGroup = getLobProductGroupForModel(model);
-                getLobProcessRows(line, model).forEach(r => {
+                let processRows = getLobProcessRows(line, model);
+                if (line === 'Door C') {
+                    processRows = filterDoorCRowsBySelectedType(processRows);
+                }
+                processRows.forEach(r => {
                     rawRows.push({ ...r, model, productGroup });
                 });
             });
@@ -3164,7 +3280,7 @@
             const lineDisplay = isLobPlateStation(line)
                 ? `${line} · ${getSelectedLobPlateLine()}`
                 : (line === 'Door C'
-                    ? `${line} · ${getSelectedLobDoorCLine()}`
+                    ? `${line} · ${getSelectedLobDoorCLine()} · ${getSelectedLobDoorCType()}`
                     : line);
 
             const groupLabel = productGroups.length > 1
@@ -3678,7 +3794,8 @@
 
             const displayRows = window.lobRenderedProcessRows;
             const currentLine = document.getElementById('lobLineSelect')?.value || '';
-            const showDoorType = currentLine === 'Door C';
+            const showDoorType = currentLine === 'Door C' &&
+                                 getSelectedLobDoorCLine() !== 'C-3';
 
             if (doorTypeHeader) {
                 doorTypeHeader.classList.toggle('hidden', !showDoorType);
@@ -3959,6 +4076,7 @@
                     const clean = String(name || '').trim();
                     if (!clean) return;
                     if (!modelMatchesMasterAndWorkProcess(clean, line)) return;
+                    if (line === 'Door C' && !modelMatchesSelectedDoorCType(clean)) return;
                     const key = normalizeModelName(clean);
                     if (seen.has(key)) return;
                     seen.add(key);
@@ -4067,7 +4185,12 @@
             if (line !== 'Back Plate' && line !== 'Bottom Plate') {
                 const parsed = parseLobDoorArea(row.area, row.doorType);
                 lobWpEditorPart = parsed.subPart;
-                lobWpEditorDoorType = parsed.doorType;
+
+                if (line === 'Door C' && (getSelectedLobDoorCLine() === 'C-1' || getSelectedLobDoorCLine() === 'C-2')) {
+                    lobWpEditorDoorType = getSelectedLobDoorCType();
+                } else {
+                    lobWpEditorDoorType = parsed.doorType;
+                }
             } else {
                 lobWpEditorPart = line;
                 lobWpEditorDoorType = '';
