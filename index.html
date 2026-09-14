@@ -91,6 +91,10 @@
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                         <span>4. Door Part Quick Selection</span>
                     </button>
+                    <button onclick="switchTab('linebalance')" id="nav-linebalance" class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>5. Line Of Balance</span>
+                    </button>
                 </nav>
             </div>
             <div class="p-4 mx-4 mb-4 bg-slate-900/50 rounded-xl border border-bordercolor text-xs text-slate-300 flex items-center justify-between"> 
@@ -658,6 +662,153 @@
                         </div>
                     </div>
                 </section>
+
+            <!-- 5. LINE OF BALANCE PAGE -->
+            <div id="tab-content-linebalance" class="hidden p-4 sm:p-6 space-y-5">
+
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-7 rounded-full bg-emerald-400"></div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-white">Line Of Balance Analysis</h2>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">
+                                        เลือก Line และ Model เพื่อดู Layout พนักงาน, Line Balance และรายละเอียดกระบวนการ
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Production Line</label>
+                                <select id="lobLineSelect" onchange="onLobLineChange()"
+                                    class="bg-slate-800 text-cyan-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
+                                    <option value="Door A">Door A</option>
+                                    <option value="Door B">Door B</option>
+                                    <option value="Door C">Door C</option>
+                                    <option value="Door Glass">Door Glass</option>
+                                    <option value="Back Plate">Back Plate</option>
+                                    <option value="Bottom Plate">Bottom Plate</option>
+                                </select>
+                            </div>
+
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Model</label>
+                                <select id="lobModelSelect" onchange="renderLineBalancePage()"
+                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[180px] focus:outline-none">
+                                    <option value="">เลือก Model</option>
+                                </select>
+                            </div>
+
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Target UPH</label>
+                                <input id="lobTargetUph" type="number" min="1" step="1" value="120"
+                                    oninput="renderLineBalancePage()"
+                                    class="w-20 bg-slate-800 text-emerald-300 border border-bordercolor rounded-lg px-2 py-1.5 text-center text-xs font-bold focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- KPI -->
+                <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
+                        <div class="text-[9px] text-slate-400">Selected Line</div>
+                        <div id="lobKpiLine" class="text-sm font-bold text-cyan-300 mt-1">-</div>
+                    </div>
+                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
+                        <div class="text-[9px] text-slate-400">Takt Time</div>
+                        <div id="lobKpiTakt" class="text-sm font-bold text-yellow-300 mt-1">-</div>
+                    </div>
+                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
+                        <div class="text-[9px] text-slate-400">Max CT</div>
+                        <div id="lobKpiMaxCt" class="text-sm font-bold text-rose-300 mt-1">-</div>
+                    </div>
+                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
+                        <div class="text-[9px] text-slate-400">Total Lead Time</div>
+                        <div id="lobKpiLead" class="text-sm font-bold text-emerald-300 mt-1">-</div>
+                    </div>
+                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
+                        <div class="text-[9px] text-slate-400">Required Manpower</div>
+                        <div id="lobKpiMp" class="text-sm font-bold text-cyan-300 mt-1">-</div>
+                    </div>
+                    <div class="bg-cardbg border border-bordercolor rounded-xl p-3">
+                        <div class="text-[9px] text-slate-400">Balance Efficiency</div>
+                        <div id="lobKpiEff" class="text-sm font-bold text-violet-300 mt-1">-</div>
+                    </div>
+                </section>
+
+                <!-- EMPLOYEE LAYOUT -->
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Employee Layout by Work Point</h3>
+                            <p class="text-[9px] text-slate-400 mt-0.5">จำนวนพนักงานที่ต้องการต่อจุด = ⌈Cycle Time ÷ Takt Time⌉</p>
+                        </div>
+                        <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
+                    </div>
+                    <div id="lobEmployeeLayout" class="flex gap-3 overflow-x-auto pb-3 min-h-[150px]"></div>
+                </section>
+
+                <!-- CHART + SUMMARY -->
+                <section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+                    <div class="xl:col-span-8 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-cyan-300">Line Balance Chart</h3>
+                                <p class="text-[9px] text-slate-400 mt-0.5">Cycle Time เทียบกับ Takt Time ของ Target UPH</p>
+                            </div>
+                            <div class="flex items-center gap-2 text-[9px]">
+                                <span class="px-2 py-1 rounded bg-blue-950/40 border border-blue-500/20 text-blue-300">CT</span>
+                                <span class="px-2 py-1 rounded bg-yellow-950/40 border border-yellow-500/20 text-yellow-300">Takt Time</span>
+                            </div>
+                        </div>
+                        <div class="h-[390px]">
+                            <canvas id="lineBalancePageChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="xl:col-span-4 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                        <h3 class="text-sm font-bold text-white mb-3">Balance Summary</h3>
+                        <div id="lobBalanceSummary" class="space-y-2 text-xs"></div>
+                    </div>
+                </section>
+
+                <!-- PROCESS TABLE -->
+                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Process Detail Table</h3>
+                            <p class="text-[9px] text-slate-400 mt-0.5">ข้อมูลดึงจาก Work Process & CT ที่บันทึกไว้</p>
+                        </div>
+                        <span id="lobProcessCount" class="text-[10px] text-cyan-300 font-bold">0 Process</span>
+                    </div>
+                    <div class="max-h-[480px] overflow-auto rounded-xl border border-bordercolor/70">
+                        <table class="w-full text-left border-collapse text-[10px]">
+                            <thead class="sticky top-0 z-20 bg-slate-900">
+                                <tr class="text-slate-300 border-b border-bordercolor">
+                                    <th class="px-2 py-2 text-center w-12">No.</th>
+                                    <th class="px-2 py-2 whitespace-nowrap">Part / Area</th>
+                                    <th class="px-2 py-2 whitespace-nowrap">Station</th>
+                                    <th class="px-2 py-2">Process</th>
+                                    <th class="px-2 py-2 text-center">WT1</th>
+                                    <th class="px-2 py-2 text-center">WT2</th>
+                                    <th class="px-2 py-2 text-center">WT3</th>
+                                    <th class="px-2 py-2 text-center">Loss</th>
+                                    <th class="px-2 py-2 text-center text-cyan-300">CT</th>
+                                    <th class="px-2 py-2 text-center text-yellow-300">Takt</th>
+                                    <th class="px-2 py-2 text-center text-emerald-300">Req. MP</th>
+                                    <th class="px-2 py-2 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lobProcessTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
             </div>
         </main>
     </div>
@@ -703,11 +854,13 @@
             document.getElementById('tab-content-mastermodel').classList.add('hidden');
             document.getElementById('tab-content-workprocess').classList.add('hidden');
             document.getElementById('tab-content-doorparts').classList.add('hidden');
+            document.getElementById('tab-content-linebalance').classList.add('hidden');
 
             document.getElementById('nav-dashboard').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
             document.getElementById('nav-mastermodel').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
             document.getElementById('nav-workprocess').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
             document.getElementById('nav-doorparts').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
+            document.getElementById('nav-linebalance').className = "w-full text-left px-4 py-3 rounded-xl hover:bg-slate-800/50 text-slate-300 hover:text-white transition flex items-center space-x-3";
 
             if (tabId === 'dashboard') {
                 document.getElementById('tab-content-dashboard').classList.remove('hidden');
@@ -730,6 +883,11 @@
                 document.getElementById('nav-doorparts').className = "w-full text-left px-4 py-3 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 font-medium transition flex items-center space-x-3";
                 renderDoorSelectors();
                 loadDoorProcessDataForCurrentSelection();
+            }
+ else if (tabId === 'linebalance') {
+                document.getElementById('tab-content-linebalance').classList.remove('hidden');
+                document.getElementById('nav-linebalance').className = "w-full text-left px-4 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-medium transition flex items-center space-x-3";
+                initLineBalancePage();
             }
         }
 
@@ -1428,6 +1586,360 @@
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
         }
+
+
+        // ============================================================
+        // LINE OF BALANCE PAGE
+        // ============================================================
+        let lineBalancePageChart = null;
+
+        function getAllCurrentModels() {
+            const names = [];
+            if (currentDailyData && Array.isArray(currentDailyData.groups)) {
+                currentDailyData.groups.forEach(g => {
+                    (g.models || []).forEach(m => {
+                        if (m && m.name && !names.includes(m.name)) names.push(m.name);
+                    });
+                });
+            }
+            return names;
+        }
+
+        function modelMatchesLobLine(modelName, lineName) {
+            const cfg = getMasterConfigForModel(modelName);
+
+            if (lineName === 'Back Plate') {
+                return cfg.backPlateSource === 'ผลิตเอง';
+            }
+            if (lineName === 'Bottom Plate') {
+                return cfg.bottomSource === 'ผลิตเอง';
+            }
+            return cfg.station === lineName;
+        }
+
+        function initLineBalancePage() {
+            const lineSel = document.getElementById('lobLineSelect');
+            if (!lineSel) return;
+            populateLobModelSelect();
+            ensureLineBalanceChart();
+            renderLineBalancePage();
+        }
+
+        function onLobLineChange() {
+            populateLobModelSelect();
+            renderLineBalancePage();
+        }
+
+        function populateLobModelSelect() {
+            const lineSel = document.getElementById('lobLineSelect');
+            const modelSel = document.getElementById('lobModelSelect');
+            if (!lineSel || !modelSel) return;
+
+            const line = lineSel.value;
+            const previous = modelSel.value;
+            const models = getAllCurrentModels()
+                .filter(name => modelMatchesLobLine(name, line))
+                .sort((a, b) => a.localeCompare(b));
+
+            modelSel.innerHTML = models.length
+                ? models.map(name => `<option value="${name.replace(/"/g, '&quot;')}">${name}</option>`).join('')
+                : `<option value="">ไม่มี Model ใน Line นี้</option>`;
+
+            if (models.includes(previous)) modelSel.value = previous;
+            else if (models.length) modelSel.value = models[0];
+        }
+
+        function getLobProcessRows(lineName, modelName) {
+            if (!modelName) return [];
+            const rows = [];
+
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                const key = `${modelName}_${lineName}`;
+                const list = processDatabase[key] || [];
+                list.forEach((item, idx) => {
+                    rows.push({
+                        area: lineName,
+                        station: item.station || `STA ${idx + 1}`,
+                        p1: item.p1 || '-',
+                        p2: item.p2 || '-',
+                        p3: item.p3 || '-',
+                        wt1: parseFloat(item.wt1) || 0,
+                        wt2: parseFloat(item.wt2) || 0,
+                        wt3: parseFloat(item.wt3) || 0,
+                        loss: parseFloat(item.loss) || 0
+                    });
+                });
+                return rows;
+            }
+
+            // Door lines: collect all saved door-process records for this model.
+            const prefix = `${modelName}_Door (`;
+            Object.keys(doorProcessDatabase).forEach(key => {
+                if (!key.startsWith(prefix)) return;
+                const list = doorProcessDatabase[key];
+                if (!Array.isArray(list) || !list.length) return;
+
+                let area = key.substring((modelName + '_').length);
+                list.forEach((item, idx) => {
+                    rows.push({
+                        area,
+                        station: item.station || `STA ${idx + 1}`,
+                        p1: item.p1 || '-',
+                        p2: item.p2 || '-',
+                        p3: item.p3 || '-',
+                        wt1: parseFloat(item.wt1) || 0,
+                        wt2: parseFloat(item.wt2) || 0,
+                        wt3: parseFloat(item.wt3) || 0,
+                        loss: parseFloat(item.loss) || 0
+                    });
+                });
+            });
+
+            return rows;
+        }
+
+        function ensureLineBalanceChart() {
+            const canvas = document.getElementById('lineBalancePageChart');
+            if (!canvas || lineBalancePageChart) return;
+
+            lineBalancePageChart = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Cycle Time',
+                            data: [],
+                            backgroundColor: '#0ea5e9',
+                            borderRadius: 5,
+                            order: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Takt Time',
+                            data: [],
+                            borderColor: '#facc15',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            tension: 0,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(items) {
+                                    if (!items || !items.length) return '';
+                                    const idx = items[0].dataIndex;
+                                    const mp = lineBalancePageChart._requiredMp || [];
+                                    return `Required MP: ${mp[idx] || 0}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#1e293b' },
+                            title: { display: true, text: 'Seconds' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxRotation: 45, minRotation: 0 },
+                            title: { display: true, text: 'Work Point' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderLineBalancePage() {
+            const lineSel = document.getElementById('lobLineSelect');
+            const modelSel = document.getElementById('lobModelSelect');
+            const uphInput = document.getElementById('lobTargetUph');
+            if (!lineSel || !modelSel || !uphInput) return;
+
+            const line = lineSel.value;
+            const model = modelSel.value;
+            const targetUph = Math.max(1, parseFloat(uphInput.value) || 120);
+            const takt = 3600 / targetUph;
+
+            const rows = getLobProcessRows(line, model).map((r, i) => {
+                const wtTotal = r.wt1 + r.wt2 + r.wt3;
+                const ct = wtTotal + r.loss;
+                const reqMp = ct > 0 ? Math.max(1, Math.ceil(ct / takt)) : 0;
+                return { ...r, no: i + 1, wtTotal, ct, reqMp };
+            });
+
+            const maxCt = rows.length ? Math.max(...rows.map(r => r.ct)) : 0;
+            const totalLead = rows.reduce((s, r) => s + r.ct, 0);
+            const totalMp = rows.reduce((s, r) => s + r.reqMp, 0);
+            const balanceEff = totalMp > 0 && takt > 0
+                ? (totalLead / (totalMp * takt)) * 100
+                : 0;
+
+            document.getElementById('lobKpiLine').textContent = line || '-';
+            document.getElementById('lobKpiTakt').textContent = `${takt.toFixed(1)} s`;
+            document.getElementById('lobKpiMaxCt').textContent = maxCt ? `${maxCt.toFixed(1)} s` : '-';
+            document.getElementById('lobKpiLead').textContent = totalLead ? `${totalLead.toFixed(1)} s` : '-';
+            document.getElementById('lobKpiMp').textContent = totalMp ? `${totalMp} คน` : '-';
+            document.getElementById('lobKpiEff').textContent = balanceEff ? `${balanceEff.toFixed(1)}%` : '-';
+
+            renderLobEmployeeLayout(rows, takt);
+            renderLobProcessTable(rows, takt);
+            renderLobSummary(rows, takt, balanceEff, targetUph);
+            renderLobMainChart(rows, takt);
+        }
+
+        function renderLobEmployeeLayout(rows, takt) {
+            const box = document.getElementById('lobEmployeeLayout');
+            const summary = document.getElementById('lobLayoutSummary');
+            if (!box || !summary) return;
+
+            summary.textContent = `${rows.length} Point`;
+
+            if (!rows.length) {
+                box.innerHTML = `
+                    <div class="w-full min-h-[130px] flex items-center justify-center text-slate-500 text-xs border border-dashed border-slate-700 rounded-xl">
+                        ยังไม่มีข้อมูล Work Process & CT สำหรับ Model นี้
+                    </div>`;
+                return;
+            }
+
+            box.innerHTML = rows.map((r, idx) => {
+                const over = r.ct > takt;
+                const people = Array.from({length: Math.min(r.reqMp, 8)}, () =>
+                    `<span class="inline-flex w-6 h-6 rounded-full bg-cyan-950/70 border border-cyan-500/30 items-center justify-center text-[11px]">👤</span>`
+                ).join('');
+
+                return `
+                    <div class="relative shrink-0 w-[185px] rounded-xl border ${over ? 'border-rose-500/40 bg-rose-950/10' : 'border-emerald-500/25 bg-slate-900/60'} p-3">
+                        ${idx < rows.length - 1 ? '<div class="absolute -right-3 top-1/2 text-slate-600 text-lg">→</div>' : ''}
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="text-[9px] text-slate-500">${r.area}</div>
+                                <div class="text-xs font-bold text-cyan-300 mt-0.5">${r.station}</div>
+                            </div>
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${over ? 'bg-rose-950/60 text-rose-300' : 'bg-emerald-950/60 text-emerald-300'}">
+                                ${r.ct.toFixed(1)}s
+                            </span>
+                        </div>
+                        <div class="text-[9px] text-slate-300 mt-2 h-8 overflow-hidden">${r.p1}</div>
+                        <div class="mt-2 pt-2 border-t border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] text-slate-400">Required MP</span>
+                                <span class="text-sm font-bold text-white">${r.reqMp}</span>
+                            </div>
+                            <div class="flex gap-1 flex-wrap mt-1.5">${people}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderLobProcessTable(rows, takt) {
+            const tbody = document.getElementById('lobProcessTableBody');
+            const count = document.getElementById('lobProcessCount');
+            if (!tbody || !count) return;
+
+            count.textContent = `${rows.length} Process`;
+
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="12" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = rows.map(r => {
+                const over = r.ct > takt;
+                const processes = [r.p1, r.p2, r.p3].filter(p => p && p !== '-').join(' / ') || '-';
+                return `
+                    <tr class="${over ? 'bg-rose-950/10' : ''}">
+                        <td class="px-2 py-2 text-center text-slate-500">${r.no}</td>
+                        <td class="px-2 py-2 text-[9px] text-violet-300 whitespace-nowrap">${r.area}</td>
+                        <td class="px-2 py-2 font-bold text-cyan-300 whitespace-nowrap">${r.station}</td>
+                        <td class="px-2 py-2 min-w-[180px]">${processes}</td>
+                        <td class="px-2 py-2 text-center">${r.wt1.toFixed(1)}</td>
+                        <td class="px-2 py-2 text-center">${r.wt2.toFixed(1)}</td>
+                        <td class="px-2 py-2 text-center">${r.wt3.toFixed(1)}</td>
+                        <td class="px-2 py-2 text-center text-rose-300">${r.loss.toFixed(1)}</td>
+                        <td class="px-2 py-2 text-center font-bold ${over ? 'text-rose-300' : 'text-cyan-300'}">${r.ct.toFixed(1)}</td>
+                        <td class="px-2 py-2 text-center text-yellow-300">${takt.toFixed(1)}</td>
+                        <td class="px-2 py-2 text-center font-bold text-emerald-300">${r.reqMp}</td>
+                        <td class="px-2 py-2 text-center">
+                            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold ${over ? 'bg-rose-950/60 text-rose-300 border border-rose-500/20' : 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/20'}">
+                                ${over ? 'OVER TAKT' : 'OK'}
+                            </span>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function renderLobSummary(rows, takt, balanceEff, targetUph) {
+            const box = document.getElementById('lobBalanceSummary');
+            if (!box) return;
+
+            const overRows = rows.filter(r => r.ct > takt);
+            const maxRow = rows.length
+                ? rows.reduce((a, b) => a.ct >= b.ct ? a : b)
+                : null;
+
+            box.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-2.5">
+                        <div class="text-[9px] text-slate-500">Target</div>
+                        <div class="font-bold text-cyan-300 mt-0.5">${Math.round(targetUph)} UPH</div>
+                    </div>
+                    <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-2.5">
+                        <div class="text-[9px] text-slate-500">Takt</div>
+                        <div class="font-bold text-yellow-300 mt-0.5">${takt.toFixed(1)}s</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Balance Efficiency</span>
+                        <span class="font-bold ${balanceEff >= 85 ? 'text-emerald-300' : 'text-amber-300'}">${balanceEff.toFixed(1)}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div class="h-full bg-emerald-500 rounded-full" style="width:${Math.min(100, Math.max(0, balanceEff))}%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Over Takt Point</span>
+                        <span class="font-bold ${overRows.length ? 'text-rose-300' : 'text-emerald-300'}">${overRows.length}</span>
+                    </div>
+                    <div class="text-[9px] text-slate-500 mt-1">
+                        ${overRows.length ? overRows.map(r => r.station).join(', ') : 'ไม่มีจุดที่เกิน Takt Time'}
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/70 border border-bordercolor rounded-lg p-3">
+                    <div class="text-[9px] text-slate-500">Bottleneck</div>
+                    <div class="font-bold text-rose-300 mt-1">${maxRow ? maxRow.station : '-'}</div>
+                    <div class="text-[9px] text-slate-400 mt-0.5">${maxRow ? `${maxRow.ct.toFixed(1)}s · ${maxRow.area}` : '-'}</div>
+                </div>
+            `;
+        }
+
+        function renderLobMainChart(rows, takt) {
+            ensureLineBalanceChart();
+            if (!lineBalancePageChart) return;
+
+            lineBalancePageChart.data.labels = rows.map(r => r.station);
+            lineBalancePageChart.data.datasets[0].data = rows.map(r => Number(r.ct.toFixed(2)));
+            lineBalancePageChart.data.datasets[1].data = rows.map(() => Number(takt.toFixed(2)));
+            lineBalancePageChart.data.datasets[1].label = `Takt Time (${takt.toFixed(1)}s)`;
+            lineBalancePageChart._requiredMp = rows.map(r => r.reqMp);
+            lineBalancePageChart.update();
+        }
+
 
         let savedShiftHours = localStorage.getItem('haier_shift_hours') || '8';
         document.getElementById('shiftHoursInput').value = savedShiftHours;
@@ -3229,6 +3741,7 @@
             setTimeout(applyBackBottomHourlyCapacityColumns, 0);
                         renderDailyOrderSummaryTable(currentDailyData);
                         renderManpowerTable(currentDailyData);
+                        if (document.getElementById('tab-content-linebalance') && !document.getElementById('tab-content-linebalance').classList.contains('hidden')) { populateLobModelSelect(); renderLineBalancePage(); }
                         
                         alert('โหลดและอัปเดตข้อมูลจาก Excel สำเร็จ!');
                     }
