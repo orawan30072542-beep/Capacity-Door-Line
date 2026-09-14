@@ -1132,13 +1132,14 @@
                                     <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
                                     <div>
                                         <h3 class="text-sm font-bold text-cyan-400">กราฟ Line of Balance & Takt Time Analysis</h3>
-                                        <p class="text-[9px] text-slate-400 mt-0.5">รูปแบบเดียวกับ Work Process และ Door Part</p>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">เมื่อเลือกหลาย Model กราฟจะรวมเวลาของ Station เดียวกัน เช่น BP01 = CT Model A + CT Model B</p>
                                     </div>
                                 </div>
                                 <div class="text-[10px] text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded border border-bordercolor flex items-center gap-3">
                                     <span><span class="inline-block w-2 h-2 rounded-sm bg-blue-500 mr-1"></span>Cycle Time</span>
                                     <span><span class="inline-block w-5 h-[2px] bg-yellow-400 align-middle mr-1"></span>Takt 100%</span>
                                     <span><span class="inline-block w-5 h-[2px] bg-rose-400 align-middle mr-1"></span>Takt 85%</span>
+                                    <span class="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-500/20 text-cyan-300">หลาย Model = รวม CT ตาม Station</span>
                                 </div>
                             </div>
                             <div class="lob-page5-chart-wrapper bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80">
@@ -2548,7 +2549,15 @@
                                     if (!items || !items.length) return '';
                                     const idx = items[0].dataIndex;
                                     const mp = lineBalancePageChart._requiredMp || [];
-                                    return `Required MP: ${mp[idx] || 0}`;
+                                    const breakdown = (lineBalancePageChart._stationBreakdown || [])[idx] || [];
+
+                                    const details = breakdown.map(x =>
+                                        `${x.model}: ${Number(x.ct || 0).toFixed(1)}s`
+                                    );
+
+                                    details.push(`รวม Station: ${breakdown.reduce((s, x) => s + Number(x.ct || 0), 0).toFixed(1)}s`);
+                                    details.push(`Required MP: ${mp[idx] || 0}`);
+                                    return details;
                                 }
                             }
                         }
@@ -3194,21 +3203,70 @@
             `;
         }
 
+        function aggregateLobChartRowsByStation(rows, takt) {
+            const stationMap = new Map();
+
+            (rows || []).forEach((row, index) => {
+                const station = String(row?.station || `ST${index + 1}`).trim();
+                const key = station.toLowerCase().replace(/\s+/g, ' ');
+                const ct = Number(row?.ct || 0);
+                const model = String(row?.model || '').trim();
+                const group = String(row?.productGroup || '').trim();
+
+                if (!stationMap.has(key)) {
+                    stationMap.set(key, {
+                        station,
+                        ct: 0,
+                        wtTotal: 0,
+                        loss: 0,
+                        models: [],
+                        groups: [],
+                        breakdown: []
+                    });
+                }
+
+                const agg = stationMap.get(key);
+                agg.ct += ct;
+                agg.wtTotal += Number(row?.wtTotal || 0);
+                agg.loss += Number(row?.loss || 0);
+
+                if (model && !agg.models.includes(model)) agg.models.push(model);
+                if (group && !agg.groups.includes(group)) agg.groups.push(group);
+
+                agg.breakdown.push({
+                    model: model || '-',
+                    group: group || '-',
+                    ct
+                });
+            });
+
+            return Array.from(stationMap.values()).map((row, index) => ({
+                ...row,
+                no: index + 1,
+                reqMp: row.ct > 0 && takt > 0 ? Math.max(1, Math.ceil(row.ct / takt)) : 0
+            }));
+        }
+
         function renderLobMainChart(rows, takt) {
             ensureLineBalanceChart();
             if (!lineBalancePageChart) return;
 
             const takt85 = Number(takt || 0) * 0.85;
+            const chartRows = aggregateLobChartRowsByStation(rows, takt);
 
-            lineBalancePageChart.data.labels = rows.map(r =>
-                r.productGroup ? `G${r.productGroup} · ${r.station}` : r.station
-            );
-            lineBalancePageChart.data.datasets[0].data = rows.map(r => Number(r.ct.toFixed(2)));
-            lineBalancePageChart.data.datasets[1].data = rows.map(() => Number(takt.toFixed(2)));
+            // Example:
+            // BP01 = CT(TM10 at BP01) + CT(ECO at BP01) + ...
+            // BP02 = CT(TM10 at BP02) + CT(ECO at BP02) + ...
+            lineBalancePageChart.data.labels = chartRows.map(r => r.station);
+            lineBalancePageChart.data.datasets[0].data = chartRows.map(r => Number(r.ct.toFixed(2)));
+            lineBalancePageChart.data.datasets[0].label = 'Combined Cycle Time by Station';
+            lineBalancePageChart.data.datasets[1].data = chartRows.map(() => Number(takt.toFixed(2)));
             lineBalancePageChart.data.datasets[1].label = `Takt Time 100% (${takt.toFixed(1)}s)`;
-            lineBalancePageChart.data.datasets[2].data = rows.map(() => Number(takt85.toFixed(2)));
+            lineBalancePageChart.data.datasets[2].data = chartRows.map(() => Number(takt85.toFixed(2)));
             lineBalancePageChart.data.datasets[2].label = `Takt Time 85% (${takt85.toFixed(1)}s)`;
-            lineBalancePageChart._requiredMp = rows.map(r => r.reqMp);
+
+            lineBalancePageChart._requiredMp = chartRows.map(r => r.reqMp);
+            lineBalancePageChart._stationBreakdown = chartRows.map(r => r.breakdown);
             lineBalancePageChart.update();
         }
 
