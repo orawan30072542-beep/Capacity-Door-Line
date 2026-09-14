@@ -54,6 +54,19 @@
 }
 </style>
 
+
+<style>
+.lob-layout-object{position:absolute;box-sizing:border-box;user-select:none}
+.lob-layout-object.is-editing{cursor:move}
+.lob-layout-object.is-selected{outline:3px solid #2563eb;outline-offset:2px}
+.lob-layout-table{background:#fff;border:1px solid #111827;display:flex;align-items:center;justify-content:center;color:#111827;font-size:11px;font-weight:700;min-width:74px;min-height:30px;padding:3px 8px}
+.lob-layout-conveyor{background:#566d8d;border:1px solid #475569;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.lob-layout-employee{width:42px;height:42px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lob-person-head{width:13px;height:13px;border-radius:50%;background:#6b7280;border:1px solid #374151}
+.lob-person-body{width:30px;height:16px;margin-top:-1px;background:#22c55e;border:1px solid #15803d;border-radius:13px 13px 4px 4px}
+.lob-employee-label{position:absolute;top:42px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;color:#111827;border:1px solid #111827;padding:2px 8px;font-size:10px;font-weight:700;min-width:58px;text-align:center}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -751,16 +764,40 @@
                     </div>
                 </section>
 
-                <!-- EMPLOYEE LAYOUT -->
+                <!-- EMPLOYEE LAYOUT DESIGNER -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
                         <div>
-                            <h3 class="text-sm font-bold text-white">Employee Layout by Work Point</h3>
-                            <p class="text-[9px] text-slate-400 mt-0.5">จำนวนพนักงานที่ต้องการต่อจุด = ⌈Cycle Time ÷ Takt Time⌉</p>
+                            <h3 class="text-sm font-bold text-white">Editable Line Layout</h3>
+                            <p class="text-[9px] text-slate-400 mt-0.5">
+                                Layout แสดง Table, Conveyor และ Employee — กด Edit เพื่อย้าย/เพิ่ม/ลบ และกด Save Layout เพื่อบันทึกแยกตาม Line + Model
+                            </p>
                         </div>
-                        <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
+                            <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
+                                class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
+                            <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
+                                class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-[10px] font-bold">Save Layout</button>
+                            <button type="button" id="lobResetLayoutBtn" onclick="resetLobLayout()" disabled
+                                class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white text-[10px] font-bold">Auto Layout</button>
+                        </div>
                     </div>
-                    <div id="lobEmployeeLayout" class="flex gap-3 overflow-x-auto pb-3 min-h-[150px]"></div>
+
+                    <div id="lobLayoutToolbar" class="hidden mb-3 flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-bordercolor">
+                        <span class="text-[9px] text-slate-400 font-semibold">Add:</span>
+                        <button onclick="addLobLayoutObject('table')" class="px-2.5 py-1 rounded-lg border border-slate-600 bg-slate-800 text-[9px] text-slate-200">+ Table</button>
+                        <button onclick="addLobLayoutObject('conveyor')" class="px-2.5 py-1 rounded-lg border border-blue-500/30 bg-blue-950/40 text-[9px] text-blue-300">+ Conveyor</button>
+                        <button onclick="addLobLayoutObject('employee')" class="px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-950/40 text-[9px] text-emerald-300">+ Employee</button>
+                        <button onclick="deleteSelectedLobObject()" class="px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/40 text-[9px] text-rose-300">Delete Selected</button>
+                        <span class="text-[9px] text-slate-500">ลากเพื่อย้ายตำแหน่ง • Double click เพื่อแก้ชื่อ</span>
+                    </div>
+
+                    <div class="rounded-xl border border-bordercolor/70 bg-white overflow-auto">
+                        <div id="lobLayoutCanvas" class="relative min-w-[980px] h-[390px] select-none"
+                            style="background-image:linear-gradient(#e5e7eb 1px,transparent 1px),linear-gradient(90deg,#e5e7eb 1px,transparent 1px);background-size:20px 20px;">
+                        </div>
+                    </div>
                 </section>
 
                 <!-- CHART + SUMMARY -->
@@ -1939,49 +1976,234 @@
             renderLobMainChart(rows, takt);
         }
 
+
+        let lobLayoutEditMode = false;
+        let lobSelectedObjectId = null;
+        let lobDragState = null;
+
+        function getLobLayoutKey() {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            const model = document.getElementById('lobModelSelect')?.value || '';
+            return `haier_lob_layout_v2::${line}::${model}`;
+        }
+
+        function getDefaultLobLayout(rows) {
+            const objects = [{
+                id:'conveyor_main', type:'conveyor',
+                x:80, y:155, w:820, h:54, label:'Conveyor'
+            }];
+
+            const count = Math.max(rows.length, 1);
+            const step = count > 1 ? 790 / (count - 1) : 0;
+
+            rows.forEach((r, i) => {
+                const x = count === 1 ? 450 : Math.min(875, 85 + i * step);
+                const topSide = i % 2 === 0;
+
+                objects.push({
+                    id:`table_${i}`, type:'table',
+                    x:x, y:topSide ? 55 : 270,
+                    w:78, h:30, label:r.station || `STA ${i+1}`, processIndex:i
+                });
+                objects.push({
+                    id:`employee_${i}`, type:'employee',
+                    x:x+18, y:topSide ? 98 : 215,
+                    w:42, h:42, label:r.station || `P${i+1}`, processIndex:i
+                });
+            });
+            return objects;
+        }
+
+        function getCurrentLayoutObjectsFromCanvas() {
+            const canvas = document.getElementById('lobLayoutCanvas');
+            if (!canvas) return [];
+            return Array.from(canvas.querySelectorAll('.lob-layout-object')).map(el => ({
+                id:el.dataset.id,
+                type:el.dataset.type,
+                x:parseFloat(el.style.left)||0,
+                y:parseFloat(el.style.top)||0,
+                w:parseFloat(el.style.width)||el.offsetWidth,
+                h:parseFloat(el.style.height)||el.offsetHeight,
+                label:el.dataset.label||'',
+                processIndex:el.dataset.processIndex !== '' ? Number(el.dataset.processIndex) : null
+            }));
+        }
+
+        function loadLobLayout(rows) {
+            try {
+                const saved = JSON.parse(localStorage.getItem(getLobLayoutKey()) || 'null');
+                if (Array.isArray(saved) && saved.length) return saved;
+            } catch(e) {}
+            return getDefaultLobLayout(rows);
+        }
+
         function renderLobEmployeeLayout(rows, takt) {
-            const box = document.getElementById('lobEmployeeLayout');
+            renderLobLayoutDesigner(rows);
+        }
+
+        function renderLobLayoutDesigner(rows) {
+            const canvas = document.getElementById('lobLayoutCanvas');
             const summary = document.getElementById('lobLayoutSummary');
-            if (!box || !summary) return;
+            if (!canvas || !summary) return;
 
             summary.textContent = `${rows.length} Point`;
+            updateLobLayoutEditUI();
 
             if (!rows.length) {
-                box.innerHTML = `
-                    <div class="w-full min-h-[130px] flex items-center justify-center text-slate-500 text-xs border border-dashed border-slate-700 rounded-xl">
-                        ไม่พบ Process ของ Model นี้ — กรุณาบันทึกข้อมูลใน Work Process / Door Part Quick Selection ก่อน
-                    </div>`;
+                canvas.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">ไม่พบข้อมูล Process ของ Model นี้</div>`;
                 return;
             }
 
-            box.innerHTML = rows.map((r, idx) => {
-                const over = r.ct > takt;
-                const people = Array.from({length: Math.min(r.reqMp, 8)}, () =>
-                    `<span class="inline-flex w-6 h-6 rounded-full bg-cyan-950/70 border border-cyan-500/30 items-center justify-center text-[11px]">👤</span>`
-                ).join('');
+            const objects = loadLobLayout(rows);
+            canvas.innerHTML = '';
 
-                return `
-                    <div class="relative shrink-0 w-[185px] rounded-xl border ${over ? 'border-rose-500/40 bg-rose-950/10' : 'border-emerald-500/25 bg-slate-900/60'} p-3">
-                        ${idx < rows.length - 1 ? '<div class="absolute -right-3 top-1/2 text-slate-600 text-lg">→</div>' : ''}
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
-                                <div class="text-[9px] text-slate-500">${r.area}</div>
-                                <div class="text-xs font-bold text-cyan-300 mt-0.5">${r.station}</div>
-                            </div>
-                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${over ? 'bg-rose-950/60 text-rose-300' : 'bg-emerald-950/60 text-emerald-300'}">
-                                ${r.ct.toFixed(1)}s
-                            </span>
-                        </div>
-                        <div class="text-[9px] text-slate-300 mt-2 h-8 overflow-hidden">${r.p1}</div>
-                        <div class="mt-2 pt-2 border-t border-slate-800">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[9px] text-slate-400">Required MP</span>
-                                <span class="text-sm font-bold text-white">${r.reqMp}</span>
-                            </div>
-                            <div class="flex gap-1 flex-wrap mt-1.5">${people}</div>
-                        </div>
-                    </div>`;
-            }).join('');
+            objects.forEach(obj => {
+                const el = document.createElement('div');
+                el.className = `lob-layout-object lob-layout-${obj.type}${lobLayoutEditMode?' is-editing':''}${lobSelectedObjectId===obj.id?' is-selected':''}`;
+                el.dataset.id = obj.id;
+                el.dataset.type = obj.type;
+                el.dataset.label = obj.label || '';
+                el.dataset.processIndex = obj.processIndex ?? '';
+                el.style.left = `${obj.x}px`;
+                el.style.top = `${obj.y}px`;
+                el.style.width = `${obj.w}px`;
+                el.style.height = `${obj.h}px`;
+
+                if (obj.type === 'employee') {
+                    el.innerHTML = `<div class="lob-person-head"></div><div class="lob-person-body"></div><div class="lob-employee-label">${lobEscape(obj.label||'Employee')}</div>`;
+                } else {
+                    el.innerHTML = `<span>${lobEscape(obj.label || (obj.type==='conveyor'?'Conveyor':'Table'))}</span>`;
+                }
+
+                el.addEventListener('mousedown', lobObjectMouseDown);
+                el.addEventListener('click', ev => {
+                    if (!lobLayoutEditMode) return;
+                    ev.stopPropagation();
+                    lobSelectedObjectId = obj.id;
+                    renderLobLayoutDesigner(rows);
+                });
+                el.addEventListener('dblclick', ev => {
+                    if (!lobLayoutEditMode) return;
+                    ev.stopPropagation();
+                    const next = prompt('แก้ชื่อ', el.dataset.label || '');
+                    if (next === null) return;
+                    el.dataset.label = next.trim();
+                    const objectsNow = getCurrentLayoutObjectsFromCanvas();
+                    localStorage.setItem(getLobLayoutKey(), JSON.stringify(objectsNow));
+                    renderLobLayoutDesigner(rows);
+                });
+                canvas.appendChild(el);
+            });
+
+            canvas.onclick = () => {
+                if (!lobLayoutEditMode) return;
+                lobSelectedObjectId = null;
+                renderLobLayoutDesigner(rows);
+            };
+        }
+
+        function updateLobLayoutEditUI() {
+            const edit = document.getElementById('lobEditLayoutBtn');
+            const save = document.getElementById('lobSaveLayoutBtn');
+            const reset = document.getElementById('lobResetLayoutBtn');
+            const toolbar = document.getElementById('lobLayoutToolbar');
+
+            if (edit) edit.textContent = lobLayoutEditMode ? 'Cancel Edit' : 'Edit Layout';
+            if (save) save.disabled = !lobLayoutEditMode;
+            if (reset) reset.disabled = !lobLayoutEditMode;
+            if (toolbar) toolbar.classList.toggle('hidden', !lobLayoutEditMode);
+        }
+
+        function toggleLobLayoutEdit() {
+            lobLayoutEditMode = !lobLayoutEditMode;
+            lobSelectedObjectId = null;
+            renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+        function saveLobLayout() {
+            localStorage.setItem(getLobLayoutKey(), JSON.stringify(getCurrentLayoutObjectsFromCanvas()));
+            lobLayoutEditMode = false;
+            lobSelectedObjectId = null;
+            renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+        function resetLobLayout() {
+            localStorage.removeItem(getLobLayoutKey());
+            lobSelectedObjectId = null;
+            renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+        function getCurrentLobRowsForLayout() {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            const model = document.getElementById('lobModelSelect')?.value || '';
+            return getLobProcessRows(line, model).map((r,i)=>({
+                ...r, no:i+1,
+                wtTotal:(r.wt1||0)+(r.wt2||0)+(r.wt3||0),
+                ct:(r.wt1||0)+(r.wt2||0)+(r.wt3||0)+(r.loss||0)
+            }));
+        }
+
+        function addLobLayoutObject(type) {
+            if (!lobLayoutEditMode) return;
+            const current = getCurrentLayoutObjectsFromCanvas();
+            const id = `${type}_${Date.now()}`;
+            current.push({
+                id, type,
+                x:type==='conveyor'?100:120,
+                y:type==='conveyor'?155:100,
+                w:type==='conveyor'?500:(type==='table'?78:42),
+                h:type==='conveyor'?54:(type==='table'?30:42),
+                label:type==='conveyor'?'Conveyor':(type==='table'?'Table':'Employee'),
+                processIndex:null
+            });
+            localStorage.setItem(getLobLayoutKey(), JSON.stringify(current));
+            lobSelectedObjectId = id;
+            renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+        function deleteSelectedLobObject() {
+            if (!lobLayoutEditMode || !lobSelectedObjectId) return;
+            const current = getCurrentLayoutObjectsFromCanvas().filter(x => x.id !== lobSelectedObjectId);
+            localStorage.setItem(getLobLayoutKey(), JSON.stringify(current));
+            lobSelectedObjectId = null;
+            renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+        function lobObjectMouseDown(e) {
+            if (!lobLayoutEditMode || e.button !== 0) return;
+            e.stopPropagation();
+            const el = e.currentTarget;
+            const canvas = document.getElementById('lobLayoutCanvas');
+            const cr = canvas.getBoundingClientRect();
+
+            lobSelectedObjectId = el.dataset.id;
+            lobDragState = {
+                el, canvas,
+                startX:e.clientX, startY:e.clientY,
+                left:parseFloat(el.style.left)||0,
+                top:parseFloat(el.style.top)||0
+            };
+            document.addEventListener('mousemove', lobObjectMouseMove);
+            document.addEventListener('mouseup', lobObjectMouseUp);
+        }
+
+        function lobObjectMouseMove(e) {
+            if (!lobDragState) return;
+            const {el,canvas,startX,startY,left,top} = lobDragState;
+            const nx = Math.max(0, Math.min(canvas.scrollWidth-el.offsetWidth, left+(e.clientX-startX)));
+            const ny = Math.max(0, Math.min(canvas.clientHeight-el.offsetHeight, top+(e.clientY-startY)));
+            el.style.left = `${nx}px`;
+            el.style.top = `${ny}px`;
+        }
+
+        function lobObjectMouseUp() {
+            document.removeEventListener('mousemove', lobObjectMouseMove);
+            document.removeEventListener('mouseup', lobObjectMouseUp);
+            lobDragState = null;
+        }
+
+        function lobEscape(v) {
+            return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         }
 
         function renderLobProcessTable(rows, takt) {
