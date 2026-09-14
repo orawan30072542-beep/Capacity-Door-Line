@@ -1175,7 +1175,7 @@
                                     <option value="C-2">C-2</option>
                                     <option value="C-3">C-3</option>
                                 </select>
-                                <div class="text-[8px] text-slate-500 mt-1 lob-helper">อ้างอิง Assigned Routing จาก Master Model</div>
+                                <div class="text-[8px] text-slate-500 mt-1 lob-helper">อ้างอิง Assigned Routing จาก Master Model · ไม่ผูกกับประเภทฝา RR/RL/FR/FL/VEG/FB</div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -2323,19 +2323,16 @@
                        (cfg.bottomLine || 'Line#1') === getSelectedLobPlateLine();
             }
 
-            // Door C: Station + C-1/C-2/C-3 are taken from the same
-            // actual model used by Master Model.
+            // Door C:
+            // C-1 / C-2 / C-3 membership comes ONLY from Assigned Routing in Master Model.
+            // Door type (RR/RL/FR/FL/VEG/FB) and manual ratio must NOT hide the Product Group.
             if (lineName === 'Door C') {
                 if (cfg.station !== 'Door C') return false;
 
                 const selectedSubLine = getSelectedLobDoorCLine();
-
-                // Assigned Routing shown on Master Model is built from these routes.
                 const routes = getDoorCRoutingDetails(actualModel) || [];
-                return routes.some(route =>
-                    route.line === selectedSubLine &&
-                    getDoorCManualRatio(actualModel, route.line, route.qty) > 0
-                );
+
+                return routes.some(route => route.line === selectedSubLine);
             }
 
             return cfg.station === lineName;
@@ -2743,12 +2740,13 @@
             const rows = [];
             const targetModel = normalizeModelName(actualModel);
 
-            const pushRows = (list, area) => {
+            const pushRows = (list, area, sourceType = '') => {
                 if (!Array.isArray(list)) return;
                 list.forEach((item, idx) => {
                     rows.push({
-                        model: modelName,
+                        model: actualModel,
                         area: area || '-',
+                        sourceType,
                         station: item.station || `STA ${idx + 1}`,
                         p1: item.p1 || '-',
                         p2: item.p2 || '-',
@@ -2762,53 +2760,113 @@
             };
 
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
-                // A) Saved Work Process DB
                 Object.keys(processDatabase || {}).forEach(key => {
                     const suffix = `_${lineName}`;
                     if (!key.endsWith(suffix)) return;
                     const storedModel = key.slice(0, -suffix.length);
                     if (normalizeModelName(storedModel) !== targetModel) return;
-                    pushRows(processDatabase[key], lineName);
+                    pushRows(processDatabase[key], lineName, 'work-process');
                 });
 
-                // B) Current editor data that is already visible in Work Process page
                 if (!rows.length &&
-                    normalizeModelName(selectedModel || '') === targetModel &&
+                    normalizeModelName(resolveLobActualModelName(selectedModel || '')) === targetModel &&
                     selectedPartValue === lineName &&
                     Array.isArray(currentProcessData)) {
-                    pushRows(currentProcessData, lineName);
+                    pushRows(currentProcessData, lineName, 'work-process-current');
                 }
 
                 return rows;
             }
 
-            // Door A / B / C / Door Glass:
-            // saved Door Process DB uses keys MODEL_Door (Sub Part - Door Type)
+            // DOOR C SPECIAL:
+            // Do not bind Line Balance availability to Door Type.
+            // RR/RL/FR/FL/VEG/FB are detail categories from Door Part page,
+            // not physical C-1/C-2/C-3 line membership.
+            if (lineName === 'Door C') {
+                // A) Prefer normal Work Process rows if they exist for this model.
+                Object.keys(processDatabase || {}).forEach(key => {
+                    const split = key.lastIndexOf('_');
+                    if (split <= 0) return;
+
+                    const storedModel = key.slice(0, split);
+                    if (normalizeModelName(storedModel) !== targetModel) return;
+
+                    const part = key.slice(split + 1);
+                    if (['Back Plate', 'Bottom Plate', 'Gasket'].includes(part)) return;
+
+                    pushRows(processDatabase[key], part || 'Door C', 'work-process');
+                });
+
+                // B) Door Part rows can still be used as data,
+                // but Door Type is ignored and duplicates are removed afterwards.
+                if (!rows.length) {
+                    Object.keys(doorProcessDatabase || {}).forEach(key => {
+                        const idx = key.indexOf('_Door (');
+                        if (idx <= 0) return;
+
+                        const storedModel = key.slice(0, idx);
+                        if (normalizeModelName(storedModel) !== targetModel) return;
+
+                        pushRows(doorProcessDatabase[key], 'Door C', 'door-part');
+                    });
+                }
+
+                // C) Current Door Part editor fallback.
+                if (!rows.length &&
+                    normalizeModelName(resolveLobActualModelName(selectedDoorModel || '')) === targetModel &&
+                    Array.isArray(currentDoorProcessData)) {
+                    pushRows(currentDoorProcessData, 'Door C', 'door-part-current');
+                }
+
+                // Remove duplicates caused by the same station/process being stored
+                // under several Door Types.
+                const dedup = new Map();
+                rows.forEach((r, i) => {
+                    const key = [
+                        normalizeModelName(r.model),
+                        String(r.station || '').trim().toUpperCase(),
+                        String(r.p1 || '').trim().toUpperCase(),
+                        String(r.p2 || '').trim().toUpperCase(),
+                        String(r.p3 || '').trim().toUpperCase(),
+                        Number(r.wt1 || 0).toFixed(3),
+                        Number(r.wt2 || 0).toFixed(3),
+                        Number(r.wt3 || 0).toFixed(3),
+                        Number(r.loss || 0).toFixed(3)
+                    ].join('||');
+
+                    if (!dedup.has(key)) dedup.set(key, r);
+                });
+
+                return Array.from(dedup.values());
+            }
+
+            // Door A / Door B / Door Glass keep Door Part behavior.
             Object.keys(doorProcessDatabase || {}).forEach(key => {
                 const idx = key.indexOf('_Door (');
                 if (idx <= 0) return;
+
                 const storedModel = key.slice(0, idx);
                 if (normalizeModelName(storedModel) !== targetModel) return;
-                pushRows(doorProcessDatabase[key], key.slice(idx + 1));
+
+                pushRows(doorProcessDatabase[key], key.slice(idx + 1), 'door-part');
             });
 
-            // Current Door Part editor rows as fallback
             if (!rows.length &&
                 normalizeModelName(resolveLobActualModelName(selectedDoorModel || '')) === targetModel &&
                 Array.isArray(currentDoorProcessData)) {
                 const area = `Door (${selectedDoorSubPart || '-'} - ${selectedDoorType || '-'})`;
-                pushRows(currentDoorProcessData, area);
+                pushRows(currentDoorProcessData, area, 'door-part-current');
             }
 
-            // Final fallback:
-            // If this model only has normal Work Process data, show it rather than a blank page.
             if (!rows.length) {
                 Object.keys(processDatabase || {}).forEach(key => {
                     const split = key.lastIndexOf('_');
                     if (split <= 0) return;
+
                     const storedModel = key.slice(0, split);
                     if (normalizeModelName(storedModel) !== targetModel) return;
-                    pushRows(processDatabase[key], key.slice(split + 1));
+
+                    pushRows(processDatabase[key], key.slice(split + 1), 'work-process-fallback');
                 });
             }
 
@@ -2927,7 +2985,7 @@
                     dataStatus.textContent = isLobPlateStation(line)
                         ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
                         : (line === 'Door C'
-                            ? `${getSelectedLobDoorCLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
+                            ? `${getSelectedLobDoorCLine()} · ${rawRows.length} Process / ${productGroups.length} Group · ไม่แยกประเภทฝา`
                             : `${rawRows.length} Process / ${productGroups.length} Group`);
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
