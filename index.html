@@ -1199,7 +1199,7 @@
                                     <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Group selected</span>
                                 </div>
                                 <div class="text-[8px] text-slate-500 mt-1 lob-helper">
-                                    Product Group แสดงตาม Line ที่กำหนดใน Master Model — รูปแบบการเลือกเป็นปุ่มเหมือน Work Process
+                                    Product Group และ Model ดึงจาก Master/Daily Plan ตาม Line ที่กำหนด — รูปแบบการเลือกเป็นปุ่มเหมือน Work Process
                                 </div>
                             </div>
 
@@ -2580,26 +2580,169 @@
         }
 
         function getLobProductGroupForModel(modelName) {
-            const target = normalizeLobName(modelName);
+            const target = normalizeModelName(modelName);
             if (!target) return '';
 
+            // 1) Use Product Group from the actual imported/Master data first.
+            for (const group of (currentDailyData?.groups || [])) {
+                const found = (group.models || []).some(
+                    m => normalizeModelName(m?.name) === target
+                );
+                if (found) return String(group.productGroup || '').trim();
+            }
+
+            // 2) Manual mapping is only fallback.
             for (const [group, models] of Object.entries(LOB_PRODUCT_GROUP_MAP)) {
-                if ((models || []).some(m => normalizeLobName(m) === target)) {
+                if ((models || []).some(m => normalizeModelName(m) === target)) {
                     return group;
                 }
             }
+
             return '';
+        }
+
+        function getAllModelsForProductGroup(productGroup) {
+            const groupName = String(productGroup || '').trim();
+            const result = [];
+            const seen = new Set();
+
+            // 1) Real models from Daily Plan / Master table.
+            (currentDailyData?.groups || []).forEach(g => {
+                if (String(g?.productGroup || '').trim() !== groupName) return;
+
+                (g.models || []).forEach(m => {
+                    const name = resolveLobActualModelName(m?.name || '');
+                    const key = normalizeModelName(name);
+                    if (name && !seen.has(key)) {
+                        seen.add(key);
+                        result.push(name);
+                    }
+                });
+            });
+
+            // 2) Fallback manual mapping for groups not present in currentDailyData.
+            if (!result.length) {
+                (LOB_PRODUCT_GROUP_MAP[groupName] || []).forEach(name => {
+                    const actual = resolveLobActualModelName(name);
+                    const key = normalizeModelName(actual);
+                    if (actual && !seen.has(key)) {
+                        seen.add(key);
+                        result.push(actual);
+                    }
+                });
+            }
+
+            return result;
         }
 
         function getLobProductGroupsForLine(lineName) {
             const result = [];
+            const seen = new Set();
 
-            Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
-                const hasModelForLine = (models || []).some(model =>
-                    modelMatchesLobLine(model, lineName)
+            // A) Main source: Master/Daily Plan.
+            (currentDailyData?.groups || []).forEach(g => {
+                const groupName = String(g?.productGroup || '').trim();
+                if (!groupName || seen.has(groupName)) return;
+
+                const models = (g.models || []).map(m =>
+                    resolveLobActualModelName(m?.name || '')
                 );
-                if (hasModelForLine) result.push(group);
+
+                if (models.some(model => model && modelMatchesLobLine(model, lineName))) {
+                    seen.add(groupName);
+                    result.push(groupName);
+                }
             });
+
+            // B) Back/Bottom Plate: also discover Product Groups from SAVED Work Process.
+            // This prevents Line Balance from showing 0 Process when the process exists
+            // but today's Daily Plan does not contain that model/group.
+            if (isLobPlateStation(lineName)) {
+                const suffix = `_${lineName}`;
+
+                Object.keys(processDatabase || {}).forEach(key => {
+                    if (!key.endsWith(suffix)) return;
+
+                    const storedModel = key.slice(0, -suffix.length);
+                    const rows = processDatabase[key];
+                    if (!storedModel || !Array.isArray(rows) || !rows.length) return;
+
+                    const actualModel = resolveLobActualModelName(storedModel);
+                    if (!modelMatchesLobLine(actualModel, lineName)) return;
+
+                    const groupName = getLobProductGroupForModel(actualModel);
+                    if (groupName && !seen.has(groupName)) {
+                        seen.add(groupName);
+                        result.push(groupName);
+                    }
+                });
+            }
+
+            // C) Manual mapping fallback.
+            Object.keys(LOB_PRODUCT_GROUP_MAP).forEach(groupName => {
+                if (seen.has(groupName)) return;
+
+                const models = getAllModelsForProductGroup(groupName);
+                if (models.some(model => modelMatchesLobLine(model, lineName))) {
+                    seen.add(groupName);
+                    result.push(groupName);
+                }
+            });
+
+            return result;
+        }
+
+        function getSavedPlateModelsForLob(lineName, productGroups) {
+            if (!isLobPlateStation(lineName)) return [];
+
+            const selectedGroups = new Set(
+                (productGroups || []).map(g => String(g || '').trim())
+            );
+            const suffix = `_${lineName}`;
+            const result = [];
+            const seen = new Set();
+
+            Object.keys(processDatabase || {}).forEach(key => {
+                if (!key.endsWith(suffix)) return;
+
+                const storedModel = key.slice(0, -suffix.length);
+                const savedRows = processDatabase[key];
+                if (!storedModel || !Array.isArray(savedRows) || !savedRows.length) return;
+
+                const actualModel = resolveLobActualModelName(storedModel);
+                const group = getLobProductGroupForModel(actualModel);
+
+                // Follow Line#1 / Line#2 from Master Model.
+                if (!modelMatchesLobLine(actualModel, lineName)) return;
+
+                if (selectedGroups.size && !selectedGroups.has(group)) return;
+
+                const modelKey = normalizeModelName(actualModel);
+                if (!seen.has(modelKey)) {
+                    seen.add(modelKey);
+                    result.push(actualModel);
+                }
+            });
+
+            // Include current Work Process editor data too.
+            if (selectedModel &&
+                selectedPartValue === lineName &&
+                Array.isArray(currentProcessData) &&
+                currentProcessData.length) {
+
+                const actualModel = resolveLobActualModelName(selectedModel);
+                const group = getLobProductGroupForModel(actualModel);
+
+                if (modelMatchesLobLine(actualModel, lineName) &&
+                    (!selectedGroups.size || selectedGroups.has(group))) {
+
+                    const modelKey = normalizeModelName(actualModel);
+                    if (!seen.has(modelKey)) {
+                        seen.add(modelKey);
+                        result.push(actualModel);
+                    }
+                }
+            }
 
             return result;
         }
@@ -2609,10 +2752,8 @@
             const seen = new Set();
 
             (productGroups || []).forEach(group => {
-                const mapped = LOB_PRODUCT_GROUP_MAP[String(group || '').trim()] || [];
-
-                mapped.forEach(name => {
-                    const actualModel = resolveLobActualModelName(name);
+                getAllModelsForProductGroup(group).forEach(model => {
+                    const actualModel = resolveLobActualModelName(model);
                     const key = normalizeModelName(actualModel);
                     if (!actualModel || seen.has(key)) return;
 
@@ -2712,9 +2853,10 @@
             const keep = previous.filter(g => groups.includes(g));
 
             if (keep.length) {
-                Array.from(sel.options).forEach(o => o.selected = keep.includes(o.value));
+                Array.from(sel.options).forEach(o => {
+                    o.selected = keep.includes(o.value);
+                });
             } else {
-                // Follow Product Group currently selected in Work Process / Door Part where possible.
                 const preferredModel =
                     (line === 'Back Plate' || line === 'Bottom Plate')
                         ? selectedModel
@@ -2723,8 +2865,11 @@
                 const preferredGroup = getLobProductGroupForModel(preferredModel);
 
                 if (preferredGroup && groups.includes(preferredGroup)) {
-                    Array.from(sel.options).forEach(o => o.selected = (o.value === preferredGroup));
+                    Array.from(sel.options).forEach(o => {
+                        o.selected = (o.value === preferredGroup);
+                    });
                 } else if (sel.options.length) {
+                    // Always select one valid group so Page 5 renders immediately.
                     sel.options[0].selected = true;
                 }
             }
@@ -2760,18 +2905,25 @@
             };
 
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                const suffix = `_${lineName}`;
+
                 Object.keys(processDatabase || {}).forEach(key => {
-                    const suffix = `_${lineName}`;
                     if (!key.endsWith(suffix)) return;
+
                     const storedModel = key.slice(0, -suffix.length);
-                    if (normalizeModelName(storedModel) !== targetModel) return;
+                    const storedActual = resolveLobActualModelName(storedModel);
+
+                    if (normalizeModelName(storedActual) !== targetModel) return;
+
                     pushRows(processDatabase[key], lineName, 'work-process');
                 });
 
+                // Current editor data is valid even if it has not yet been reloaded from localStorage.
                 if (!rows.length &&
                     normalizeModelName(resolveLobActualModelName(selectedModel || '')) === targetModel &&
                     selectedPartValue === lineName &&
-                    Array.isArray(currentProcessData)) {
+                    Array.isArray(currentProcessData) &&
+                    currentProcessData.length) {
                     pushRows(currentProcessData, lineName, 'work-process-current');
                 }
 
@@ -2860,13 +3012,15 @@
 
             if (!rows.length) {
                 Object.keys(processDatabase || {}).forEach(key => {
-                    const split = key.lastIndexOf('_');
-                    if (split <= 0) return;
+                    // Match by model prefix instead of splitting on the last "_",
+                    // because some model names themselves may contain underscores.
+                    const normalizedKey = normalizeModelName(key);
+                    const normalizedPrefix = normalizeModelName(actualModel + '_');
 
-                    const storedModel = key.slice(0, split);
-                    if (normalizeModelName(storedModel) !== targetModel) return;
+                    if (!normalizedKey.startsWith(normalizedPrefix)) return;
 
-                    pushRows(processDatabase[key], key.slice(split + 1), 'work-process-fallback');
+                    const part = key.slice(actualModel.length + 1) || lineName;
+                    pushRows(processDatabase[key], part, 'work-process-fallback');
                 });
             }
 
@@ -2965,7 +3119,25 @@
 
             const line = lineSel.value;
             const productGroups = getSelectedLobModels();
-            const models = getModelsForLobProductGroups(line, productGroups);
+
+            let models = getModelsForLobProductGroups(line, productGroups);
+
+            // Back/Bottom Plate:
+            // Work Process database is the authoritative CT source.
+            // Add models that actually have saved process data on the selected Master Line.
+            if (isLobPlateStation(line)) {
+                const savedModels = getSavedPlateModelsForLob(line, productGroups);
+                const seenModels = new Set(models.map(m => normalizeModelName(m)));
+
+                savedModels.forEach(model => {
+                    const key = normalizeModelName(model);
+                    if (!seenModels.has(key)) {
+                        seenModels.add(key);
+                        models.push(model);
+                    }
+                });
+            }
+
             updateLobSelectedModelCount();
 
             const targetUph = Math.max(1, parseFloat(uphInput.value) || 120);
@@ -2983,7 +3155,7 @@
             if (dataStatus) {
                 if (rawRows.length > 0) {
                     dataStatus.textContent = isLobPlateStation(line)
-                        ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
+                        ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group / ${models.length} Model`
                         : (line === 'Door C'
                             ? `${getSelectedLobDoorCLine()} · ${rawRows.length} Process / ${productGroups.length} Group · ไม่แยกประเภทฝา`
                             : `${rawRows.length} Process / ${productGroups.length} Group`);
@@ -2991,8 +3163,10 @@
                 } else {
                     dataStatus.textContent = productGroups.length
                         ? (line === 'Door C'
-                            ? `${getSelectedLobDoorCLine()} · No Process Data`
-                            : 'No Process Data')
+                            ? `${getSelectedLobDoorCLine()} · ${models.length} Model · No Process Data`
+                            : (isLobPlateStation(line)
+                            ? `${getSelectedLobPlateLine()} · ${models.length} Model · No Process Data`
+                            : 'No Process Data'))
                         : (line === 'Door C'
                             ? `${getSelectedLobDoorCLine()} · No Product Group`
                             : 'Select Product Group');
