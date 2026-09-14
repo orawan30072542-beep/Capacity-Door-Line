@@ -571,6 +571,7 @@
                         <div class="w-1.5 h-6 bg-purple-400 rounded-full"></div>
                         <div>
                             <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Master Model & Component Routing</h2>
+                            <div class="mt-1"><span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-2 py-1 rounded-lg">PRODUCT GROUP AUTO-MAPPED</span></div>
                             <p class="text-xs text-slate-300 mt-0.5">กำหนดชนิดชิ้นส่วนประตู (Glass / Metal) สถานีงาน และเส้นทางกระบวนการผลิตของแต่ละรุ่น พร้อมตั้งค่าแหล่งผลิต Back Plate และ Bottom Plate</p>
                         </div>
                     </div>
@@ -1562,6 +1563,9 @@
             tbody.innerHTML = '';
             if (!currentDailyData || !currentDailyData.groups) return;
 
+            // Repair Product Group before rendering Master Model.
+            currentDailyData = normalizeDailyPlanProductGroups(currentDailyData, true);
+
             currentDailyData.groups.forEach(g => {
                 g.models.forEach(m => {
                     let config = getMasterConfigForModel(m.name);
@@ -2134,6 +2138,72 @@
                 "TM-21 T"
             ]
         };
+
+        function normalizeDailyPlanProductGroups(data, saveToStorage = false) {
+            if (!data || !Array.isArray(data.groups)) return data;
+
+            const mappedGroups = new Map();
+            const unknownGroups = new Map();
+
+            data.groups.forEach(g => {
+                const originalGroup = String(g?.productGroup || '').trim();
+                (g?.models || []).forEach(m => {
+                    const modelName = String(m?.name || '').trim();
+                    if (!modelName) return;
+
+                    let correctGroup = '';
+                    const target = normalizeLobName(modelName);
+
+                    for (const [group, models] of Object.entries(LOB_PRODUCT_GROUP_MAP)) {
+                        if ((models || []).some(name => normalizeLobName(name) === target)) {
+                            correctGroup = group;
+                            break;
+                        }
+                    }
+
+                    const finalGroup = correctGroup || originalGroup || 'UNMAPPED';
+                    const bucket = correctGroup ? mappedGroups : unknownGroups;
+
+                    if (!bucket.has(finalGroup)) bucket.set(finalGroup, []);
+                    const existing = bucket.get(finalGroup);
+
+                    // Avoid duplicate model rows.
+                    if (!existing.some(x => normalizeLobName(x.name) === target)) {
+                        existing.push({
+                            ...m,
+                            name: modelName,
+                            orders: Array.isArray(m.orders) ? m.orders : []
+                        });
+                    }
+                });
+            });
+
+            const groups = [];
+
+            // Keep the authoritative Product Group order.
+            Object.keys(LOB_PRODUCT_GROUP_MAP).forEach(group => {
+                if (mappedGroups.has(group)) {
+                    groups.push({ productGroup: group, models: mappedGroups.get(group) });
+                }
+            });
+
+            // Preserve any models that do not exist in the manual mapping.
+            unknownGroups.forEach((models, group) => {
+                groups.push({ productGroup: group, models });
+            });
+
+            const normalized = { ...data, groups };
+
+            if (saveToStorage) {
+                try {
+                    localStorage.setItem('haier_daily_plan_data', JSON.stringify(normalized));
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            return normalized;
+        }
 
         function normalizeLobName(value) {
             return String(value || '').trim().toLowerCase();
@@ -4838,13 +4908,25 @@
                     let rawDays = json[0].slice(2);
                     let days = rawDays.map(d => formatExcelDate(d));
                     let groupsMap = {};
+                    let lastGroupName = '';
 
                     for (let i = 1; i < json.length; i++) {
                         let row = json[i];
                         if (!row || row.length === 0) continue;
-                        let gName = String(row[0] || '159').trim();
+
+                        const rawGroup = String(row[0] ?? '').trim();
+                        if (rawGroup) lastGroupName = rawGroup;
+
                         let mName = String(row[1] || '').trim();
                         if (!mName) continue;
+
+                        // If Excel leaves Product Group blank on following model rows,
+                        // inherit the previous non-blank Product Group.
+                        let gName = lastGroupName || getLobProductGroupForModel(mName) || 'UNMAPPED';
+
+                        // Known models always use the authoritative Product Group mapping.
+                        const mappedGroup = getLobProductGroupForModel(mName);
+                        if (mappedGroup) gName = mappedGroup;
 
                         if (!groupsMap[gName]) groupsMap[gName] = [];
                         let orders = [];
@@ -4860,8 +4942,10 @@
                     }
 
                     if (newGroups.length > 0) {
-                        currentDailyData = { days: days, groups: newGroups };
-                        localStorage.setItem('haier_daily_plan_data', JSON.stringify(currentDailyData));
+                        currentDailyData = normalizeDailyPlanProductGroups(
+                            { days: days, groups: newGroups },
+                            true
+                        );
                         renderUnifiedTable(currentDailyData);
                         renderMasterModelTable();
                         initSelectors();
@@ -5282,6 +5366,8 @@
         }
 
         // Initialize on load
+        // Repair any old saved data where blank Product Group cells were incorrectly stored as 159.
+        currentDailyData = normalizeDailyPlanProductGroups(currentDailyData, true);
         initSelectors();
         renderUnifiedTable(currentDailyData);
         renderMasterModelTable();
