@@ -170,6 +170,106 @@
 }
 </style>
 
+
+<style>
+#lobLayoutCanvas{
+    margin:0 auto;
+}
+#lobLayoutCanvas .lob-layout-table{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-align:center !important;
+}
+#lobLayoutCanvas .lob-layout-employee{
+    overflow:visible !important;
+}
+#lobLayoutCanvas .lob-employee-label{
+    left:50% !important;
+    transform:translateX(-50%) !important;
+}
+#lobLayoutCanvas .lob-layout-conveyor{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-align:center !important;
+}
+</style>
+
+
+<style>
+/* ===== Line Of Balance final layout =====
+   Top: Balance Summary full width
+   Below: Left 70% = Layout + Chart / Right 30% = Process Detail
+   Process Detail height equals Layout + Chart combined
+*/
+#tab-content-linebalance .lob-final-summary{
+    width:100% !important;
+    float:none !important;
+    min-height:0 !important;
+    max-height:none !important;
+    margin:0 0 16px 0 !important;
+}
+#tab-content-linebalance .lob-final-left{
+    width:70%;
+    float:left;
+    box-sizing:border-box;
+    padding-right:8px;
+}
+#tab-content-linebalance .lob-final-right{
+    width:30%;
+    float:right;
+    box-sizing:border-box;
+    padding-left:8px;
+}
+#tab-content-linebalance .lob-final-left .lob-layout-card,
+#tab-content-linebalance .lob-final-left .lob-chart-card{
+    width:100% !important;
+    float:none !important;
+    clear:none !important;
+    margin:0 !important;
+    box-sizing:border-box;
+}
+#tab-content-linebalance .lob-final-left .lob-layout-card{
+    min-height:430px !important;
+}
+#tab-content-linebalance .lob-final-left .lob-chart-card{
+    min-height:355px !important;
+    margin-top:16px !important;
+}
+#tab-content-linebalance .lob-final-right .lob-process-card{
+    width:100% !important;
+    float:none !important;
+    margin:0 !important;
+    min-height:801px !important;
+    height:801px !important;
+    max-height:801px !important;
+    overflow:auto !important;
+    box-sizing:border-box;
+}
+#tab-content-linebalance .lob-final-body::after{
+    content:"";
+    display:block;
+    clear:both;
+}
+@media (max-width:1200px){
+    #tab-content-linebalance .lob-final-left,
+    #tab-content-linebalance .lob-final-right{
+        width:100%;
+        float:none;
+        padding:0;
+    }
+    #tab-content-linebalance .lob-final-right{
+        margin-top:16px;
+    }
+    #tab-content-linebalance .lob-final-right .lob-process-card{
+        min-height:0 !important;
+        height:auto !important;
+        max-height:640px !important;
+    }
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -812,7 +912,7 @@
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                                <label class="text-[9px] text-slate-400 block mb-1">Model</label>
+                                <label class="text-[9px] text-slate-400 block mb-1">Product</label>
                                 <select id="lobModelSelect" multiple size="5" onchange="updateLobSelectedModelCount(); renderLineBalancePage()"
                                     class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[220px] focus:outline-none">
                                 </select>
@@ -874,133 +974,133 @@
                     </div>
                 </section>
 
-                <!-- EMPLOYEE LAYOUT DESIGNER -->
-                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4 lob-layout-card">
+                <!-- BALANCE SUMMARY : TOP -->
+                <section class="bg-cardbg p-4 rounded-2xl border border-bordercolor shadow-sm">
+                    <div class="flex items-center justify-between gap-3 mb-3">
                         <div>
-                            <h3 class="text-sm font-bold text-white">Editable Line Layout</h3>
-                            <p class="text-[9px] text-slate-400 mt-0.5">
-                                Layout แสดง Table, Conveyor และ Employee — กด Edit เพื่อย้าย/เพิ่ม/ลบ และกด Save Layout เพื่อบันทึกแยกตาม Line + Model
-                            </p>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
-                            <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
-                                class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
-                            <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
-                                class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-[10px] font-bold">Save Layout</button>
-                            <button type="button" id="lobResetLayoutBtn" onclick="resetLobLayout()" disabled
-                                class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white text-[10px] font-bold">Auto Layout</button>
+                            <h3 class="text-sm font-bold text-white">Balance Summary</h3>
+                            <p class="text-[9px] text-slate-400 mt-0.5">สรุปสถานะ Line Balance ของ Product ที่เลือก</p>
                         </div>
                     </div>
-
-                    <div id="lobLayoutToolbar" class="hidden mb-3 p-3 rounded-xl bg-slate-950/90 border border-blue-900/60">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-[9px] text-slate-400 font-semibold">Add:</span>
-                            <button onclick="addLobLayoutObject('table')" class="px-2.5 py-1 rounded-lg border border-blue-800 bg-slate-900 text-[9px] text-blue-200 hover:bg-blue-950">+ Table</button>
-                            <button onclick="addLobLayoutObject('conveyor')" class="px-2.5 py-1 rounded-lg border border-blue-600/50 bg-blue-950/50 text-[9px] text-cyan-300 hover:bg-blue-900/50">+ Conveyor</button>
-                            <button onclick="addLobLayoutObject('employee')" class="px-2.5 py-1 rounded-lg border border-cyan-600/40 bg-cyan-950/30 text-[9px] text-cyan-300 hover:bg-cyan-900/40">+ Employee</button>
-                            <button onclick="deleteSelectedLobObject()" class="px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/40 text-[9px] text-rose-300">Delete Selected</button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 mt-3 pt-3 border-t border-slate-800">
-                            <div class="md:col-span-5">
-                                <label class="text-[8px] text-slate-500 block mb-1">Selected object text</label>
-                                <input id="lobObjectTextInput" type="text" oninput="updateSelectedLobObjectText(this.value)"
-                                    placeholder="พิมพ์ชื่อจุดงาน / ข้อความ"
-                                    class="w-full bg-slate-900 border border-blue-900/70 rounded-lg px-2.5 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-500">
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="text-[8px] text-slate-500 block mb-1">Object color</label>
-                                <div class="flex items-center gap-2">
-                                    <input id="lobObjectColorInput" type="color" value="#1e3a5f"
-                                        oninput="updateSelectedLobObjectColor(this.value)"
-                                        class="w-10 h-7 rounded border border-slate-700 bg-slate-900 p-0.5">
-                                    <button onclick="applyLobPresetColor('#0f172a')" class="w-6 h-6 rounded bg-slate-900 border border-slate-600" title="Black"></button>
-                                    <button onclick="applyLobPresetColor('#1e3a5f')" class="w-6 h-6 rounded bg-[#1e3a5f] border border-blue-700" title="Navy"></button>
-                                    <button onclick="applyLobPresetColor('#1d4ed8')" class="w-6 h-6 rounded bg-blue-700 border border-blue-500" title="Blue"></button>
-                                    <button onclick="applyLobPresetColor('#0891b2')" class="w-6 h-6 rounded bg-cyan-600 border border-cyan-400" title="Cyan"></button>
-                                </div>
-                            </div>
-                            <div class="md:col-span-4 flex items-end">
-                                <div class="text-[8px] leading-4 text-slate-500">
-                                    ลาก = ย้ายตำแหน่ง • จุดมุมขวาล่าง = ปรับกว้าง/ยาว Table และ Conveyor • พนักงานลากไปวางจุดงานได้อิสระ
-                                    <br><span class="text-cyan-300">วัตถุจะ Snap เข้ากริด 10 px เพื่อให้ Layout เป็นสัดส่วนและแนวตรงกัน</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="rounded-xl border border-blue-950 bg-slate-950 overflow-auto shadow-inner">
-                        <div id="lobLayoutCanvas" class="relative select-none"
-                            style="width:100%;height:360px;min-width:820px;background-color:#07111f;
-                            background-image:
-                            linear-gradient(rgba(59,130,246,.28) 1px,transparent 1px),
-                            linear-gradient(90deg,rgba(59,130,246,.28) 1px,transparent 1px),
-                            linear-gradient(rgba(30,64,175,.12) 1px,transparent 1px),
-                            linear-gradient(90deg,rgba(30,64,175,.12) 1px,transparent 1px);
-                            background-size:50px 50px,50px 50px,10px 10px,10px 10px;">
-                        </div>
-                    </div>
+                    <div id="lobBalanceSummary" class="space-y-2 text-xs"></div>
                 </section>
 
-                <!-- CHART + SUMMARY -->
-                <section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
-                    <div class="xl:col-span-8 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 lob-chart-card">
+                <!-- MAIN 70 / 30 -->
+                <section class="grid grid-cols-1 xl:grid-cols-10 gap-4 items-stretch">
+                    <!-- LEFT 70% -->
+                    <div class="xl:col-span-7 flex flex-col gap-4">
+                        <!-- LAYOUT -->
+                        <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
+                                <div>
+                                    <h3 class="text-sm font-bold text-white">Editable Line Layout</h3>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">
+                                        Table, Conveyor และ Employee สามารถลากย้าย ปรับขนาด เปลี่ยนสี และบันทึก Layout ได้
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span id="lobLayoutSummary" class="text-[10px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">0 Point</span>
+                                    <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
+                                        class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
+                                    <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
+                                        class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-[10px] font-bold">Save Layout</button>
+                                    <button type="button" id="lobResetLayoutBtn" onclick="resetLobLayout()" disabled
+                                        class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white text-[10px] font-bold">Auto Layout</button>
+                                </div>
+                            </div>
+
+                            <div id="lobLayoutToolbar" class="hidden mb-3 p-3 rounded-xl bg-slate-950/90 border border-blue-900/60">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-[9px] text-slate-400 font-semibold">Add:</span>
+                                    <button onclick="addLobLayoutObject('table')" class="px-2.5 py-1 rounded-lg border border-blue-800 bg-slate-900 text-[9px] text-blue-200">+ Table</button>
+                                    <button onclick="addLobLayoutObject('conveyor')" class="px-2.5 py-1 rounded-lg border border-blue-600/50 bg-blue-950/50 text-[9px] text-cyan-300">+ Conveyor</button>
+                                    <button onclick="addLobLayoutObject('employee')" class="px-2.5 py-1 rounded-lg border border-cyan-600/40 bg-cyan-950/30 text-[9px] text-cyan-300">+ Employee</button>
+                                    <button onclick="deleteSelectedLobObject()" class="px-2.5 py-1 rounded-lg border border-rose-500/30 bg-rose-950/40 text-[9px] text-rose-300">Delete Selected</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 mt-3 pt-3 border-t border-slate-800">
+                                    <div class="md:col-span-5">
+                                        <label class="text-[8px] text-slate-500 block mb-1">Selected object text</label>
+                                        <input id="lobObjectTextInput" type="text" oninput="updateSelectedLobObjectText(this.value)"
+                                            placeholder="พิมพ์ชื่อจุดงาน / ข้อความ"
+                                            class="w-full bg-slate-900 border border-blue-900/70 rounded-lg px-2.5 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-500">
+                                    </div>
+                                    <div class="md:col-span-3">
+                                        <label class="text-[8px] text-slate-500 block mb-1">Object color</label>
+                                        <div class="flex items-center gap-2">
+                                            <input id="lobObjectColorInput" type="color" value="#1e3a5f"
+                                                oninput="updateSelectedLobObjectColor(this.value)"
+                                                class="w-10 h-7 rounded border border-slate-700 bg-slate-900 p-0.5">
+                                            <button onclick="applyLobPresetColor('#0f172a')" class="w-6 h-6 rounded bg-slate-900 border border-slate-600"></button>
+                                            <button onclick="applyLobPresetColor('#1e3a5f')" class="w-6 h-6 rounded bg-[#1e3a5f] border border-blue-700"></button>
+                                            <button onclick="applyLobPresetColor('#1d4ed8')" class="w-6 h-6 rounded bg-blue-700 border border-blue-500"></button>
+                                            <button onclick="applyLobPresetColor('#0891b2')" class="w-6 h-6 rounded bg-cyan-600 border border-cyan-400"></button>
+                                        </div>
+                                    </div>
+                                    <div class="md:col-span-4 flex items-end">
+                                        <div class="text-[8px] leading-4 text-slate-500">
+                                            ลากเพื่อย้ายตำแหน่ง • มุมขวาล่างใช้ปรับขนาด Table / Conveyor
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl border border-blue-950 bg-slate-950 overflow-auto shadow-inner">
+                                <div id="lobLayoutCanvas" class="relative select-none"
+                                    style="width:100%;height:350px;min-width:820px;background-color:#07111f;
+                                    background-image:
+                                    linear-gradient(rgba(59,130,246,.28) 1px,transparent 1px),
+                                    linear-gradient(90deg,rgba(59,130,246,.28) 1px,transparent 1px),
+                                    linear-gradient(rgba(30,64,175,.12) 1px,transparent 1px),
+                                    linear-gradient(90deg,rgba(30,64,175,.12) 1px,transparent 1px);
+                                    background-size:50px 50px,50px 50px,10px 10px,10px 10px;">
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- GRAPH -->
+                        <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-cyan-300">Line Balance Chart</h3>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Cycle Time เทียบกับ Takt Time</p>
+                                </div>
+                                <div class="flex items-center gap-2 text-[9px]">
+                                    <span class="px-2 py-1 rounded bg-blue-950/40 border border-blue-500/20 text-blue-300">CT</span>
+                                    <span class="px-2 py-1 rounded bg-yellow-950/40 border border-yellow-500/20 text-yellow-300">Takt Time</span>
+                                </div>
+                            </div>
+                            <div class="h-[330px]">
+                                <canvas id="lineBalancePageChart"></canvas>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- RIGHT 30% -->
+                    <section class="xl:col-span-3 bg-cardbg p-4 rounded-2xl border border-bordercolor shadow-sm flex flex-col min-h-[830px]">
+                        <div class="flex items-center justify-between gap-2 mb-3 shrink-0">
                             <div>
-                                <h3 class="text-sm font-bold text-cyan-300">Line Balance Chart</h3>
-                                <p class="text-[9px] text-slate-400 mt-0.5">Cycle Time เทียบกับ Takt Time ของ Target UPH</p>
+                                <h3 class="text-sm font-bold text-white">Process Detail</h3>
+                                <p class="text-[9px] text-slate-400 mt-0.5">แสดงจุดงานและ CT — กด Detail เพื่อดูข้อมูลทั้งหมด</p>
                             </div>
-                            <div class="flex items-center gap-2 text-[9px]">
-                                <span class="px-2 py-1 rounded bg-blue-950/40 border border-blue-500/20 text-blue-300">CT</span>
-                                <span class="px-2 py-1 rounded bg-yellow-950/40 border border-yellow-500/20 text-yellow-300">Takt Time</span>
-                            </div>
+                            <span id="lobProcessCount" class="text-[10px] text-cyan-300 font-bold whitespace-nowrap">0 Process</span>
                         </div>
-                        <div class="h-[390px]">
-                            <canvas id="lineBalancePageChart"></canvas>
-                        </div>
-                    </div>
 
-                    <div class="xl:col-span-4 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm lob-summary-card">
-                        <h3 class="text-sm font-bold text-white mb-3">Balance Summary</h3>
-                        <div id="lobBalanceSummary" class="space-y-2 text-xs"></div>
-                    </div>
+                        <div class="flex-1 min-h-0 overflow-auto rounded-xl border border-bordercolor/70">
+                            <table class="w-full text-left border-collapse text-[10px]">
+                                <thead class="sticky top-0 z-20 bg-slate-900">
+                                    <tr class="text-slate-300 border-b border-bordercolor">
+                                        <th class="px-3 py-2.5">จุดงาน</th>
+                                        <th class="px-2 py-2.5 text-center text-cyan-300 w-20">เวลา CT</th>
+                                        <th class="px-2 py-2.5 text-center w-16">Detail</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lobProcessTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
+                            </table>
+                        </div>
+                    </section>
                 </section>
 
-                <!-- PROCESS TABLE -->
-                <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                    <div class="flex items-center justify-between mb-3 lob-process-card">
-                        <div>
-                            <h3 class="text-sm font-bold text-white">Process Detail Table</h3>
-                            <p class="text-[9px] text-slate-400 mt-0.5">ข้อมูลดึงจาก Work Process & CT ที่บันทึกไว้</p>
-                        </div>
-                        <span id="lobProcessCount" class="text-[10px] text-cyan-300 font-bold">0 Process</span>
-                    </div>
-                    <div class="max-h-[480px] overflow-auto rounded-xl border border-bordercolor/70">
-                        <table class="w-full text-left border-collapse text-[10px]">
-                            <thead class="sticky top-0 z-20 bg-slate-900">
-                                <tr class="text-slate-300 border-b border-bordercolor">
-                                    <th class="px-2 py-2 text-center w-12">No.</th>
-                                    <th class="px-2 py-2 whitespace-nowrap text-amber-300">Model</th>
-                                    <th class="px-2 py-2 whitespace-nowrap">Part / Area</th>
-                                    <th class="px-2 py-2 whitespace-nowrap">Station</th>
-                                    <th class="px-2 py-2">Process</th>
-                                    <th class="px-2 py-2 text-center">WT1</th>
-                                    <th class="px-2 py-2 text-center">WT2</th>
-                                    <th class="px-2 py-2 text-center">WT3</th>
-                                    <th class="px-2 py-2 text-center">Loss</th>
-                                    <th class="px-2 py-2 text-center text-cyan-300">CT</th>
-                                    <th class="px-2 py-2 text-center text-yellow-300">Takt</th>
-                                    <th class="px-2 py-2 text-center text-emerald-300">Req. MP</th>
-                                    <th class="px-2 py-2 text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lobProcessTableBody" class="divide-y divide-bordercolor/40 text-slate-300"></tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
+</div>
 
         </main>
     </div>
@@ -2159,74 +2259,81 @@
         function getLobLayoutKey() {
             const line = document.getElementById('lobLineSelect')?.value || '';
             const models = getSelectedLobModels().slice().sort();
-            return `haier_lob_layout_v4::${line}::${models.join('||')}`;
+            return `haier_lob_layout_v7::${line}::${models.join('||')}`;
         }
 
         function getDefaultLobLayout(rows) {
-            // Dashboard proportion: 1000 × 360
-            // Conveyor centered, work points distributed evenly above/below.
+            // Balanced paired layout:
+            // 1 column = top station + bottom station aligned on the same center line.
             const objects = [];
             const canvasW = 1000;
-            const conveyorX = 55;
-            const conveyorY = 160;
-            const conveyorW = 890;
-            const conveyorH = 48;
+            const conveyorX = 70;
+            const conveyorY = 148;
+            const conveyorW = 860;
+            const conveyorH = 54;
 
             objects.push({
                 id:'conveyor_main',
                 type:'conveyor',
-                x:conveyorX, y:conveyorY,
-                w:conveyorW, h:conveyorH,
+                x:conveyorX,
+                y:conveyorY,
+                w:conveyorW,
+                h:conveyorH,
                 label:'Conveyor',
                 color:'#1e3a5f'
             });
 
             if (!rows.length) return objects;
 
-            const topRows = rows.filter((_, i) => i % 2 === 0);
-            const bottomRows = rows.filter((_, i) => i % 2 === 1);
+            const pairCount = Math.ceil(rows.length / 2);
+            const leftCenter = 120;
+            const rightCenter = 880;
+            const step = pairCount > 1 ? (rightCenter - leftCenter) / (pairCount - 1) : 0;
 
-            const placeRow = (list, isTop) => {
-                const n = Math.max(list.length, 1);
-                const left = 75;
-                const right = 875;
-                const step = n > 1 ? (right - left) / (n - 1) : 0;
+            rows.forEach((r, i) => {
+                const isTop = (i % 2 === 0);
+                const pairIndex = Math.floor(i / 2);
+                const centerX = pairCount === 1
+                    ? 500
+                    : leftCenter + (pairIndex * step);
 
-                list.forEach((r, localIndex) => {
-                    const originalIndex = rows.indexOf(r);
-                    const centerX = n === 1 ? 475 : left + localIndex * step;
-                    const tableX = Math.round((centerX - 55) / 10) * 10;
-                    const tableY = isTop ? 38 : 292;
-                    const empY = isTop ? 104 : 224;
+                const tableW = 108;
+                const tableH = 34;
+                const employeeW = 46;
+                const employeeH = 46;
 
-                    objects.push({
-                        id:`table_${originalIndex}`,
-                        type:'table',
-                        x:Math.max(10, Math.min(canvasW - 120, tableX)),
-                        y:tableY,
-                        w:110,
-                        h:34,
-                        label:(r.station || `STA ${originalIndex+1}`),
-                        color:'#0f2742',
-                        processIndex:originalIndex
-                    });
+                // Perfect center alignment between label and worker.
+                const tableX = Math.round((centerX - tableW / 2) / 10) * 10;
+                const empX = Math.round((centerX - employeeW / 2) / 10) * 10;
 
-                    objects.push({
-                        id:`employee_${originalIndex}`,
-                        type:'employee',
-                        x:Math.max(10, Math.min(canvasW - 50, tableX + 32)),
-                        y:empY,
-                        w:46,
-                        h:46,
-                        label:(r.station || `P${originalIndex+1}`),
-                        color:'#2563eb',
-                        processIndex:originalIndex
-                    });
+                const tableY = isTop ? 24 : 292;
+                const empY = isTop ? 82 : 222;
+
+                objects.push({
+                    id:`table_${i}`,
+                    type:'table',
+                    x:Math.max(10, Math.min(canvasW - tableW - 10, tableX)),
+                    y:tableY,
+                    w:tableW,
+                    h:tableH,
+                    label:(r.station || `STA ${i+1}`),
+                    color:'#0f2742',
+                    processIndex:i
                 });
-            };
 
-            placeRow(topRows, true);
-            placeRow(bottomRows, false);
+                objects.push({
+                    id:`employee_${i}`,
+                    type:'employee',
+                    x:Math.max(10, Math.min(canvasW - employeeW - 10, empX)),
+                    y:empY,
+                    w:employeeW,
+                    h:employeeH,
+                    label:(r.station || `P${i+1}`),
+                    color:'#2563eb',
+                    processIndex:i
+                });
+            });
+
             return objects;
         }
 
@@ -2542,6 +2649,15 @@
             return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
         }
 
+        function toggleLobProcessDetail(rowNo) {
+            const detail = document.getElementById(`lob-detail-${rowNo}`);
+            const icon = document.getElementById(`lob-detail-icon-${rowNo}`);
+            if (!detail) return;
+            const isHidden = detail.classList.contains('hidden');
+            detail.classList.toggle('hidden', !isHidden);
+            if (icon) icon.textContent = isHidden ? '−' : '+';
+        }
+
         function renderLobProcessTable(rows, takt) {
             const tbody = document.getElementById('lobProcessTableBody');
             const count = document.getElementById('lobProcessCount');
@@ -2550,33 +2666,75 @@
             count.textContent = `${rows.length} Process`;
 
             if (!rows.length) {
-                tbody.innerHTML = `<tr><td colspan="13" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = rows.map(r => {
                 const over = r.ct > takt;
                 const processes = [r.p1, r.p2, r.p3].filter(p => p && p !== '-').join(' / ') || '-';
+
                 return `
-                    <tr class="${over ? 'bg-rose-950/10' : ''}">
-                        <td class="px-2 py-2 text-center text-slate-500">${r.no}</td>
-                        <td class="px-2 py-2 text-[9px] text-amber-300 font-bold whitespace-nowrap">${r.model || '-'}</td>
-                        <td class="px-2 py-2 text-[9px] text-violet-300 whitespace-nowrap">${r.area}</td>
-                        <td class="px-2 py-2 font-bold text-cyan-300 whitespace-nowrap">${r.station}</td>
-                        <td class="px-2 py-2 min-w-[180px]">${processes}</td>
-                        <td class="px-2 py-2 text-center">${r.wt1.toFixed(1)}</td>
-                        <td class="px-2 py-2 text-center">${r.wt2.toFixed(1)}</td>
-                        <td class="px-2 py-2 text-center">${r.wt3.toFixed(1)}</td>
-                        <td class="px-2 py-2 text-center text-rose-300">${r.loss.toFixed(1)}</td>
-                        <td class="px-2 py-2 text-center font-bold ${over ? 'text-rose-300' : 'text-cyan-300'}">${r.ct.toFixed(1)}</td>
-                        <td class="px-2 py-2 text-center text-yellow-300">${takt.toFixed(1)}</td>
-                        <td class="px-2 py-2 text-center font-bold text-emerald-300">${r.reqMp}</td>
-                        <td class="px-2 py-2 text-center">
-                            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold ${over ? 'bg-rose-950/60 text-rose-300 border border-rose-500/20' : 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/20'}">
-                                ${over ? 'OVER TAKT' : 'OK'}
-                            </span>
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-3 py-3">
+                            <div class="font-bold text-cyan-300">${lobEscape(r.station || '-')}</div>
+                            ${r.model ? `<div class="text-[8px] text-slate-500 mt-0.5">${lobEscape(r.model)}</div>` : ''}
                         </td>
-                    </tr>`;
+                        <td class="px-2 py-3 text-center">
+                            <div class="font-black text-sm ${over ? 'text-rose-300' : 'text-cyan-300'}">${r.ct.toFixed(1)}</div>
+                            <div class="text-[8px] text-slate-500">sec</div>
+                        </td>
+                        <td class="px-2 py-3 text-center">
+                            <button type="button" onclick="toggleLobProcessDetail(${r.no})"
+                                class="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-blue-950/50 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 text-[9px] font-bold">
+                                <span id="lob-detail-icon-${r.no}" class="text-sm leading-none">+</span>
+                                Detail
+                            </button>
+                        </td>
+                    </tr>
+                    <tr id="lob-detail-${r.no}" class="hidden bg-slate-950/55">
+                        <td colspan="3" class="p-3">
+                            <div class="grid grid-cols-2 gap-2 text-[9px]">
+                                <div class="col-span-2 rounded-lg border border-slate-700/70 bg-slate-900/70 p-2">
+                                    <div class="text-slate-500 mb-1">Process</div>
+                                    <div class="text-slate-200 leading-4">${lobEscape(processes)}</div>
+                                </div>
+
+                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                                    <div class="text-slate-500">Product</div>
+                                    <div class="text-amber-300 font-bold mt-0.5">${lobEscape(r.model || '-')}</div>
+                                </div>
+                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                                    <div class="text-slate-500">Part / Area</div>
+                                    <div class="text-violet-300 font-bold mt-0.5">${lobEscape(r.area || '-')}</div>
+                                </div>
+
+                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                                    <div class="text-slate-500">WT1 / WT2 / WT3</div>
+                                    <div class="text-white font-bold mt-0.5">${r.wt1.toFixed(1)} / ${r.wt2.toFixed(1)} / ${r.wt3.toFixed(1)}</div>
+                                </div>
+                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                                    <div class="text-slate-500">Loss</div>
+                                    <div class="text-rose-300 font-bold mt-0.5">${r.loss.toFixed(1)} sec</div>
+                                </div>
+
+                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                                    <div class="text-slate-500">Takt Time</div>
+                                    <div class="text-yellow-300 font-bold mt-0.5">${takt.toFixed(1)} sec</div>
+                                </div>
+                                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+                                    <div class="text-slate-500">Required MP</div>
+                                    <div class="text-emerald-300 font-bold mt-0.5">${r.reqMp} คน</div>
+                                </div>
+
+                                <div class="col-span-2 rounded-lg border ${over ? 'border-rose-500/30 bg-rose-950/20' : 'border-emerald-500/30 bg-emerald-950/20'} p-2 flex items-center justify-between">
+                                    <span class="text-slate-400">Status</span>
+                                    <span class="font-bold ${over ? 'text-rose-300' : 'text-emerald-300'}">${over ? 'OVER TAKT' : 'OK'}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }).join('');
         }
 
