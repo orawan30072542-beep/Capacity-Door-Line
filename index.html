@@ -1055,7 +1055,7 @@
                                     <option value="C-2">C-2</option>
                                     <option value="C-3">C-3</option>
                                 </select>
-                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิง Assigned Routing จาก Master Model · แต่ละ C-Line ใช้จุดพนักงานร่วมกันทุก Product Group</div>
+                                <div class="text-[8px] text-slate-500 mt-1">Master Model กำหนด C-1/C-2/C-3 · Work Process กำหนด Station และ CT · แต่ละ C-Line ใช้จุดพนักงานร่วมกัน</div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1154,6 +1154,7 @@
                                     <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/30 border border-cyan-500/20 px-3 py-1 rounded-lg">MASTER LINE FILTER</span>
                                     <span class="text-[9px] font-bold text-violet-300 bg-violet-950/30 border border-violet-500/20 px-3 py-1 rounded-lg">DOOR C C-1/C-2/C-3</span>
                                     <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE PER C-LINE</span>
+                                    <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">MASTER + WORK PROCESS</span>
                                     <span class="text-[9px] font-bold text-orange-300 bg-orange-950/30 border border-orange-500/20 px-3 py-1 rounded-lg">PLATE LINE SEPARATED</span>
                                     <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
@@ -2460,14 +2461,73 @@
             return '';
         }
 
+        function hasSavedLobWorkProcess(modelName, lineName) {
+            const target = normalizeModelName(modelName);
+            if (!target) return false;
+
+            // Back Plate / Bottom Plate: Work Process DB
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                const key = Object.keys(processDatabase || {}).find(k => {
+                    const suffix = `_${lineName}`;
+                    if (!k.endsWith(suffix)) return false;
+                    const storedModel = k.slice(0, -suffix.length);
+                    return normalizeModelName(storedModel) === target &&
+                           Array.isArray(processDatabase[k]) &&
+                           processDatabase[k].length > 0;
+                });
+                if (key) return true;
+
+                return normalizeModelName(selectedModel || '') === target &&
+                       selectedPartValue === lineName &&
+                       Array.isArray(currentProcessData) &&
+                       currentProcessData.length > 0;
+            }
+
+            // Door A / B / C / Glass:
+            // Work Process for door models is stored in Door Process DB.
+            const doorKey = Object.keys(doorProcessDatabase || {}).find(k => {
+                const cut = k.indexOf('_Door (');
+                if (cut <= 0) return false;
+                const storedModel = k.slice(0, cut);
+                return normalizeModelName(storedModel) === target &&
+                       Array.isArray(doorProcessDatabase[k]) &&
+                       doorProcessDatabase[k].length > 0;
+            });
+            if (doorKey) return true;
+
+            // Current editor fallback.
+            if (normalizeModelName(selectedDoorModel || '') === target &&
+                Array.isArray(currentDoorProcessData) &&
+                currentDoorProcessData.length > 0) {
+                return true;
+            }
+
+            // Legacy/general Work Process fallback.
+            return Object.keys(processDatabase || {}).some(k => {
+                const normalizedKey = normalizeModelName(k);
+                const normalizedPrefix = normalizeModelName(modelName + '_');
+                return normalizedKey.startsWith(normalizedPrefix) &&
+                       Array.isArray(processDatabase[k]) &&
+                       processDatabase[k].length > 0;
+            });
+        }
+
+        function modelMatchesMasterAndWorkProcess(modelName, lineName) {
+            // MASTER MODEL = decides physical production line / routing.
+            // WORK PROCESS = decides whether CT/process data exists and should be shown.
+            return modelMatchesLobLine(modelName, lineName) &&
+                   hasSavedLobWorkProcess(modelName, lineName);
+        }
+
         function getLobProductGroupsForLine(lineName) {
             const result = [];
 
             Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
-                const hasModelForLine = (models || []).some(model =>
-                    modelMatchesLobLine(model, lineName)
+                const hasValidModel = (models || []).some(model =>
+                    modelMatchesMasterAndWorkProcess(model, lineName)
                 );
-                if (hasModelForLine) result.push(group);
+
+                if (hasValidModel) result.push(group);
             });
 
             return result;
@@ -2482,11 +2542,15 @@
 
                 mapped.forEach(name => {
                     const clean = String(name || '').trim();
-                    if (!clean || seen.has(clean)) return;
+                    const key = normalizeModelName(clean);
 
-                    // Strict mapping prevents unrelated models from being pulled into a Product Group.
-                    if (modelMatchesLobLine(clean, lineName)) {
-                        seen.add(clean);
+                    if (!clean || seen.has(key)) return;
+
+                    // Show only data that passes BOTH:
+                    // 1) Master Model line/routing
+                    // 2) Work Process has saved CT/process
+                    if (modelMatchesMasterAndWorkProcess(clean, lineName)) {
+                        seen.add(key);
                         models.push(clean);
                     }
                 });
@@ -2608,12 +2672,14 @@
             const rows = [];
             const targetModel = normalizeModelName(modelName);
 
-            const pushRows = (list, area) => {
+            const pushRows = (list, area, source = '') => {
                 if (!Array.isArray(list)) return;
+
                 list.forEach((item, idx) => {
                     rows.push({
                         model: modelName,
                         area: area || '-',
+                        source,
                         station: item.station || `STA ${idx + 1}`,
                         p1: item.p1 || '-',
                         p2: item.p2 || '-',
@@ -2626,58 +2692,81 @@
                 });
             };
 
+            // Back / Bottom use normal Work Process database.
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
-                // A) Saved Work Process DB
+                const suffix = `_${lineName}`;
+
                 Object.keys(processDatabase || {}).forEach(key => {
-                    const suffix = `_${lineName}`;
                     if (!key.endsWith(suffix)) return;
+
                     const storedModel = key.slice(0, -suffix.length);
                     if (normalizeModelName(storedModel) !== targetModel) return;
-                    pushRows(processDatabase[key], lineName);
+
+                    pushRows(processDatabase[key], lineName, 'Work Process');
                 });
 
-                // B) Current editor data that is already visible in Work Process page
                 if (!rows.length &&
                     normalizeModelName(selectedModel || '') === targetModel &&
                     selectedPartValue === lineName &&
                     Array.isArray(currentProcessData)) {
-                    pushRows(currentProcessData, lineName);
+                    pushRows(currentProcessData, lineName, 'Current Work Process');
                 }
 
                 return rows;
             }
 
-            // Door A / B / C / Door Glass:
-            // saved Door Process DB uses keys MODEL_Door (Sub Part - Door Type)
+            // Door lines:
+            // MASTER MODEL decides which physical line the model belongs to.
+            // Work Process data is then read from all saved door process entries for that model.
             Object.keys(doorProcessDatabase || {}).forEach(key => {
-                const idx = key.indexOf('_Door (');
-                if (idx <= 0) return;
-                const storedModel = key.slice(0, idx);
+                const cut = key.indexOf('_Door (');
+                if (cut <= 0) return;
+
+                const storedModel = key.slice(0, cut);
                 if (normalizeModelName(storedModel) !== targetModel) return;
-                pushRows(doorProcessDatabase[key], key.slice(idx + 1));
+
+                pushRows(doorProcessDatabase[key], key.slice(cut + 1), 'Work Process');
             });
 
-            // Current Door Part editor rows as fallback
+            // Current door work-process editor.
             if (!rows.length &&
                 normalizeModelName(selectedDoorModel || '') === targetModel &&
                 Array.isArray(currentDoorProcessData)) {
                 const area = `Door (${selectedDoorSubPart || '-'} - ${selectedDoorType || '-'})`;
-                pushRows(currentDoorProcessData, area);
+                pushRows(currentDoorProcessData, area, 'Current Work Process');
             }
 
-            // Final fallback:
-            // If this model only has normal Work Process data, show it rather than a blank page.
+            // Legacy/general Work Process fallback.
             if (!rows.length) {
                 Object.keys(processDatabase || {}).forEach(key => {
-                    const split = key.lastIndexOf('_');
-                    if (split <= 0) return;
-                    const storedModel = key.slice(0, split);
-                    if (normalizeModelName(storedModel) !== targetModel) return;
-                    pushRows(processDatabase[key], key.slice(split + 1));
+                    const normalizedKey = normalizeModelName(key);
+                    const normalizedPrefix = normalizeModelName(modelName + '_');
+                    if (!normalizedKey.startsWith(normalizedPrefix)) return;
+
+                    const area = key.slice(modelName.length + 1) || lineName;
+                    pushRows(processDatabase[key], area, 'Legacy Work Process');
                 });
             }
 
-            return rows;
+            // Remove exact duplicate station/process rows.
+            const unique = new Map();
+
+            rows.forEach(r => {
+                const key = [
+                    String(r.station || '').trim().toUpperCase(),
+                    String(r.p1 || '').trim().toUpperCase(),
+                    String(r.p2 || '').trim().toUpperCase(),
+                    String(r.p3 || '').trim().toUpperCase(),
+                    Number(r.wt1 || 0).toFixed(3),
+                    Number(r.wt2 || 0).toFixed(3),
+                    Number(r.wt3 || 0).toFixed(3),
+                    Number(r.loss || 0).toFixed(3)
+                ].join('||');
+
+                if (!unique.has(key)) unique.set(key, r);
+            });
+
+            return Array.from(unique.values());
         }
 
         function ensureLineBalanceChart() {
@@ -2845,15 +2934,15 @@
 
             // Back / Bottom Plate share one physical Layout per Line#1 / Line#2.
             if (isLobPlateStation(line)) {
-                return `haier_lob_master_line_v2::${line}::${getSelectedLobPlateLine()}::COMMON`;
+                return `haier_lob_master_workprocess_v1::${line}::${getSelectedLobPlateLine()}::COMMON`;
             }
 
             // Door C: save a completely separate Layout for C-1 / C-2 / C-3.
             if (line === 'Door C') {
-                return `haier_lob_master_line_v2::Door C::${getSelectedLobDoorCLine()}::COMMON`;
+                return `haier_lob_master_workprocess_v1::Door C::${getSelectedLobDoorCLine()}::COMMON`;
             }
 
-            return `haier_lob_master_line_v2::${line}::${groupKey}`;
+            return `haier_lob_master_workprocess_v1::${line}::${groupKey}`;
         }
 
         function getUniqueLobLayoutRows(rows) {
