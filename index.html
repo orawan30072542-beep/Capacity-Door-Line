@@ -522,6 +522,13 @@
 }
 </style>
 
+
+<style>
+#tab-content-linebalance #lobDoorCTypeButtons button{
+    min-width:42px;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1219,10 +1226,9 @@
 
                             <div id="lobDoorCTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Door Type</label>
-                                <select id="lobDoorCTypeSelect" onchange="onLobDoorCTypeChange()"
-                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[105px] focus:outline-none">
-                                </select>
-                                <div id="lobDoorCTypeHint" class="text-[8px] text-slate-500 mt-1">C-1 = RL/RR · C-2 = VEG/FB · C-3 = FUF/TM</div>
+                                <select id="lobDoorCTypeSelect" multiple class="hidden" aria-hidden="true"></select>
+                                <div id="lobDoorCTypeButtons" class="flex flex-wrap gap-1"></div>
+                                <div id="lobDoorCTypeHint" class="text-[8px] text-slate-500 mt-1">เลือกได้หลายประเภทพร้อมกัน</div>
                             </div>
 
                             <div class="lob-compact-wide-card flex-1 min-w-[320px] bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1399,7 +1405,7 @@
                                 <div class="w-1.5 h-5 bg-cyan-400 rounded-full"></div>
                                 <div>
                                     <h3 class="text-sm font-bold text-cyan-400">Work Process & Cycle Time</h3>
-                                    <p class="text-[9px] text-slate-400 mt-0.5">Door C: C-1 เลือก RL/RR · C-2 เลือก VEG/FB · C-3 เลือก FUF/TM · ด้านนอกแสดง Work Time Total และ Loss</p>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Door C เลือกได้หลายประเภทพร้อมกัน · ข้อมูล Station ซ้ำจะรวมเป็น 1 บรรทัด เช่น R01 แสดงเพียง 1 บรรทัด</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
@@ -2415,38 +2421,81 @@
             return [];
         }
 
-        function getSelectedLobDoorCType() {
+        function getSelectedLobDoorCTypes() {
             const sel = document.getElementById('lobDoorCTypeSelect');
-            const options = getDoorCTypeOptions();
-            return sel?.value || options[0] || '';
+            if (!sel) return getDoorCTypeOptions();
+            const selected = Array.from(sel.options || [])
+                .filter(o => o.selected)
+                .map(o => o.value)
+                .filter(Boolean);
+            return selected.length ? selected : getDoorCTypeOptions();
         }
 
-        function populateLobDoorCTypeSelect(preferredValue = '') {
+        // Compatibility helper: when a single value is needed, use the first selected.
+        function getSelectedLobDoorCType() {
+            return getSelectedLobDoorCTypes()[0] || '';
+        }
+
+        function renderLobDoorCTypeButtons() {
+            const sel = document.getElementById('lobDoorCTypeSelect');
+            const box = document.getElementById('lobDoorCTypeButtons');
+            if (!sel || !box) return;
+
+            box.innerHTML = '';
+            Array.from(sel.options || []).forEach(option => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = option.value;
+                btn.className = `px-2.5 py-1 rounded-md text-[10px] font-black border transition ${
+                    option.selected
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-400/60'
+                        : 'bg-slate-800 text-slate-400 border-bordercolor hover:bg-slate-700'
+                }`;
+                btn.onclick = () => {
+                    option.selected = !option.selected;
+
+                    // At least one type must remain selected.
+                    const selected = Array.from(sel.options).filter(o => o.selected);
+                    if (!selected.length) option.selected = true;
+
+                    renderLobDoorCTypeButtons();
+                    onLobDoorCTypeChange();
+                };
+                box.appendChild(btn);
+            });
+        }
+
+        function populateLobDoorCTypeSelect(preferredValues = null) {
             const sel = document.getElementById('lobDoorCTypeSelect');
             const hint = document.getElementById('lobDoorCTypeHint');
             if (!sel) return;
 
             const cLine = getSelectedLobDoorCLine();
             const options = getDoorCTypeOptions(cLine);
-            const current = preferredValue || sel.value;
+            const previous = Array.isArray(preferredValues)
+                ? preferredValues
+                : Array.from(sel.options || []).filter(o => o.selected).map(o => o.value);
 
             sel.innerHTML = options.map(value =>
                 `<option value="${value}">${value}</option>`
             ).join('');
 
-            if (current && options.includes(current)) {
-                sel.value = current;
-            } else if (options.length) {
-                sel.value = options[0];
-            }
+            const validPrevious = previous.filter(v => options.includes(v));
+            const selectedValues = validPrevious.length ? validPrevious : options;
+
+            Array.from(sel.options).forEach(o => {
+                o.selected = selectedValues.includes(o.value);
+            });
 
             if (hint) {
                 hint.textContent = cLine === 'C-1'
-                    ? 'C-1 ใช้เฉพาะ RL / RR'
+                    ? 'C-1: เลือก RL, RR หรือเลือกพร้อมกันได้'
                     : cLine === 'C-2'
-                        ? 'C-2 ใช้เฉพาะ VEG / FB'
-                        : 'C-3 แยกตามกลุ่ม Model FUF / TM';
+                        ? 'C-2: เลือก VEG, FB หรือเลือกพร้อมกันได้'
+                        : 'C-3: เลือก FUF, TM หรือเลือกพร้อมกันได้';
             }
+
+            renderLobDoorCTypeButtons();
         }
 
         function onLobDoorCTypeChange() {
@@ -2460,31 +2509,86 @@
 
         function modelMatchesSelectedDoorCType(modelName) {
             const cLine = getSelectedLobDoorCLine();
-            const selectedType = getSelectedLobDoorCType();
+            const selectedTypes = getSelectedLobDoorCTypes();
 
             if (cLine !== 'C-3') return true;
 
             const model = normalizeModelName(modelName || '');
-            if (selectedType === 'FUF') return model.startsWith('FUF');
-            if (selectedType === 'TM') return model.startsWith('TM');
-            return true;
+            return selectedTypes.some(type => {
+                if (type === 'FUF') return model.startsWith('FUF');
+                if (type === 'TM') return model.startsWith('TM');
+                return false;
+            });
         }
 
         function filterDoorCRowsBySelectedType(rows) {
             if (!Array.isArray(rows)) return [];
             const cLine = getSelectedLobDoorCLine();
-            const selectedType = getSelectedLobDoorCType();
+            const selectedTypes = getSelectedLobDoorCTypes();
 
-            // C-1 / C-2 are true Door Type filters.
             if (cLine === 'C-1' || cLine === 'C-2') {
                 return rows.filter(r =>
-                    String(r?.doorType || '').toUpperCase() === selectedType
+                    selectedTypes.includes(String(r?.doorType || '').toUpperCase())
                 );
             }
 
-            // C-3 selection is model family (FUF / TM), so process rows are kept.
+            // C-3 uses model family selection FUF/TM; process rows are kept.
             return rows;
         }
+
+        function aggregateDoorCProcessRowsByStation(rows) {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            if (line !== 'Door C') return Array.isArray(rows) ? rows : [];
+
+            const map = new Map();
+
+            (rows || []).forEach((r, index) => {
+                const station = String(r?.station || `STA ${index + 1}`).trim();
+                const key = station.toUpperCase().replace(/\s+/g, ' ');
+                const wt1 = Number(r?.wt1 || 0);
+                const wt2 = Number(r?.wt2 || 0);
+                const wt3 = Number(r?.wt3 || 0);
+                const loss = Number(r?.loss || 0);
+
+                if (!map.has(key)) {
+                    map.set(key, {
+                        ...r,
+                        station,
+                        wt1Sum: 0,
+                        wt2Sum: 0,
+                        wt3Sum: 0,
+                        lossSum: 0,
+                        count: 0,
+                        mergedDoorTypes: new Set(),
+                        mergedModels: new Set()
+                    });
+                }
+
+                const item = map.get(key);
+                item.wt1Sum += wt1;
+                item.wt2Sum += wt2;
+                item.wt3Sum += wt3;
+                item.lossSum += loss;
+                item.count += 1;
+                if (r?.doorType && r.doorType !== '-') item.mergedDoorTypes.add(String(r.doorType).toUpperCase());
+                if (r?.model) item.mergedModels.add(String(r.model));
+            });
+
+            return Array.from(map.values()).map(item => {
+                const divisor = Math.max(1, item.count);
+                return {
+                    ...item,
+                    wt1: item.wt1Sum / divisor,
+                    wt2: item.wt2Sum / divisor,
+                    wt3: item.wt3Sum / divisor,
+                    loss: item.lossSum / divisor,
+                    doorType: Array.from(item.mergedDoorTypes).join(' + ') || '-',
+                    model: Array.from(item.mergedModels).join(' + ') || item.model || '-',
+                    mergedCount: item.count
+                };
+            });
+        }
+
 
         function updateLobSubLineVisibility() {
             const line = document.getElementById('lobLineSelect')?.value || '';
@@ -2549,7 +2653,7 @@
 
         function onLobDoorCLineChange() {
             // C-1 = RL/RR, C-2 = VEG/FB, C-3 = FUF/TM
-            populateLobDoorCTypeSelect();
+            populateLobDoorCTypeSelect(getDoorCTypeOptions());
 
             const sel = document.getElementById('lobModelSelect');
             if (sel) {
@@ -3265,9 +3369,13 @@
                 }
             }
 
-            const rows = rawRows.map((r, i) => {
-                const wtTotal = r.wt1 + r.wt2 + r.wt3;
-                const ct = wtTotal + r.loss;
+            const displayRawRows = line === 'Door C'
+                ? aggregateDoorCProcessRowsByStation(rawRows)
+                : rawRows;
+
+            const rows = displayRawRows.map((r, i) => {
+                const wtTotal = (Number(r.wt1) || 0) + (Number(r.wt2) || 0) + (Number(r.wt3) || 0);
+                const ct = wtTotal + (Number(r.loss) || 0);
                 const reqMp = ct > 0 ? Math.max(1, Math.ceil(ct / takt)) : 0;
                 return { ...r, no: i + 1, wtTotal, ct, reqMp };
             });
@@ -3280,7 +3388,7 @@
             const lineDisplay = isLobPlateStation(line)
                 ? `${line} · ${getSelectedLobPlateLine()}`
                 : (line === 'Door C'
-                    ? `${line} · ${getSelectedLobDoorCLine()} · ${getSelectedLobDoorCType()}`
+                    ? `${line} · ${getSelectedLobDoorCLine()} · ${getSelectedLobDoorCTypes().join(' + ')}`
                     : line);
 
             const groupLabel = productGroups.length > 1
@@ -3794,14 +3902,13 @@
 
             const displayRows = window.lobRenderedProcessRows;
             const currentLine = document.getElementById('lobLineSelect')?.value || '';
-            const showDoorType = currentLine === 'Door C' &&
-                                 getSelectedLobDoorCLine() !== 'C-3';
+            const showDoorType = false; // Door C rows are merged by Station; R01/R02/... appear only once.
 
             if (doorTypeHeader) {
                 doorTypeHeader.classList.toggle('hidden', !showDoorType);
             }
 
-            count.textContent = `${displayRows.length} Process`;
+            count.textContent = currentLine === 'Door C' ? `${displayRows.length} Station` : `${displayRows.length} Process`;
 
             if (!displayRows.length) {
                 tbody.innerHTML = `<tr><td colspan="${showDoorType ? 5 : 4}" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
@@ -4187,7 +4294,7 @@
                 lobWpEditorPart = parsed.subPart;
 
                 if (line === 'Door C' && (getSelectedLobDoorCLine() === 'C-1' || getSelectedLobDoorCLine() === 'C-2')) {
-                    lobWpEditorDoorType = getSelectedLobDoorCType();
+                    lobWpEditorDoorType = getSelectedLobDoorCTypes()[0] || parsed.doorType;
                 } else {
                     lobWpEditorDoorType = parsed.doorType;
                 }
