@@ -918,7 +918,7 @@
                                     <option value="Line#1">Line#1</option>
                                     <option value="Line#2">Line#2</option>
                                 </select>
-                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model</div>
+                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · หลาย Product Group ใช้พนักงานชุดเดียวกัน</div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1019,6 +1019,7 @@
                                     <span class="text-[9px] font-bold text-fuchsia-300 bg-fuchsia-950/30 border border-fuchsia-500/20 px-3 py-1 rounded-lg">MULTI GROUP LAYOUT</span>
                                     <span class="text-[9px] font-bold text-emerald-300 bg-emerald-950/30 border border-emerald-500/20 px-3 py-1 rounded-lg">STRICT MODEL MAPPING</span>
                                     <span class="text-[9px] font-bold text-orange-300 bg-orange-950/30 border border-orange-500/20 px-3 py-1 rounded-lg">PLATE LINE SEPARATED</span>
+                                    <span class="text-[9px] font-bold text-sky-300 bg-sky-950/30 border border-sky-500/20 px-3 py-1 rounded-lg">SHARED EMPLOYEE</span>
                                     <button type="button" id="lobEditLayoutBtn" onclick="toggleLobLayoutEdit()"
                                         class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold">Edit Layout</button>
                                     <button type="button" id="lobSaveLayoutBtn" onclick="saveLobLayout()" disabled
@@ -2469,12 +2470,55 @@
             const groups = getSelectedLobModels().slice().sort();
             const groupKey = groups.length ? groups.join('||') : 'NO_GROUP';
 
-            // Back Plate / Bottom Plate are split by Master Model Line#1 / Line#2.
-            const plateLineKey = isLobPlateStation(line)
-                ? `::${getSelectedLobPlateLine()}`
-                : '';
+            // Back Plate / Bottom Plate:
+            // Line#1 employees and Line#2 employees are shared across Product Groups.
+            // Therefore the saved layout is COMMON per physical plate line.
+            if (isLobPlateStation(line)) {
+                return `haier_lob_plate_shared_employee_v2::${line}::${getSelectedLobPlateLine()}::COMMON`;
+            }
 
-            return `haier_lob_plate_line_layout_v1::${line}${plateLineKey}::${groupKey}`;
+            // Door lines can still have a different layout by selected Product Group set.
+            return `haier_lob_plate_shared_employee_v2::${line}::${groupKey}`;
+        }
+
+        function getUniqueLobLayoutRows(rows) {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+
+            // Door layouts keep the original behavior.
+            if (!isLobPlateStation(line)) return Array.isArray(rows) ? rows : [];
+
+            // Back/Bottom Plate:
+            // Multiple Product Groups on the same Line#1 or Line#2 use the same workers.
+            // Keep only one physical work point per station. If the same station has
+            // different CT between groups, retain the row with the highest CT.
+            const byStation = new Map();
+
+            (rows || []).forEach((row, index) => {
+                const station = String(row?.station || row?.part || row?.area || `Point ${index + 1}`).trim();
+                const key = station.toLowerCase().replace(/\s+/g, ' ');
+                const ct = Number(row?.ct ?? (
+                    (Number(row?.wt1) || 0) +
+                    (Number(row?.wt2) || 0) +
+                    (Number(row?.wt3) || 0) +
+                    (Number(row?.loss) || 0)
+                )) || 0;
+
+                if (!byStation.has(key)) {
+                    byStation.set(key, { ...row, station, ct });
+                    return;
+                }
+
+                const current = byStation.get(key);
+                const currentCt = Number(current?.ct) || 0;
+                if (ct > currentCt) {
+                    byStation.set(key, { ...row, station, ct });
+                }
+            });
+
+            return Array.from(byStation.values()).map((row, i) => ({
+                ...row,
+                no: i + 1
+            }));
         }
 
         function getDefaultLobLayout(rows) {
@@ -2577,7 +2621,7 @@
         }
 
         function renderLobEmployeeLayout(rows, takt) {
-            renderLobLayoutDesigner(rows);
+            renderLobLayoutDesigner(getUniqueLobLayoutRows(rows));
         }
 
         function renderLobLayoutDesigner(rows) {
@@ -2585,7 +2629,10 @@
             const summary = document.getElementById('lobLayoutSummary');
             if (!canvas || !summary) return;
 
-            summary.textContent = `${rows.length} Point`;
+            rows = getUniqueLobLayoutRows(rows);
+            summary.textContent = isLobPlateStation(document.getElementById('lobLineSelect')?.value || '')
+                ? `${rows.length} Shared Point`
+                : `${rows.length} Point`;
             updateLobLayoutEditUI();
 
             if (!rows.length) {
@@ -2770,12 +2817,14 @@
                 });
             });
 
-            return all.map((r, i) => ({
+            const rows = all.map((r, i) => ({
                 ...r,
                 no: i + 1,
                 wtTotal: (r.wt1 || 0) + (r.wt2 || 0) + (r.wt3 || 0),
                 ct: (r.wt1 || 0) + (r.wt2 || 0) + (r.wt3 || 0) + (r.loss || 0)
             }));
+
+            return getUniqueLobLayoutRows(rows);
         }
 
         function addLobLayoutObject(type) {
