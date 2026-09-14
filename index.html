@@ -83,6 +83,93 @@
 .lob-object-caption{pointer-events:none;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
 </style>
 
+
+<style>
+#lobLayoutCanvas::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    box-shadow:inset 0 0 0 2px rgba(59,130,246,.35);
+}
+.lob-layout-table{
+    border:1px solid #2563eb !important;
+    border-radius:4px !important;
+}
+.lob-layout-conveyor{
+    border:2px solid #3b82f6 !important;
+    background-image:repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,.03) 0px,
+        rgba(255,255,255,.03) 22px,
+        rgba(96,165,250,.10) 23px,
+        rgba(96,165,250,.10) 25px
+    );
+}
+</style>
+
+
+<style>
+/* Line Of Balance proportional dashboard layout */
+#tab-content-linebalance{
+    --lob-gap:16px;
+}
+#tab-content-linebalance .lob-layout-card{
+    width:64%;
+    float:left;
+    min-height:430px;
+}
+#tab-content-linebalance .lob-chart-card{
+    width:64%;
+    float:left;
+    clear:left;
+    min-height:355px;
+    margin-top:16px;
+}
+#tab-content-linebalance .lob-process-card{
+    width:calc(36% - 16px);
+    float:right;
+    min-height:430px;
+    max-height:430px;
+    overflow:auto;
+}
+#tab-content-linebalance .lob-summary-card{
+    width:calc(36% - 16px);
+    float:right;
+    min-height:355px;
+    margin-top:16px;
+}
+#tab-content-linebalance::after{
+    content:"";
+    display:block;
+    clear:both;
+}
+#tab-content-linebalance .lob-layout-card,
+#tab-content-linebalance .lob-chart-card,
+#tab-content-linebalance .lob-process-card,
+#tab-content-linebalance .lob-summary-card{
+    box-sizing:border-box;
+}
+#tab-content-linebalance .lob-chart-card canvas{
+    max-height:270px !important;
+}
+#tab-content-linebalance .lob-process-card table{
+    font-size:10px;
+}
+@media (max-width:1200px){
+    #tab-content-linebalance .lob-layout-card,
+    #tab-content-linebalance .lob-chart-card,
+    #tab-content-linebalance .lob-process-card,
+    #tab-content-linebalance .lob-summary-card{
+        width:100%;
+        float:none;
+        min-height:0;
+        max-height:none;
+        margin-top:16px;
+    }
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -415,7 +502,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Product ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วนพาร์ททั่วไป</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
                             &larr; กลับหน้า Dashboard หลัก
@@ -552,7 +639,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-bordercolor pb-1">
                         <div class="flex items-center space-x-1.5">
                             <div class="w-1 h-3.5 bg-amber-400 rounded-full"></div>
-                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Product ด่วน (Quick Selection) - ส่วน Part Door</h2>
+                            <h2 class="text-[11px] font-bold text-white tracking-wide">แถบควบคุมและเลือก Model ด่วน (Quick Selection) - ส่วน Part Door</h2>
                         </div>
                         <button onclick="switchTab('dashboard')" class="text-[10px] text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-bordercolor transition">
                             &larr; กลับหน้า Dashboard หลัก
@@ -725,7 +812,7 @@
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                                <label class="text-[9px] text-slate-400 block mb-1">Product</label>
+                                <label class="text-[9px] text-slate-400 block mb-1">Model</label>
                                 <select id="lobModelSelect" multiple size="5" onchange="updateLobSelectedModelCount(); renderLineBalancePage()"
                                     class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[220px] focus:outline-none">
                                 </select>
@@ -734,7 +821,7 @@
                                         class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-cyan-300">Select all</button>
                                     <button type="button" onclick="clearLobModels()"
                                         class="px-2 py-0.5 rounded bg-slate-700 text-[8px] text-slate-300">Clear</button>
-                                    <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 Product selected</span>
+                                    <span id="lobSelectedModelCount" class="text-[8px] text-slate-500 ml-1">0 selected</span>
                                 </div>
                             </div>
 
@@ -789,11 +876,11 @@
 
                 <!-- EMPLOYEE LAYOUT DESIGNER -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4 lob-layout-card">
                         <div>
                             <h3 class="text-sm font-bold text-white">Editable Line Layout</h3>
                             <p class="text-[9px] text-slate-400 mt-0.5">
-                                Layout แสดง Table, Conveyor และ Employee — กด Edit เพื่อย้าย/เพิ่ม/ลบ และกด Save Layout เพื่อบันทึกแยกตาม Line + Product
+                                Layout แสดง Table, Conveyor และ Employee — กด Edit เพื่อย้าย/เพิ่ม/ลบ และกด Save Layout เพื่อบันทึกแยกตาม Line + Model
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -838,14 +925,21 @@
                             <div class="md:col-span-4 flex items-end">
                                 <div class="text-[8px] leading-4 text-slate-500">
                                     ลาก = ย้ายตำแหน่ง • จุดมุมขวาล่าง = ปรับกว้าง/ยาว Table และ Conveyor • พนักงานลากไปวางจุดงานได้อิสระ
+                                    <br><span class="text-cyan-300">วัตถุจะ Snap เข้ากริด 10 px เพื่อให้ Layout เป็นสัดส่วนและแนวตรงกัน</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="rounded-xl border border-blue-950 bg-slate-950 overflow-auto shadow-inner">
-                        <div id="lobLayoutCanvas" class="relative min-w-[1100px] h-[460px] select-none"
-                            style="background-color:#07111f;background-image:linear-gradient(rgba(30,64,175,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(30,64,175,.16) 1px,transparent 1px);background-size:20px 20px;">
+                        <div id="lobLayoutCanvas" class="relative select-none"
+                            style="width:100%;height:360px;min-width:820px;background-color:#07111f;
+                            background-image:
+                            linear-gradient(rgba(59,130,246,.28) 1px,transparent 1px),
+                            linear-gradient(90deg,rgba(59,130,246,.28) 1px,transparent 1px),
+                            linear-gradient(rgba(30,64,175,.12) 1px,transparent 1px),
+                            linear-gradient(90deg,rgba(30,64,175,.12) 1px,transparent 1px);
+                            background-size:50px 50px,50px 50px,10px 10px,10px 10px;">
                         </div>
                     </div>
                 </section>
@@ -853,7 +947,7 @@
                 <!-- CHART + SUMMARY -->
                 <section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
                     <div class="xl:col-span-8 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 lob-chart-card">
                             <div>
                                 <h3 class="text-sm font-bold text-cyan-300">Line Balance Chart</h3>
                                 <p class="text-[9px] text-slate-400 mt-0.5">Cycle Time เทียบกับ Takt Time ของ Target UPH</p>
@@ -868,7 +962,7 @@
                         </div>
                     </div>
 
-                    <div class="xl:col-span-4 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
+                    <div class="xl:col-span-4 bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm lob-summary-card">
                         <h3 class="text-sm font-bold text-white mb-3">Balance Summary</h3>
                         <div id="lobBalanceSummary" class="space-y-2 text-xs"></div>
                     </div>
@@ -876,7 +970,7 @@
 
                 <!-- PROCESS TABLE -->
                 <section class="bg-cardbg p-5 rounded-2xl border border-bordercolor shadow-sm">
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-3 lob-process-card">
                         <div>
                             <h3 class="text-sm font-bold text-white">Process Detail Table</h3>
                             <p class="text-[9px] text-slate-400 mt-0.5">ข้อมูลดึงจาก Work Process & CT ที่บันทึกไว้</p>
@@ -888,7 +982,7 @@
                             <thead class="sticky top-0 z-20 bg-slate-900">
                                 <tr class="text-slate-300 border-b border-bordercolor">
                                     <th class="px-2 py-2 text-center w-12">No.</th>
-                                    <th class="px-2 py-2 whitespace-nowrap text-amber-300">Product</th>
+                                    <th class="px-2 py-2 whitespace-nowrap text-amber-300">Model</th>
                                     <th class="px-2 py-2 whitespace-nowrap">Part / Area</th>
                                     <th class="px-2 py-2 whitespace-nowrap">Station</th>
                                     <th class="px-2 py-2">Process</th>
@@ -1802,7 +1896,7 @@
         function updateLobSelectedModelCount() {
             const el = document.getElementById('lobSelectedModelCount');
             if (!el) return;
-            el.textContent = `${getSelectedLobModels().length} Product selected`;
+            el.textContent = `${getSelectedLobModels().length} selected`;
         }
 
         function selectAllLobModels() {
@@ -2024,10 +2118,10 @@
             const dataStatus = document.getElementById('lobDataStatus');
             if (dataStatus) {
                 if (rawRows.length > 0) {
-                    dataStatus.textContent = `${rawRows.length} Process / ${models.length} Product`;
+                    dataStatus.textContent = `${rawRows.length} Process / ${models.length} Model`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
-                    dataStatus.textContent = models.length ? 'No Process Data' : 'Select Product';
+                    dataStatus.textContent = models.length ? 'No Process Data' : 'Select Model';
                     dataStatus.className = 'text-[10px] font-bold text-rose-300 py-1.5 min-w-[90px]';
                 }
             }
@@ -2045,7 +2139,7 @@
             const balanceEff = totalMp > 0 && takt > 0 ? (totalLead / (totalMp * takt)) * 100 : 0;
 
             document.getElementById('lobKpiLine').textContent =
-                models.length > 1 ? `${line} · ${models.length} Products` : (line || '-');
+                models.length > 1 ? `${line} · ${models.length} Models` : (line || '-');
             document.getElementById('lobKpiTakt').textContent = `${takt.toFixed(1)} s`;
             document.getElementById('lobKpiMaxCt').textContent = maxCt ? `${maxCt.toFixed(1)} s` : '-';
             document.getElementById('lobKpiLead').textContent = totalLead ? `${totalLead.toFixed(1)} s` : '-';
@@ -2065,33 +2159,74 @@
         function getLobLayoutKey() {
             const line = document.getElementById('lobLineSelect')?.value || '';
             const models = getSelectedLobModels().slice().sort();
-            return `haier_lob_layout_v3::${line}::${models.join('||')}`;
+            return `haier_lob_layout_v4::${line}::${models.join('||')}`;
         }
 
         function getDefaultLobLayout(rows) {
-            const objects = [{
-                id:'conveyor_main', type:'conveyor',
-                x:80, y:190, w:900, h:58, label:'Conveyor', color:'#1e3a5f'
-            }];
+            // Dashboard proportion: 1000 × 360
+            // Conveyor centered, work points distributed evenly above/below.
+            const objects = [];
+            const canvasW = 1000;
+            const conveyorX = 55;
+            const conveyorY = 160;
+            const conveyorW = 890;
+            const conveyorH = 48;
 
-            const count = Math.max(rows.length, 1);
-            const step = count > 1 ? 790 / (count - 1) : 0;
-
-            rows.forEach((r, i) => {
-                const x = count === 1 ? 450 : Math.min(875, 85 + i * step);
-                const topSide = i % 2 === 0;
-
-                objects.push({
-                    id:`table_${i}`, type:'table',
-                    x:x, y:topSide ? 55 : 270,
-                    w:120, h:34, label:(r.model ? `${r.model} · ${r.station || `STA ${i+1}`}` : (r.station || `STA ${i+1}`)), color:'#0f2742', processIndex:i
-                });
-                objects.push({
-                    id:`employee_${i}`, type:'employee',
-                    x:x+18, y:topSide ? 98 : 215,
-                    w:46, h:46, label:(r.model ? `${r.model} · ${r.station || `P${i+1}`}` : (r.station || `P${i+1}`)), color:'#2563eb', processIndex:i
-                });
+            objects.push({
+                id:'conveyor_main',
+                type:'conveyor',
+                x:conveyorX, y:conveyorY,
+                w:conveyorW, h:conveyorH,
+                label:'Conveyor',
+                color:'#1e3a5f'
             });
+
+            if (!rows.length) return objects;
+
+            const topRows = rows.filter((_, i) => i % 2 === 0);
+            const bottomRows = rows.filter((_, i) => i % 2 === 1);
+
+            const placeRow = (list, isTop) => {
+                const n = Math.max(list.length, 1);
+                const left = 75;
+                const right = 875;
+                const step = n > 1 ? (right - left) / (n - 1) : 0;
+
+                list.forEach((r, localIndex) => {
+                    const originalIndex = rows.indexOf(r);
+                    const centerX = n === 1 ? 475 : left + localIndex * step;
+                    const tableX = Math.round((centerX - 55) / 10) * 10;
+                    const tableY = isTop ? 38 : 292;
+                    const empY = isTop ? 104 : 224;
+
+                    objects.push({
+                        id:`table_${originalIndex}`,
+                        type:'table',
+                        x:Math.max(10, Math.min(canvasW - 120, tableX)),
+                        y:tableY,
+                        w:110,
+                        h:34,
+                        label:(r.station || `STA ${originalIndex+1}`),
+                        color:'#0f2742',
+                        processIndex:originalIndex
+                    });
+
+                    objects.push({
+                        id:`employee_${originalIndex}`,
+                        type:'employee',
+                        x:Math.max(10, Math.min(canvasW - 50, tableX + 32)),
+                        y:empY,
+                        w:46,
+                        h:46,
+                        label:(r.station || `P${originalIndex+1}`),
+                        color:'#2563eb',
+                        processIndex:originalIndex
+                    });
+                });
+            };
+
+            placeRow(topRows, true);
+            placeRow(bottomRows, false);
             return objects;
         }
 
@@ -2132,7 +2267,7 @@
             updateLobLayoutEditUI();
 
             if (!rows.length) {
-                canvas.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">ไม่พบข้อมูล Process ของ Product นี้</div>`;
+                canvas.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">ไม่พบข้อมูล Process ของ Model นี้</div>`;
                 syncLobObjectEditor(null);
                 return;
             }
@@ -2322,10 +2457,10 @@
             const id = `${type}_${Date.now()}`;
             current.push({
                 id, type,
-                x:type==='conveyor'?100:120,
-                y:type==='conveyor'?155:100,
-                w:type==='conveyor'?500:(type==='table'?78:42),
-                h:type==='conveyor'?54:(type==='table'?30:42),
+                x:type==='conveyor'?100:150,
+                y:type==='conveyor'?270:150,
+                w:type==='conveyor'?500:(type==='table'?130:46),
+                h:type==='conveyor'?60:(type==='table'?50:46),
                 label:type==='conveyor'?'Conveyor':(type==='table'?'Table':'Employee'),
                 color:defaultLobColor(type),
                 processIndex:null
@@ -2341,6 +2476,11 @@
             localStorage.setItem(getLobLayoutKey(), JSON.stringify(current));
             lobSelectedObjectId = null;
             renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+
+        function snapLobValue(value, grid = 10) {
+            return Math.round(value / grid) * grid;
         }
 
         function lobObjectMouseDown(e) {
@@ -2381,15 +2521,15 @@
                 const minH = s.el.dataset.type === 'conveyor' ? 34 : 26;
                 const maxW = Math.max(minW, s.canvas.scrollWidth - s.left);
                 const maxH = Math.max(minH, s.canvas.clientHeight - s.top);
-                s.el.style.width = `${Math.max(minW, Math.min(maxW, s.width + dx))}px`;
-                s.el.style.height = `${Math.max(minH, Math.min(maxH, s.height + dy))}px`;
+                s.el.style.width = `${snapLobValue(Math.max(minW, Math.min(maxW, s.width + dx)))}px`;
+                s.el.style.height = `${snapLobValue(Math.max(minH, Math.min(maxH, s.height + dy)))}px`;
                 return;
             }
 
             const nx = Math.max(0, Math.min(s.canvas.scrollWidth-s.el.offsetWidth, s.left+dx));
             const ny = Math.max(0, Math.min(s.canvas.clientHeight-s.el.offsetHeight, s.top+dy));
-            s.el.style.left = `${nx}px`;
-            s.el.style.top = `${ny}px`;
+            s.el.style.left = `${snapLobValue(nx)}px`;
+            s.el.style.top = `${snapLobValue(ny)}px`;
         }
 
         function lobObjectMouseUp() {
@@ -2677,7 +2817,7 @@
             let groups = data.groups;
             let hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
-            let headerHtml = `<th class="p-3 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Product</th>`;
+            let headerHtml = `<th class="p-3 font-medium w-35 text-slate-300 bg-slate-900 sticky top-0 z-30">Product Group</th><th class="p-3 font-medium w-32 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             days.forEach(day => {
                 headerHtml += `<th class="p-3 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${day}</th>`;
             });
@@ -4020,7 +4160,7 @@
             const isPlateStation = (currentCapacityStation === 'Back Plate' || currentCapacityStation === 'Bottom Plate');
             const columns = isPlateStation ? ['Routing / Line'] : ['RR', 'RL', 'FR', 'FL', 'VEG', 'FB'];
 
-            let headerHtml = `<th class="px-1.5 py-2 font-medium w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Product</th>`;
+            let headerHtml = `<th class="px-1.5 py-2 font-medium w-24 text-slate-300 bg-slate-900 sticky top-0 z-30">Model</th>`;
             columns.forEach(col => {
                 if (isPlateStation) {
                     headerHtml += `<th class="p-2 font-medium text-center text-slate-300 bg-slate-900 sticky top-0 z-30">${col}</th>`;
