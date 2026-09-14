@@ -703,6 +703,11 @@
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Data</label>
+                                <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px]">-</div>
+                            </div>
+
+                            <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Target UPH</label>
                                 <input id="lobTargetUph" type="number" min="1" step="1" value="120"
                                     oninput="renderLineBalancePage()"
@@ -1594,27 +1599,80 @@
         let lineBalancePageChart = null;
 
         function getAllCurrentModels() {
-            const names = [];
+            const names = new Set();
+
+            // 1) Daily Plan
             if (currentDailyData && Array.isArray(currentDailyData.groups)) {
                 currentDailyData.groups.forEach(g => {
                     (g.models || []).forEach(m => {
-                        if (m && m.name && !names.includes(m.name)) names.push(m.name);
+                        if (m && m.name) names.add(String(m.name).trim());
                     });
                 });
             }
-            return names;
+
+            // 2) Master Model
+            Object.keys(masterModelConfig || {}).forEach(name => {
+                if (name) names.add(String(name).trim());
+            });
+
+            // 3) Normal Work Process DB: MODEL_Back Plate / Bottom Plate / Gasket
+            Object.keys(processDatabase || {}).forEach(key => {
+                const suffixes = ['_Back Plate', '_Bottom Plate', '_Gasket'];
+                const suffix = suffixes.find(s => key.endsWith(s));
+                if (suffix) {
+                    const model = key.slice(0, -suffix.length).trim();
+                    if (model) names.add(model);
+                }
+            });
+
+            // 4) Door Work Process DB: MODEL_Door (...)
+            Object.keys(doorProcessDatabase || {}).forEach(key => {
+                const idx = key.indexOf('_Door (');
+                if (idx > 0) {
+                    const model = key.slice(0, idx).trim();
+                    if (model) names.add(model);
+                }
+            });
+
+            return Array.from(names);
+        }
+
+        function modelHasLobProcessData(modelName, lineName) {
+            const target = normalizeModelName(modelName);
+
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                return Object.keys(processDatabase || {}).some(key => {
+                    const suffix = `_${lineName}`;
+                    if (!key.endsWith(suffix)) return false;
+                    const storedModel = key.slice(0, -suffix.length);
+                    return normalizeModelName(storedModel) === target &&
+                           Array.isArray(processDatabase[key]) &&
+                           processDatabase[key].length > 0;
+                });
+            }
+
+            return Object.keys(doorProcessDatabase || {}).some(key => {
+                const idx = key.indexOf('_Door (');
+                if (idx <= 0) return false;
+                const storedModel = key.slice(0, idx);
+                return normalizeModelName(storedModel) === target &&
+                       Array.isArray(doorProcessDatabase[key]) &&
+                       doorProcessDatabase[key].length > 0;
+            });
         }
 
         function modelMatchesLobLine(modelName, lineName) {
             const cfg = getMasterConfigForModel(modelName);
 
             if (lineName === 'Back Plate') {
-                return cfg.backPlateSource === 'ผลิตเอง';
+                return cfg.backPlateSource === 'ผลิตเอง' || modelHasLobProcessData(modelName, lineName);
             }
             if (lineName === 'Bottom Plate') {
-                return cfg.bottomSource === 'ผลิตเอง';
+                return cfg.bottomSource === 'ผลิตเอง' || modelHasLobProcessData(modelName, lineName);
             }
-            return cfg.station === lineName;
+
+            // Master Model is primary; saved Door Process is fallback so old data is not hidden.
+            return cfg.station === lineName || modelHasLobProcessData(modelName, lineName);
         }
 
         function initLineBalancePage() {
@@ -1639,7 +1697,12 @@
             const previous = modelSel.value;
             const models = getAllCurrentModels()
                 .filter(name => modelMatchesLobLine(name, line))
-                .sort((a, b) => a.localeCompare(b));
+                .sort((a, b) => {
+                    const aData = modelHasLobProcessData(a, line) ? 1 : 0;
+                    const bData = modelHasLobProcessData(b, line) ? 1 : 0;
+                    if (aData !== bData) return bData - aData;
+                    return a.localeCompare(b);
+                });
 
             modelSel.innerHTML = models.length
                 ? models.map(name => `<option value="${name.replace(/"/g, '&quot;')}">${name}</option>`).join('')
@@ -1652,38 +1715,53 @@
         function getLobProcessRows(lineName, modelName) {
             if (!modelName) return [];
             const rows = [];
+            const targetModel = normalizeModelName(modelName);
 
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
-                const key = `${modelName}_${lineName}`;
-                const list = processDatabase[key] || [];
-                list.forEach((item, idx) => {
-                    rows.push({
-                        area: lineName,
-                        station: item.station || `STA ${idx + 1}`,
-                        p1: item.p1 || '-',
-                        p2: item.p2 || '-',
-                        p3: item.p3 || '-',
-                        wt1: parseFloat(item.wt1) || 0,
-                        wt2: parseFloat(item.wt2) || 0,
-                        wt3: parseFloat(item.wt3) || 0,
-                        loss: parseFloat(item.loss) || 0
+                Object.keys(processDatabase || {}).forEach(key => {
+                    const suffix = `_${lineName}`;
+                    if (!key.endsWith(suffix)) return;
+
+                    const storedModel = key.slice(0, -suffix.length);
+                    if (normalizeModelName(storedModel) !== targetModel) return;
+
+                    const list = processDatabase[key];
+                    if (!Array.isArray(list)) return;
+
+                    list.forEach((item, idx) => {
+                        rows.push({
+                            area: lineName,
+                            station: item.station || `STA ${idx + 1}`,
+                            p1: item.p1 || '-',
+                            p2: item.p2 || '-',
+                            p3: item.p3 || '-',
+                            wt1: parseFloat(item.wt1) || 0,
+                            wt2: parseFloat(item.wt2) || 0,
+                            wt3: parseFloat(item.wt3) || 0,
+                            loss: parseFloat(item.loss) || 0
+                        });
                     });
                 });
                 return rows;
             }
 
-            // Door lines: collect all saved door-process records for this model.
-            const prefix = `${modelName}_Door (`;
-            Object.keys(doorProcessDatabase).forEach(key => {
-                if (!key.startsWith(prefix)) return;
+            // Door process keys are MODEL_Door (Process - DoorType).
+            // Match model names robustly instead of requiring exact spacing/case.
+            Object.keys(doorProcessDatabase || {}).forEach(key => {
+                const idx = key.indexOf('_Door (');
+                if (idx <= 0) return;
+
+                const storedModel = key.slice(0, idx);
+                if (normalizeModelName(storedModel) !== targetModel) return;
+
                 const list = doorProcessDatabase[key];
                 if (!Array.isArray(list) || !list.length) return;
 
-                let area = key.substring((modelName + '_').length);
-                list.forEach((item, idx) => {
+                const area = key.slice(idx + 1); // Door (...)
+                list.forEach((item, rowIdx) => {
                     rows.push({
                         area,
-                        station: item.station || `STA ${idx + 1}`,
+                        station: item.station || `STA ${rowIdx + 1}`,
                         p1: item.p1 || '-',
                         p2: item.p2 || '-',
                         p3: item.p3 || '-',
@@ -1770,7 +1848,19 @@
             const targetUph = Math.max(1, parseFloat(uphInput.value) || 120);
             const takt = 3600 / targetUph;
 
-            const rows = getLobProcessRows(line, model).map((r, i) => {
+            const rawRows = getLobProcessRows(line, model);
+            const dataStatus = document.getElementById('lobDataStatus');
+            if (dataStatus) {
+                if (rawRows.length > 0) {
+                    dataStatus.textContent = `${rawRows.length} Process`;
+                    dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
+                } else {
+                    dataStatus.textContent = 'No Process Data';
+                    dataStatus.className = 'text-[10px] font-bold text-rose-300 py-1.5 min-w-[90px]';
+                }
+            }
+
+            const rows = rawRows.map((r, i) => {
                 const wtTotal = r.wt1 + r.wt2 + r.wt3;
                 const ct = wtTotal + r.loss;
                 const reqMp = ct > 0 ? Math.max(1, Math.ceil(ct / takt)) : 0;
@@ -3817,6 +3907,11 @@
             let storageKey = selectedModel ? `${selectedModel}_${selectedPartValue}` : 'default';
             processDatabase[storageKey] = JSON.parse(JSON.stringify(currentProcessData));
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            if (document.getElementById('tab-content-linebalance') &&
+                !document.getElementById('tab-content-linebalance').classList.contains('hidden')) {
+                populateLobModelSelect();
+                renderLineBalancePage();
+            }
             
             renderSavedDisplayTable();
             updateLobChart();
@@ -3839,6 +3934,11 @@
             currentProcessData = [];
             delete processDatabase[storageKey];
             localStorage.setItem('haier_process_db_v7', JSON.stringify(processDatabase));
+            if (document.getElementById('tab-content-linebalance') &&
+                !document.getElementById('tab-content-linebalance').classList.contains('hidden')) {
+                populateLobModelSelect();
+                renderLineBalancePage();
+            }
 
             renderProcessTableInputs();
             renderSavedDisplayTable();
@@ -3949,6 +4049,11 @@
             let storageKey = selectedDoorModel ? `${selectedDoorModel}_${effectivePart}` : 'door_default';
             doorProcessDatabase[storageKey] = JSON.parse(JSON.stringify(currentDoorProcessData));
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            if (document.getElementById('tab-content-linebalance') &&
+                !document.getElementById('tab-content-linebalance').classList.contains('hidden')) {
+                populateLobModelSelect();
+                renderLineBalancePage();
+            }
             
             renderDoorSavedDisplayTable();
             updateDoorLobChart();
@@ -3973,6 +4078,11 @@
             currentDoorProcessData = [];
             delete doorProcessDatabase[storageKey];
             localStorage.setItem('haier_door_process_db_v1', JSON.stringify(doorProcessDatabase));
+            if (document.getElementById('tab-content-linebalance') &&
+                !document.getElementById('tab-content-linebalance').classList.contains('hidden')) {
+                populateLobModelSelect();
+                renderLineBalancePage();
+            }
 
             renderDoorProcessTableInputs();
             renderDoorSavedDisplayTable();
