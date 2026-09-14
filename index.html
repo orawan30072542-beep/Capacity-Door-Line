@@ -704,7 +704,13 @@
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Data</label>
-                                <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px]">-</div>
+                                <div class="flex items-center gap-2">
+                                    <div id="lobDataStatus" class="text-[10px] font-bold text-slate-400 py-1.5 min-w-[90px]">-</div>
+                                    <button type="button" onclick="populateLobModelSelect(); renderLineBalancePage();"
+                                        class="px-2 py-1 rounded-md bg-slate-800 border border-bordercolor text-[9px] text-cyan-300 hover:bg-slate-700">
+                                        Refresh
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -1678,6 +1684,17 @@
         function initLineBalancePage() {
             const lineSel = document.getElementById('lobLineSelect');
             if (!lineSel) return;
+
+            // Open with the process context the user was working on.
+            if (selectedPartValue === 'Back Plate' || selectedPartValue === 'Bottom Plate') {
+                lineSel.value = selectedPartValue;
+            } else if (selectedDoorModel) {
+                const cfg = getMasterConfigForModel(selectedDoorModel);
+                if (['Door A', 'Door B', 'Door C', 'Door Glass'].includes(cfg.station)) {
+                    lineSel.value = cfg.station;
+                }
+            }
+
             populateLobModelSelect();
             ensureLineBalanceChart();
             renderLineBalancePage();
@@ -1695,7 +1712,9 @@
 
             const line = lineSel.value;
             const previous = modelSel.value;
-            const models = getAllCurrentModels()
+
+            const allModels = getAllCurrentModels();
+            let models = allModels
                 .filter(name => modelMatchesLobLine(name, line))
                 .sort((a, b) => {
                     const aData = modelHasLobProcessData(a, line) ? 1 : 0;
@@ -1704,64 +1723,46 @@
                     return a.localeCompare(b);
                 });
 
+            // Routing/Master บางรุ่นอาจยังไม่ได้ตั้งค่า:
+            // ถ้า Filter แล้วไม่เหลือ Model ให้แสดง Model ทั้งหมดแทน เพื่อไม่ให้หน้า LOB ว่าง
+            if (!models.length) {
+                models = allModels.sort((a, b) => {
+                    const aData = modelHasLobProcessData(a, line) ? 1 : 0;
+                    const bData = modelHasLobProcessData(b, line) ? 1 : 0;
+                    if (aData !== bData) return bData - aData;
+                    return a.localeCompare(b);
+                });
+            }
+
             modelSel.innerHTML = models.length
                 ? models.map(name => `<option value="${name.replace(/"/g, '&quot;')}">${name}</option>`).join('')
-                : `<option value="">ไม่มี Model ใน Line นี้</option>`;
+                : `<option value="">ไม่มี Model</option>`;
 
-            if (models.includes(previous)) modelSel.value = previous;
-            else if (models.length) modelSel.value = models[0];
+            if (models.includes(previous)) {
+                modelSel.value = previous;
+            } else {
+                // Prefer the model currently open in Work Process / Door Part page.
+                const preferred = line === 'Back Plate' || line === 'Bottom Plate'
+                    ? selectedModel
+                    : selectedDoorModel;
+
+                if (preferred && models.includes(preferred)) modelSel.value = preferred;
+                else if (models.length) modelSel.value = models[0];
+            }
         }
 
         function getLobProcessRows(lineName, modelName) {
             if (!modelName) return [];
+
             const rows = [];
             const targetModel = normalizeModelName(modelName);
 
-            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
-                Object.keys(processDatabase || {}).forEach(key => {
-                    const suffix = `_${lineName}`;
-                    if (!key.endsWith(suffix)) return;
-
-                    const storedModel = key.slice(0, -suffix.length);
-                    if (normalizeModelName(storedModel) !== targetModel) return;
-
-                    const list = processDatabase[key];
-                    if (!Array.isArray(list)) return;
-
-                    list.forEach((item, idx) => {
-                        rows.push({
-                            area: lineName,
-                            station: item.station || `STA ${idx + 1}`,
-                            p1: item.p1 || '-',
-                            p2: item.p2 || '-',
-                            p3: item.p3 || '-',
-                            wt1: parseFloat(item.wt1) || 0,
-                            wt2: parseFloat(item.wt2) || 0,
-                            wt3: parseFloat(item.wt3) || 0,
-                            loss: parseFloat(item.loss) || 0
-                        });
-                    });
-                });
-                return rows;
-            }
-
-            // Door process keys are MODEL_Door (Process - DoorType).
-            // Match model names robustly instead of requiring exact spacing/case.
-            Object.keys(doorProcessDatabase || {}).forEach(key => {
-                const idx = key.indexOf('_Door (');
-                if (idx <= 0) return;
-
-                const storedModel = key.slice(0, idx);
-                if (normalizeModelName(storedModel) !== targetModel) return;
-
-                const list = doorProcessDatabase[key];
-                if (!Array.isArray(list) || !list.length) return;
-
-                const area = key.slice(idx + 1); // Door (...)
-                list.forEach((item, rowIdx) => {
+            const pushRows = (list, area) => {
+                if (!Array.isArray(list)) return;
+                list.forEach((item, idx) => {
                     rows.push({
-                        area,
-                        station: item.station || `STA ${rowIdx + 1}`,
+                        area: area || '-',
+                        station: item.station || `STA ${idx + 1}`,
                         p1: item.p1 || '-',
                         p2: item.p2 || '-',
                         p3: item.p3 || '-',
@@ -1771,7 +1772,58 @@
                         loss: parseFloat(item.loss) || 0
                     });
                 });
+            };
+
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                // A) Saved Work Process DB
+                Object.keys(processDatabase || {}).forEach(key => {
+                    const suffix = `_${lineName}`;
+                    if (!key.endsWith(suffix)) return;
+                    const storedModel = key.slice(0, -suffix.length);
+                    if (normalizeModelName(storedModel) !== targetModel) return;
+                    pushRows(processDatabase[key], lineName);
+                });
+
+                // B) Current editor data that is already visible in Work Process page
+                if (!rows.length &&
+                    normalizeModelName(selectedModel || '') === targetModel &&
+                    selectedPartValue === lineName &&
+                    Array.isArray(currentProcessData)) {
+                    pushRows(currentProcessData, lineName);
+                }
+
+                return rows;
+            }
+
+            // Door A / B / C / Door Glass:
+            // saved Door Process DB uses keys MODEL_Door (Sub Part - Door Type)
+            Object.keys(doorProcessDatabase || {}).forEach(key => {
+                const idx = key.indexOf('_Door (');
+                if (idx <= 0) return;
+                const storedModel = key.slice(0, idx);
+                if (normalizeModelName(storedModel) !== targetModel) return;
+                pushRows(doorProcessDatabase[key], key.slice(idx + 1));
             });
+
+            // Current Door Part editor rows as fallback
+            if (!rows.length &&
+                normalizeModelName(selectedDoorModel || '') === targetModel &&
+                Array.isArray(currentDoorProcessData)) {
+                const area = `Door (${selectedDoorSubPart || '-'} - ${selectedDoorType || '-'})`;
+                pushRows(currentDoorProcessData, area);
+            }
+
+            // Final fallback:
+            // If this model only has normal Work Process data, show it rather than a blank page.
+            if (!rows.length) {
+                Object.keys(processDatabase || {}).forEach(key => {
+                    const split = key.lastIndexOf('_');
+                    if (split <= 0) return;
+                    const storedModel = key.slice(0, split);
+                    if (normalizeModelName(storedModel) !== targetModel) return;
+                    pushRows(processDatabase[key], key.slice(split + 1));
+                });
+            }
 
             return rows;
         }
@@ -1852,7 +1904,7 @@
             const dataStatus = document.getElementById('lobDataStatus');
             if (dataStatus) {
                 if (rawRows.length > 0) {
-                    dataStatus.textContent = `${rawRows.length} Process`;
+                    dataStatus.textContent = `${rawRows.length} Process Loaded`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
                     dataStatus.textContent = 'No Process Data';
@@ -1897,7 +1949,7 @@
             if (!rows.length) {
                 box.innerHTML = `
                     <div class="w-full min-h-[130px] flex items-center justify-center text-slate-500 text-xs border border-dashed border-slate-700 rounded-xl">
-                        ยังไม่มีข้อมูล Work Process & CT สำหรับ Model นี้
+                        ไม่พบ Process ของ Model นี้ — กรุณาบันทึกข้อมูลใน Work Process / Door Part Quick Selection ก่อน
                     </div>`;
                 return;
             }
