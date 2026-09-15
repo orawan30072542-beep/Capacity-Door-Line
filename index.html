@@ -1605,12 +1605,13 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </div>
 
                                                         <div id="lobDoorCFoamLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                                <label class="text-[9px] text-slate-400 block mb-1">Door Foam Line</label>
+                                <label class="text-[9px] text-slate-400 block mb-1">Door Foam Data Line <span class="text-cyan-400">· Shared Layout</span></label>
                                 <select id="lobDoorCFoamLineSelect" onchange="onLobDoorCFoamLineChange()"
                                     class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
                                     <option value="Main Line">Main Line</option>
                                     <option value="RL Line">RL Line</option>
                                 </select>
+                                <div class="mt-1 text-[8px] text-slate-500">สลับเฉพาะ Graph / Table — Layout ใช้ร่วมกัน</div>
                             </div>
 
 <div id="lobDoorCTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -4114,9 +4115,9 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 }
 
                 // Door Foam is independent from C-1/C-2/C-3.
-                // It has only Main Line and RL Line, each with its own Layout.
-                const foamLine = getSelectedLobDoorCFoamLine();
-                return `haier_lob_layout_shared_v4_Door_C_Door_Foam_${foamLine.replace(/[^A-Za-z0-9_-]/g, '_')}`;
+                // Main Line and RL Line SHARE ONE Layout.
+                // Only graph/table data switches between Main Line and RL Line.
+                return 'haier_lob_layout_shared_v4_Door_C_Door_Foam';
             }
 
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
@@ -4513,7 +4514,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
             if (lineName === 'Door C') {
                 physicalLine += getSelectedLobDoorProcessArea() === 'Door Foam'
-                    ? ` Door Foam · ${getSelectedLobDoorCFoamLine()}`
+                    ? ` Door Foam · Shared Layout (Main Line + RL Line)`
                     : ` Door Bend · ${getSelectedLobDoorCLine() || 'C-1'}`;
             } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
                 physicalLine += ` ${document.getElementById('lobPlateLineSelect')?.value || 'Line#1'}`;
