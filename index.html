@@ -286,6 +286,100 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 .mp-inner-ok { color:#86efac !important; font-weight:900 !important; }
 .mp-inner-warn { color:#fde68a !important; font-weight:900 !important; }
 
+
+/* ===== MATCH INNER TEXT TO SECTION 2 SUMMARY TABLE ===== */
+#tab-content-manpower table,
+#tab-content-capacity table,
+.mp-clear-section table {
+    color: #eaf2ff !important;
+}
+
+/* Column names: clear blue-white like Section 2 */
+#tab-content-manpower table thead th,
+#tab-content-capacity table thead th,
+.mp-clear-section table thead th {
+    color: #dbeafe !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
+    letter-spacing: .01em !important;
+}
+
+/* Main data: bright white, no faded gray */
+#tab-content-manpower table tbody td,
+#tab-content-capacity table tbody td,
+.mp-clear-section table tbody td {
+    color: #f8fafc !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+}
+
+/* Internal labels/cards */
+#tab-content-manpower .text-xs,
+#tab-content-manpower .text-sm,
+#tab-content-capacity .text-xs,
+#tab-content-capacity .text-sm,
+.mp-clear-section .text-xs,
+.mp-clear-section .text-sm {
+    opacity: 1 !important;
+}
+
+/* Previously-muted internal text should remain readable */
+#tab-content-manpower .text-gray-300,
+#tab-content-manpower .text-gray-400,
+#tab-content-manpower .text-gray-500,
+#tab-content-manpower .text-slate-300,
+#tab-content-manpower .text-slate-400,
+#tab-content-manpower .text-slate-500,
+#tab-content-capacity .text-gray-300,
+#tab-content-capacity .text-gray-400,
+#tab-content-capacity .text-gray-500,
+#tab-content-capacity .text-slate-300,
+#tab-content-capacity .text-slate-400,
+#tab-content-capacity .text-slate-500,
+.mp-clear-section .text-gray-300,
+.mp-clear-section .text-gray-400,
+.mp-clear-section .text-gray-500,
+.mp-clear-section .text-slate-300,
+.mp-clear-section .text-slate-400,
+.mp-clear-section .text-slate-500 {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+    font-weight: 650 !important;
+}
+
+/* Important numeric values */
+#tab-content-manpower .font-bold,
+#tab-content-manpower .font-semibold,
+#tab-content-capacity .font-bold,
+#tab-content-capacity .font-semibold,
+.mp-clear-section .font-bold,
+.mp-clear-section .font-semibold {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Inputs/selects same clarity as Section 2 */
+#tab-content-manpower input,
+#tab-content-manpower select,
+#tab-content-capacity input,
+#tab-content-capacity select,
+.mp-clear-section input,
+.mp-clear-section select {
+    color: #f8fafc !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+}
+
+/* Clear row separation without making headings louder */
+#tab-content-manpower table tbody tr,
+#tab-content-capacity table tbody tr,
+.mp-clear-section table tbody tr {
+    border-bottom: 1px solid rgba(71,85,105,.42) !important;
+}
+
 </style>
 
 <style>
