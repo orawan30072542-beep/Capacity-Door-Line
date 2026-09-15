@@ -1306,7 +1306,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div>
                                     <h3 class="text-sm font-bold text-white">Editable Line Layout</h3>
                                     <p class="text-[9px] text-slate-400 mt-0.5">
-                                        Table, Conveyor และ Employee สามารถลากย้าย ปรับขนาด เปลี่ยนสี และบันทึก Layout ได้
+                                        Table และ Conveyor สามารถลากย้าย ปรับขนาด เปลี่ยนสี หมุน 90° และบันทึก Layout ได้ • Employee สามารถลากย้ายได้
                                     </p>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
@@ -1357,9 +1357,19 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                             <button onclick="applyLobPresetColor('#0891b2')" class="w-6 h-6 rounded bg-cyan-600 border border-cyan-400"></button>
                                         </div>
                                     </div>
-                                    <div class="md:col-span-4 flex items-end">
-                                        <div class="text-[8px] leading-4 text-slate-500">
-                                            ลากเพื่อย้ายตำแหน่ง • มุมขวาล่างใช้ปรับขนาด Table / Conveyor
+                                    <div class="md:col-span-4">
+                                        <label class="text-[8px] text-slate-500 block mb-1">Rotate Table / Conveyor</label>
+                                        <div class="flex items-center gap-1">
+                                            <button type="button" onclick="rotateSelectedLobObject(-90)"
+                                                class="px-2 py-1 rounded-lg border border-cyan-600/40 bg-cyan-950/30 text-[9px] text-cyan-300">↶ -90°</button>
+                                            <button type="button" onclick="rotateSelectedLobObject(90)"
+                                                class="px-2 py-1 rounded-lg border border-cyan-600/40 bg-cyan-950/30 text-[9px] text-cyan-300">↷ +90°</button>
+                                            <button type="button" onclick="rotateSelectedLobObject(0, true)"
+                                                class="px-2 py-1 rounded-lg border border-slate-600 bg-slate-900 text-[9px] text-slate-300">0°</button>
+                                            <span id="lobObjectRotationLabel" class="text-[9px] font-bold text-amber-300 ml-1">-</span>
+                                        </div>
+                                        <div class="text-[8px] leading-4 text-slate-500 mt-1">
+                                            เลือก Table / Conveyor แล้วหมุนได้ทีละ 90°
                                         </div>
                                     </div>
                                 </div>
@@ -3687,7 +3697,8 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 w:conveyorW,
                 h:conveyorH,
                 label:'Conveyor',
-                color:'#1e3a5f'
+                color:'#1e3a5f',
+                rotation:0
             });
 
             if (!rows.length) return objects;
@@ -3725,6 +3736,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                     h:tableH,
                     label:(r.station || `STA ${i+1}`),
                     color:'#0f2742',
+                    rotation:0,
                     processIndex:i
                 });
 
@@ -3756,6 +3768,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 h:parseFloat(el.style.height)||el.offsetHeight,
                 label:el.dataset.label||'',
                 color:el.dataset.color||'',
+                rotation:Number(el.dataset.rotation || 0),
                 processIndex:el.dataset.processIndex !== '' ? Number(el.dataset.processIndex) : null
             }));
         }
@@ -3807,6 +3820,12 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 el.style.top = `${obj.y}px`;
                 el.style.width = `${obj.w}px`;
                 el.style.height = `${obj.h}px`;
+                const objRotation = Number(obj.rotation || 0);
+                el.dataset.rotation = String(objRotation);
+                if (obj.type === 'table' || obj.type === 'conveyor') {
+                    el.style.transform = `rotate(${objRotation}deg)`;
+                    el.style.transformOrigin = 'center center';
+                }
 
                 if (obj.type === 'employee') {
                     el.innerHTML = `
@@ -3884,6 +3903,11 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 colorInput.value = el ? (el.dataset.color || defaultLobColor(el.dataset.type)) : '#1e3a5f';
                 colorInput.disabled = !el;
             }
+            const rotationLabel = document.getElementById('lobObjectRotationLabel');
+            if (rotationLabel) {
+                const canRotate = !!el && (el.dataset.type === 'table' || el.dataset.type === 'conveyor');
+                rotationLabel.textContent = canRotate ? `${Number(el.dataset.rotation || 0)}°` : '-';
+            }
         }
 
         function getSelectedLobElement() {
@@ -3921,6 +3945,23 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             const input = document.getElementById('lobObjectColorInput');
             if (input) input.value = color;
             updateSelectedLobObjectColor(color);
+        }
+
+        function rotateSelectedLobObject(delta = 90, reset = false) {
+            if (!lobLayoutEditMode) return;
+            const el = getSelectedLobElement();
+            if (!el || !['table', 'conveyor'].includes(el.dataset.type)) return;
+
+            let current = Number(el.dataset.rotation || 0);
+            let next = reset ? 0 : current + Number(delta || 0);
+            next = ((next % 360) + 360) % 360;
+
+            el.dataset.rotation = String(next);
+            el.style.transform = `rotate(${next}deg)`;
+            el.style.transformOrigin = 'center center';
+
+            const rotationLabel = document.getElementById('lobObjectRotationLabel');
+            if (rotationLabel) rotationLabel.textContent = `${next}°`;
         }
 
         function updateLobLayoutEditUI() {
@@ -3990,6 +4031,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 h:type==='conveyor'?60:(type==='table'?50:46),
                 label:type==='conveyor'?'Conveyor':(type==='table'?'Table':'Employee'),
                 color:defaultLobColor(type),
+                rotation:0,
                 processIndex:null
             });
             localStorage.setItem(getLobLayoutKey(), JSON.stringify(current));
