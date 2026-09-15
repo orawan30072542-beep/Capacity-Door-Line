@@ -1231,7 +1231,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <option value="Line#1">Line#1</option>
                                     <option value="Line#2">Line#2</option>
                                 </select>
-                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · หลาย Product Group ใช้พนักงานชุดเดียวกัน</div>
+                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · Layout ใช้ร่วมกันทุกรุ่น / ทุก Product Group</div>
                             </div>
 
                             <div id="lobDoorCLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -3626,21 +3626,34 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
         let lobDragState = null;
 
         function getLobLayoutKey() {
-            const line = document.getElementById('lobLineSelect')?.value || 'ALL';
-            const groups = getSelectedLobModels().slice().sort();
-            const groupKey = groups.length ? groups.join('||') : 'NO_GROUP';
+            const lineName = document.getElementById('lobLineSelect')?.value || 'Door A';
 
-            // Back / Bottom Plate share one physical Layout per Line#1 / Line#2.
-            if (isLobPlateStation(line)) {
-                return `haier_lob_master_workprocess_avg_v2::${line}::${getSelectedLobPlateLine()}::COMMON`;
+            // Layout A / B / C ใช้ร่วมกันทุกรุ่นและทุก Product Group
+            // เหมือนแนวคิด Shared Layout ของ Door C:
+            // เปลี่ยน Model / Product Group แล้วตำแหน่ง Table, Conveyor, Employee ไม่เปลี่ยน
+            if (lineName === 'Door A') {
+                return 'haier_lob_layout_shared_v4_Door_A';
+            }
+            if (lineName === 'Door B') {
+                return 'haier_lob_layout_shared_v4_Door_B';
+            }
+            if (lineName === 'Door C') {
+                const cLine = getSelectedLobDoorCLine() || 'C-1';
+                return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
             }
 
-            // Door C: save a completely separate Layout for C-1 / C-2 / C-3.
-            if (line === 'Door C') {
-                return `haier_lob_master_workprocess_avg_v2::Door C::${getSelectedLobDoorCLine()}::COMMON`;
+            // Back Plate / Bottom Plate ยังแยกตาม Physical Line
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                const plateLine = document.getElementById('lobPlateLineSelect')?.value || 'Line#1';
+                return `haier_lob_layout_shared_v4_${lineName.replace(/\s+/g, '_')}_${plateLine.replace(/[^A-Za-z0-9_-]/g, '_')}`;
             }
 
-            return `haier_lob_master_workprocess_avg_v2::${line}::${groupKey}`;
+            // Door Glass ใช้ Layout เดียวร่วมกันทุกรุ่น
+            if (lineName === 'Door Glass') {
+                return 'haier_lob_layout_shared_v4_Door_Glass';
+            }
+
+            return `haier_lob_layout_shared_v4_${lineName.replace(/\s+/g, '_')}`;
         }
 
         function getUniqueLobLayoutRows(rows) {
