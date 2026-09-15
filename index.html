@@ -179,6 +179,15 @@
 .lob-layout-fullscreen #lobLayoutCanvas { height:calc(100vh - 180px)!important; min-height:calc(100vh - 180px)!important; max-height:calc(100vh - 180px)!important; overflow:hidden!important; }
 @media(max-width:1024px){:root{--lob-layout-height:300px;--lob-chart-height:440px;}}
 @media(max-width:640px){:root{--lob-layout-height:250px;--lob-chart-height:360px;}}
+
+/* Manpower & Capacity — clearer typography and section colors */
+.mp-overview-title{color:#fff!important;font-size:22px!important;font-weight:900!important}
+.mp-actual-header{background:linear-gradient(90deg,rgba(6,182,212,.25),rgba(8,47,73,.08))!important;border:1px solid rgba(34,211,238,.38)!important;border-left:5px solid #22d3ee!important;border-radius:12px!important;padding:13px 16px!important;color:#ecfeff!important;font-size:18px!important;font-weight:900!important;margin:12px 0!important}
+.mp-capacity-header{background:linear-gradient(90deg,rgba(37,99,235,.30),rgba(30,58,138,.08))!important;border:1px solid rgba(96,165,250,.40)!important;border-left:5px solid #60a5fa!important;border-radius:12px!important;padding:13px 16px!important;color:#eff6ff!important;font-size:18px!important;font-weight:900!important;margin:16px 0 12px!important}
+.mp-actual-header::before{content:"ACTUAL";display:inline-block;margin-right:10px;padding:4px 8px;border-radius:7px;background:rgba(6,182,212,.18);border:1px solid rgba(34,211,238,.42);color:#67e8f9;font-size:10px;font-weight:900;letter-spacing:.08em}
+.mp-capacity-header::before{content:"03";display:inline-flex;align-items:center;justify-content:center;width:29px;height:29px;margin-right:9px;border-radius:8px;background:rgba(59,130,246,.20);border:1px solid rgba(96,165,250,.50);color:#bfdbfe;font-size:12px;font-weight:900}
+div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacity-header),section:has(>.mp-capacity-header){border:1px solid rgba(56,189,248,.22)!important;border-radius:16px!important;padding:14px!important;margin-bottom:18px!important;background:rgba(2,12,27,.34)!important}
+
 </style>
 
 <style>
@@ -766,7 +775,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         <div>
                             <div class="flex items-center gap-2">
                                 <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
-                                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Actual</h2>
+                                <h2 class="mp-overview-title text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Actual</h2>
                             <p class="text-[10px] text-slate-400 mt-1">
                                 จัดข้อมูลเป็น 4 โซน: Order Plan → Capacity → Manpower (In + Out) → Result / Risk
                             </p>
@@ -934,7 +943,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
+                            <h2 class="mp-capacity-header text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
                             <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
