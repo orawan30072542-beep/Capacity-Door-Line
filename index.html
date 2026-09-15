@@ -4135,28 +4135,11 @@ function updateLobSubLineVisibility() {
                     : 'haier_lob_layout_shared_v4_Door_B';
             }
             if (lineName === 'Door C') {
-                // IMPORTANT: Door Bend and Door Foam use completely separate Layout storage.
-                // Door Bend keeps the original C-1/C-2/C-3 Layouts unchanged.
-                if (processArea === 'Door Bend') {
-                    const cLine = getSelectedLobDoorCLine() || 'C-1';
-                    return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
-                }
-
-                // Door Foam has its own Layout, independent from Door Bend.
-                // RR / RL / VEG / FB switch only graph/table data and share this Foam Layout.
-                if (processArea === 'Door Foam') {
-                    return 'haier_lob_layout_shared_v5_Door_C_Door_Foam_ONLY';
-                }
-
-                const cLine = getSelectedLobDoorCLine() || 'C-1';
-                return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
+                // ONE shared Layout for every Door C view.
+                // Door Bend C-1/C-2/C-3 and Door Foam RR/RL/VEG/FB
+                // change only graph/table data, not the Layout.
+                return 'haier_lob_layout_shared_v6_Door_C_ALL';
             }
-
-            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
-                const plateLine = document.getElementById('lobPlateLineSelect')?.value || 'Line#1';
-                return `haier_lob_layout_shared_v4_${lineName.replace(/\s+/g, '_')}_${plateLine.replace(/[^A-Za-z0-9_-]/g, '_')}`;
-            }
-
             if (lineName === 'Door Glass') {
                 return processArea === 'Door Glass'
                     ? 'haier_lob_layout_shared_v4_Door_Glass_Door_Glass'
@@ -4545,9 +4528,7 @@ function updateLobSubLineVisibility() {
             let physicalLine = lineName;
 
             if (lineName === 'Door C') {
-                physicalLine += getSelectedLobDoorProcessArea() === 'Door Foam'
-                    ? ` Door Foam Layout · Shared RR / RL / VEG / FB`
-                    : ` Door Bend · ${getSelectedLobDoorCLine() || 'C-1'}`;
+                physicalLine += ` · One Shared Layout (Door Bend + Door Foam)`;
             } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
                 physicalLine += ` ${document.getElementById('lobPlateLineSelect')?.value || 'Line#1'}`;
             }
