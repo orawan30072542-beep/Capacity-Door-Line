@@ -97,6 +97,49 @@
             width: 100% !important;
         }
 
+
+        /* ===== LOB 50:50 HEIGHT =====
+           Editable Line Layout = 50%
+           Line of Balance & Takt Time Analysis = 50%
+        */
+        :root { --lob-half-height: 520px; }
+
+        #lobLayoutCanvas {
+            height: var(--lob-half-height) !important;
+            min-height: var(--lob-half-height) !important;
+            max-height: var(--lob-half-height) !important;
+            overflow: auto !important;
+        }
+
+        /* Chart canvas gets exactly the same visual height as Layout */
+        #lineBalancePageChart {
+            height: var(--lob-half-height) !important;
+            min-height: var(--lob-half-height) !important;
+            max-height: var(--lob-half-height) !important;
+            width: 100% !important;
+        }
+
+        /* Keep Chart.js from forcing its own aspect-ratio height */
+        #lineBalancePageChart.canvas,
+        canvas#lineBalancePageChart {
+            height: var(--lob-half-height) !important;
+        }
+
+        @media (max-width: 1024px) {
+            :root { --lob-half-height: 440px; }
+        }
+
+        @media (max-width: 640px) {
+            :root { --lob-half-height: 360px; }
+        }
+
+        /* Full Layout mode remains truly full screen */
+        .lob-layout-fullscreen #lobLayoutCanvas {
+            height: calc(100vh - 180px) !important;
+            min-height: calc(100vh - 180px) !important;
+            max-height: none !important;
+        }
+
 </style>
 
 <style>
