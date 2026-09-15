@@ -1327,6 +1327,10 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                         class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-[10px] font-bold">Save Layout</button>
                                     <button type="button" id="lobResetLayoutBtn" onclick="resetLobLayout()" disabled
                                         class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 text-white text-[10px] font-bold">Auto Layout</button>
+                                            <button type="button" onclick="clearCurrentLobLayout()"
+                                                class="px-3 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-500/40 text-[10px] font-semibold transition">
+                                                ล้าง Layout
+                                            </button>
                                 </div>
                             </div>
 
@@ -3994,6 +3998,42 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             lobLayoutEditMode = !lobLayoutEditMode;
             lobSelectedObjectId = null;
             renderLobLayoutDesigner(getCurrentLobRowsForLayout());
+        }
+
+        function clearCurrentLobLayout() {
+            const layoutKey = getLobLayoutKey();
+            const lineName = document.getElementById('lobLineSelect')?.value || 'Current Line';
+            let physicalLine = lineName;
+            if (lineName === 'Door C') {
+                physicalLine += ` ${getSelectedLobDoorCLine() || 'C-1'}`;
+            } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+                physicalLine += ` ${document.getElementById('lobPlateLineSelect')?.value || 'Line#1'}`;
+            }
+
+            if (!window.confirm(
+                `ล้าง Layout ของ ${physicalLine} ?\n\n` +
+                `Table, Conveyor, Employee และตำแหน่งที่บันทึกไว้จะถูกลบทั้งหมด\n` +
+                `ข้อมูล Work Process / CT จะไม่ถูกลบ`
+            )) return;
+
+            // Delete only the saved visual layout of the selected physical line.
+            localStorage.removeItem(layoutKey);
+            lobSelectedObjectId = null;
+
+            // Clear the canvas, then rebuild the default layout from current process data.
+            const canvas = document.getElementById('lobLayoutCanvas');
+            if (canvas) canvas.innerHTML = '';
+
+            try {
+                renderLineBalancePage();
+            } catch (err) {
+                console.warn('Clear Layout refresh:', err);
+            }
+
+            // Keep layout editing active so a new layout can be created immediately.
+            if (!lobLayoutEditMode) {
+                try { toggleLobLayoutEdit(); } catch (err) {}
+            }
         }
 
         function saveLobLayout() {
