@@ -40,7 +40,64 @@
             width: 100%;
             height: 480px;
         }
-    </style>
+    
+        /* ===== FULL DATA / FULL WIDTH MODE ===== */
+        #mainContent, main, .main-content {
+            width: 100% !important;
+            max-width: none !important;
+        }
+        #tab-content-linebalance {
+            width: 100% !important;
+            max-width: none !important;
+        }
+        #tab-content-linebalance .max-w-7xl,
+        #tab-content-linebalance .max-w-6xl,
+        #tab-content-linebalance .max-w-5xl,
+        #tab-content-linebalance .max-w-4xl {
+            max-width: none !important;
+            width: 100% !important;
+        }
+        #lobLayoutCanvas {
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 680px !important;
+        }
+        #tab-content-linebalance table {
+            width: 100% !important;
+        }
+        .lob-full-data-scroll {
+            overflow-x: auto !important;
+            width: 100% !important;
+        }
+        @media (min-width: 1280px) {
+            #tab-content-linebalance {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+
+
+        .lob-layout-fullscreen {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 9998 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            background: #020617 !important;
+            padding: 12px !important;
+            overflow: auto !important;
+        }
+        .lob-layout-fullscreen #lobLayoutCanvas {
+            min-height: calc(100vh - 180px) !important;
+            height: calc(100vh - 180px) !important;
+            width: 100% !important;
+        }
+
+</style>
 
 <style>
 #tableManpowerCapacity thead th{
@@ -874,7 +931,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             
 
             <!-- 5. LINE OF BALANCE PAGE -->
-            <div id="tab-content-linebalance" class="hidden p-4 sm:p-6 space-y-5">
+            <div id="tab-content-linebalance" class="hidden p-3 sm:p-4 space-y-5 w-full max-w-none">
 
                 <!-- MERGED WORKSPACE: PAGE 3 + PAGE 4 + PAGE 5 -->
                 <section class="sticky top-16 z-40 bg-slate-950/95 backdrop-blur-md border border-emerald-500/30 rounded-2xl p-2 shadow-xl">
@@ -1489,7 +1546,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
             <!-- LINE BALANCE INLINE WORK PROCESS EDITOR -->
             <div id="lobWorkProcessEditorModal" class="hidden fixed inset-0 z-[120] bg-slate-950/80 backdrop-blur-sm p-3 sm:p-6 overflow-auto">
-                <div class="w-[96vw] max-w-none min-h-[88vh] mx-auto bg-cardbg border border-cyan-500/30 rounded-2xl shadow-2xl">
+                <div class="w-[99vw] max-w-none min-h-[96vh] mx-auto bg-cardbg border border-cyan-500/30 rounded-2xl shadow-2xl">
                     <div class="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-900 border-b border-bordercolor rounded-t-2xl">
                         <div class="flex flex-wrap items-center gap-3">
                             <div>
@@ -4026,6 +4083,15 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             if (!lobLayoutEditMode) {
                 try { toggleLobLayoutEdit(); } catch (err) {}
             }
+        }
+
+        function toggleLobLayoutFullscreen() {
+            const canvas = document.getElementById('lobLayoutCanvas');
+            if (!canvas) return;
+            const card = canvas.closest('.bg-cardbg') || canvas.parentElement?.parentElement || canvas.parentElement;
+            if (!card) return;
+            card.classList.toggle('lob-layout-fullscreen');
+            document.body.style.overflow = card.classList.contains('lob-layout-fullscreen') ? 'hidden' : '';
         }
 
         function clearCurrentLobLayout() {
