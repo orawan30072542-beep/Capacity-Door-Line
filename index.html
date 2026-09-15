@@ -3278,6 +3278,14 @@ function updateLobSubLineVisibility() {
             if (lineName === 'Door C') {
                 if (cfg.station !== 'Door C') return false;
 
+                // Door Foam is one Door C area and is NOT separated by C-1/C-2/C-3.
+                // Its graph/table data comes directly from saved Work Process
+                // (Foaming + selected lid type RR/RL/VEG/FB).
+                if (getSelectedLobDoorProcessArea() === 'Door Foam') {
+                    return true;
+                }
+
+                // Door Bend keeps the original C-1/C-2/C-3 routing.
                 const selectedCLine = getSelectedLobDoorCLine();
                 return (getDoorCRoutingDetails(modelName) || [])
                     .some(route => route.line === selectedCLine);
@@ -4706,7 +4714,10 @@ function updateLobSubLineVisibility() {
             count.textContent = currentLine === 'Door C' ? `${displayRows.length} Station` : `${displayRows.length} Process`;
 
             if (!displayRows.length) {
-                tbody.innerHTML = `<tr><td colspan="${showDoorType ? 5 : 4}" class="p-5 text-center text-slate-500">ไม่มีข้อมูล Work Process & CT</td></tr>`;
+                const isDoorCFoam = currentLine === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam';
+                tbody.innerHTML = `<tr><td colspan="${showDoorType ? 5 : 4}" class="p-5 text-center text-slate-500">${isDoorCFoam
+                    ? 'ยังไม่มีข้อมูล Foaming ของฝาที่เลือกใน Work Process'
+                    : 'ไม่มีข้อมูล Work Process & CT'}</td></tr>`;
                 return;
             }
 
@@ -4734,10 +4745,12 @@ function updateLobSubLineVisibility() {
                             ${Number(r.loss || 0).toFixed(1)} s
                         </td>
                         <td class="p-1.5 text-center">
-                            <button type="button" onclick="openLobWpEditor(${index})"
-                                class="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-bold">
-                                Edit
-                            </button>
+                            ${currentLine === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam'
+                                ? `<span class="inline-flex items-center px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[9px] font-bold">Work Process</span>`
+                                : `<button type="button" onclick="openLobWpEditor(${index})"
+                                    class="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-bold">
+                                    Edit
+                                  </button>`}
                         </td>
                     </tr>
                 `;
@@ -5066,6 +5079,11 @@ function updateLobSubLineVisibility() {
         }
 
         function openLobFullWorkProcessEditor() {
+            const currentLine = document.getElementById('lobLineSelect')?.value || '';
+            if (currentLine === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam') {
+                alert('Door Foam ดึงข้อมูลจาก Work Process โดยตรง กรุณาแก้ไขข้อมูลที่หน้า Work Process');
+                return;
+            }
             if (!requireOwnerEdit()) return;
             const firstRow = (window.lobRenderedProcessRows || [])[0];
             if (firstRow) {
@@ -5113,6 +5131,11 @@ function updateLobSubLineVisibility() {
         }
 
         function openLobWpEditor(rowIndex) {
+            const currentLine = document.getElementById('lobLineSelect')?.value || '';
+            if (currentLine === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam') {
+                alert('Door Foam ดึงข้อมูลจาก Work Process โดยตรง กรุณาแก้ไขข้อมูลที่หน้า Work Process');
+                return;
+            }
             const row = (window.lobRenderedProcessRows || [])[rowIndex];
             if (!row) return;
 
