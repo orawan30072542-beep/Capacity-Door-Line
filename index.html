@@ -188,6 +188,104 @@
 .mp-capacity-header::before{content:"03";display:inline-flex;align-items:center;justify-content:center;width:29px;height:29px;margin-right:9px;border-radius:8px;background:rgba(59,130,246,.20);border:1px solid rgba(96,165,250,.50);color:#bfdbfe;font-size:12px;font-weight:900}
 div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacity-header),section:has(>.mp-capacity-header){border:1px solid rgba(56,189,248,.22)!important;border-radius:16px!important;padding:14px!important;margin-bottom:18px!important;background:rgba(2,12,27,.34)!important}
 
+
+/* ===== MANPOWER & CAPACITY — INNER CONTENT LEGIBILITY ===== */
+/* Return section titles closer to normal size; emphasis is on internal data. */
+.mp-overview-title { font-size:18px !important; font-weight:800 !important; }
+.mp-actual-header, .mp-capacity-header {
+    font-size:15px !important;
+    font-weight:800 !important;
+    padding:10px 12px !important;
+}
+.mp-actual-header::before, .mp-capacity-header::before { display:none !important; }
+
+/* Internal labels / descriptions */
+#tab-content-manpower table th,
+#tab-content-capacity table th,
+.manpower-capacity-section table th,
+.mp-clear-section table th {
+    color:#bfdbfe !important;
+    font-size:12px !important;
+    font-weight:800 !important;
+    letter-spacing:.015em !important;
+    line-height:1.35 !important;
+}
+#tab-content-manpower table td,
+#tab-content-capacity table td,
+.manpower-capacity-section table td,
+.mp-clear-section table td {
+    color:#f8fafc !important;
+    font-size:13px !important;
+    font-weight:650 !important;
+    line-height:1.45 !important;
+}
+
+/* Make each data row easier to distinguish */
+#tab-content-manpower tbody tr,
+#tab-content-capacity tbody tr,
+.mp-clear-section tbody tr {
+    border-bottom:1px solid rgba(71,85,105,.45) !important;
+}
+#tab-content-manpower tbody tr:nth-child(even),
+#tab-content-capacity tbody tr:nth-child(even),
+.mp-clear-section tbody tr:nth-child(even) {
+    background:rgba(30,41,59,.38) !important;
+}
+#tab-content-manpower tbody tr:hover,
+#tab-content-capacity tbody tr:hover,
+.mp-clear-section tbody tr:hover {
+    background:rgba(30,64,175,.16) !important;
+}
+
+/* Strong internal metric values */
+#tab-content-manpower .text-white,
+#tab-content-capacity .text-white,
+.mp-clear-section .text-white {
+    color:#ffffff !important;
+    font-weight:800 !important;
+}
+#tab-content-manpower .text-gray-400,
+#tab-content-manpower .text-slate-400,
+#tab-content-manpower .text-gray-500,
+#tab-content-manpower .text-slate-500,
+#tab-content-capacity .text-gray-400,
+#tab-content-capacity .text-slate-400,
+#tab-content-capacity .text-gray-500,
+#tab-content-capacity .text-slate-500,
+.mp-clear-section .text-gray-400,
+.mp-clear-section .text-slate-400,
+.mp-clear-section .text-gray-500,
+.mp-clear-section .text-slate-500 {
+    color:#cbd5e1 !important;
+    opacity:1 !important;
+}
+
+/* Inputs and selectors inside these sections */
+#tab-content-manpower input, #tab-content-manpower select,
+#tab-content-capacity input, #tab-content-capacity select,
+.mp-clear-section input, .mp-clear-section select {
+    color:#f8fafc !important;
+    font-weight:700 !important;
+    border-color:rgba(96,165,250,.35) !important;
+    background-color:rgba(15,23,42,.95) !important;
+}
+
+/* Clear visual groups for capacity/work-process content */
+#tab-content-manpower .bg-slate-800\/30,
+#tab-content-manpower .bg-slate-800\/40,
+#tab-content-capacity .bg-slate-800\/30,
+#tab-content-capacity .bg-slate-800\/40,
+.mp-clear-section .bg-slate-800\/30,
+.mp-clear-section .bg-slate-800\/40 {
+    border:1px solid rgba(71,85,105,.55) !important;
+}
+
+/* Useful semantic colors inside data: cyan for actual/capacity, green for OK, amber for attention */
+.mp-inner-actual { color:#67e8f9 !important; font-weight:900 !important; }
+.mp-inner-capacity { color:#93c5fd !important; font-weight:900 !important; }
+.mp-inner-ok { color:#86efac !important; font-weight:900 !important; }
+.mp-inner-warn { color:#fde68a !important; font-weight:900 !important; }
+
 </style>
 
 <style>
