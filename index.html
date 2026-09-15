@@ -380,6 +380,14 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
     border-bottom: 1px solid rgba(71,85,105,.42) !important;
 }
 
+
+/* LOB process-area switch */
+#lobDoorProcessAreaWrap { min-width:145px; }
+#lobDoorProcessAreaSelect { min-width:128px !important; width:128px !important; }
+
+
+#lobDoorCFoamLineWrap { min-width:145px; }
+#lobDoorCFoamLineSelect { min-width:128px !important; width:128px !important; }
 </style>
 
 <style>
@@ -729,7 +737,9 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 /* Compact Line Balance top controls */
 #tab-content-linebalance #lobLineSelect,
 #tab-content-linebalance #lobPlateLineSelect,
-#tab-content-linebalance #lobDoorCLineSelect {
+#tab-content-linebalance #lobDoorCLineSelect,
+#tab-content-linebalance #lobDoorProcessAreaSelect,
+#tab-content-linebalance #lobDoorCFoamLineSelect {
     min-width: 118px !important;
     width: 118px !important;
     height: 34px !important;
@@ -1564,6 +1574,15 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 </select>
                             </div>
 
+                            <div id="lobDoorProcessAreaWrap" class="lob-compact-control-card bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Process Area</label>
+                                <select id="lobDoorProcessAreaSelect" onchange="onLobDoorProcessAreaChange()"
+                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
+                                    <option value="Door Bend">Door Bend</option>
+                                    <option value="Door Foam">Door Foam</option>
+                                </select>
+                            </div>
+
                             <div id="lobPlateLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Plate Line</label>
                                 <select id="lobPlateLineSelect" onchange="onLobPlateLineChange()"
@@ -1585,7 +1604,16 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="text-[8px] text-slate-500 mt-1">Master Model กำหนด C-1/C-2/C-3 · Work Process กำหนด Station และ CT · แต่ละ C-Line ใช้จุดพนักงานร่วมกัน</div>
                             </div>
 
-                            <div id="lobDoorCTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                                        <div id="lobDoorCFoamLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                                <label class="text-[9px] text-slate-400 block mb-1">Door Foam Line</label>
+                                <select id="lobDoorCFoamLineSelect" onchange="onLobDoorCFoamLineChange()"
+                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
+                                    <option value="Main Line">Main Line</option>
+                                    <option value="RL Line">RL Line</option>
+                                </select>
+                            </div>
+
+<div id="lobDoorCTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <label class="text-[9px] text-slate-400 block mb-1">Door Type</label>
                                 <select id="lobDoorCTypeSelect" multiple class="hidden" aria-hidden="true"></select>
                                 <div id="lobDoorCTypeButtons" class="flex flex-wrap gap-1"></div>
@@ -3071,7 +3099,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
         function aggregateDoorCProcessRowsByStation(rows) {
             const line = document.getElementById('lobLineSelect')?.value || '';
-            if (line !== 'Door C') return Array.isArray(rows) ? rows : [];
+            if (line !== 'Door C' || getSelectedLobDoorProcessArea() === 'Door Foam') return Array.isArray(rows) ? rows : [];
 
             const map = new Map();
 
@@ -3123,8 +3151,84 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
         }
 
 
+
+        // ===== LOB Process Area switch =====
+        // Existing Door A/B/C data and layouts are treated as Door Bend and keep their old keys unchanged.
+        // Door Foam is a new, separate view/layout using existing saved "Foaming" Work Process data.
+        // Door Glass uses Door Frame (existing) + Door Glass (new separate layout).
+        function getSelectedLobDoorProcessArea() {
+            const line = document.getElementById('lobLineSelect')?.value || 'Door A';
+            const sel = document.getElementById('lobDoorProcessAreaSelect');
+            if (line === 'Door Glass') return sel?.value || 'Door Frame';
+            if (line === 'Door A' || line === 'Door B' || line === 'Door C') return sel?.value || 'Door Bend';
+            return '';
+        }
+
+        function getLobProcessAreaOptions(line) {
+            if (line === 'Door Glass') return ['Door Frame', 'Door Glass'];
+            if (line === 'Door A' || line === 'Door B' || line === 'Door C') return ['Door Bend', 'Door Foam'];
+            return [];
+        }
+
+        function populateLobDoorProcessAreaSelect() {
+            const line = document.getElementById('lobLineSelect')?.value || 'Door A';
+            const sel = document.getElementById('lobDoorProcessAreaSelect');
+            const wrap = document.getElementById('lobDoorProcessAreaWrap');
+            const options = getLobProcessAreaOptions(line);
+
+            if (wrap) wrap.classList.toggle('hidden', options.length === 0);
+            if (!sel || !options.length) return;
+
+            const previous = sel.value;
+            sel.innerHTML = options.map(v => `<option value="${v}">${v}</option>`).join('');
+
+            // Default = old/original data area. This protects all previously entered data.
+            sel.value = options.includes(previous) ? previous : options[0];
+        }
+
+        function lobRowMatchesSelectedProcessArea(row) {
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            if (!['Door A','Door B','Door C','Door Glass'].includes(line)) return true;
+
+            const selected = getSelectedLobDoorProcessArea();
+            const area = String(row?.area || '').toLowerCase();
+
+            if (selected === 'Door Bend') {
+                return area.includes('bending') || area.includes('door bend');
+            }
+            if (selected === 'Door Foam') {
+                return area.includes('foaming') || area.includes('door foam');
+            }
+            if (selected === 'Door Frame') {
+                return area.includes('door frame') || area.includes('(frame');
+            }
+            if (selected === 'Door Glass') {
+                return area.includes('door glass') || area.includes('(glass');
+            }
+            return true;
+        }
+
+        function onLobDoorProcessAreaChange() {
+            lobSelectedObjectId = null;
+            updateLobSubLineVisibility();
+            populateLobModelSelect();
+            renderLineBalancePage();
+        }
+
+
+        function getSelectedLobDoorCFoamLine() {
+            return document.getElementById('lobDoorCFoamLineSelect')?.value || 'Main Line';
+        }
+
+        function onLobDoorCFoamLineChange() {
+            lobSelectedObjectId = null;
+            populateLobModelSelect();
+            renderLineBalancePage();
+        }
+
         function updateLobSubLineVisibility() {
             const line = document.getElementById('lobLineSelect')?.value || '';
+            populateLobDoorProcessAreaSelect();
             const plateWrap = document.getElementById('lobPlateLineWrap');
             const doorCWrap = document.getElementById('lobDoorCLineWrap');
             const doorCTypeWrap = document.getElementById('lobDoorCTypeWrap');
@@ -3133,15 +3237,22 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 plateWrap.classList.toggle('hidden', !isLobPlateStation(line));
             }
 
+            const doorCFoamWrap = document.getElementById('lobDoorCFoamLineWrap');
+            const isDoorCFoam = line === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam';
+
             if (doorCWrap) {
-                doorCWrap.classList.toggle('hidden', line !== 'Door C');
+                doorCWrap.classList.toggle('hidden', line !== 'Door C' || isDoorCFoam);
             }
 
             if (doorCTypeWrap) {
-                doorCTypeWrap.classList.toggle('hidden', line !== 'Door C');
+                doorCTypeWrap.classList.toggle('hidden', line !== 'Door C' || isDoorCFoam);
             }
 
-            if (line === 'Door C') {
+            if (doorCFoamWrap) {
+                doorCFoamWrap.classList.toggle('hidden', !isDoorCFoam);
+            }
+
+            if (line === 'Door C' && !isDoorCFoam) {
                 populateLobDoorCTypeSelect();
             }
         }
@@ -3235,6 +3346,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
         }
 
         function onLobLineChange() {
+            populateLobDoorProcessAreaSelect();
             updateLobSubLineVisibility();
             populateLobModelSelect();
             renderLineBalancePage();
@@ -3734,10 +3846,15 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 });
             }
 
+            // Line Of Balance process-area switch:
+            // Existing data remains untouched in doorProcessDatabase.
+            // We only filter what is displayed in LOB.
+            const areaFilteredRows = rows.filter(lobRowMatchesSelectedProcessArea);
+
             // Remove exact duplicate station/process rows.
             const unique = new Map();
 
-            rows.forEach(r => {
+            areaFilteredRows.forEach(r => {
                 const key = [
                     String(r.doorType || '-').trim().toUpperCase(),
                     String(r.station || '').trim().toUpperCase(),
@@ -3892,7 +4009,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             models.forEach(model => {
                 const productGroup = getLobProductGroupForModel(model);
                 let processRows = getLobProcessRows(line, model);
-                if (line === 'Door C') {
+                if (line === 'Door C' && getSelectedLobDoorProcessArea() !== 'Door Foam') {
                     processRows = filterDoorCRowsBySelectedType(processRows);
                 }
                 processRows.forEach(r => {
@@ -3905,7 +4022,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 if (rawRows.length > 0) {
                     dataStatus.textContent = isLobPlateStation(line)
                         ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
-                        : `${rawRows.length} Process / ${productGroups.length} Group`;
+                        : `${getSelectedLobDoorProcessArea() ? getSelectedLobDoorProcessArea() + ' · ' : ''}${line === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam' ? getSelectedLobDoorCFoamLine() + ' · ' : ''}${rawRows.length} Process / ${productGroups.length} Group`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
                     dataStatus.textContent = productGroups.length ? 'No Process Data' : 'Select Product Group';
@@ -3975,30 +4092,42 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
         function getLobLayoutKey() {
             const lineName = document.getElementById('lobLineSelect')?.value || 'Door A';
+            const processArea = getSelectedLobDoorProcessArea();
 
-            // Layout A / B / C ใช้ร่วมกันทุกรุ่นและทุก Product Group
-            // เหมือนแนวคิด Shared Layout ของ Door C:
-            // เปลี่ยน Model / Product Group แล้วตำแหน่ง Table, Conveyor, Employee ไม่เปลี่ยน
+            // IMPORTANT: old/original keys = Door Bend / Door Frame.
+            // Do not rename them: previously saved layouts must stay exactly where they are.
             if (lineName === 'Door A') {
-                return 'haier_lob_layout_shared_v4_Door_A';
+                return processArea === 'Door Foam'
+                    ? 'haier_lob_layout_shared_v4_Door_A_Door_Foam'
+                    : 'haier_lob_layout_shared_v4_Door_A';
             }
             if (lineName === 'Door B') {
-                return 'haier_lob_layout_shared_v4_Door_B';
+                return processArea === 'Door Foam'
+                    ? 'haier_lob_layout_shared_v4_Door_B_Door_Foam'
+                    : 'haier_lob_layout_shared_v4_Door_B';
             }
             if (lineName === 'Door C') {
-                const cLine = getSelectedLobDoorCLine() || 'C-1';
-                return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
+                // Door Bend keeps the original C-1/C-2/C-3 layout keys unchanged.
+                if (processArea !== 'Door Foam') {
+                    const cLine = getSelectedLobDoorCLine() || 'C-1';
+                    return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
+                }
+
+                // Door Foam is independent from C-1/C-2/C-3.
+                // It has only Main Line and RL Line, each with its own Layout.
+                const foamLine = getSelectedLobDoorCFoamLine();
+                return `haier_lob_layout_shared_v4_Door_C_Door_Foam_${foamLine.replace(/[^A-Za-z0-9_-]/g, '_')}`;
             }
 
-            // Back Plate / Bottom Plate ยังแยกตาม Physical Line
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
                 const plateLine = document.getElementById('lobPlateLineSelect')?.value || 'Line#1';
                 return `haier_lob_layout_shared_v4_${lineName.replace(/\s+/g, '_')}_${plateLine.replace(/[^A-Za-z0-9_-]/g, '_')}`;
             }
 
-            // Door Glass ใช้ Layout เดียวร่วมกันทุกรุ่น
             if (lineName === 'Door Glass') {
-                return 'haier_lob_layout_shared_v4_Door_Glass';
+                return processArea === 'Door Glass'
+                    ? 'haier_lob_layout_shared_v4_Door_Glass_Door_Glass'
+                    : 'haier_lob_layout_shared_v4_Door_Glass';
             }
 
             return `haier_lob_layout_shared_v4_${lineName.replace(/\s+/g, '_')}`;
@@ -4383,7 +4512,9 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             let physicalLine = lineName;
 
             if (lineName === 'Door C') {
-                physicalLine += ` ${getSelectedLobDoorCLine() || 'C-1'}`;
+                physicalLine += getSelectedLobDoorProcessArea() === 'Door Foam'
+                    ? ` Door Foam · ${getSelectedLobDoorCFoamLine()}`
+                    : ` Door Bend · ${getSelectedLobDoorCLine() || 'C-1'}`;
             } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
                 physicalLine += ` ${document.getElementById('lobPlateLineSelect')?.value || 'Line#1'}`;
             }
@@ -4935,11 +5066,46 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
         function openLobFullWorkProcessEditor() {
             if (!requireOwnerEdit()) return;
             const firstRow = (window.lobRenderedProcessRows || [])[0];
-            if (!firstRow) {
+            if (firstRow) {
+                openLobWpEditor(0);
+                return;
+            }
+
+            // Allow creating the NEW Door Foam / Door Glass process directly from LOB.
+            const line = document.getElementById('lobLineSelect')?.value || '';
+            if (!['Door A','Door B','Door C','Door Glass'].includes(line)) {
                 alert('ไม่มีข้อมูล Work Process สำหรับ Line / Product Group ที่เลือก');
                 return;
             }
-            openLobWpEditor(0);
+
+            const groups = getSelectedLobModels();
+            const models = getModelsForLobProductGroups(line, groups);
+            const model = models[0] || '';
+            if (!model) {
+                alert('กรุณาเลือก Product Group / Model ก่อน');
+                return;
+            }
+
+            lobWpEditorMode = 'door';
+            lobWpEditorModel = model;
+            const area = getSelectedLobDoorProcessArea();
+            lobWpEditorPart = area === 'Door Foam' ? 'Foaming'
+                : area === 'Door Bend' ? 'Bending'
+                : area === 'Door Frame' ? 'Door Frame'
+                : 'Door Glass';
+
+            if (line === 'Door C') {
+                lobWpEditorDoorType = getSelectedLobDoorCTypes()[0] || 'RR';
+            } else {
+                const cfg = getMasterConfigForModel(model);
+                lobWpEditorDoorType = cfg?.doorType && ['RR','RL','FR','FL','VEG','FB'].includes(String(cfg.doorType).toUpperCase())
+                    ? String(cfg.doorType).toUpperCase()
+                    : 'RR';
+            }
+
+            populateLobWpEditorModelSelect(model);
+            loadLobWpEditorModel(model);
+            document.getElementById('lobWorkProcessEditorModal')?.classList.remove('hidden');
         }
 
         function openLobWpEditor(rowIndex) {
@@ -4959,7 +5125,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                 const parsed = parseLobDoorArea(row.area, row.doorType);
                 lobWpEditorPart = parsed.subPart;
 
-                if (line === 'Door C' && (getSelectedLobDoorCLine() === 'C-1' || getSelectedLobDoorCLine() === 'C-2')) {
+                if (line === 'Door C' && getSelectedLobDoorProcessArea() !== 'Door Foam' && (getSelectedLobDoorCLine() === 'C-1' || getSelectedLobDoorCLine() === 'C-2')) {
                     lobWpEditorDoorType = getSelectedLobDoorCTypes()[0] || parsed.doorType;
                 } else {
                     lobWpEditorDoorType = parsed.doorType;
