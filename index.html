@@ -167,6 +167,18 @@
             max-height: 100% !important;
         }
 
+
+/* ===== Layout 35% fixed / no internal scrolling ===== */
+:root { --lob-layout-height: 350px; --lob-chart-height: 520px; }
+#lobLayoutCanvas {
+ height: var(--lob-layout-height) !important; min-height: var(--lob-layout-height) !important; max-height: var(--lob-layout-height) !important;
+ overflow: hidden !important; overscroll-behavior: none !important; scrollbar-width: none !important; touch-action: none;
+}
+#lobLayoutCanvas::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
+.lob-chart-fixed-height { height:var(--lob-chart-height)!important; min-height:var(--lob-chart-height)!important; max-height:var(--lob-chart-height)!important; }
+.lob-layout-fullscreen #lobLayoutCanvas { height:calc(100vh - 180px)!important; min-height:calc(100vh - 180px)!important; max-height:calc(100vh - 180px)!important; overflow:hidden!important; }
+@media(max-width:1024px){:root{--lob-layout-height:300px;--lob-chart-height:440px;}}
+@media(max-width:640px){:root{--lob-layout-height:250px;--lob-chart-height:360px;}}
 </style>
 
 <style>
