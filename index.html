@@ -4104,15 +4104,21 @@ function updateLobSubLineVisibility() {
                     : 'haier_lob_layout_shared_v4_Door_B';
             }
             if (lineName === 'Door C') {
-                // Door Bend keeps the original C-1/C-2/C-3 layout keys unchanged.
-                if (processArea !== 'Door Foam') {
+                // IMPORTANT: Door Bend and Door Foam use completely separate Layout storage.
+                // Door Bend keeps the original C-1/C-2/C-3 Layouts unchanged.
+                if (processArea === 'Door Bend') {
                     const cLine = getSelectedLobDoorCLine() || 'C-1';
                     return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
                 }
 
-                // Door Foam is independent from C-1/C-2/C-3.
-                // Door Foam uses ONE shared Layout. Graph/table data switches by RR / RL / VEG / FB.
-                return 'haier_lob_layout_shared_v4_Door_C_Door_Foam';
+                // Door Foam has its own Layout, independent from Door Bend.
+                // RR / RL / VEG / FB switch only graph/table data and share this Foam Layout.
+                if (processArea === 'Door Foam') {
+                    return 'haier_lob_layout_shared_v5_Door_C_Door_Foam_ONLY';
+                }
+
+                const cLine = getSelectedLobDoorCLine() || 'C-1';
+                return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
             }
 
             if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
@@ -4509,7 +4515,7 @@ function updateLobSubLineVisibility() {
 
             if (lineName === 'Door C') {
                 physicalLine += getSelectedLobDoorProcessArea() === 'Door Foam'
-                    ? ` Door Foam · Shared Layout (RR / RL / VEG / FB)`
+                    ? ` Door Foam Layout · Shared RR / RL / VEG / FB`
                     : ` Door Bend · ${getSelectedLobDoorCLine() || 'C-1'}`;
             } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
                 physicalLine += ` ${document.getElementById('lobPlateLineSelect')?.value || 'Line#1'}`;
