@@ -3614,13 +3614,28 @@ function updateLobSubLineVisibility() {
                    hasSavedLobWorkProcess(modelName, lineName);
         }
 
+
+        function modelMatchesCurrentLobDoorSelection(modelName, lineName) {
+            if (lineName !== 'Door C') return true;
+
+            // Door Foam does not use the hidden C-1/C-2/C-3 family filter.
+            // It must be selected from actual Foaming Work Process rows
+            // for RR / RL / VEG / FB, including BM models.
+            if (getSelectedLobDoorProcessArea() === 'Door Foam') {
+                return getLobProcessRows(lineName, modelName).length > 0;
+            }
+
+            // Door Bend keeps the original C-1/C-2/C-3 selection logic.
+            return modelMatchesSelectedDoorCType(modelName);
+        }
+
         function getLobProductGroupsForLine(lineName) {
             const result = [];
 
             Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
                 const hasValidModel = (models || []).some(model =>
                     modelMatchesMasterAndWorkProcess(model, lineName) &&
-                    (lineName !== 'Door C' || modelMatchesSelectedDoorCType(model))
+                    modelMatchesCurrentLobDoorSelection(model, lineName)
                 );
 
                 if (hasValidModel) result.push(group);
@@ -3640,12 +3655,13 @@ function updateLobSubLineVisibility() {
                 // only ONE Model from that Group.
                 // Priority = first model in mapping that:
                 //   1) belongs to selected line in Master Model
-                //   2) has saved Work Process data.
+                //   2) has saved Work Process data
+                //   3) for Door C Foam, has actual Foaming rows for selected RR/RL/VEG/FB.
                 const selectedModel = mapped.find(name => {
                     const clean = String(name || '').trim();
                     return clean &&
                            modelMatchesMasterAndWorkProcess(clean, lineName) &&
-                           (lineName !== 'Door C' || modelMatchesSelectedDoorCType(clean));
+                           modelMatchesCurrentLobDoorSelection(clean, lineName);
                 });
 
                 if (!selectedModel) return;
@@ -3666,7 +3682,7 @@ function updateLobSubLineVisibility() {
             return mapped.find(name => {
                 const clean = String(name || '').trim();
                 return modelMatchesMasterAndWorkProcess(clean, lineName) &&
-                       (lineName !== 'Door C' || modelMatchesSelectedDoorCType(clean));
+                       modelMatchesCurrentLobDoorSelection(clean, lineName);
             }) || '';
         }
 
