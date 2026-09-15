@@ -4032,6 +4032,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             const layoutKey = getLobLayoutKey();
             const lineName = document.getElementById('lobLineSelect')?.value || 'Current Line';
             let physicalLine = lineName;
+
             if (lineName === 'Door C') {
                 physicalLine += ` ${getSelectedLobDoorCLine() || 'C-1'}`;
             } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
@@ -4039,26 +4040,38 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             }
 
             if (!window.confirm(
-                `ลบ Layout ของ ${physicalLine} ?\n\n` +
-                `Table, Conveyor, Employee และตำแหน่ง Layout ที่บันทึกไว้ของไลน์นี้จะถูกลบทั้งหมด\n` +
+                `ล้าง Layout ของ ${physicalLine} ?\n\n` +
+                `Table, Conveyor, Employee และตำแหน่ง Layout จะถูกล้างออกทั้งหมด\n` +
                 `ข้อมูล Work Process / CT จะไม่ถูกลบ`
             )) return;
 
-            // Delete only the saved visual layout of the selected physical line.
-            localStorage.removeItem(layoutKey);
+            // IMPORTANT:
+            // Do NOT remove the key. If the key disappears, renderLobLayoutDesigner()
+            // interprets that as "no saved layout" and auto-generates the default layout again.
+            // An explicit [] means this physical line intentionally has an empty layout.
+            localStorage.setItem(layoutKey, JSON.stringify([]));
+
             lobSelectedObjectId = null;
 
-            // Clear the canvas, then rebuild the default layout from current process data.
             const canvas = document.getElementById('lobLayoutCanvas');
-            if (canvas) canvas.innerHTML = '';
+            if (canvas) {
+                canvas.innerHTML = '';
+            }
 
+            const summary = document.getElementById('lobLayoutSummary');
+            if (summary) summary.textContent = 'Layout ว่าง — กด + Table / + Conveyor / + Employee เพื่อสร้างใหม่';
+
+            const rotationLabel = document.getElementById('lobObjectRotationLabel');
+            if (rotationLabel) rotationLabel.textContent = '-';
+
+            // Refresh while preserving the explicit empty [] state.
             try {
                 renderLineBalancePage();
             } catch (err) {
                 console.warn('Clear Layout refresh:', err);
             }
 
-            // Keep layout editing active so a new layout can be created immediately.
+            // Enter edit mode so the user can start adding objects immediately.
             if (!lobLayoutEditMode) {
                 try { toggleLobLayoutEdit(); } catch (err) {}
             }
