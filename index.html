@@ -388,7 +388,9 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 
 
 #lobDoorCFoamTypeWrap { min-width:145px; }
-#lobDoorCFoamTypeSelect { min-width:118px !important; width:118px !important; }
+
+
+#lobDoorCFoamTypeButtons button{min-width:42px;}
 </style>
 
 <style>
@@ -1605,22 +1607,14 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </div>
 
                                                         <div id="lobDoorCFoamTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                                <label class="text-[9px] text-slate-400 block mb-1">Door Foam · ฝา</label>
-                                <select id="lobDoorCFoamTypeSelect" onchange="onLobDoorCFoamTypeChange()"
-                                    class="bg-slate-800 text-amber-300 border border-bordercolor rounded-lg px-3 py-1.5 text-xs font-bold min-w-[135px] focus:outline-none">
-                                    <option value="RR">RR</option>
-                                    <option value="RL">RL</option>
-                                    <option value="VEG">VEG</option>
-                                    <option value="FB">FB</option>
-                                </select>
-                            </div>
-
-                            <div id="lobDoorCTypeWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                                <label class="text-[9px] text-slate-400 block mb-1">Door Type</label>
-                                <select id="lobDoorCTypeSelect" multiple class="hidden" aria-hidden="true"></select>
-                                <div id="lobDoorCTypeButtons" class="flex flex-wrap gap-1"></div>
-                                <div id="lobDoorCTypeHint" class="text-[8px] text-slate-500 mt-1">เลือกได้หลายประเภทพร้อมกัน</div>
-                            </div>
+<label class="text-[9px] text-slate-400 block mb-1">Door Foam · Door Type</label>
+<select id="lobDoorCFoamTypeSelect" multiple class="hidden" aria-hidden="true">
+<option value="RR" selected>RR</option><option value="RL" selected>RL</option>
+<option value="VEG" selected>VEG</option><option value="FB" selected>FB</option>
+</select>
+<div id="lobDoorCFoamTypeButtons" class="flex flex-wrap gap-1"></div>
+<div class="text-[8px] text-slate-500 mt-1">เลือกได้หลายประเภทพร้อมกัน · เหมือน Door Bend C</div>
+</div>
 
                             <div class="lob-compact-wide-card flex-1 min-w-[320px] bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                                 <div class="flex items-center justify-between mb-1">
@@ -3204,8 +3198,8 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
                 // Door C Foam is separated by lid/door type: RR / RL / VEG / FB.
                 if (line === 'Door C') {
-                    const selectedFoamType = getSelectedLobDoorCFoamType();
-                    return String(row?.doorType || '').trim().toUpperCase() === selectedFoamType;
+                    const selectedFoamTypes = getSelectedLobDoorCFoamTypes();
+                    return selectedFoamTypes.includes(String(row?.doorType || '').trim().toUpperCase());
                 }
                 return true;
             }
@@ -3224,6 +3218,34 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             populateLobModelSelect();
             renderLineBalancePage();
         }
+function getLobDoorCFoamTypeOptions(){ return ['RR','RL','VEG','FB']; }
+function getSelectedLobDoorCFoamTypes(){
+ const sel=document.getElementById('lobDoorCFoamTypeSelect');
+ if(!sel) return getLobDoorCFoamTypeOptions();
+ const v=Array.from(sel.options||[]).filter(o=>o.selected).map(o=>o.value);
+ return v.length?v:getLobDoorCFoamTypeOptions();
+}
+function getSelectedLobDoorCFoamType(){ return getSelectedLobDoorCFoamTypes()[0]||'RR'; }
+function renderLobDoorCFoamTypeButtons(){
+ const sel=document.getElementById('lobDoorCFoamTypeSelect'), box=document.getElementById('lobDoorCFoamTypeButtons');
+ if(!sel||!box)return;
+ box.innerHTML='';
+ Array.from(sel.options).forEach(o=>{
+   const b=document.createElement('button'); b.type='button'; b.textContent=o.value;
+   b.className=`px-2.5 py-1 rounded-md text-[10px] font-black border transition ${o.selected?'bg-amber-500/20 text-amber-300 border-amber-400/60':'bg-slate-800 text-slate-400 border-bordercolor hover:bg-slate-700'}`;
+   b.onclick=()=>{ o.selected=!o.selected; if(!Array.from(sel.options).some(x=>x.selected))o.selected=true; renderLobDoorCFoamTypeButtons(); onLobDoorCFoamTypeChange(); };
+   box.appendChild(b);
+ });
+}
+function populateLobDoorCFoamTypeSelect(){
+ const sel=document.getElementById('lobDoorCFoamTypeSelect'); if(!sel)return;
+ renderLobDoorCFoamTypeButtons();
+}
+function onLobDoorCFoamTypeChange(){
+ const ms=document.getElementById('lobModelSelect'); if(ms)Array.from(ms.options||[]).forEach(o=>o.selected=false);
+ populateLobModelSelect(); renderLineBalancePage();
+}
+
 function updateLobSubLineVisibility() {
             const line = document.getElementById('lobLineSelect')?.value || '';
             populateLobDoorProcessAreaSelect();
@@ -3240,6 +3262,7 @@ function updateLobSubLineVisibility() {
 
             if (doorCFoamTypeWrap) {
                 doorCFoamTypeWrap.classList.toggle('hidden', !isDoorCFoam);
+                if (isDoorCFoam) populateLobDoorCFoamTypeSelect();
             }
 
             if (doorCWrap) {
@@ -4027,7 +4050,7 @@ function updateLobSubLineVisibility() {
                 if (rawRows.length > 0) {
                     dataStatus.textContent = isLobPlateStation(line)
                         ? `${getSelectedLobPlateLine()} · ${rawRows.length} Process / ${productGroups.length} Group`
-                        : `${getSelectedLobDoorProcessArea() ? getSelectedLobDoorProcessArea() + ' · ' : ''}${line === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam' ? 'ฝา ' + getSelectedLobDoorCFoamType() + ' · ' : ''}${rawRows.length} Process / ${productGroups.length} Group`;
+                        : `${getSelectedLobDoorProcessArea() ? getSelectedLobDoorProcessArea() + ' · ' : ''}${line === 'Door C' && getSelectedLobDoorProcessArea() === 'Door Foam' ? 'ฝา ' + getSelectedLobDoorCFoamTypes().join(' + ') + ' · ' : ''}${rawRows.length} Process / ${productGroups.length} Group`;
                     dataStatus.className = 'text-[10px] font-bold text-emerald-300 py-1.5 min-w-[90px]';
                 } else {
                     dataStatus.textContent = productGroups.length ? 'No Process Data' : 'Select Product Group';
@@ -7701,14 +7724,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html
-        function getSelectedLobDoorCFoamType() {
-            return document.getElementById('lobDoorCFoamTypeSelect')?.value || 'RR';
-        }
-
-        function onLobDoorCFoamTypeChange() {
-            lobSelectedObjectId = null;
-            populateLobModelSelect();
-            renderLineBalancePage();
-        }
-
->
