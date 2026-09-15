@@ -140,6 +140,33 @@
             max-height: none !important;
         }
 
+
+        /* ===== FIX: LOB chart must stay inside its card ===== */
+        .lob-chart-fixed-height {
+            height: var(--lob-half-height) !important;
+            min-height: var(--lob-half-height) !important;
+            max-height: var(--lob-half-height) !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+
+        .lob-chart-fixed-height #lineBalancePageChart,
+        .lob-chart-fixed-height canvas#lineBalancePageChart {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+        }
+
+        /* neutralize the earlier direct 520px canvas rule */
+        #lineBalancePageChart {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+        }
+
 </style>
 
 <style>
@@ -1513,7 +1540,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <span class="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-500/20 text-cyan-300">Station ซ้ำ = Average CT</span>
                                 </div>
                             </div>
-                            <div class="lob-page5-chart-wrapper bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80">
+                            <div class="lob-chart-fixed-height lob-page5-chart-wrapper bg-slate-950/60 p-3 rounded-xl border border-bordercolor/80">
                                 <canvas id="lineBalancePageChart"></canvas>
                             </div>
                         </section>
