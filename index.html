@@ -4041,40 +4041,31 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
             if (!window.confirm(
                 `ล้าง Layout ของ ${physicalLine} ?\n\n` +
-                `Table, Conveyor, Employee และตำแหน่ง Layout จะถูกล้างออกทั้งหมด\n` +
-                `ข้อมูล Work Process / CT จะไม่ถูกลบ`
+                `ข้อมูลภายใน Layout ทั้งหมดจะถูกลบ และเหลือเฉพาะพื้นที่ว่าง\n` +
+                `Work Process / CT / ข้อมูลการผลิตจะไม่ถูกลบ`
             )) return;
 
-            // IMPORTANT:
-            // Do NOT remove the key. If the key disappears, renderLobLayoutDesigner()
-            // interprets that as "no saved layout" and auto-generates the default layout again.
-            // An explicit [] means this physical line intentionally has an empty layout.
+            // [] = intentionally blank layout. Never delete this key, otherwise
+            // the normal renderer will auto-create the default layout again.
             localStorage.setItem(layoutKey, JSON.stringify([]));
-
             lobSelectedObjectId = null;
 
             const canvas = document.getElementById('lobLayoutCanvas');
             if (canvas) {
                 canvas.innerHTML = '';
+                canvas.querySelectorAll('.lob-layout-object').forEach(el => el.remove());
             }
 
             const summary = document.getElementById('lobLayoutSummary');
-            if (summary) summary.textContent = 'Layout ว่าง — กด + Table / + Conveyor / + Employee เพื่อสร้างใหม่';
+            if (summary) summary.textContent = 'Layout ว่าง';
 
             const rotationLabel = document.getElementById('lobObjectRotationLabel');
             if (rotationLabel) rotationLabel.textContent = '-';
 
-            // Refresh while preserving the explicit empty [] state.
-            try {
-                renderLineBalancePage();
-            } catch (err) {
-                console.warn('Clear Layout refresh:', err);
-            }
-
-            // Enter edit mode so the user can start adding objects immediately.
-            if (!lobLayoutEditMode) {
-                try { toggleLobLayoutEdit(); } catch (err) {}
-            }
+            // Do NOT call renderLineBalancePage() here.
+            // That function can rebuild a default layout from Work Process.
+            // The canvas must remain completely blank after Clear Layout.
+            syncLobObjectEditor?.();
         }
 
         function saveLobLayout() {
