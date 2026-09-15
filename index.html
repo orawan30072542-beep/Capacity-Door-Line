@@ -4135,10 +4135,22 @@ function updateLobSubLineVisibility() {
                     : 'haier_lob_layout_shared_v4_Door_B';
             }
             if (lineName === 'Door C') {
-                // ONE shared Layout for every Door C view.
-                // Door Bend C-1/C-2/C-3 and Door Foam RR/RL/VEG/FB
-                // change only graph/table data, not the Layout.
-                return 'haier_lob_layout_shared_v6_Door_C_ALL';
+                const processArea = getSelectedLobDoorProcessArea();
+
+                // Door Bend remains separated exactly as before:
+                // C-1, C-2 and C-3 each have their own Layout.
+                if (processArea === 'Door Bend') {
+                    const cLine = getSelectedLobDoorCLine() || 'C-1';
+                    return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
+                }
+
+                // Door Foam uses one Layout for RR / RL / VEG / FB.
+                if (processArea === 'Door Foam') {
+                    return 'haier_lob_layout_shared_v6_Door_C_Foam_ALL';
+                }
+
+                const cLine = getSelectedLobDoorCLine() || 'C-1';
+                return `haier_lob_layout_shared_v4_Door_C_${cLine}`;
             }
             if (lineName === 'Door Glass') {
                 return processArea === 'Door Glass'
@@ -4528,7 +4540,9 @@ function updateLobSubLineVisibility() {
             let physicalLine = lineName;
 
             if (lineName === 'Door C') {
-                physicalLine += ` · One Shared Layout (Door Bend + Door Foam)`;
+                physicalLine += getSelectedLobDoorProcessArea() === 'Door Foam'
+                    ? ` · Door Foam Shared Layout`
+                    : ` · Door Bend ${getSelectedLobDoorCLine() || 'C-1'} Layout`;
             } else if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
                 physicalLine += ` ${document.getElementById('lobPlateLineSelect')?.value || 'Line#1'}`;
             }
