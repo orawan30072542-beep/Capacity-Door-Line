@@ -1186,7 +1186,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
+                                    <div class="text-[8px] text-slate-500">3600 ÷ Σ(Lead Time × Order) : C-1 + C-2 + C-3</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6702,47 +6702,40 @@ function updateLobSubLineVisibility() {
         }
 
 
-        // Door C Actual Output / Day = C-1 + C-2 + C-3.
-        // Each C-line uses Order-weighted Lead Time by Model.
+        // Door C Actual Output / Day:
+        // 3600 / [(LeadTimeC1 × OrderC1) + (LeadTimeC2 × OrderC2) + (LeadTimeC3 × OrderC3)]
         function getDoorCActualOutputSum(data, hours, actualManpower) {
-            const stats = {};
-            ['C-1','C-2','C-3'].forEach(groupName => {
-                let weightedSum = 0, orderSum = 0;
-                data.groups.forEach(g => (g.models || []).forEach(m => {
-                    if (!modelBelongsToManpowerGroup(m.name, 'Door C', groupName)) return;
-                    const ratio = getManpowerOrderMultiplier(m.name, 'Door C', groupName);
-                    const leadTime = Number(getLeadTimeForManpower(m.name, 'Door C') || 0);
-                    if (ratio <= 0 || leadTime <= 0) return;
-                    (m.orders || []).forEach((raw, i) => {
-                        if (isSunday(data.days[i])) return;
-                        const order = Math.max(0, Number(raw) || 0) * ratio;
-                        if (order <= 0) return;
-                        weightedSum += leadTime * order;
-                        orderSum += order;
+            if (!data || !Array.isArray(data.days) || !Array.isArray(data.groups)) return 0;
+
+            const weightedByLine = { 'C-1': 0, 'C-2': 0, 'C-3': 0 };
+
+            ['C-1', 'C-2', 'C-3'].forEach(groupName => {
+                data.groups.forEach(g => {
+                    (g.models || []).forEach(m => {
+                        if (!modelBelongsToManpowerGroup(m.name, 'Door C', groupName)) return;
+
+                        const ratio = getManpowerOrderMultiplier(m.name, 'Door C', groupName);
+                        const leadTime = Number(getLeadTimeForManpower(m.name, 'Door C') || 0);
+                        if (ratio <= 0 || leadTime <= 0) return;
+
+                        (m.orders || []).forEach((rawOrder, dayIndex) => {
+                            if (isSunday(data.days[dayIndex])) return;
+                            const baseOrder = Math.max(0, Number(rawOrder) || 0);
+                            if (baseOrder <= 0) return;
+
+                            const ratioOrder = baseOrder * ratio;
+                            weightedByLine[groupName] += leadTime * ratioOrder;
+                        });
                     });
-                }));
-                const weightedLeadTime = orderSum > 0 ? weightedSum / orderSum : 0;
-
-                const mp = data.days.map((day,i) => {
-                    if (isSunday(day)) return 0;
-                    const r = calculateManpowerByGroupDay(data,i,'Door C',groupName,hours);
-                    const raw = Number(r.totalManpowerCombined || r.manpowerRequired || 0);
-                    return (groupName==='C-1'||groupName==='C-2') ? raw/4 : raw;
-                }).filter(v=>v>0);
-                const avgMp = mp.length ? mp.reduce((a,b)=>a+b,0)/mp.length : 0;
-                stats[groupName]={weightedLeadTime,avgMp};
+                });
             });
 
-            const totalPlanMp = Object.values(stats).reduce((s,x)=>s+x.avgMp,0);
-            let total = 0;
-            ['C-1','C-2','C-3'].forEach(groupName=>{
-                const s=stats[groupName];
-                const allocatedMp=totalPlanMp>0 ? actualManpower*(s.avgMp/totalPlanMp) : 0;
-                if(s.weightedLeadTime>0 && allocatedMp>0 && hours>0){
-                    total += (3600/s.weightedLeadTime)*0.85*allocatedMp*hours;
-                }
-            });
-            return total;
+            const denominator =
+                weightedByLine['C-1'] +
+                weightedByLine['C-2'] +
+                weightedByLine['C-3'];
+
+            return denominator > 0 ? 3600 / denominator : 0;
         }
 
         function renderManpowerTable(data) {
