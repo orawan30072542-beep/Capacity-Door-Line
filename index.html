@@ -1160,7 +1160,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
                                     <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
-                                    <div id="mpPlanShortPercent" class="text-[9px] text-orange-300 mt-1">Short 0%</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
                                         <div id="mpPlanOrderUPH" class="mp-inline-hourly">0</div>
@@ -1183,25 +1182,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <input id="mpActualManpowerInput" type="number" min="0" step="1" value="0"
                                         onchange="saveMpPlanActualInput('manpower', this.value)"
                                         class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none">
-                                    <div id="mpDoorCActualManpowerWrap" class="hidden mt-2 pt-2 border-t border-emerald-500/20">
-                                        <div class="grid grid-cols-3 gap-1">
-                                            <label class="text-[8px] text-slate-400">C-1
-                                                <input id="mpActualManpowerC1" type="number" min="0" step="1" value="0"
-                                                    onchange="saveDoorCActualManpower('C-1',this.value)"
-                                                    class="w-full mt-0.5 bg-slate-950/60 border border-emerald-500/20 rounded px-1 py-1 text-center text-[11px] text-emerald-300">
-                                            </label>
-                                            <label class="text-[8px] text-slate-400">C-2
-                                                <input id="mpActualManpowerC2" type="number" min="0" step="1" value="0"
-                                                    onchange="saveDoorCActualManpower('C-2',this.value)"
-                                                    class="w-full mt-0.5 bg-slate-950/60 border border-emerald-500/20 rounded px-1 py-1 text-center text-[11px] text-emerald-300">
-                                            </label>
-                                            <label class="text-[8px] text-slate-400">C-3
-                                                <input id="mpActualManpowerC3" type="number" min="0" step="1" value="0"
-                                                    onchange="saveDoorCActualManpower('C-3',this.value)"
-                                                    class="w-full mt-0.5 bg-slate-950/60 border border-emerald-500/20 rounded px-1 py-1 text-center text-[11px] text-emerald-300">
-                                            </label>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
@@ -1209,11 +1189,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
-                                        <div id="mpDoorCActualOutputDetail" class="hidden text-[8px] text-slate-400 mt-1 col-span-2">
-                                            C-1: <span id="mpActualOutputC1" class="text-emerald-300">0</span> ·
-                                            C-2: <span id="mpActualOutputC2" class="text-emerald-300">0</span> ·
-                                            C-3: <span id="mpActualOutputC3" class="text-emerald-300">0</span> UPH
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2695,11 +2670,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             if (doorType === 'Glass') return 'Line 2 (Glass Machine)';
 
             let routingLines = ['Line 1 (Press Machine)'];
-            if (station !== 'Door C') {
-                const mainMp = document.getElementById('mpActualManpowerInput');
-                if (mainMp) { mainMp.readOnly = false; mainMp.title = ''; }
-            }
-
             if (station === 'Door C') {
                 getDoorCRoutingDetails(modelName).forEach(item => {
                     const ratio = getDoorCManualRatio(modelName, item.line, item.qty);
@@ -6652,25 +6622,15 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
-        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime, doorRatio = 1, actualOutputOverride = null, actualHourlyOverride = null) {
+        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Actual Output / Day =
-            // (3600 / Max Lead Time) × 85% × Current Manpower × Working Hours × Door Ratio
-            // Door Ratio is derived from the same production plan:
-            // Total Door Order ÷ Total Order.
-            const effectiveDoorRatio = Math.max(0, Number(doorRatio || 0));
+            // Actual Output / Day = (3600 / Lead Time) × Current Manpower × Working Hours
             const actualOutputPerHour = avgLeadTime > 0
-                ? (3600 / avgLeadTime) * 0.85 * actualManpower * effectiveDoorRatio
+                ? (3600 / avgLeadTime) * 0.85 * actualManpower
                 : 0;
-            let actualOutput = actualOutputPerHour * hours;
-            if (actualOutputOverride !== null && Number.isFinite(Number(actualOutputOverride))) {
-                actualOutput = Math.max(0, Number(actualOutputOverride) || 0);
-                actualOutputPerHour = actualHourlyOverride !== null && Number.isFinite(Number(actualHourlyOverride))
-                    ? Math.max(0, Number(actualHourlyOverride) || 0)
-                    : (hours > 0 ? actualOutput / hours : 0);
-            }
+            const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
             const outEl = document.getElementById('mpActualOutputInput');
@@ -6698,11 +6658,6 @@ function updateLobSubLineVisibility() {
                 return `${n > 0 ? '+' : ''}${n.toLocaleString()}`;
             };
 
-            const currentShortPercent = Math.max(
-                0,
-                parseFloat(document.getElementById('shortPercentInput')?.value) || 0
-            );
-            setText('mpPlanShortPercent', `Short ${currentShortPercent.toLocaleString()}%`);
             setText('mpPlanOrderDay', planOrderPerDay > 0 ? Math.round(planOrderPerDay).toLocaleString() : '0');
 
             const planWorkingHours = Math.max(
@@ -6730,60 +6685,6 @@ function updateLobSubLineVisibility() {
             const orderDiffEl = document.getElementById('mpOrderDiff');
             if (mpDiffEl) mpDiffEl.className = `text-lg mt-1 ${manpowerDiff >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
             if (orderDiffEl) orderDiffEl.className = `text-lg mt-1 ${orderDiff >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
-        }
-
-
-        function getDoorCActualManpowerKey(groupName) {
-            return `haier_door_c_actual_manpower_${groupName}`;
-        }
-
-        function getDoorCActualManpower(groupName) {
-            const v = Number(localStorage.getItem(getDoorCActualManpowerKey(groupName)));
-            return Number.isFinite(v) && v >= 0 ? v : 0;
-        }
-
-        function saveDoorCActualManpower(groupName, value) {
-            localStorage.setItem(getDoorCActualManpowerKey(groupName), String(Math.max(0, Number(value) || 0)));
-            const total = ['C-1','C-2','C-3'].reduce((s,g) => s + getDoorCActualManpower(g), 0);
-            const main = document.getElementById('mpActualManpowerInput');
-            if (main) main.value = Math.ceil(total);
-            saveMpPlanActualInput('manpower', total);
-            if (typeof renderManpowerDashboard === 'function') renderManpowerDashboard();
-        }
-
-        // Door C capacity is calculated from the real process groups of each physical C-line.
-        // C-1: RR + RL | C-2: VEG + FB (FT group in the current database) | C-3: its routed work.
-        // UPH/employee = 3600 / summed Lead Time of the C-line.
-        // Actual UPH = UPH/employee × actual employees entered for that C-line.
-        function getDoorCActualOutputByLine(data, hours) {
-            const result = { c1:0, c2:0, c3:0, totalUPH:0, totalDay:0 };
-
-            const calcLine = (groupName) => {
-                let weightedLt = 0, orderTotal = 0;
-                data.groups.forEach(g => (g.models || []).forEach(m => {
-                    if (!modelBelongsToManpowerGroup(m.name, 'Door C', groupName)) return;
-                    const ratio = Number(getManpowerOrderMultiplier(m.name, 'Door C', groupName) || 0);
-                    const lt = Number(getLeadTimeForManpower(m.name, 'Door C') || 0);
-                    if (ratio <= 0 || lt <= 0) return;
-                    (m.orders || []).forEach((raw, i) => {
-                        if (isSunday(data.days[i])) return;
-                        const order = Math.max(0, Number(raw) || 0) * ratio;
-                        if (order <= 0) return;
-                        weightedLt += lt * order;
-                        orderTotal += order;
-                    });
-                }));
-                const lineLt = orderTotal > 0 ? weightedLt / orderTotal : 0;
-                const mp = getDoorCActualManpower(groupName);
-                return lineLt > 0 ? (3600 / lineLt) * mp : 0;
-            };
-
-            result.c1 = calcLine('C-1');
-            result.c2 = calcLine('C-2');
-            result.c3 = calcLine('C-3');
-            result.totalUPH = result.c1 + result.c2 + result.c3;
-            result.totalDay = result.totalUPH * Math.max(0, Number(hours) || 0);
-            return result;
         }
 
         function renderManpowerTable(data) {
@@ -6845,16 +6746,6 @@ function updateLobSubLineVisibility() {
             let activeDays = 0;
             let peakManpower = 0;
             const dailyMpTotals = new Array(days.length).fill(0);
-            // Door C Plan Manpower must be calculated as:
-            // Avg(C-1) + Avg(C-2) + Avg(C-3).
-            // C-1 and C-2 are divided by 4 because 1 unit = 4 pcs.
-            const doorCGroupDailyMp = station === 'Door C'
-                ? {
-                    'C-1': new Array(days.length).fill(0),
-                    'C-2': new Array(days.length).fill(0),
-                    'C-3': new Array(days.length).fill(0)
-                  }
-                : null;
             const dailyPlanOrderTotals = new Array(days.length).fill(0);
             let summaryMaxLeadTime = 0;
 
@@ -6938,7 +6829,7 @@ function updateLobSubLineVisibility() {
                         ? 'In Line + Out Line รวมในบรรทัดเดียว'
                         : 'Total Manpower',
                     cls: 'text-amber-300',
-                    format: (v, row, currentGroupName) => {
+                    format: (v, row) => {
                         if (!(v > 0)) return '-';
 
                         const baseInLine = Number(row.manpowerPerHour || 0) > 0
@@ -6952,19 +6843,11 @@ function updateLobSubLineVisibility() {
 
                         if (station === 'Bottom Plate' || station === 'Back Plate') {
                             return `
-                                <div class="mp-num-main">${Math.ceil(v)} คน</div>
+                                <div class="mp-num-main">${Math.round(v)} คน</div>
                             `;
                         }
 
-                        // Door C: C-1 and C-2 produce 4 pcs per 1 unit.
-                        // Therefore the displayed Manpower (In + Out) must also be ÷ 4.
-                        // C-3 remains unchanged. Manpower is always rounded UP to whole people.
-                        const displayManpower = station === 'Door C'
-                            && (currentGroupName === 'C-1' || currentGroupName === 'C-2')
-                            ? Math.ceil(Number(v || 0) / 4)
-                            : Math.ceil(Number(v || 0));
-
-                        return `<div class="mp-num-main">${displayManpower} คน</div>`;
+                        return `<div class="mp-num-main">${Math.round(v)} คน</div>`;
                     }
                 }
             ];
@@ -7083,17 +6966,14 @@ function updateLobSubLineVisibility() {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
                     const rawDailyManpower = Number(r.totalManpowerCombined || 0);
-                    // IMPORTANT: use the current Manpower group itself, not the LOB selector.
-                    // C-1 / C-2: 1 unit = 4 pcs => manpower ÷ 4. C-3 remains unchanged.
-                    const doorCDivisor = station === 'Door C'
-                        && (groupName === 'C-1' || groupName === 'C-2')
+                    const selectedDoorCLine = (typeof getSelectedLobDoorCLine === 'function')
+                        ? getSelectedLobDoorCLine()
+                        : (document.getElementById('lobDoorCLineSelect')?.value || '');
+                    const doorCDivisor = currentManpowerStation === 'Door C'
+                        && (selectedDoorCLine === 'C-1' || selectedDoorCLine === 'C-2')
                         ? 4
                         : 1;
-                    const adjustedDailyManpower = rawDailyManpower / doorCDivisor;
-                    dailyMpTotals[i] += adjustedDailyManpower;
-                    if (doorCGroupDailyMp && doorCGroupDailyMp[groupName]) {
-                        doorCGroupDailyMp[groupName][i] += adjustedDailyManpower;
-                    }
+                    dailyMpTotals[i] += rawDailyManpower / doorCDivisor;
                     const summaryDoorOrder = Number(r.doorOrder || 0);
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
@@ -7167,7 +7047,7 @@ function updateLobSubLineVisibility() {
                                     title="กรอกจำนวนชิ้นต่อคนต่อชั่วโมง แล้วระบบจะคำนวณ Manpower ให้อัตโนมัติ"
                                     onchange="saveManualHourlyOutput('${station}', '${groupName}', '${day}', this.value)"
                                     class="w-14 sm:w-16 bg-slate-950/80 border border-lime-500/30 rounded-md px-1.5 py-1 text-center text-[10px] font-bold text-lime-300 focus:outline-none focus:border-lime-400" />`
-                                : metric.format(r[metric.key], r, groupName);
+                                : metric.format(r[metric.key], r);
 
                         rowHtml += `
                             <td class="px-1 py-2 text-center ${isSun ? 'bg-slate-950/60 text-slate-600' : metric.cls}">
@@ -7233,45 +7113,20 @@ function updateLobSubLineVisibility() {
             const totalDoorOrderForPlan = Number(totalDoorOrderAllDays || 0);
             const numberOfPlanDays = Math.max(1, Number(effectiveProductionDays || 0));
 
-            // Base Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
-            // Final Plan Order / Day must include Short %.
-            const basePlanOrderPerDay = totalDoorOrderForPlan > 0
+            // Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
+            // totalDoorOrderAllDays is exactly the value displayed in the Total Door Order KPI.
+            const planOrderPerDay = totalDoorOrderForPlan > 0
                 ? totalDoorOrderForPlan / numberOfPlanDays
                 : 0;
-            const planShortPercent = Math.max(
-                0,
-                parseFloat(document.getElementById('shortPercentInput')?.value) || 0
-            );
-            const planOrderPerDay = basePlanOrderPerDay * (1 + planShortPercent / 100);
 
             // Plan Manpower = average required manpower across production days.
             // Use the same daily manpower totals already calculated for the table.
             const manpowerProductionDays = dailyMpTotals.filter((v, i) =>
                 !isSunday(days[i]) && Number(v || 0) > 0
             );
-
-            let avgPlanManpower = 0;
-            if (station === 'Door C' && doorCGroupDailyMp) {
-                const averageDoorCGroup = (groupName) => {
-                    const values = doorCGroupDailyMp[groupName].filter((v, i) =>
-                        !isSunday(days[i]) && Number(v || 0) > 0
-                    );
-                    return values.length > 0
-                        ? values.reduce((sum, v) => sum + Number(v || 0), 0) / values.length
-                        : 0;
-                };
-
-                const avgC1 = averageDoorCGroup('C-1');
-                const avgC2 = averageDoorCGroup('C-2');
-                const avgC3 = averageDoorCGroup('C-3');
-
-                // Door C Plan Manpower = Avg C-1 + Avg C-2 + Avg C-3
-                avgPlanManpower = avgC1 + avgC2 + avgC3;
-            } else {
-                avgPlanManpower = manpowerProductionDays.length > 0
-                    ? manpowerProductionDays.reduce((sum, v) => sum + Number(v || 0), 0) / manpowerProductionDays.length
-                    : (activeDays > 0 ? totalDailyManpower / activeDays : 0);
-            }
+            const avgPlanManpower = manpowerProductionDays.length > 0
+                ? manpowerProductionDays.reduce((sum, v) => sum + Number(v || 0), 0) / manpowerProductionDays.length
+                : (activeDays > 0 ? totalDailyManpower / activeDays : 0);
 
             // Summary uses the highest Lead Time from all active production rows.
             const summaryAvgLeadTime = summaryMaxLeadTime;
@@ -7279,53 +7134,11 @@ function updateLobSubLineVisibility() {
             setText('mpAvgManpower', avgPlanManpower > 0 ? Math.ceil(avgPlanManpower).toLocaleString() : '0');
             setText('mpPeakManpower', String(peakManpower));
 
-            // Door Ratio for Actual Output:
-            // use the actual aggregate lid ratio from the selected production line.
-            // Example: Total Order 100 units, Total Door Order 400 pcs => Ratio = 4.
-            const summaryDoorRatio = totalOrderAllDays > 0
-                ? totalDoorOrderAllDays / totalOrderAllDays
-                : 1;
-
-                        const doorCActual = station === 'Door C'
-                ? getDoorCActualOutputByLine(data, hours)
-                : null;
-
-            const dcWrap = document.getElementById('mpDoorCActualManpowerWrap');
-            const dcDetail = document.getElementById('mpDoorCActualOutputDetail');
-            if (dcWrap) dcWrap.classList.toggle('hidden', station !== 'Door C');
-            if (dcDetail) dcDetail.classList.toggle('hidden', station !== 'Door C');
-
-            if (station === 'Door C') {
-                const c1Input = document.getElementById('mpActualManpowerC1');
-                const c2Input = document.getElementById('mpActualManpowerC2');
-                const c3Input = document.getElementById('mpActualManpowerC3');
-                if (c1Input) c1Input.value = getDoorCActualManpower('C-1');
-                if (c2Input) c2Input.value = getDoorCActualManpower('C-2');
-                if (c3Input) c3Input.value = getDoorCActualManpower('C-3');
-
-                const totalActualMp = getDoorCActualManpower('C-1') + getDoorCActualManpower('C-2') + getDoorCActualManpower('C-3');
-                const mainMp = document.getElementById('mpActualManpowerInput');
-                if (mainMp) {
-                    mainMp.value = Math.ceil(totalActualMp);
-                    mainMp.readOnly = true;
-                    mainMp.title = 'Door C: Actual Manpower = C-1 + C-2 + C-3';
-                }
-
-                const c1El = document.getElementById('mpActualOutputC1');
-                const c2El = document.getElementById('mpActualOutputC2');
-                const c3El = document.getElementById('mpActualOutputC3');
-                if (c1El) c1El.textContent = Math.round(doorCActual.c1).toLocaleString();
-                if (c2El) c2El.textContent = Math.round(doorCActual.c2).toLocaleString();
-                if (c3El) c3El.textContent = Math.round(doorCActual.c3).toLocaleString();
-            }
-
-updateMpPlanActualSummary(
+            updateMpPlanActualSummary(
                 planOrderPerDay,
                 avgPlanManpower,
-                summaryAvgLeadTime,
-                summaryDoorRatio,
-                doorCActual ? doorCActual.totalDay : null,
-                doorCActual ? doorCActual.totalUPH : null);
+                summaryAvgLeadTime
+            );
         }
 
         function switchManpowerStation(stationName) {
