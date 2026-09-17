@@ -6862,6 +6862,18 @@ function updateLobSubLineVisibility() {
                             // C-line Order = Model Order × Ratio ของ C-line นั้นเท่านั้น
                             (getDoorCRoutingDetails(modelName) || []).forEach(route => {
                                 if (!dailyDoorCOrder[route.line]) return;
+
+                                // Door C physical-line order rule:
+                                // C-1 = BM T-Door + BM23 + BM29
+                                // C-2 = BM23 + BM29
+                                // C-3 = follow Master routing (TM/FUF/BM T-Door routes)
+                                const n = normalizeModelName(modelName);
+                                const isBMTDoor = n.includes('BM T-DOOR') || n.includes('BM T DOOR');
+                                const isBM23 = n.includes('BM23');
+                                const isBM29 = n.includes('BM29');
+                                if (route.line === 'C-1' && !(isBMTDoor || isBM23 || isBM29)) return;
+                                if (route.line === 'C-2' && !(isBM23 || isBM29)) return;
+
                                 const ratio = Math.max(
                                     0,
                                     Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
