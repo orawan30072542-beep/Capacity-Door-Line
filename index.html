@@ -6529,55 +6529,26 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
-        function getMpActualOutputFromLeadTime(rows = []) {
+        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
             const actualManpower = getMpPlanActualInput('manpower');
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Lead Time = total process time for the selected line/model/day.
-            // Use the average active Lead Time represented by the current manpower rows.
-            const leadTimes = [];
-            rows.forEach(row => {
-                (row.days || []).forEach(day => {
-                    const order = Number(day?.doorOrder || day?.order || 0);
-                    const leadTime = Number(
-                        day?.leadTime ||
-                        day?.totalLeadTime ||
-                        day?.overallLeadTime ||
-                        day?.processTime ||
-                        0
-                    );
-                    if (order > 0 && leadTime > 0) leadTimes.push(leadTime);
-                });
-            });
-
-            const leadTime = leadTimes.length
-                ? leadTimes.reduce((sum, v) => sum + v, 0) / leadTimes.length
+            // Actual Output / Day = (3600 / Lead Time) × Current Manpower × Working Hours
+            const actualOutputPerHour = avgLeadTime > 0
+                ? (3600 / avgLeadTime) * actualManpower
                 : 0;
-
-            const outputPerHour = leadTime > 0
-                ? (3600 / leadTime) * actualManpower
-                : 0;
-
-            const workingHours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
-            const outputPerDay = outputPerHour * workingHours;
-
-            return { leadTime, outputPerHour, outputPerDay };
-        }
-
-        function updateMpPlanActualSummary(planOrderPerDay, planManpower, rows = []) {
-            const actualManpower = getMpPlanActualInput('manpower');
-            const actualCalc = getMpActualOutputFromLeadTime(rows);
-            const actualOutput = actualCalc.outputPerDay;
+            const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
-            const outInput = document.getElementById('mpActualOutputInput');
+            const outEl = document.getElementById('mpActualOutputInput');
             if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
-            if (outInput) outInput.textContent = Math.round(actualOutput).toLocaleString();
+            if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
 
             const formulaEl = document.getElementById('mpActualOutputFormula');
             if (formulaEl) {
-                formulaEl.textContent = actualCalc.leadTime > 0
-                    ? `(${3600} / ${actualCalc.leadTime.toFixed(2)}s) × ${actualManpower} คน × ${Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0)} hr`
-                    : 'ยังไม่มี Lead Time';
+                formulaEl.textContent = avgLeadTime > 0
+                    ? `(3600 / ${avgLeadTime.toFixed(2)}s) × ${actualManpower} คน × ${hours.toFixed(1)} hr`
+                    : 'ยังไม่มี Lead Time จาก Work Process';
             }
 
             const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
@@ -6594,7 +6565,7 @@ function updateLobSubLineVisibility() {
             };
 
             setText('mpPlanOrderDay', Math.round(planOrderPerDay).toLocaleString());
-            setText('mpPlanManpower', planManpower.toFixed(2));
+            setText('mpPlanManpower', planManpower > 0 ? planManpower.toFixed(2) : '0');
             setText('mpOutputAchievement', `${performance.toFixed(1)}%`);
             setText('mpOutputAchievementDetail',
                 `${Math.round(actualOutput).toLocaleString()} / ${Math.round(planOrderPerDay).toLocaleString()}`);
@@ -6670,6 +6641,8 @@ function updateLobSubLineVisibility() {
             let peakManpower = 0;
             const dailyMpTotals = new Array(days.length).fill(0);
             const dailyPlanOrderTotals = new Array(days.length).fill(0);
+            let summaryLeadTimeWeighted = 0;
+            let summaryLeadTimeQty = 0;
 
             const metricDefs = [
                 // ───────────── ZONE 1 : ORDER PLAN ─────────────
@@ -6888,13 +6861,13 @@ function updateLobSubLineVisibility() {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
                     dailyMpTotals[i] += Number(r.totalManpowerCombined || 0);
-                    dailyPlanOrderTotals[i] += Number(
-                        r.doorOrder ??
-                        r.totalDoorOrder ??
-                        r.order ??
-                        r.orderWithShort ??
-                        0
-                    );
+                    const summaryDoorOrder = Number(r.doorOrder || 0);
+                    dailyPlanOrderTotals[i] += summaryDoorOrder;
+
+                    if (summaryDoorOrder > 0 && Number(r.avgLeadTime || 0) > 0) {
+                        summaryLeadTimeWeighted += Number(r.avgLeadTime) * summaryDoorOrder;
+                        summaryLeadTimeQty += summaryDoorOrder;
+                    }
                 });
 
                 metricDefs.forEach((metric, metricIndex) => {
@@ -6994,30 +6967,32 @@ function updateLobSubLineVisibility() {
             setText('mpHours', `${hours.toFixed(1)} hr`);
             setText('mpTotalOrder', totalOrderAllDays.toLocaleString());
             setText('mpTotalDoorOrder', totalDoorOrderAllDays.toLocaleString());
-            const avgPlanManpower = activeDays > 0 ? (totalDailyManpower / activeDays) : 0;
-            // Plan Order / Day must come directly from the production plan:
-            // Total Door Order ÷ number of production days.
-            const totalDoorOrderFromPlan = Number(
-                String(document.getElementById('mpTotalDoorOrder')?.textContent || '0').replace(/,/g, '')
-            ) || 0;
-
-            // Count production-plan days that actually have planned Door Order.
-            // If daily plan values are unavailable, fall back to non-Sunday dates in the plan period.
-            let productionDayCount = dailyPlanOrderTotals.filter((v, i) =>
+            // Plan Order / Day = Total Door Order from production plan ÷ number of production days.
+            const productionDayCount = dailyPlanOrderTotals.filter((v, i) =>
                 !isSunday(days[i]) && Number(v || 0) > 0
             ).length;
 
-            if (!(productionDayCount > 0)) {
-                productionDayCount = days.filter(d => !isSunday(d)).length || 1;
-            }
-
             const planOrderPerDay = productionDayCount > 0
-                ? totalDoorOrderFromPlan / productionDayCount
+                ? totalDoorOrderAllDays / productionDayCount
+                : 0;
+
+            const avgPlanManpower = activeDays > 0
+                ? totalDailyManpower / activeDays
+                : 0;
+
+            // Lead Time comes directly from the same calculated manpower rows.
+            const summaryAvgLeadTime = summaryLeadTimeQty > 0
+                ? summaryLeadTimeWeighted / summaryLeadTimeQty
                 : 0;
 
             setText('mpAvgManpower', avgPlanManpower > 0 ? avgPlanManpower.toFixed(2) : '0');
             setText('mpPeakManpower', String(peakManpower));
-            updateMpPlanActualSummary(planOrderPerDay, avgPlanManpower, rows);
+
+            updateMpPlanActualSummary(
+                planOrderPerDay,
+                avgPlanManpower,
+                summaryAvgLeadTime
+            );
         }
 
         function switchManpowerStation(stationName) {
