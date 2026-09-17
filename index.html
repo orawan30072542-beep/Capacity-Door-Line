@@ -391,6 +391,15 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 
 
 #lobDoorCFoamTypeButtons button{min-width:42px;}
+
+/* ===== Manpower & Capacity Requirement Overview Actual — number hierarchy ===== */
+#tableManpowerCapacity .mp-num-top{font-size:16px!important;line-height:1.05!important;font-weight:900!important}
+#tableManpowerCapacity .mp-num-bottom{font-size:12px!important;line-height:1.1!important;font-weight:800!important;color:#fff!important;margin-top:4px!important}
+#tableManpowerCapacity .mp-top-order{color:#38bdf8!important}
+#tableManpowerCapacity .mp-top-door{color:#c084fc!important}
+#tableManpowerCapacity .mp-top-short{color:#fb923c!important}
+#tableManpowerCapacity .mp-top-capacity{color:#22d3ee!important}
+#tableManpowerCapacity .mp-num-main{font-size:16px!important;line-height:1.05!important;font-weight:900!important}
 </style>
 
 <style>
@@ -985,7 +994,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </p>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Back Plate / Bottom Plate Line#1 / Line#2: Load to Cart 1 คน รวมอยู่ใน In Line | Out Line = Part Supply 1 + Delivery 1 (รวม 2 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours | Manpower / Hour = Order/Hour ÷ (3600 ÷ Overall Lead Time)
+                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Back Plate / Bottom Plate Line#1 / Line#2: Load to Cart 1 คน รวมอยู่ใน In Line | Out Line = Part Supply 1 + Delivery 1 (รวม 2 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -6250,7 +6259,7 @@ function updateLobSubLineVisibility() {
                     label: 'Coverage %',
                     subLabel: 'Actual Capacity ÷ Order',
                     cls: 'text-amber-300',
-                    format: v => v > 0 ? `${v.toFixed(1)}%` : '-'
+                    format: v => v > 0 ? `<span class="mp-num-main">${v.toFixed(1)}%</span>` : '-'
                 },
                 {
                     key: 'gap',
@@ -6479,8 +6488,8 @@ function updateLobSubLineVisibility() {
                     subLabel: 'ไม่คูณ Ratio',
                     cls: 'text-white',
                     format: (v, row) => v > 0
-                        ? `<div class="font-bold">${Math.round(v).toLocaleString()}</div>
-                           <div class="text-[8px] text-sky-300 mt-0.5">UPH ${Math.round(row.totalOrderUPH).toLocaleString()}</div>`
+                        ? `<div class="mp-num-top mp-top-order">${Math.round(v).toLocaleString()}</div>
+                           <div class="mp-num-bottom">UPH ${Math.round(row.totalOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
                 {
@@ -6491,8 +6500,8 @@ function updateLobSubLineVisibility() {
                     subLabel: 'คูณ Ratio',
                     cls: 'text-violet-300',
                     format: (v, row) => v > 0
-                        ? `<div class="font-bold">${Math.round(v).toLocaleString()}</div>
-                           <div class="text-[8px] text-fuchsia-300 mt-0.5">UPH ${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
+                        ? `<div class="mp-num-top mp-top-door">${Math.round(v).toLocaleString()}</div>
+                           <div class="mp-num-bottom">UPH ${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
                 {
@@ -6503,26 +6512,17 @@ function updateLobSubLineVisibility() {
                     subLabel: `Door Order × ${(1 + getShortPercent()/100).toFixed(2)}`,
                     cls: 'text-orange-300',
                     format: (v, row) => v > 0
-                        ? `<div class="font-bold">${Math.round(v).toLocaleString()}</div>
-                           <div class="text-[8px] text-orange-200 mt-0.5">UPH ${Math.round(row.shortageOrderUPH).toLocaleString()}</div>`
+                        ? `<div class="mp-num-top mp-top-short">${Math.round(v).toLocaleString()}</div>
+                           <div class="mp-num-bottom">UPH ${Math.round(row.shortageOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
 
                 // ───────────── ZONE 2 : CAPACITY ─────────────
                 {
-                    key: 'avgLeadTime',
+                    key: 'actualUPH',
                     zone: 'CAPACITY',
                     zoneNo: '2',
                     zoneStart: true,
-                    zoneClass: 'emerald',
-                    label: 'Overall Lead Time',
-                    subLabel: 'Process Time',
-                    cls: 'text-emerald-300',
-                    format: v => v > 0 ? `${v.toFixed(1)}s` : '-'
-                },
-                {
-                    key: 'actualUPH',
-                    zone: 'CAPACITY',
                     zoneClass: 'emerald',
                     label: 'Actual Capacity',
                     subLabel: 'Day / UPH / Gap Day / Gap Hour',
@@ -6536,8 +6536,8 @@ function updateLobSubLineVisibility() {
                         const gapHourText = `${gapHour > 0 ? '+' : ''}${Math.round(gapHour).toLocaleString()}`;
 
                         return `
-                            <div class="font-bold text-cyan-300">${Math.round(row.actualCapacity || 0).toLocaleString()}</div>
-                            <div class="text-[9px] text-emerald-300 mt-0.5">${Math.round(v).toLocaleString()}</div>
+                            <div class="mp-num-top mp-top-capacity">${Math.round(row.actualCapacity || 0).toLocaleString()}</div>
+                            <div class="mp-num-bottom">${Math.round(v).toLocaleString()} UPH</div>
                             <div class="text-[9px] mt-1 pt-1 border-t border-slate-700/70 ${gapDay >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${gapDayText}</div>
                             <div class="text-[9px] ${gapHour >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${gapHourText}</div>
                         `;
@@ -6570,14 +6570,14 @@ function updateLobSubLineVisibility() {
 
                         if (station === 'Bottom Plate' || station === 'Back Plate') {
                             return `
-                                <div class="font-bold">${Math.round(v)} คน</div>
+                                <div class="mp-num-main">${Math.round(v)} คน</div>
                                 <div class="text-[8px] text-slate-400 mt-0.5">
                                     In ${inLine} + Out ${outLine}
                                 </div>
                             `;
                         }
 
-                        return `<div class="font-bold">${Math.round(v)} คน</div>`;
+                        return `<div class="mp-num-main">${Math.round(v)} คน</div>`;
                     }
                 }
             ];
