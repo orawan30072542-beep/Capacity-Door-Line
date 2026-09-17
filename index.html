@@ -5977,6 +5977,53 @@ function updateLobSubLineVisibility() {
                 };
             }
 
+            // ===== Door C: แยกยอด C-1 / C-2 / C-3 ไว้ด้านบน =====
+            // ใช้ Daily Plan + Master Model Routing + Ratio ของแต่ละ C-Line
+            // เป็นยอดชิ้นงานที่ C-Line นั้นต้องผลิตจริงในแต่ละวัน
+            if (currentSummaryStation === 'Door C') {
+                const doorCKpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
+
+                ['C-1', 'C-2', 'C-3'].forEach(cLine => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'bg-cyan-950/70 font-bold border-b border-cyan-800/50';
+
+                    let html = `
+                        <td class="p-3 bg-cyan-950/80 text-cyan-300">${cLine}</td>
+                        <td class="p-3 bg-cyan-950/80 text-white">TOTAL ${cLine}</td>
+                    `;
+
+                    for (let i = 0; i < days.length; i++) {
+                        const day = days[i];
+
+                        if (isSunday(day)) {
+                            html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
+                            continue;
+                        }
+
+                        const qty = Math.round(
+                            Number(doorCKpi?.dailyDoorCOrder?.[cLine]?.[i] || 0)
+                        );
+                        const uph = qty > 0 && hours > 0
+                            ? Math.round(qty / hours)
+                            : 0;
+
+                        html += `
+                            <td class="p-2 text-center border-l border-cyan-900/40 bg-cyan-950/35">
+                                <div class="text-cyan-300 text-xs font-bold">
+                                    ${qty > 0 ? qty.toLocaleString() : '-'}
+                                </div>
+                                <div class="text-white text-[10px] font-normal opacity-90">
+                                    ${qty > 0 ? uph.toLocaleString() : '-'}
+                                </div>
+                            </td>
+                        `;
+                    }
+
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            }
+
             // แถว TOTAL ด้านบน
             if (currentSummaryStation === 'Back Plate' || currentSummaryStation === 'Bottom Plate') {
                 const isBack = currentSummaryStation === 'Back Plate';
