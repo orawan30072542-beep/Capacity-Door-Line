@@ -7048,6 +7048,68 @@ function updateLobSubLineVisibility() {
             return Number(metrics?.totalQty || 0);
         }
 
+
+        // Weighted Lead Time for Summary Capacity Plan & Acual
+        // Formula: Σ(Lead Time × Order) ÷ Σ(Order)
+        // Door C C-1 uses RR + RL Lead Time for each active BM model.
+        // Door C C-2 uses VEG + FB/FT; C-3 uses RR + FR.
+        function getSummaryCapacityLeadTime(data, station, lineName, dayIndex) {
+            let weightedLeadTime = 0;
+            let totalOrder = 0;
+
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+
+                    const order = Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                    if (order <= 0) return;
+
+                    const cfg = getMasterConfigForModel(modelName);
+                    let belongs = false;
+                    let leadTime = 0;
+
+                    if (station === 'Door C') {
+                        belongs = cfg.station === 'Door C' &&
+                            (getDoorCRoutingDetails(modelName) || []).some(route => route.line === lineName);
+                        if (!belongs) return;
+
+                        if (lineName === 'C-1') {
+                            const rr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0);
+                            const rl = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RL')) || 0);
+                            leadTime = rr + rl;
+                        } else if (lineName === 'C-2') {
+                            const veg = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'VEG')) || 0);
+                            const fb = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FB')) || 0);
+                            const ft = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FT')) || 0);
+                            leadTime = veg + fb + ft;
+                        } else if (lineName === 'C-3') {
+                            const rr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0);
+                            const fr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FR')) || 0);
+                            leadTime = rr + fr;
+                        }
+                    } else if (station === 'Back Plate') {
+                        belongs = cfg.backPlateSource === 'ผลิตเอง' &&
+                            (cfg.backPlateLine || 'Line#1') === lineName;
+                        if (belongs) leadTime = getLeadTimeForManpower(modelName, station);
+                    } else if (station === 'Bottom Plate') {
+                        belongs = cfg.bottomSource === 'ผลิตเอง' &&
+                            (cfg.bottomLine || 'Line#1') === lineName;
+                        if (belongs) leadTime = getLeadTimeForManpower(modelName, station);
+                    } else {
+                        belongs = cfg.station === station;
+                        if (belongs) leadTime = getLeadTimeForManpower(modelName, station);
+                    }
+
+                    if (!belongs || leadTime <= 0) return;
+                    weightedLeadTime += leadTime * order;
+                    totalOrder += order;
+                });
+            });
+
+            return totalOrder > 0 ? weightedLeadTime / totalOrder : 0;
+        }
+
         function renderSummaryCapacityPlanActual(data) {
             const head = document.getElementById('summaryCapacityPlanActualHead');
             const body = document.getElementById('summaryCapacityPlanActualBody');
@@ -7104,7 +7166,7 @@ function updateLobSubLineVisibility() {
 
                 // Row 1: imported plan.
                 html += `<tr class="bg-amber-950/10">
-                    <td rowspan="3" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
+                    <td rowspan="4" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
                         ${lineName}
                     </td>
                     <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
@@ -7123,7 +7185,25 @@ function updateLobSubLineVisibility() {
                     ${required.map((v,i) => dailyCell(v, hours > 0 ? v / hours : 0, isSunday(days[i]))).join('')}
                 </tr>`;
 
-                // Row 3: Diff Required - Plan.
+                // Row 3: Weighted Lead Time = Σ(Lead Time × Order) ÷ Σ(Order)
+                const leadTimes = days.map((day, i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityLeadTime(data, station, lineName, i)
+                );
+                html += `<tr class="bg-cyan-950/5">
+                    <td class="px-3 py-2.5 text-cyan-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Lead Time รวม
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">Σ(Lead Time × Order) ÷ Σ Order</div>
+                    </td>
+                    ${leadTimes.map((v,i) => isSunday(days[i])
+                        ? `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`
+                        : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="text-cyan-300 text-sm font-bold">${v > 0 ? v.toFixed(1) : '0'}</div>
+                            <div class="text-white text-[8px] font-normal mt-0.5">sec</div>
+                           </td>`
+                    ).join('')}
+                </tr>`;
+
+                // Row 4: Diff Required - Plan.
                 html += `<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
                     <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
                         Diff
