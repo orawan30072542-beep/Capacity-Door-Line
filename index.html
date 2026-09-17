@@ -6838,8 +6838,10 @@ function updateLobSubLineVisibility() {
                     let belongs = false;
 
                     if (station === 'Door C') {
-                        belongs = cfg.station === 'Door C' &&
-                            (getDoorCRoutingDetails(modelName) || []).length > 0;
+                        // Door C order source is the actual C-1/C-2/C-3 routing.
+                        // Do not require cfg.station exact match here; otherwise BM23/BM29
+                        // can be skipped even though their Master routing belongs to Door C.
+                        belongs = (getDoorCRoutingDetails(modelName) || []).length > 0;
                     } else if (station === 'Back Plate') {
                         belongs = cfg.backPlateSource === 'ผลิตเอง';
                     } else if (station === 'Bottom Plate') {
@@ -6868,9 +6870,10 @@ function updateLobSubLineVisibility() {
                                 // C-2 = BM23 + BM29
                                 // C-3 = follow Master routing (TM/FUF/BM T-Door routes)
                                 const n = normalizeModelName(modelName);
-                                const isBMTDoor = n.includes('BM T-DOOR') || n.includes('BM T DOOR');
-                                const isBM23 = n.includes('BM23');
-                                const isBM29 = n.includes('BM29');
+                                const compactN = n.replace(/[\s_\-]+/g, '');
+                                const isBMTDoor = compactN.includes('BMTDOOR');
+                                const isBM23 = compactN.includes('BM23');
+                                const isBM29 = compactN.includes('BM29');
                                 if (route.line === 'C-1' && !(isBMTDoor || isBM23 || isBM29)) return;
                                 if (route.line === 'C-2' && !(isBM23 || isBM29)) return;
 
