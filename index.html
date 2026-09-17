@@ -1005,6 +1005,13 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 class="w-14 bg-slate-950 border border-orange-500/30 rounded px-1.5 py-1 text-center text-xs font-bold text-orange-300 focus:outline-none focus:border-orange-400">
                         </label>
 
+                        <label class="flex items-center gap-2 bg-slate-900/70 border border-emerald-500/25 rounded-lg px-2.5 py-1.5">
+                            <span class="text-[10px] font-semibold text-emerald-300">Efficiency %</span>
+                            <input id="efficiencyPercentInput" type="number" min="1" max="100" step="1" value="85"
+                                onchange="saveEfficiencyPercent(this.value)"
+                                class="w-14 bg-slate-950 border border-emerald-500/30 rounded px-1.5 py-1 text-center text-xs font-bold text-emerald-300 focus:outline-none focus:border-emerald-400">
+                        </label>
+
                     <span class="text-xs text-slate-300">ชม.</span>
                     <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
                         บันทึกชั่วโมง
@@ -2932,11 +2939,11 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
             });
 
             let uphPlan = hours > 0 ? totalQty / hours : 0;
-            let uphPlan85 = uphPlan * 0.85;
+            let uphPlan85 = uphPlan * getEfficiencyRate();
 
             let effectiveMaxCT = maxCTValues.length > 0 ? Math.max(...maxCTValues) : 30;
             let uphActMaxCT = effectiveMaxCT > 0 ? 3600 / effectiveMaxCT : 0;
-            let uphActMaxCT85 = uphActMaxCT * 0.85;
+            let uphActMaxCT85 = uphActMaxCT * getEfficiencyRate();
 
             return {
                 totalQty: Math.round(totalQty),
@@ -6087,6 +6094,30 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
+        function getEfficiencyPercent() {
+            const saved = localStorage.getItem('haier_manpower_efficiency_percent');
+            if (saved === null || saved === '') return 85;
+            return Math.min(100, Math.max(1, Number(saved) || 85));
+        }
+
+        function getEfficiencyRate() {
+            return getEfficiencyPercent() / 100;
+        }
+
+        function saveEfficiencyPercent(value) {
+            const pct = Math.min(100, Math.max(1, Number(value) || 85));
+            localStorage.setItem('haier_manpower_efficiency_percent', String(pct));
+
+            const input = document.getElementById('efficiencyPercentInput');
+            if (input && Number(input.value) !== pct) input.value = pct;
+
+            // Recalculate all capacity/manpower views immediately.
+            renderManpowerTable(currentDailyData);
+            renderCapacityTable(currentDailyData);
+            renderUnifiedTable(currentDailyData);
+            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
+        }
+
         function getBottomOutLineManpower(station, groupName) {
             // Back Plate และ Bottom Plate ใช้ Support เหมือนกัน
             // Load to Cart จัดเป็น In Line
@@ -6121,7 +6152,7 @@ function updateLobSubLineVisibility() {
                     const leadTime = getLeadTimeForManpower(m.name, station);
                     if (leadTime <= 0) return;
 
-                    const upm85 = (3600 / leadTime) * 0.85;
+                    const upm85 = (3600 / leadTime) * getEfficiencyRate();
                     if (upm85 <= 0) return;
 
                     // แสดง Order 2 แบบ
@@ -6146,8 +6177,8 @@ function updateLobSubLineVisibility() {
             const shortageOrder = doorOrder * (1 + shortagePercent / 100);
             const shortageOrderUPH = hours > 0 ? shortageOrder / hours : 0;
 
-            // UPM 85% = Capacity ต่อคนต่อชั่วโมงจาก Overall Lead Time
-            const effectiveUPM85 = avgLeadTime > 0 ? (3600 / avgLeadTime) * 0.85 : 0;
+            // UPM Efficiency = Capacity ต่อคนต่อชั่วโมงจาก Overall Lead Time × Efficiency %
+            const effectiveUPM85 = avgLeadTime > 0 ? (3600 / avgLeadTime) * getEfficiencyRate() : 0;
             const capacityPerManDay = effectiveUPM85 * hours;
 
             // ยอดที่ต้องผลิตต่อชั่วโมง หลังเผื่อ Short 20%
@@ -6593,6 +6624,9 @@ function updateLobSubLineVisibility() {
             const station = currentManpowerStation || 'Door A';
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
+
+            const efficiencyInput = document.getElementById('efficiencyPercentInput');
+            if (efficiencyInput) efficiencyInput.value = getEfficiencyPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
             const stationLabel = document.getElementById('manpowerStationLabel');
@@ -7124,9 +7158,9 @@ function updateLobSubLineVisibility() {
                 routingTh.style.maxWidth = '10%';
             }
 
-            // Find UPH85 column
+            // Find UPH Efficiency column
             let headers = Array.from(table.querySelectorAll('thead th'));
-            const uph85Index = headers.findIndex(th => /UPH\s*85%/i.test(th.textContent || ''));
+            const uph85Index = headers.findIndex(th => /UPH\\s*(?:85%|Eff\\.%)/i.test(th.textContent || ''));
             if (uph85Index < 0) return;
 
             // Avoid duplicate columns.
@@ -7207,7 +7241,7 @@ function updateLobSubLineVisibility() {
                     UPH<br>100%
                 </th>
                 <th class="px-2 py-1.5 font-medium text-center text-rose-300 bg-slate-900 sticky top-0 z-30 w-20">
-                    UPH<br>85%
+                    UPH<br>Eff.%
                 </th>`;
             headerRow.innerHTML = headerHtml;
 
@@ -7345,7 +7379,7 @@ function updateLobSubLineVisibility() {
                 }
 
                 let uphMax = maxCT > 0 ? Math.round(3600 / maxCT) : 0;
-                let uph85 = Math.round(uphMax * 0.85);
+                let uph85 = Math.round(uphMax * getEfficiencyRate());
 
                 let tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-800/30 transition border-b border-bordercolor/40';
