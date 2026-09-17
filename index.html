@@ -413,6 +413,25 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
         line-height:1.5rem !important;
     }
 }
+
+/* Manpower & Capacity Actual — compact, non-bold numbers */
+#tableManpowerCapacity .mp-num-top,
+#tableManpowerCapacity .mp-num-bottom,
+#tableManpowerCapacity .mp-num-main{
+    font-weight:400 !important;
+}
+#tableManpowerCapacity .mp-num-top{
+    line-height:1 !important;
+}
+#tableManpowerCapacity .mp-num-bottom{
+    line-height:1 !important;
+    margin-top:1px !important;
+}
+#tableManpowerCapacity td{
+    padding-top:5px !important;
+    padding-bottom:5px !important;
+    line-height:1.15 !important;
+}
 </style>
 
 <style>
@@ -6502,7 +6521,7 @@ function updateLobSubLineVisibility() {
                     cls: 'text-white',
                     format: (v, row) => v > 0
                         ? `<div class="mp-num-top mp-top-order">${Math.round(v).toLocaleString()}</div>
-                           <div class="mp-num-bottom">UPH ${Math.round(row.totalOrderUPH).toLocaleString()}</div>`
+                           <div class="mp-num-bottom">${Math.round(row.totalOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
                 {
@@ -6514,7 +6533,7 @@ function updateLobSubLineVisibility() {
                     cls: 'text-violet-300',
                     format: (v, row) => v > 0
                         ? `<div class="mp-num-top mp-top-door">${Math.round(v).toLocaleString()}</div>
-                           <div class="mp-num-bottom">UPH ${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
+                           <div class="mp-num-bottom">${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
                 {
@@ -6526,7 +6545,7 @@ function updateLobSubLineVisibility() {
                     cls: 'text-orange-300',
                     format: (v, row) => v > 0
                         ? `<div class="mp-num-top mp-top-short">${Math.round(v).toLocaleString()}</div>
-                           <div class="mp-num-bottom">UPH ${Math.round(row.shortageOrderUPH).toLocaleString()}</div>`
+                           <div class="mp-num-bottom">${Math.round(row.shortageOrderUPH).toLocaleString()}</div>`
                         : '-'
                 },
 
@@ -6550,7 +6569,7 @@ function updateLobSubLineVisibility() {
 
                         return `
                             <div class="mp-num-top mp-top-capacity">${Math.round(row.actualCapacity || 0).toLocaleString()}</div>
-                            <div class="mp-num-bottom">${Math.round(v).toLocaleString()} UPH</div>
+                            <div class="mp-num-bottom">${Math.round(v).toLocaleString()}</div>
                             <div class="text-[9px] mt-1 pt-1 border-t border-slate-700/70 ${gapDay >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${gapDayText}</div>
                             <div class="text-[9px] ${gapHour >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${gapHourText}</div>
                         `;
