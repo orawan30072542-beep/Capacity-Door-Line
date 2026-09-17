@@ -6955,32 +6955,42 @@ function updateLobSubLineVisibility() {
             const body = document.getElementById('mpDailyProductionOrderBody');
             if (!head || !body) return;
 
-            const days = Array.isArray(data?.days) ? data.days : [];
+            const sourceData = data && Array.isArray(data.days) && Array.isArray(data.groups)
+                ? data
+                : getDailyPlanData();
+            const days = Array.isArray(sourceData?.days) ? sourceData.days : [];
+
             if (!days.length) {
                 head.innerHTML = '';
-                body.innerHTML = '<tr><td class="p-3 text-slate-500">ไม่มีข้อมูล</td></tr>';
+                body.innerHTML = '<tr><td class="p-3 text-slate-500">ไม่มีข้อมูล Daily Plan</td></tr>';
                 return;
             }
 
-            const kpi = getManpowerOrderKpisFromDailyPlan(data, station);
+            // Use the exact same calculation as
+            // "ยอดรวมออเดอร์รายวันที่ต้องผลิต (เฉพาะการผลิตเองอ้างอิงจาก Master Model)"
+            const kpi = getManpowerOrderKpisFromDailyPlan(sourceData, station);
 
             head.innerHTML = `<tr>
                 <th class="p-2 text-left text-slate-300 sticky left-0 bg-slate-950 z-10 min-w-[150px]">Total / Day</th>
                 ${days.map(day => `<th class="p-2 text-center text-slate-300 min-w-[68px]">${formatDayLabel(day)}</th>`).join('')}
             </tr>`;
 
-            const totals = station === 'Door C'
-                ? days.map((_, i) =>
-                    Number(kpi?.dailyDoorCOrder?.['C-1']?.[i] || 0) +
-                    Number(kpi?.dailyDoorCOrder?.['C-2']?.[i] || 0) +
-                    Number(kpi?.dailyDoorCOrder?.['C-3']?.[i] || 0)
-                  )
-                : days.map((_, i) => Number(kpi?.dailyDoorOrder?.[i] || 0));
+            let totals = [];
+            if (station === 'Door C') {
+                totals = days.map((_, i) => {
+                    const c1 = Number(kpi?.dailyDoorCOrder?.['C-1']?.[i] || 0);
+                    const c2 = Number(kpi?.dailyDoorCOrder?.['C-2']?.[i] || 0);
+                    const c3 = Number(kpi?.dailyDoorCOrder?.['C-3']?.[i] || 0);
+                    return c1 + c2 + c3;
+                });
+            } else {
+                totals = days.map((_, i) => Number(kpi?.dailyDoorOrder?.[i] || 0));
+            }
 
             body.innerHTML = `<tr class="border-t border-slate-700/60">
                 <td class="p-2 text-left text-cyan-300 font-semibold sticky left-0 bg-slate-900 z-10">ยอดรวมที่ต้องผลิต</td>
                 ${totals.map((qty,i) => `<td class="p-2 text-center border-l border-slate-800/70 ${isSunday(days[i]) ? 'bg-slate-950/80 text-slate-600' : 'text-white'}">
-                    ${isSunday(days[i]) ? '—' : (qty > 0 ? Math.round(qty).toLocaleString() : '-')}
+                    ${isSunday(days[i]) ? '—' : Math.round(qty).toLocaleString()}
                 </td>`).join('')}
             </tr>`;
         }
@@ -6995,7 +7005,6 @@ function updateLobSubLineVisibility() {
 
             const days = data.days;
             const station = currentManpowerStation || 'Door A';
-            renderMpDailyProductionOrderSummary(data, station);
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
@@ -7506,6 +7515,9 @@ function updateLobSubLineVisibility() {
                 avgPlanManpower,
                 summaryAvgLeadTime
             );
+            // Render after all Manpower/KPI calculations are complete.
+            renderMpDailyProductionOrderSummary(data, station);
+
         }
 
         function switchManpowerStation(stationName) {
