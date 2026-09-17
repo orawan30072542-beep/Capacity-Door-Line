@@ -1104,7 +1104,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
                                     <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
                                     <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
-                                    <div id="mpActualOutputFormula" class="text-[8px] text-slate-500 mt-1">คำนวณจาก Lead Time × Current Manpower</div>
+                                    <div id="mpActualOutputFormula" class="text-[8px] text-slate-500 mt-1">คำนวณจาก Max Lead Time × Current Manpower</div>
                                 </div>
                             </div>
                         </div>
@@ -6548,7 +6548,7 @@ function updateLobSubLineVisibility() {
             if (formulaEl) {
                 formulaEl.textContent = avgLeadTime > 0
                     ? `(3600 / ${avgLeadTime.toFixed(2)}s) × ${actualManpower} คน × ${hours.toFixed(1)} hr`
-                    : 'ยังไม่มี Lead Time จาก Work Process';
+                    : 'ยังไม่มี Max Lead Time จาก Work Process';
             }
 
             const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
@@ -6641,8 +6641,7 @@ function updateLobSubLineVisibility() {
             let peakManpower = 0;
             const dailyMpTotals = new Array(days.length).fill(0);
             const dailyPlanOrderTotals = new Array(days.length).fill(0);
-            let summaryLeadTimeWeighted = 0;
-            let summaryLeadTimeQty = 0;
+            let summaryMaxLeadTime = 0;
 
             const metricDefs = [
                 // ───────────── ZONE 1 : ORDER PLAN ─────────────
@@ -6865,8 +6864,10 @@ function updateLobSubLineVisibility() {
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
                     if (summaryDoorOrder > 0 && Number(r.avgLeadTime || 0) > 0) {
-                        summaryLeadTimeWeighted += Number(r.avgLeadTime) * summaryDoorOrder;
-                        summaryLeadTimeQty += summaryDoorOrder;
+                        summaryMaxLeadTime = Math.max(
+                            summaryMaxLeadTime,
+                            Number(r.avgLeadTime || 0)
+                        );
                     }
                 });
 
@@ -6980,10 +6981,8 @@ function updateLobSubLineVisibility() {
                 ? totalDailyManpower / activeDays
                 : 0;
 
-            // Lead Time comes directly from the same calculated manpower rows.
-            const summaryAvgLeadTime = summaryLeadTimeQty > 0
-                ? summaryLeadTimeWeighted / summaryLeadTimeQty
-                : 0;
+            // Summary uses the highest Lead Time from all active production rows.
+            const summaryAvgLeadTime = summaryMaxLeadTime;
 
             setText('mpAvgManpower', avgPlanManpower > 0 ? avgPlanManpower.toFixed(2) : '0');
             setText('mpPeakManpower', String(peakManpower));
