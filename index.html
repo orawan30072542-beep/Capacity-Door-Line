@@ -1185,7 +1185,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
+                                    <div class="text-[8px] text-slate-500">Actual Door Output / Day · ด้านขวา = / Hour</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6636,9 +6636,11 @@ function updateLobSubLineVisibility() {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Actual Output / Day = (3600 / Lead Time) × Current Manpower × Working Hours
+            // Actual Output แสดงรูปแบบเดียวกับ Plan:
+            // ซ้าย = Actual Output / Day, ขวา = Actual Output / Hour
+            // Formula = (3600 / Lead Time) × Actual Manpower
             const actualOutputPerHour = avgLeadTime > 0
-                ? (3600 / avgLeadTime) * 0.85 * actualManpower
+                ? (3600 / avgLeadTime) * actualManpower
                 : 0;
             const actualOutput = actualOutputPerHour * hours;
 
