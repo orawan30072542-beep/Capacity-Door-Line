@@ -1222,20 +1222,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </div>
                         </div>
                     </div>
-                    <!-- Total daily production summary by physical line -->
-                    <div id="mpDailyLineTotalSummary" class="mt-4 bg-slate-900/55 border border-bordercolor rounded-xl overflow-hidden">
-                        <div class="px-4 py-3 border-b border-bordercolor">
-                            <div class="text-sm font-semibold text-white">สรุปออเดอร์และยอดผลิตรวมรายวันแต่ละไลน์</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">ออเดอร์รายวันที่ต้องทำ + ยอดผลิตรวมรายวัน อยู่ในตารางเดียวกัน</div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-[10px] border-collapse">
-                                <thead><tr id="mpDailyLineTotalHead" class="bg-slate-950/80 text-slate-300"></tr></thead>
-                                <tbody id="mpDailyLineTotalBody" class="divide-y divide-bordercolor/50"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
 
                     <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
@@ -6950,93 +6936,6 @@ function updateLobSubLineVisibility() {
             };
         }
 
-
-        // Copy only the TOTAL logic used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต"
-        // into the Manpower overview.
-        function renderMpDailyLineTotalSummary(data) {
-            const head = document.getElementById('mpDailyLineTotalHead');
-            const body = document.getElementById('mpDailyLineTotalBody');
-            if (!head || !body || !data?.days || !data?.groups) return;
-
-            const days = data.days;
-            const groups = data.groups;
-            const hours = parseFloat(document.getElementById('shiftHoursInput')?.value) || 8;
-            const station = currentManpowerStation || 'Door A';
-
-            head.innerHTML =
-                `<th class="p-3 text-left bg-slate-950/95 sticky left-0 z-20 min-w-[190px]">รายการ / Production Line</th>` +
-                days.map(day => `<th class="p-3 text-center bg-slate-950/95 min-w-[70px]">${day}</th>`).join('');
-
-            const rows = [];
-
-            if (station === 'Door C') {
-                const kpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
-
-                ['C-1','C-2','C-3'].forEach(line => {
-                    // Required Order = Daily Plan units routed to this C-line, BEFORE Ratio.
-                    const required = days.map((_, i) => {
-                        let total = 0;
-                        groups.forEach(g => (g.models || []).forEach(m => {
-                            const modelName = String(m?.name || '').trim();
-                            const routes = getDoorCRoutingDetails(modelName) || [];
-                            if (!routes.some(r => r.line === line)) return;
-                            total += Math.max(0, Number(m?.orders?.[i]) || 0);
-                        }));
-                        return total;
-                    });
-
-                    // Production Total = physical pieces required AFTER Master Ratio.
-                    const production = days.map((_,i) =>
-                        Number(kpi?.dailyDoorCOrder?.[line]?.[i] || 0)
-                    );
-
-                    rows.push({ label: `${line} · ออเดอร์รายวันที่ต้องทำ`, totals: required, kind:'order' });
-                    rows.push({ label: `${line} · ยอดผลิตรวมรายวัน`, totals: production, kind:'production' });
-                });
-            } else if (station === 'Back Plate' || station === 'Bottom Plate') {
-                const isBack = station === 'Back Plate';
-
-                ['Line#1','Line#2'].forEach(lineName => {
-                    const required = days.map((_,i) => {
-                        let qty = 0;
-                        groups.forEach(g => (g.models || []).forEach(m => {
-                            const cfg = getMasterConfigForModel(m.name);
-                            const source = isBack ? cfg.backPlateSource : cfg.bottomSource;
-                            const line = isBack ? (cfg.backPlateLine || 'Line#1') : (cfg.bottomLine || 'Line#1');
-                            if (source === 'ผลิตเอง' && line === lineName) {
-                                qty += Math.max(0, Number(m.orders?.[i]) || 0);
-                            }
-                        }));
-                        return qty;
-                    });
-
-                    rows.push({ label:`${station} ${lineName} · ออเดอร์รายวันที่ต้องทำ`, totals:required, kind:'order' });
-                    rows.push({ label:`${station} ${lineName} · ยอดผลิตรวมรายวัน`, totals:required.slice(), kind:'production' });
-                });
-            } else {
-                const totals = days.map((_,i) => {
-                    if (isSunday(days[i])) return 0;
-                    const metrics = getDayCapacityMetrics(groups, days, i, station, hours);
-                    return Number(metrics?.totalQty || 0);
-                });
-                rows.push({ label:`${station} · ออเดอร์รายวันที่ต้องทำ`, totals:totals.slice(), kind:'order' });
-                rows.push({ label:`${station} · ยอดผลิตรวมรายวัน`, totals:totals.slice(), kind:'production' });
-            }
-
-            body.innerHTML = rows.map((row,idx) => `
-                <tr class="${row.kind === 'order' ? 'bg-sky-950/25' : 'bg-slate-900/45'} ${row.kind === 'production' ? 'border-b-2 border-slate-700/70' : ''}">
-                    <td class="p-3 sticky left-0 z-10 ${row.kind === 'order' ? 'bg-sky-950/95 text-sky-300' : 'bg-slate-900/95 text-cyan-300'} font-semibold">
-                        ${row.label}
-                    </td>
-                    ${row.totals.map((qty,i) => `
-                        <td class="p-3 text-center border-l border-bordercolor/40 ${isSunday(days[i]) ? 'bg-slate-950 text-slate-600' : (row.kind === 'order' ? 'text-sky-200' : 'text-white')}">
-                            ${isSunday(days[i]) ? '—' : Math.round(qty).toLocaleString()}
-                        </td>
-                    `).join('')}
-                </tr>
-            `).join('');
-        }
-
         function renderManpowerTable(data) {
             const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
@@ -7047,7 +6946,6 @@ function updateLobSubLineVisibility() {
 
             const days = data.days;
             const station = currentManpowerStation || 'Door A';
-            renderMpDailyLineTotalSummary(data);
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
