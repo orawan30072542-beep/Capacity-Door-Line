@@ -6702,42 +6702,82 @@ function updateLobSubLineVisibility() {
         }
 
 
-        // Door C Actual Output / Day =
-        // (3600 / ((LeadTimeC1 × OrderC1) + (LeadTimeC2 × OrderC2) + (LeadTimeC3 × OrderC3))) × Actual Manpower
-        function getDoorCActualOutputByLeadtimeOrderAndManpower(data, actualManpower) {
-            if (!data || !Array.isArray(data.days) || !Array.isArray(data.groups)) return 0;
+        // Door C Actual Output:
+        // 1) Sum Lead Time for the Door Types that belong to each C-line.
+        //    C-1 = RR + RL, C-2 = FB + FT/VEG, C-3 = its routed Door C work.
+        // 2) UPH per employee = 3600 / C-line Lead Time.
+        // 3) Actual UPH = UPH per employee × Actual Manpower of that C-line.
+        // 4) Actual Output / Day = (Actual UPH C-1 + C-2 + C-3) × Working Hours.
+        function getDoorCActualOutputByLine(data, hours, actualManpowerTotal) {
+            if (!data || !Array.isArray(data.days) || !Array.isArray(data.groups)) {
+                return { c1:0, c2:0, c3:0, totalUPH:0, totalDay:0 };
+            }
 
-            const weighted = { 'C-1': 0, 'C-2': 0, 'C-3': 0 };
+            const groups = ['C-1','C-2','C-3'];
+            const info = {};
 
-            ['C-1', 'C-2', 'C-3'].forEach(groupName => {
-                data.groups.forEach(g => {
-                    (g.models || []).forEach(m => {
-                        if (!modelBelongsToManpowerGroup(m.name, 'Door C', groupName)) return;
+            groups.forEach(groupName => {
+                let ltOrderSum = 0;
+                let orderSum = 0;
 
-                        const ratio = getManpowerOrderMultiplier(m.name, 'Door C', groupName);
-                        const leadTime = Number(getLeadTimeForManpower(m.name, 'Door C') || 0);
-                        if (ratio <= 0 || leadTime <= 0) return;
+                data.groups.forEach(g => (g.models || []).forEach(m => {
+                    if (!modelBelongsToManpowerGroup(m.name, 'Door C', groupName)) return;
 
-                        (m.orders || []).forEach((rawOrder, dayIndex) => {
-                            if (isSunday(data.days[dayIndex])) return;
-                            const baseOrder = Math.max(0, Number(rawOrder) || 0);
-                            if (baseOrder <= 0) return;
+                    const ratio = Number(getManpowerOrderMultiplier(m.name, 'Door C', groupName) || 0);
+                    const leadTime = Number(getLeadTimeForManpower(m.name, 'Door C') || 0);
+                    if (ratio <= 0 || leadTime <= 0) return;
 
-                            const order = baseOrder * ratio;
-                            weighted[groupName] += leadTime * order;
-                        });
+                    (m.orders || []).forEach((rawOrder, dayIndex) => {
+                        if (isSunday(data.days[dayIndex])) return;
+                        const order = Math.max(0, Number(rawOrder) || 0) * ratio;
+                        if (order <= 0) return;
+                        ltOrderSum += leadTime * order;
+                        orderSum += order;
                     });
-                });
+                }));
+
+                // For a single model/day (e.g. BM29 on 9/19), this is exactly
+                // the total C-line Lead Time for that model. For mixed plans,
+                // use order-weighted C-line Lead Time.
+                const lineLeadTime = orderSum > 0 ? ltOrderSum / orderSum : 0;
+
+                // Existing manpower calculation is used only to split the one
+                // Current Actual Manpower input into C-1 / C-2 / C-3.
+                const mpValues = data.days.map((day, dayIndex) => {
+                    if (isSunday(day)) return 0;
+                    const r = calculateManpowerByGroupDay(data, dayIndex, 'Door C', groupName, hours);
+                    const rawMp = Number(r.totalManpowerCombined || r.manpowerRequired || 0);
+                    return (groupName === 'C-1' || groupName === 'C-2') ? rawMp / 4 : rawMp;
+                }).filter(v => v > 0);
+
+                const avgPlanMp = mpValues.length
+                    ? mpValues.reduce((s,v) => s + v, 0) / mpValues.length
+                    : 0;
+
+                info[groupName] = { lineLeadTime, avgPlanMp };
             });
 
-            const denominator =
-                weighted['C-1'] +
-                weighted['C-2'] +
-                weighted['C-3'];
+            const totalPlanMp = groups.reduce((s,g) => s + Number(info[g]?.avgPlanMp || 0), 0);
 
-            return denominator > 0
-                ? (3600 / denominator) * Math.max(0, Number(actualManpower) || 0)
-                : 0;
+            const calculateLine = (groupName) => {
+                const x = info[groupName];
+                if (!x || x.lineLeadTime <= 0) return 0;
+                const actualMp = totalPlanMp > 0
+                    ? Math.max(0, Number(actualManpowerTotal) || 0) * (x.avgPlanMp / totalPlanMp)
+                    : 0;
+                return (3600 / x.lineLeadTime) * actualMp;
+            };
+
+            const c1 = calculateLine('C-1');
+            const c2 = calculateLine('C-2');
+            const c3 = calculateLine('C-3');
+            const totalUPH = c1 + c2 + c3;
+
+            return {
+                c1, c2, c3,
+                totalUPH,
+                totalDay: totalUPH * Math.max(0, Number(hours) || 0)
+            };
         }
 
         function renderManpowerTable(data) {
@@ -7241,18 +7281,20 @@ function updateLobSubLineVisibility() {
                 : 1;
 
                         const doorCActualOutput = station === 'Door C'
-                ? getDoorCActualOutputByLeadtimeOrderAndManpower(
+                ? getDoorCActualOutputByLine(
                     data,
+                    hours,
                     getMpPlanActualInput('manpower')
                 )
                 : null;
+            const doorCActualOutputDay = doorCActualOutput ? doorCActualOutput.totalDay : null;
 
 updateMpPlanActualSummary(
                 planOrderPerDay,
                 avgPlanManpower,
                 summaryAvgLeadTime,
                 summaryDoorRatio,
-                doorCActualOutput);
+                doorCActualOutputDay);
         }
 
         function switchManpowerStation(stationName) {
