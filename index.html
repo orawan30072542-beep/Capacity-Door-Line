@@ -6946,6 +6946,13 @@ function updateLobSubLineVisibility() {
 
             const groups = getManpowerGroupsForStation(station);
 
+            // Door C table Order must come from the same source as Daily Plan totals:
+            // Daily Plan + only models produced in-house according to Master Model +
+            // routing/Ratio of each C-1/C-2/C-3 line.
+            const doorCMasterOrderKpis = station === 'Door C'
+                ? getManpowerOrderKpisFromDailyPlan(data, 'Door C')
+                : null;
+
             let totalOrderAllDays = 0;
             let totalDoorOrderAllDays = 0;
             let totalDailyManpower = 0;
@@ -6964,12 +6971,20 @@ function updateLobSubLineVisibility() {
                     zoneStart: true,
                     zoneClass: 'violet',
                     label: 'Total Order',
-                    subLabel: 'ไม่คูณ Ratio',
+                    subLabel: station === 'Door C'
+                        ? 'Daily Plan × Ratio · ผลิตเองตาม Master Model'
+                        : 'ไม่คูณ Ratio',
                     cls: 'text-white',
-                    format: (v, row) => v > 0
-                        ? `<div class="mp-num-top mp-top-order">${Math.round(v).toLocaleString()}</div>
-                           <div class="mp-num-bottom">${Math.round(row.totalOrderUPH).toLocaleString()}</div>`
-                        : '-'
+                    format: (v, row) => {
+                        const displayOrder = station === 'Door C'
+                            ? Number(row.masterProductionOrder || 0)
+                            : Number(v || 0);
+                        const displayUPH = hours > 0 ? displayOrder / hours : 0;
+                        return displayOrder > 0
+                            ? `<div class="mp-num-top mp-top-order">${Math.round(displayOrder).toLocaleString()}</div>
+                               <div class="mp-num-bottom">${Math.round(displayUPH).toLocaleString()}</div>`
+                            : '-';
+                    }
                 },
                 {
                     key: 'doorOrder',
@@ -7053,6 +7068,14 @@ function updateLobSubLineVisibility() {
                             `;
                         }
 
+                        // Door C: จำนวนพนักงาน ÷ Ratio ของ C-line ในวันนั้น
+                        // effective Ratio = Door Order ÷ Base Unit Order.
+                        if (station === 'Door C') {
+                            const ratio = Math.max(1, Number(row.effectiveDoorCRatio || 1));
+                            const displayManpower = Math.ceil(Number(v || 0) / ratio);
+                            return `<div class="mp-num-main">${displayManpower} คน</div>`;
+                        }
+
                         return `<div class="mp-num-main">${Math.round(v)} คน</div>`;
                     }
                 }
@@ -7117,6 +7140,24 @@ function updateLobSubLineVisibility() {
                     }
                     const result = calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours);
 
+                    if (station === 'Door C') {
+                        // Authoritative physical order for this C-line/day.
+                        result.masterProductionOrder = Number(
+                            doorCMasterOrderKpis?.dailyDoorCOrder?.[groupName]?.[dayIndex] || 0
+                        );
+
+                        // Ratio for manpower conversion. This also supports a mixed day
+                        // where models on the same C-line have different Master ratios.
+                        const baseUnitOrder = Math.max(0, Number(result.totalOrder || 0));
+                        const physicalDoorOrder = Math.max(0, Number(result.doorOrder || 0));
+                        result.effectiveDoorCRatio = baseUnitOrder > 0
+                            ? physicalDoorOrder / baseUnitOrder
+                            : 1;
+                    } else {
+                        result.masterProductionOrder = Number(result.totalOrder || 0);
+                        result.effectiveDoorCRatio = 1;
+                    }
+
                     // Capacity Plan & Actual ใช้ Order/Group/Day ชุดเดียวกับ Manpower
                     const capResult = calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours);
                     result.planUPH = capResult.planUPH;
@@ -7172,14 +7213,10 @@ function updateLobSubLineVisibility() {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
                     const rawDailyManpower = Number(r.totalManpowerCombined || 0);
-                    const selectedDoorCLine = (typeof getSelectedLobDoorCLine === 'function')
-                        ? getSelectedLobDoorCLine()
-                        : (document.getElementById('lobDoorCLineSelect')?.value || '');
-                    const doorCDivisor = currentManpowerStation === 'Door C'
-                        && (selectedDoorCLine === 'C-1' || selectedDoorCLine === 'C-2')
-                        ? 4
+                    const doorCRatioDivisor = station === 'Door C'
+                        ? Math.max(1, Number(r.effectiveDoorCRatio || 1))
                         : 1;
-                    dailyMpTotals[i] += rawDailyManpower / doorCDivisor;
+                    dailyMpTotals[i] += rawDailyManpower / doorCRatioDivisor;
                     const summaryDoorOrder = Number(r.doorOrder || 0);
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
