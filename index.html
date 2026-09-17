@@ -1158,11 +1158,15 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="px-3 py-2 bg-sky-500/10 text-sky-300 text-xs font-semibold">Plan <span class="text-[9px] text-slate-400 font-normal">ตามแผน</span></div>
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
-                                    <div class="text-[9px] text-slate-400">Plan Order / Day</div>
-                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
+                                    <div class="text-[9px] text-slate-400">Plan / Day</div>
                                     <div id="mpPlanShortPercent" class="text-[9px] text-orange-300 mt-1">Short 0%</div>
-                                    <div class="mp-daily-hourly-row">
-                                        <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
+                                    <div class="mt-1">
+                                        <div class="text-[8px] text-slate-500">ออเดอร์ที่ต้องทำ / วัน</div>
+                                        <div id="mpPlanUnitOrderDay" class="text-lg text-sky-300">0</div>
+                                    </div>
+                                    <div class="mt-1.5 pt-1.5 border-t border-slate-700/60">
+                                        <div class="text-[8px] text-slate-500">จำนวนฝาที่ต้องทำ / วัน</div>
+                                        <div id="mpPlanOrderDay" class="text-base text-white">0</div>
                                         <div id="mpPlanOrderUPH" class="mp-inline-hourly">0</div>
                                     </div>
                                 </div>
@@ -6623,7 +6627,7 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
-        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime, doorRatio = 1, actualOutputOverride = null) {
+        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime, doorRatio = 1, actualOutputOverride = null, planUnitOrderPerDay = 0) {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
@@ -6675,6 +6679,7 @@ function updateLobSubLineVisibility() {
                 parseFloat(document.getElementById('shortPercentInput')?.value) || 0
             );
             setText('mpPlanShortPercent', `Short ${currentShortPercent.toLocaleString()}%`);
+            setText('mpPlanUnitOrderDay', planUnitOrderPerDay > 0 ? Math.round(planUnitOrderPerDay).toLocaleString() : '0');
             setText('mpPlanOrderDay', planOrderPerDay > 0 ? Math.round(planOrderPerDay).toLocaleString() : '0');
 
             const planWorkingHours = Math.max(
@@ -7180,6 +7185,13 @@ function updateLobSubLineVisibility() {
             );
             const planOrderPerDay = basePlanOrderPerDay * (1 + planShortPercent / 100);
 
+            // Unit Order / Day uses the same production-day count and the same Short %.
+            // This is the refrigerator/unit order before multiplying by Door Ratio.
+            const baseUnitOrderPerDay = totalOrderAllDays > 0
+                ? totalOrderAllDays / numberOfPlanDays
+                : 0;
+            const planUnitOrderPerDay = baseUnitOrderPerDay * (1 + planShortPercent / 100);
+
             // Plan Manpower = average required manpower across production days.
             // Use the same daily manpower totals already calculated for the table.
             const manpowerProductionDays = dailyMpTotals.filter((v, i) =>
@@ -7262,7 +7274,8 @@ function updateLobSubLineVisibility() {
                 avgPlanManpower,
                 summaryAvgLeadTime,
                 summaryDoorRatio,
-                doorCActualOutput
+                doorCActualOutput,
+                planUnitOrderPerDay
             );
         }
 
