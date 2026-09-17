@@ -6622,13 +6622,17 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
-        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
+        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime, doorRatio = 1) {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Actual Output / Day = (3600 / Lead Time) × Current Manpower × Working Hours
+            // Actual Output / Day =
+            // (3600 / Max Lead Time) × 85% × Current Manpower × Working Hours × Door Ratio
+            // Door Ratio is derived from the same production plan:
+            // Total Door Order ÷ Total Order.
+            const effectiveDoorRatio = Math.max(0, Number(doorRatio || 0));
             const actualOutputPerHour = avgLeadTime > 0
-                ? (3600 / avgLeadTime) * 0.85 * actualManpower
+                ? (3600 / avgLeadTime) * 0.85 * actualManpower * effectiveDoorRatio
                 : 0;
             const actualOutput = actualOutputPerHour * hours;
 
@@ -7167,10 +7171,18 @@ function updateLobSubLineVisibility() {
             setText('mpAvgManpower', avgPlanManpower > 0 ? Math.ceil(avgPlanManpower).toLocaleString() : '0');
             setText('mpPeakManpower', String(peakManpower));
 
+            // Door Ratio for Actual Output:
+            // use the actual aggregate lid ratio from the selected production line.
+            // Example: Total Order 100 units, Total Door Order 400 pcs => Ratio = 4.
+            const summaryDoorRatio = totalOrderAllDays > 0
+                ? totalDoorOrderAllDays / totalOrderAllDays
+                : 1;
+
             updateMpPlanActualSummary(
                 planOrderPerDay,
                 avgPlanManpower,
-                summaryAvgLeadTime
+                summaryAvgLeadTime,
+                summaryDoorRatio
             );
         }
 
