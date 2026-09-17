@@ -1160,6 +1160,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
                                     <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
+                                    <div id="mpPlanShortPercent" class="text-[9px] text-orange-300 mt-1">Short 0%</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
                                         <div id="mpPlanOrderUPH" class="mp-inline-hourly">0</div>
@@ -6662,6 +6663,11 @@ function updateLobSubLineVisibility() {
                 return `${n > 0 ? '+' : ''}${n.toLocaleString()}`;
             };
 
+            const currentShortPercent = Math.max(
+                0,
+                parseFloat(document.getElementById('shortPercentInput')?.value) || 0
+            );
+            setText('mpPlanShortPercent', `Short ${currentShortPercent.toLocaleString()}%`);
             setText('mpPlanOrderDay', planOrderPerDay > 0 ? Math.round(planOrderPerDay).toLocaleString() : '0');
 
             const planWorkingHours = Math.max(
