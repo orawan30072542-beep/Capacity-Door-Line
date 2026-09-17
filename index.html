@@ -1185,7 +1185,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
+                                    <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน × Ratio จาก Master Model</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6622,14 +6622,21 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
-        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
+        function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime, doorRatio = 1) {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Actual Output / Day = (3600 / Lead Time) × Current Manpower × Working Hours
-            const actualOutputPerHour = avgLeadTime > 0
+            // Actual Output / Day ต้องเป็น "จำนวนฝา" จึงคูณ Ratio จาก Master Model
+            // Base Unit Output / Hour = (3600 / Lead Time) × 85% × Current Manpower
+            // Actual Door Output / Hour = Base Unit Output / Hour × Master Model Ratio
+            // Actual Output / Day = Actual Door Output / Hour × Working Hours
+            const effectiveDoorRatio = Number.isFinite(Number(doorRatio)) && Number(doorRatio) > 0
+                ? Number(doorRatio)
+                : 1;
+            const baseUnitOutputPerHour = avgLeadTime > 0
                 ? (3600 / avgLeadTime) * 0.85 * actualManpower
                 : 0;
+            const actualOutputPerHour = baseUnitOutputPerHour * effectiveDoorRatio;
             const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
@@ -7134,10 +7141,18 @@ function updateLobSubLineVisibility() {
             setText('mpAvgManpower', avgPlanManpower > 0 ? Math.ceil(avgPlanManpower).toLocaleString() : '0');
             setText('mpPeakManpower', String(peakManpower));
 
+            // Master Ratio ของ Model ถูกใช้ตอนคำนวณ Door Order อยู่แล้ว
+            // ดังนั้น Ratio เฉลี่ยของ Model mix = Total Door Order ÷ Total Unit Order
+            // เช่น Unit 100 และ Master Ratio x4 => Door Order 400 => Ratio = 4
+            const summaryMasterDoorRatio = totalOrderAllDays > 0
+                ? totalDoorOrderAllDays / totalOrderAllDays
+                : 1;
+
             updateMpPlanActualSummary(
                 planOrderPerDay,
                 avgPlanManpower,
-                summaryAvgLeadTime
+                summaryAvgLeadTime,
+                summaryMasterDoorRatio
             );
         }
 
