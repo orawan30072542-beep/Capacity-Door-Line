@@ -6688,73 +6688,71 @@ function updateLobSubLineVisibility() {
         }
 
 
-        // ===== KPI ORDER SOURCE: DAILY PLAN + MASTER MODEL =====
-        // Total Order: ยอดออเดอร์รายวันที่ต้องผลิตของ Model ที่ Master Model จัดเข้าไลน์นั้น
-        // Door Order : Total Order × Qty/Ratio ตาม Master Model
-        // สำคัญ: KPI ด้านบนไม่นำยอดจาก C-1/C-2/C-3 มาบวกซ้ำกัน
-        function calculateManpowerOverviewOrderKpis(data, station) {
+        // ===== ORDER KPI: DAILY PLAN + MASTER MODEL ROUTING =====
+        // Door C ต้องเก็บ Order ของทุก Model ที่ Master Model กำหนด Station = Door C
+        // Base Total Order นับ Order ของ Model เพียงครั้งเดียว (ไม่ซ้ำ C-1/C-2/C-3)
+        // Door Order คูณ Ratio ของ C-1/C-2/C-3 ตาม Master Model แล้วรวมทั้งหมด
+        function getManpowerOrderKpisFromDailyPlan(data, station) {
+            const days = Array.isArray(data?.days) ? data.days : [];
+            const dailyUnitOrder = new Array(days.length).fill(0);
+            const dailyDoorOrder = new Array(days.length).fill(0);
             let totalOrder = 0;
             let totalDoorOrder = 0;
-            const dailyDoorOrders = new Array((data?.days || []).length).fill(0);
 
-            if (!data || !Array.isArray(data.groups)) {
-                return { totalOrder, totalDoorOrder, dailyDoorOrders };
-            }
-
-            data.groups.forEach(g => {
-                (g.models || []).forEach(m => {
-                    const modelName = String(m?.name || '').trim();
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
                     if (!modelName) return;
 
                     const cfg = getMasterConfigForModel(modelName);
-
-                    // Master Model เป็นตัวตัดสินว่า Model นี้อยู่ไลน์ที่กำลังดูหรือไม่
                     let belongs = false;
-                    if (station === 'Back Plate') {
+
+                    if (station === 'Door C') {
+                        // ใช้ทั้ง Station + Routing จาก Master Model
+                        const routes = getDoorCRoutingDetails(modelName) || [];
+                        belongs = cfg.station === 'Door C' && routes.length > 0;
+                    } else if (station === 'Back Plate') {
                         belongs = cfg.backPlateSource === 'ผลิตเอง';
                     } else if (station === 'Bottom Plate') {
                         belongs = cfg.bottomSource === 'ผลิตเอง';
                     } else {
                         belongs = cfg.station === station;
                     }
+
                     if (!belongs) return;
 
-                    let doorMultiplier = 1;
-
+                    let multiplier = 1;
                     if (station === 'Door C') {
-                        // Door C: รวม Qty/Ratio ของ Routing ที่กำหนดใน Master Model
-                        // แต่ Base Order ของ Model นับเพียงครั้งเดียว
-                        const routes = getDoorCRoutingDetails(modelName) || [];
-                        doorMultiplier = routes.reduce((sum, route) => {
-                            const qty = getDoorCManualRatio(modelName, route.line, route.qty);
-                            return sum + Math.max(0, Number(qty) || 0);
+                        multiplier = (getDoorCRoutingDetails(modelName) || []).reduce((sum, route) => {
+                            return sum + Math.max(
+                                0,
+                                Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
+                            );
                         }, 0);
-                    } else if (station === 'Door A' || station === 'Door B' || station === 'Door Glass') {
-                        doorMultiplier = Math.max(0, Number(cfg.qtyPerSet) || 0);
-                    } else {
-                        // Back / Bottom: 1 unit order = 1 plate order
-                        doorMultiplier = 1;
+                    } else if (['Door A','Door B','Door Glass'].includes(station)) {
+                        multiplier = Math.max(0, Number(cfg.qtyPerSet) || 0);
                     }
 
-                    (m.orders || []).forEach((rawOrder, dayIndex) => {
-                        const baseOrder = Math.max(0, Number(rawOrder) || 0);
-                        if (!(baseOrder > 0)) return;
+                    (model.orders || []).forEach((raw, dayIndex) => {
+                        // ยึดยอด Daily Plan จริงทุกวันที่มี Order
+                        const order = Math.max(0, Number(raw) || 0);
+                        if (order <= 0) return;
 
-                        totalOrder += baseOrder;
+                        totalOrder += order;
+                        dailyUnitOrder[dayIndex] = (dailyUnitOrder[dayIndex] || 0) + order;
 
-                        const doorOrder = baseOrder * doorMultiplier;
+                        const doorOrder = order * multiplier;
                         totalDoorOrder += doorOrder;
-                        if (dayIndex < dailyDoorOrders.length) {
-                            dailyDoorOrders[dayIndex] += doorOrder;
-                        }
+                        dailyDoorOrder[dayIndex] = (dailyDoorOrder[dayIndex] || 0) + doorOrder;
                     });
                 });
             });
 
             return {
-                totalOrder: Math.round(totalOrder),
-                totalDoorOrder: Math.round(totalDoorOrder),
-                dailyDoorOrders
+                totalOrder,
+                totalDoorOrder,
+                dailyUnitOrder,
+                dailyDoorOrder
             };
         }
 
@@ -7152,20 +7150,20 @@ function updateLobSubLineVisibility() {
 
             setText('mpHours', `${hours.toFixed(1)} hr`);
 
-            // KPI Total Order / Door Order ต้องยึด Daily Plan + การแยกไลน์จาก Master Model
-            // ไม่ใช้ผลรวมจากตาราง Group เพราะ Door C สามารถถูกนับซ้ำ C-1/C-2/C-3 ได้
-            const overviewOrderKpis = calculateManpowerOverviewOrderKpis(data, station);
-            totalOrderAllDays = Number(overviewOrderKpis.totalOrder || 0);
-            totalDoorOrderAllDays = Number(overviewOrderKpis.totalDoorOrder || 0);
+            // Total Order / Door Order ด้านบน:
+            // ดึงใหม่โดยตรงจาก Daily Plan และ Master Model เพื่อไม่ให้ Door C ตกหล่น
+            const orderKpis = getManpowerOrderKpisFromDailyPlan(data, station);
+            totalOrderAllDays = Number(orderKpis.totalOrder || 0);
+            totalDoorOrderAllDays = Number(orderKpis.totalDoorOrder || 0);
 
-            setText('mpTotalOrder', totalOrderAllDays.toLocaleString());
-            setText('mpTotalDoorOrder', totalDoorOrderAllDays.toLocaleString());
+            setText('mpTotalOrder', Math.round(totalOrderAllDays).toLocaleString());
+            setText('mpTotalDoorOrder', Math.round(totalDoorOrderAllDays).toLocaleString());
 
-            // Plan Order / Day ใช้ Door Order รายวันที่มาจาก Daily Plan + Master Model ชุดเดียวกัน
+            // Plan Order / Day ใช้ยอด Door Order รายวันจากแหล่งเดียวกัน
             dailyPlanOrderTotals.splice(
                 0,
                 dailyPlanOrderTotals.length,
-                ...overviewOrderKpis.dailyDoorOrders
+                ...orderKpis.dailyDoorOrder
             );
 
             const productionDayCount = dailyPlanOrderTotals.filter((v, i) =>
