@@ -1185,7 +1185,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">Door C: Σ(3600 ÷ Avg. Lead Time × Ratio) × Working Hours</div>
+                                    <div class="text-[8px] text-slate-500">Door C: (C-1 + C-2 + Avg C-3) × Actual MP × Working Hours</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6633,88 +6633,107 @@ function updateLobSubLineVisibility() {
         }
 
 
-        // ===== Door C Actual Output: same production structure as Plan =====
-        // UPH = (3600 / Avg Lead Time C-1 × Ratio C-1)
-        //     + (3600 / Avg Lead Time C-2 × Ratio C-2)
-        //     + (3600 / Avg Lead Time C-3 × Ratio C-3)
-        // Avg Lead Time and Ratio are calculated from the active Daily Plan models
-        // that Master Model routes to each C-line.
-        function getDoorCActualOutputLikePlan(data) {
-            const cLines = ['C-1', 'C-2', 'C-3'];
-            const result = {};
-            let totalUPH = 0;
+        // ===== Door C Actual Output / Day =====
+        // Logic requested:
+        // C-1: sum Lead Time of RR + RL, then 3600 / summed LT
+        // C-2: sum Lead Time of VEG + FB/FT, then 3600 / summed LT
+        // C-3: calculate each active model separately, then average UPH
+        // Total Door C UPH/person = C-1 UPH + C-2 UPH + Avg C-3 UPH
+        // Actual Output / Day = Total UPH/person × Working Hours × Actual Manpower
+        function getDoorCActualOutputPerPerson(data) {
+            const activeModels = [];
 
-            cLines.forEach(cLine => {
-                let weightedLeadTimeSum = 0;
-                let weightedRatioSum = 0;
-                let totalBaseOrder = 0;
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
 
-                (data?.groups || []).forEach(group => {
-                    (group?.models || []).forEach(model => {
-                        const modelName = String(model?.name || '').trim();
-                        if (!modelName) return;
+                    const cfg = getMasterConfigForModel(modelName);
+                    if (cfg.station !== 'Door C') return;
 
-                        const cfg = getMasterConfigForModel(modelName);
-                        if (cfg.station !== 'Door C') return;
+                    const totalOrder = (model.orders || []).reduce(
+                        (sum, value) => sum + Math.max(0, Number(value) || 0), 0
+                    );
+                    if (totalOrder <= 0) return;
 
-                        const route = (getDoorCRoutingDetails(modelName) || [])
-                            .find(r => r.line === cLine);
-                        if (!route) return;
-
-                        const modelOrder = (model.orders || []).reduce(
-                            (sum, v) => sum + Math.max(0, Number(v) || 0), 0
-                        );
-                        if (modelOrder <= 0) return;
-
-                        const leadTime = Math.max(
-                            0,
-                            Number(getLeadTimeForManpower(modelName, 'Door C')) || 0
-                        );
-                        if (leadTime <= 0) return;
-
-                        const ratio = Math.max(
-                            0,
-                            Number(getDoorCManualRatio(modelName, cLine, route.qty)) || 0
-                        );
-
-                        weightedLeadTimeSum += leadTime * modelOrder;
-                        weightedRatioSum += ratio * modelOrder;
-                        totalBaseOrder += modelOrder;
-                    });
+                    activeModels.push(modelName);
                 });
-
-                const avgLeadTime = totalBaseOrder > 0
-                    ? weightedLeadTimeSum / totalBaseOrder
-                    : 0;
-                const avgRatio = totalBaseOrder > 0
-                    ? weightedRatioSum / totalBaseOrder
-                    : 0;
-
-                const uph = avgLeadTime > 0 && avgRatio > 0
-                    ? (3600 / avgLeadTime) * avgRatio
-                    : 0;
-
-                result[cLine] = { avgLeadTime, ratio: avgRatio, uph };
-                totalUPH += uph;
             });
 
-            return { lines: result, totalUPH };
+            const uniqueModels = [...new Set(activeModels)];
+
+            const routedModels = cLine => uniqueModels.filter(modelName =>
+                (getDoorCRoutingDetails(modelName) || []).some(route => route.line === cLine)
+            );
+
+            const sumDoorTypeLT = (modelNames, doorTypes) => {
+                let total = 0;
+                modelNames.forEach(modelName => {
+                    doorTypes.forEach(doorType => {
+                        total += Math.max(0, Number(getDoorTypeLeadTime(modelName, doorType)) || 0);
+                    });
+                });
+                return total;
+            };
+
+            const c1Models = routedModels('C-1');
+            const c2Models = routedModels('C-2');
+            const c3Models = routedModels('C-3');
+
+            // C-1: RR + RL
+            const c1LeadTime = sumDoorTypeLT(c1Models, ['RR', 'RL']);
+            const c1UPH = c1LeadTime > 0 ? 3600 / c1LeadTime : 0;
+
+            // C-2: VEG + FB. FT is supported as an additional/alternate saved door type.
+            const c2LeadTime = sumDoorTypeLT(c2Models, ['VEG', 'FB', 'FT']);
+            const c2UPH = c2LeadTime > 0 ? 3600 / c2LeadTime : 0;
+
+            // C-3: each model can run alternatively.
+            // Calculate each active C-3 model independently from RR + FR,
+            // then use arithmetic mean of their UPH.
+            const c3Details = c3Models.map(modelName => {
+                const rr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0);
+                const fr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FR')) || 0);
+                const leadTime = rr + fr;
+                return {
+                    modelName,
+                    leadTime,
+                    uph: leadTime > 0 ? 3600 / leadTime : 0
+                };
+            }).filter(item => item.uph > 0);
+
+            const c3UPH = c3Details.length > 0
+                ? c3Details.reduce((sum, item) => sum + item.uph, 0) / c3Details.length
+                : 0;
+
+            const totalUPHPerPerson = c1UPH + c2UPH + c3UPH;
+
+            return {
+                c1LeadTime,
+                c1UPH,
+                c2LeadTime,
+                c2UPH,
+                c3Details,
+                c3UPH,
+                totalUPHPerPerson
+            };
         }
 
         function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Actual Output:
-            // Door C = Σ[(3600 / Avg Lead Time C-line) × Ratio C-line]
-            //          แล้วคูณ Working Hours เพื่อเป็น Actual Output / Day
-            // ไลน์อื่นคงสูตรเดิมไว้
             let actualOutputPerHour = 0;
 
             if (currentManpowerStation === 'Door C') {
-                const doorCActual = getDoorCActualOutputLikePlan(currentDailyData);
-                actualOutputPerHour = Number(doorCActual.totalUPH || 0);
+                const doorCActual = getDoorCActualOutputPerPerson(currentDailyData);
+
+                // Example concept:
+                // C1 ≈ 2 + C2 ≈ 3 + C3 average ≈ 7 = ≈12 pcs/person/hour.
+                // Then multiply by actual manpower.
+                actualOutputPerHour = doorCActual.totalUPHPerPerson * actualManpower;
             } else {
+                // Other production lines keep the direct Lead Time × Actual Manpower logic.
                 actualOutputPerHour = avgLeadTime > 0
                     ? (3600 / avgLeadTime) * actualManpower
                     : 0;
