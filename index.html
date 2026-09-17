@@ -483,6 +483,15 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 #mpPlanActualSummary>div:nth-child(3){background:linear-gradient(180deg,rgba(109,40,217,.20),rgba(8,20,45,.94))!important}
 #mpPlanActualSummary>div:nth-child(4){background:linear-gradient(180deg,rgba(190,24,93,.17),rgba(8,20,45,.94))!important}
 
+
+#mpPlanOrderUPH.mp-plan-uph{
+    color:#ffffff !important;
+    font-size:60% !important;
+    line-height:1.05 !important;
+    font-weight:400 !important;
+    margin-top:4px !important;
+    opacity:.95;
+}
 </style>
 
 <style>
@@ -1132,6 +1141,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
                                     <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
                                     <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
+                                    <div id="mpPlanOrderUPH" class="mp-plan-uph">0</div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Manpower</div>
@@ -6616,6 +6626,18 @@ function updateLobSubLineVisibility() {
             };
 
             setText('mpPlanOrderDay', planOrderPerDay > 0 ? Math.round(planOrderPerDay).toLocaleString() : '0');
+
+            const planWorkingHours = Math.max(
+                0,
+                parseFloat(document.getElementById('shiftHoursInput')?.value) || 0
+            );
+            const planOrderUPH = planWorkingHours > 0
+                ? planOrderPerDay / planWorkingHours
+                : 0;
+            setText(
+                'mpPlanOrderUPH',
+                planOrderUPH > 0 ? Math.round(planOrderUPH).toLocaleString() : '0'
+            );
             setText('mpPlanManpower', planManpower > 0 ? Math.ceil(planManpower).toLocaleString() : '0');
             setText('mpOutputAchievement', `${performance.toFixed(1)}%`);
             setText('mpOutputAchievementDetail',
