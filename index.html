@@ -6857,11 +6857,19 @@ function updateLobSubLineVisibility() {
 
                         if (station === 'Bottom Plate' || station === 'Back Plate') {
                             return `
-                                <div class="mp-num-main">${Math.round(v)} คน</div>
+                                <div class="mp-num-main">${Math.ceil(v)} คน</div>
                             `;
                         }
 
-                        return `<div class="mp-num-main">${Math.round(v)} คน</div>`;
+                        // Door C: C-1 and C-2 produce 4 pcs per 1 unit.
+                        // Therefore the displayed Manpower (In + Out) must also be ÷ 4.
+                        // C-3 remains unchanged. Manpower is always rounded UP to whole people.
+                        const displayManpower = station === 'Door C'
+                            && (groupName === 'C-1' || groupName === 'C-2')
+                            ? Math.ceil(Number(v || 0) / 4)
+                            : Math.ceil(Number(v || 0));
+
+                        return `<div class="mp-num-main">${displayManpower} คน</div>`;
                     }
                 }
             ];
