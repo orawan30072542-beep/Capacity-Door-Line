@@ -483,17 +483,6 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 #mpPlanActualSummary>div:nth-child(3){background:linear-gradient(180deg,rgba(109,40,217,.20),rgba(8,20,45,.94))!important}
 #mpPlanActualSummary>div:nth-child(4){background:linear-gradient(180deg,rgba(190,24,93,.17),rgba(8,20,45,.94))!important}
 
-#mpPlanActualSummary .summary-mini-icon{
-    display:inline-flex;
-    width:22px;height:22px;
-    align-items:center;justify-content:center;
-    margin-right:6px;
-    border:1px solid currentColor;
-    border-radius:6px;
-    font-size:14px;
-    vertical-align:middle;
-    background:rgba(15,23,42,.55);
-}
 </style>
 
 <style>
@@ -1140,12 +1129,12 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="px-3 py-2 bg-sky-500/10 text-sky-300 text-xs font-semibold">Plan <span class="text-[9px] text-slate-400 font-normal">ตามแผน</span></div>
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-sky-300">▦</span> Plan Order / Day</div>
-                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
+                                    <div class="text-[9px] text-slate-400">Plan Order / Day</div>
+                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต (เฉลี่ย/วัน)</div>
                                     <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-cyan-300">♟</span> Plan Manpower</div>
+                                    <div class="text-[9px] text-slate-400">Plan Manpower</div>
                                     <div class="text-[8px] text-slate-500">คนที่ต้องใช้เฉลี่ย / วัน</div>
                                     <div id="mpPlanManpower" class="text-lg text-cyan-300 mt-1">0</div>
                                 </div>
@@ -1156,14 +1145,14 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="px-3 py-2 bg-emerald-500/10 text-emerald-300 text-xs font-semibold">Current <span class="text-[9px] text-slate-400 font-normal">ปัจจุบัน</span></div>
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-emerald-300">♟</span> Actual Manpower</div>
+                                    <div class="text-[9px] text-slate-400">Actual Manpower</div>
                                     <div class="text-[8px] text-slate-500">พนักงานที่มีตอนนี้</div>
                                     <input id="mpActualManpowerInput" type="number" min="0" step="1" value="0"
                                         onchange="saveMpPlanActualInput('manpower', this.value)"
                                         class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none">
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-emerald-300">▦</span> Actual Output / Day</div>
+                                    <div class="text-[9px] text-slate-400">Actual Output / Day</div>
                                     <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
                                     <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                 </div>
@@ -1174,7 +1163,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="px-3 py-2 bg-violet-500/10 text-violet-300 text-xs font-semibold">Performance <span class="text-[9px] text-slate-400 font-normal">ประสิทธิภาพ</span></div>
                             <div class="p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5 text-center">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-violet-300">◉</span> Output Achievement</div>
+                                    <div class="text-[9px] text-slate-400">Output Achievement</div>
                                     <div class="text-[8px] text-slate-500">Actual Output ÷ Plan Order</div>
                                     <div id="mpOutputAchievement" class="text-xl text-violet-300 mt-1">0.0%</div>
                                     <div id="mpOutputAchievementDetail" class="text-[9px] text-white mt-1">0 / 0</div>
@@ -1186,12 +1175,12 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="px-3 py-2 bg-rose-500/10 text-rose-300 text-xs font-semibold">Difference <span class="text-[9px] text-slate-400 font-normal">ผลต่าง</span></div>
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5 text-center">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-rose-300">♟</span> Manpower Diff</div>
+                                    <div class="text-[9px] text-slate-400">Manpower Diff</div>
                                     <div id="mpManpowerDiff" class="text-lg text-rose-300 mt-1">0</div>
                                     <div id="mpManpowerDiffDetail" class="text-[8px] text-white mt-1">0 - 0</div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5 text-center">
-                                    <div class="text-[9px] text-slate-400"><span class="summary-mini-icon text-rose-300">▦</span> Order Diff</div>
+                                    <div class="text-[9px] text-slate-400">Order Diff</div>
                                     <div id="mpOrderDiff" class="text-lg text-rose-300 mt-1">0</div>
                                     <div id="mpOrderDiffDetail" class="text-[8px] text-white mt-1">0 - 0</div>
                                 </div>
@@ -7060,8 +7049,8 @@ function updateLobSubLineVisibility() {
                 effectiveProductionDays = plannedDates.size || days.filter(d => !isSunday(d)).length || 1;
             }
 
-            const planOrderPerDay = effectiveTotalDoorOrder > 0
-                ? effectiveTotalDoorOrder / effectiveProductionDays
+            const planOrderPerDay = productionDayCount > 0
+                ? totalDoorOrderAllDays / productionDayCount
                 : 0;
 
             const avgManpowerKpi = Number(
