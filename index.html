@@ -1103,9 +1103,8 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
                                     <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
-                                    <input id="mpActualOutputInput" type="number" min="0" step="1" value="0"
-                                        onchange="saveMpPlanActualInput('output', this.value)"
-                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none">
+                                    <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
+                                    <div id="mpActualOutputFormula" class="text-[8px] text-slate-500 mt-1">คำนวณจาก Lead Time × Current Manpower</div>
                                 </div>
                             </div>
                         </div>
@@ -6530,14 +6529,52 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
+        function getMpActualOutputFromLeadTime() {
+            const station = currentManpowerStation || 'Door A';
+            const rows = buildManpowerRows(station) || [];
+            const actualManpower = getMpPlanActualInput('manpower');
+
+            // Lead Time = total process time for the selected line/model/day.
+            // Use the average active Lead Time represented by the current manpower rows.
+            const leadTimes = [];
+            rows.forEach(row => {
+                (row.days || []).forEach(day => {
+                    const order = Number(day?.doorOrder || 0);
+                    const leadTime = Number(day?.leadTime || 0);
+                    if (order > 0 && leadTime > 0) leadTimes.push(leadTime);
+                });
+            });
+
+            const leadTime = leadTimes.length
+                ? leadTimes.reduce((sum, v) => sum + v, 0) / leadTimes.length
+                : 0;
+
+            const outputPerHour = leadTime > 0
+                ? (3600 / leadTime) * actualManpower
+                : 0;
+
+            const workingHours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const outputPerDay = outputPerHour * workingHours;
+
+            return { leadTime, outputPerHour, outputPerDay };
+        }
+
         function updateMpPlanActualSummary(planOrderPerDay, planManpower) {
             const actualManpower = getMpPlanActualInput('manpower');
-            const actualOutput = getMpPlanActualInput('output');
+            const actualCalc = getMpActualOutputFromLeadTime();
+            const actualOutput = actualCalc.outputPerDay;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
             const outInput = document.getElementById('mpActualOutputInput');
             if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
-            if (outInput && document.activeElement !== outInput) outInput.value = actualOutput || 0;
+            if (outInput) outInput.textContent = Math.round(actualOutput).toLocaleString();
+
+            const formulaEl = document.getElementById('mpActualOutputFormula');
+            if (formulaEl) {
+                formulaEl.textContent = actualCalc.leadTime > 0
+                    ? `(${3600} / ${actualCalc.leadTime.toFixed(2)}s) × ${actualManpower} คน × ${Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0)} hr`
+                    : 'ยังไม่มี Lead Time';
+            }
 
             const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
             const manpowerDiff = actualManpower - planManpower;
