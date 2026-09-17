@@ -432,6 +432,56 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
     padding-bottom:5px !important;
     line-height:1.15 !important;
 }
+
+/* ===== Premium Plan / Current / Performance / Difference summary ===== */
+#mpPlanActualSummary{gap:14px!important;margin-top:12px}
+#mpPlanActualSummary>div{
+    border-radius:14px!important;
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+    min-height:174px;
+}
+#mpPlanActualSummary>div>div:first-child{
+    padding:10px 14px!important;
+    font-size:15px!important;
+    font-weight:700!important;
+}
+#mpPlanActualSummary .grid.grid-cols-2{gap:10px!important;padding:10px!important}
+#mpPlanActualSummary .bg-slate-900\/55{
+    min-height:112px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    border-radius:11px!important;
+    padding:12px!important;
+}
+#mpPlanActualSummary .text-\[9px\]{font-size:11px!important;line-height:1.25!important}
+#mpPlanActualSummary .text-\[8px\]{font-size:9px!important;line-height:1.25!important}
+#mpPlanActualSummary .text-lg{
+    font-size:27px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+    margin-top:8px!important;
+}
+#mpPlanActualSummary .text-xl{
+    font-size:30px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+}
+#mpActualManpowerInput{
+    font-size:27px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+}
+#mpOutputAchievementDetail,#mpManpowerDiffDetail,#mpOrderDiffDetail{
+    color:#fff!important;
+    font-size:11px!important;
+    margin-top:8px!important;
+}
+/* stronger section identity */
+#mpPlanActualSummary>div:nth-child(1){background:linear-gradient(180deg,rgba(3,105,161,.20),rgba(8,20,45,.94))!important}
+#mpPlanActualSummary>div:nth-child(2){background:linear-gradient(180deg,rgba(5,150,105,.18),rgba(8,20,45,.94))!important}
+#mpPlanActualSummary>div:nth-child(3){background:linear-gradient(180deg,rgba(109,40,217,.20),rgba(8,20,45,.94))!important}
+#mpPlanActualSummary>div:nth-child(4){background:linear-gradient(180deg,rgba(190,24,93,.17),rgba(8,20,45,.94))!important}
 </style>
 
 <style>
@@ -6558,7 +6608,7 @@ function updateLobSubLineVisibility() {
             }
 
             const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
-            const manpowerDiff = actualManpower - planManpower;
+            const manpowerDiff = Math.ceil(actualManpower) - Math.ceil(planManpower);
             const orderDiff = actualOutput - planOrderPerDay;
 
             const setText = (id, value) => {
@@ -6571,12 +6621,12 @@ function updateLobSubLineVisibility() {
             };
 
             setText('mpPlanOrderDay', Math.round(planOrderPerDay).toLocaleString());
-            setText('mpPlanManpower', planManpower > 0 ? planManpower.toFixed(2) : '0');
+            setText('mpPlanManpower', planManpower > 0 ? Math.ceil(planManpower).toLocaleString() : '0');
             setText('mpOutputAchievement', `${performance.toFixed(1)}%`);
             setText('mpOutputAchievementDetail',
                 `${Math.round(actualOutput).toLocaleString()} / ${Math.round(planOrderPerDay).toLocaleString()}`);
             setText('mpManpowerDiff', signed(manpowerDiff));
-            setText('mpManpowerDiffDetail', `${actualManpower.toLocaleString()} - ${planManpower.toFixed(2)}`);
+            setText('mpManpowerDiffDetail', `${Math.ceil(actualManpower).toLocaleString()} - ${Math.ceil(planManpower).toLocaleString()}`);
             setText('mpOrderDiff', signed(orderDiff));
             setText('mpOrderDiffDetail',
                 `${Math.round(actualOutput).toLocaleString()} - ${Math.round(planOrderPerDay).toLocaleString()}`);
@@ -6990,7 +7040,7 @@ function updateLobSubLineVisibility() {
             // Summary uses the highest Lead Time from all active production rows.
             const summaryAvgLeadTime = summaryMaxLeadTime;
 
-            setText('mpAvgManpower', avgPlanManpower > 0 ? avgPlanManpower.toFixed(2) : '0');
+            setText('mpAvgManpower', avgPlanManpower > 0 ? Math.ceil(avgPlanManpower).toLocaleString() : '0');
             setText('mpPeakManpower', String(peakManpower));
 
             updateMpPlanActualSummary(
