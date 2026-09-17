@@ -6116,6 +6116,16 @@ function updateLobSubLineVisibility() {
             return Number(config.qtyPerSet) || 1;
         }
 
+
+        function getDoorCModelOrderForLine(modelName, baseOrder, cLine) {
+            const cfg = getMasterConfigForModel(modelName);
+            if (cfg.station !== 'Door C') return 0;
+            const route = (getDoorCRoutingDetails(modelName) || []).find(r => r.line === cLine);
+            if (!route) return 0;
+            const ratio = Math.max(0, Number(getDoorCManualRatio(modelName, cLine, route.qty)) || 0);
+            return Math.max(0, Number(baseOrder) || 0) * ratio;
+        }
+
         function getLeadTimeForManpower(modelName, station) {
             if (station === 'Back Plate' || station === 'Bottom Plate') {
                 const key = `${modelName}_${station}`;
@@ -6696,8 +6706,14 @@ function updateLobSubLineVisibility() {
             const days = Array.isArray(data?.days) ? data.days : [];
             const dailyUnitOrder = new Array(days.length).fill(0);
             const dailyDoorOrder = new Array(days.length).fill(0);
+            const dailyDoorCOrder = {
+                'C-1': new Array(days.length).fill(0),
+                'C-2': new Array(days.length).fill(0),
+                'C-3': new Array(days.length).fill(0)
+            };
             let totalOrder = 0;
             let totalDoorOrder = 0;
+            const totalDoorCOrder = { 'C-1': 0, 'C-2': 0, 'C-3': 0 };
 
             (data?.groups || []).forEach(group => {
                 (group?.models || []).forEach(model => {
@@ -6708,9 +6724,8 @@ function updateLobSubLineVisibility() {
                     let belongs = false;
 
                     if (station === 'Door C') {
-                        // ใช้ทั้ง Station + Routing จาก Master Model
-                        const routes = getDoorCRoutingDetails(modelName) || [];
-                        belongs = cfg.station === 'Door C' && routes.length > 0;
+                        belongs = cfg.station === 'Door C' &&
+                            (getDoorCRoutingDetails(modelName) || []).length > 0;
                     } else if (station === 'Back Plate') {
                         belongs = cfg.backPlateSource === 'ผลิตเอง';
                     } else if (station === 'Bottom Plate') {
@@ -6718,32 +6733,40 @@ function updateLobSubLineVisibility() {
                     } else {
                         belongs = cfg.station === station;
                     }
-
                     if (!belongs) return;
 
-                    let multiplier = 1;
-                    if (station === 'Door C') {
-                        multiplier = (getDoorCRoutingDetails(modelName) || []).reduce((sum, route) => {
-                            return sum + Math.max(
-                                0,
-                                Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
-                            );
-                        }, 0);
-                    } else if (['Door A','Door B','Door Glass'].includes(station)) {
-                        multiplier = Math.max(0, Number(cfg.qtyPerSet) || 0);
-                    }
-
                     (model.orders || []).forEach((raw, dayIndex) => {
-                        // ยึดยอด Daily Plan จริงทุกวันที่มี Order
                         const order = Math.max(0, Number(raw) || 0);
                         if (order <= 0) return;
 
+                        // Total Order = Unit Order ของ Model นั้น นับเพียงครั้งเดียว
                         totalOrder += order;
                         dailyUnitOrder[dayIndex] = (dailyUnitOrder[dayIndex] || 0) + order;
 
-                        const doorOrder = order * multiplier;
-                        totalDoorOrder += doorOrder;
-                        dailyDoorOrder[dayIndex] = (dailyDoorOrder[dayIndex] || 0) + doorOrder;
+                        if (station === 'Door C') {
+                            // แยกตาม Routing จริงจาก Master Model:
+                            // C-line Order = Model Order × Ratio ของ C-line นั้นเท่านั้น
+                            (getDoorCRoutingDetails(modelName) || []).forEach(route => {
+                                if (!dailyDoorCOrder[route.line]) return;
+                                const ratio = Math.max(
+                                    0,
+                                    Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
+                                );
+                                const lineOrder = order * ratio;
+                                dailyDoorCOrder[route.line][dayIndex] += lineOrder;
+                                totalDoorCOrder[route.line] += lineOrder;
+                                dailyDoorOrder[dayIndex] += lineOrder;
+                                totalDoorOrder += lineOrder;
+                            });
+                        } else {
+                            let multiplier = 1;
+                            if (['Door A','Door B','Door Glass'].includes(station)) {
+                                multiplier = Math.max(0, Number(cfg.qtyPerSet) || 0);
+                            }
+                            const doorOrder = order * multiplier;
+                            dailyDoorOrder[dayIndex] += doorOrder;
+                            totalDoorOrder += doorOrder;
+                        }
                     });
                 });
             });
@@ -6752,7 +6775,22 @@ function updateLobSubLineVisibility() {
                 totalOrder,
                 totalDoorOrder,
                 dailyUnitOrder,
-                dailyDoorOrder
+                dailyDoorOrder,
+                dailyDoorCOrder,
+                totalDoorCOrder
+            };
+        }
+
+        // Door C order for one production day, separated by Master Model routing.
+        // Example: BM T-Door 560 -> C-1 x2, C-3 x2
+        //          BM29 1680      -> C-1 x2, C-2 x2
+        // Result: C-1=4480, C-2=3360, C-3=1120.
+        function getDoorCOrderByDayFromMaster(data, dayIndex) {
+            const kpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
+            return {
+                c1: Number(kpi.dailyDoorCOrder?.['C-1']?.[dayIndex] || 0),
+                c2: Number(kpi.dailyDoorCOrder?.['C-2']?.[dayIndex] || 0),
+                c3: Number(kpi.dailyDoorCOrder?.['C-3']?.[dayIndex] || 0)
             };
         }
 
