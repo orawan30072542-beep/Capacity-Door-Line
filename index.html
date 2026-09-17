@@ -6843,7 +6843,7 @@ function updateLobSubLineVisibility() {
                         ? 'In Line + Out Line รวมในบรรทัดเดียว'
                         : 'Total Manpower',
                     cls: 'text-amber-300',
-                    format: (v, row) => {
+                    format: (v, row, currentGroupName) => {
                         if (!(v > 0)) return '-';
 
                         const baseInLine = Number(row.manpowerPerHour || 0) > 0
@@ -6865,7 +6865,7 @@ function updateLobSubLineVisibility() {
                         // Therefore the displayed Manpower (In + Out) must also be ÷ 4.
                         // C-3 remains unchanged. Manpower is always rounded UP to whole people.
                         const displayManpower = station === 'Door C'
-                            && (groupName === 'C-1' || groupName === 'C-2')
+                            && (currentGroupName === 'C-1' || currentGroupName === 'C-2')
                             ? Math.ceil(Number(v || 0) / 4)
                             : Math.ceil(Number(v || 0));
 
@@ -7072,7 +7072,7 @@ function updateLobSubLineVisibility() {
                                     title="กรอกจำนวนชิ้นต่อคนต่อชั่วโมง แล้วระบบจะคำนวณ Manpower ให้อัตโนมัติ"
                                     onchange="saveManualHourlyOutput('${station}', '${groupName}', '${day}', this.value)"
                                     class="w-14 sm:w-16 bg-slate-950/80 border border-lime-500/30 rounded-md px-1.5 py-1 text-center text-[10px] font-bold text-lime-300 focus:outline-none focus:border-lime-400" />`
-                                : metric.format(r[metric.key], r);
+                                : metric.format(r[metric.key], r, groupName);
 
                         rowHtml += `
                             <td class="px-1 py-2 text-center ${isSun ? 'bg-slate-950/60 text-slate-600' : metric.cls}">
