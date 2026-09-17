@@ -6805,6 +6805,11 @@ function updateLobSubLineVisibility() {
             const days = Array.isArray(data?.days) ? data.days : [];
             const dailyUnitOrder = new Array(days.length).fill(0);
             const dailyDoorOrder = new Array(days.length).fill(0);
+            const dailyDoorCBaseOrder = {
+                'C-1': new Array(days.length).fill(0),
+                'C-2': new Array(days.length).fill(0),
+                'C-3': new Array(days.length).fill(0)
+            };
             const dailyDoorCOrder = {
                 'C-1': new Array(days.length).fill(0),
                 'C-2': new Array(days.length).fill(0),
@@ -6851,6 +6856,9 @@ function updateLobSubLineVisibility() {
                                     0,
                                     Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
                                 );
+                                // Base Order ของ C-line = Daily Plan ของ Model ที่ Master route มายัง C-line นี้
+                                // Door Order = Base Order × Ratio ของ C-line
+                                dailyDoorCBaseOrder[route.line][dayIndex] += order;
                                 const lineOrder = order * ratio;
                                 dailyDoorCOrder[route.line][dayIndex] += lineOrder;
                                 totalDoorCOrder[route.line] += lineOrder;
@@ -6875,6 +6883,7 @@ function updateLobSubLineVisibility() {
                 totalDoorOrder,
                 dailyUnitOrder,
                 dailyDoorOrder,
+                dailyDoorCBaseOrder,
                 dailyDoorCOrder,
                 totalDoorCOrder
             };
@@ -6972,12 +6981,12 @@ function updateLobSubLineVisibility() {
                     zoneClass: 'violet',
                     label: 'Total Order',
                     subLabel: station === 'Door C'
-                        ? 'Daily Plan × Ratio · ผลิตเองตาม Master Model'
+                        ? 'Daily Plan · ผลิตเองตาม Master Model · ยังไม่คูณ Ratio'
                         : 'ไม่คูณ Ratio',
                     cls: 'text-white',
                     format: (v, row) => {
                         const displayOrder = station === 'Door C'
-                            ? Number(row.masterProductionOrder || 0)
+                            ? Number(row.masterBaseOrder || 0)
                             : Number(v || 0);
                         const displayUPH = hours > 0 ? displayOrder / hours : 0;
                         return displayOrder > 0
@@ -6993,10 +7002,16 @@ function updateLobSubLineVisibility() {
                     label: 'Door Order',
                     subLabel: 'คูณ Ratio',
                     cls: 'text-violet-300',
-                    format: (v, row) => v > 0
-                        ? `<div class="mp-num-top mp-top-door">${Math.round(v).toLocaleString()}</div>
-                           <div class="mp-num-bottom">${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
-                        : '-'
+                    format: (v, row) => {
+                        const displayDoorOrder = station === 'Door C'
+                            ? Number(row.masterProductionOrder || 0)
+                            : Number(v || 0);
+                        const displayDoorUPH = hours > 0 ? displayDoorOrder / hours : 0;
+                        return displayDoorOrder > 0
+                            ? `<div class="mp-num-top mp-top-door">${Math.round(displayDoorOrder).toLocaleString()}</div>
+                               <div class="mp-num-bottom">${Math.round(displayDoorUPH).toLocaleString()}</div>`
+                            : '-';
+                    }
                 },
                 {
                     key: 'shortageOrder',
@@ -7143,17 +7158,29 @@ function updateLobSubLineVisibility() {
                     result.doorCGroupName = groupName;
 
                     if (station === 'Door C') {
-                        // Authoritative physical order for this C-line/day.
+                        // ORDER SOURCE OF TRUTH:
+                        // Daily Plan + Master Model routing only.
+                        // Do NOT drop an order because Work Process / Lead Time is missing.
+                        result.masterBaseOrder = Number(
+                            doorCMasterOrderKpis?.dailyDoorCBaseOrder?.[groupName]?.[dayIndex] || 0
+                        );
                         result.masterProductionOrder = Number(
                             doorCMasterOrderKpis?.dailyDoorCOrder?.[groupName]?.[dayIndex] || 0
                         );
 
-                        // Ratio for manpower conversion. This also supports a mixed day
-                        // where models on the same C-line have different Master ratios.
-                        const baseUnitOrder = Math.max(0, Number(result.totalOrder || 0));
-                        const physicalDoorOrder = Math.max(0, Number(result.doorOrder || 0));
-                        result.effectiveDoorCRatio = baseUnitOrder > 0
-                            ? physicalDoorOrder / baseUnitOrder
+                        // Force all displayed/order-plan fields to the authoritative values.
+                        result.totalOrder = result.masterBaseOrder;
+                        result.doorOrder = result.masterProductionOrder;
+                        result.totalOrderUPH = hours > 0 ? result.totalOrder / hours : 0;
+                        result.doorOrderUPH = hours > 0 ? result.doorOrder / hours : 0;
+
+                        const shortRate = 1 + (getShortPercent() / 100);
+                        result.shortageOrder = result.doorOrder * shortRate;
+                        result.shortageOrderUPH = hours > 0 ? result.shortageOrder / hours : 0;
+
+                        // Ratio for manpower conversion.
+                        result.effectiveDoorCRatio = result.masterBaseOrder > 0
+                            ? result.masterProductionOrder / result.masterBaseOrder
                             : 1;
                     } else {
                         result.masterProductionOrder = Number(result.totalOrder || 0);
