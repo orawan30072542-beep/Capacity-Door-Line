@@ -1079,7 +1079,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
-                                    <div class="text-[8px] text-slate-500">ออเดอร์เฉลี่ย / วัน</div>
+                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
                                     <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
@@ -6995,18 +6995,25 @@ function updateLobSubLineVisibility() {
             setText('mpTotalOrder', totalOrderAllDays.toLocaleString());
             setText('mpTotalDoorOrder', totalDoorOrderAllDays.toLocaleString());
             const avgPlanManpower = activeDays > 0 ? (totalDailyManpower / activeDays) : 0;
-            const activeOrderDays = dailyPlanOrderTotals.filter((v, i) => !isSunday(days[i]) && v > 0).length;
-            let planOrderPerDay = activeOrderDays > 0
-                ? dailyPlanOrderTotals.reduce((sum, v, i) => sum + (!isSunday(days[i]) ? v : 0), 0) / activeOrderDays
-                : 0;
+            // Plan Order / Day must come directly from the production plan:
+            // Total Door Order ÷ number of production days.
+            const totalDoorOrderFromPlan = Number(
+                String(document.getElementById('mpTotalDoorOrder')?.textContent || '0').replace(/,/g, '')
+            ) || 0;
 
-            if (!(planOrderPerDay > 0)) {
-                const totalDoorOrderFromHeader = Number(
-                    String(document.getElementById('mpTotalDoorOrder')?.textContent || '0').replace(/,/g, '')
-                ) || 0;
-                const workingDayCount = days.filter(d => !isSunday(d)).length || 1;
-                planOrderPerDay = totalDoorOrderFromHeader / workingDayCount;
+            // Count production-plan days that actually have planned Door Order.
+            // If daily plan values are unavailable, fall back to non-Sunday dates in the plan period.
+            let productionDayCount = dailyPlanOrderTotals.filter((v, i) =>
+                !isSunday(days[i]) && Number(v || 0) > 0
+            ).length;
+
+            if (!(productionDayCount > 0)) {
+                productionDayCount = days.filter(d => !isSunday(d)).length || 1;
             }
+
+            const planOrderPerDay = productionDayCount > 0
+                ? totalDoorOrderFromPlan / productionDayCount
+                : 0;
 
             setText('mpAvgManpower', avgPlanManpower > 0 ? avgPlanManpower.toFixed(2) : '0');
             setText('mpPeakManpower', String(peakManpower));
