@@ -1222,6 +1222,19 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </div>
                         </div>
                     </div>
+                    <div id="mpDailyProductionOrderSummary" class="mt-4 bg-slate-900/45 border border-slate-700/70 rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 border-b border-slate-700/70">
+                            <div class="text-sm font-semibold text-white">ยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">เฉพาะการผลิตเองอ้างอิงจาก Master Model · แสดงเฉพาะยอดรวมแต่ละวัน</div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead id="mpDailyProductionOrderHead" class="bg-slate-950/70"></thead>
+                                <tbody id="mpDailyProductionOrderBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
 
                     <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
@@ -5977,53 +5990,6 @@ function updateLobSubLineVisibility() {
                 };
             }
 
-            // ===== Door C: แยกยอด C-1 / C-2 / C-3 ไว้ด้านบน =====
-            // ใช้ Daily Plan + Master Model Routing + Ratio ของแต่ละ C-Line
-            // เป็นยอดชิ้นงานที่ C-Line นั้นต้องผลิตจริงในแต่ละวัน
-            if (currentSummaryStation === 'Door C') {
-                const doorCKpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
-
-                ['C-1', 'C-2', 'C-3'].forEach(cLine => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'bg-cyan-950/70 font-bold border-b border-cyan-800/50';
-
-                    let html = `
-                        <td class="p-3 bg-cyan-950/80 text-cyan-300">${cLine}</td>
-                        <td class="p-3 bg-cyan-950/80 text-white">TOTAL ${cLine}</td>
-                    `;
-
-                    for (let i = 0; i < days.length; i++) {
-                        const day = days[i];
-
-                        if (isSunday(day)) {
-                            html += `<td class="p-2 text-center border-l border-bordercolor/40 bg-slate-950 text-slate-600">—</td>`;
-                            continue;
-                        }
-
-                        const qty = Math.round(
-                            Number(doorCKpi?.dailyDoorCOrder?.[cLine]?.[i] || 0)
-                        );
-                        const uph = qty > 0 && hours > 0
-                            ? Math.round(qty / hours)
-                            : 0;
-
-                        html += `
-                            <td class="p-2 text-center border-l border-cyan-900/40 bg-cyan-950/35">
-                                <div class="text-cyan-300 text-xs font-bold">
-                                    ${qty > 0 ? qty.toLocaleString() : '-'}
-                                </div>
-                                <div class="text-white text-[10px] font-normal opacity-90">
-                                    ${qty > 0 ? uph.toLocaleString() : '-'}
-                                </div>
-                            </td>
-                        `;
-                    }
-
-                    tr.innerHTML = html;
-                    tbody.appendChild(tr);
-                });
-            }
-
             // แถว TOTAL ด้านบน
             if (currentSummaryStation === 'Back Plate' || currentSummaryStation === 'Bottom Plate') {
                 const isBack = currentSummaryStation === 'Back Plate';
@@ -6983,6 +6949,42 @@ function updateLobSubLineVisibility() {
             };
         }
 
+
+        function renderMpDailyProductionOrderSummary(data, station) {
+            const head = document.getElementById('mpDailyProductionOrderHead');
+            const body = document.getElementById('mpDailyProductionOrderBody');
+            if (!head || !body) return;
+
+            const days = Array.isArray(data?.days) ? data.days : [];
+            if (!days.length) {
+                head.innerHTML = '';
+                body.innerHTML = '<tr><td class="p-3 text-slate-500">ไม่มีข้อมูล</td></tr>';
+                return;
+            }
+
+            const kpi = getManpowerOrderKpisFromDailyPlan(data, station);
+
+            head.innerHTML = `<tr>
+                <th class="p-2 text-left text-slate-300 sticky left-0 bg-slate-950 z-10 min-w-[150px]">Total / Day</th>
+                ${days.map(day => `<th class="p-2 text-center text-slate-300 min-w-[68px]">${formatDayLabel(day)}</th>`).join('')}
+            </tr>`;
+
+            const totals = station === 'Door C'
+                ? days.map((_, i) =>
+                    Number(kpi?.dailyDoorCOrder?.['C-1']?.[i] || 0) +
+                    Number(kpi?.dailyDoorCOrder?.['C-2']?.[i] || 0) +
+                    Number(kpi?.dailyDoorCOrder?.['C-3']?.[i] || 0)
+                  )
+                : days.map((_, i) => Number(kpi?.dailyDoorOrder?.[i] || 0));
+
+            body.innerHTML = `<tr class="border-t border-slate-700/60">
+                <td class="p-2 text-left text-cyan-300 font-semibold sticky left-0 bg-slate-900 z-10">ยอดรวมที่ต้องผลิต</td>
+                ${totals.map((qty,i) => `<td class="p-2 text-center border-l border-slate-800/70 ${isSunday(days[i]) ? 'bg-slate-950/80 text-slate-600' : 'text-white'}">
+                    ${isSunday(days[i]) ? '—' : (qty > 0 ? Math.round(qty).toLocaleString() : '-')}
+                </td>`).join('')}
+            </tr>`;
+        }
+
         function renderManpowerTable(data) {
             const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
@@ -6993,6 +6995,7 @@ function updateLobSubLineVisibility() {
 
             const days = data.days;
             const station = currentManpowerStation || 'Door A';
+            renderMpDailyProductionOrderSummary(data, station);
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
