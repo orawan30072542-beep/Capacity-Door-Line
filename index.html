@@ -6529,9 +6529,7 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
-        function getMpActualOutputFromLeadTime() {
-            const station = currentManpowerStation || 'Door A';
-            const rows = buildManpowerRows(station) || [];
+        function getMpActualOutputFromLeadTime(rows = []) {
             const actualManpower = getMpPlanActualInput('manpower');
 
             // Lead Time = total process time for the selected line/model/day.
@@ -6539,8 +6537,14 @@ function updateLobSubLineVisibility() {
             const leadTimes = [];
             rows.forEach(row => {
                 (row.days || []).forEach(day => {
-                    const order = Number(day?.doorOrder || 0);
-                    const leadTime = Number(day?.leadTime || 0);
+                    const order = Number(day?.doorOrder || day?.order || 0);
+                    const leadTime = Number(
+                        day?.leadTime ||
+                        day?.totalLeadTime ||
+                        day?.overallLeadTime ||
+                        day?.processTime ||
+                        0
+                    );
                     if (order > 0 && leadTime > 0) leadTimes.push(leadTime);
                 });
             });
@@ -6559,9 +6563,9 @@ function updateLobSubLineVisibility() {
             return { leadTime, outputPerHour, outputPerDay };
         }
 
-        function updateMpPlanActualSummary(planOrderPerDay, planManpower) {
+        function updateMpPlanActualSummary(planOrderPerDay, planManpower, rows = []) {
             const actualManpower = getMpPlanActualInput('manpower');
-            const actualCalc = getMpActualOutputFromLeadTime();
+            const actualCalc = getMpActualOutputFromLeadTime(rows);
             const actualOutput = actualCalc.outputPerDay;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
@@ -6884,7 +6888,13 @@ function updateLobSubLineVisibility() {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
                     dailyMpTotals[i] += Number(r.totalManpowerCombined || 0);
-                    dailyPlanOrderTotals[i] += Number(r.doorOrder || 0);
+                    dailyPlanOrderTotals[i] += Number(
+                        r.doorOrder ??
+                        r.totalDoorOrder ??
+                        r.order ??
+                        r.orderWithShort ??
+                        0
+                    );
                 });
 
                 metricDefs.forEach((metric, metricIndex) => {
@@ -6986,13 +6996,21 @@ function updateLobSubLineVisibility() {
             setText('mpTotalDoorOrder', totalDoorOrderAllDays.toLocaleString());
             const avgPlanManpower = activeDays > 0 ? (totalDailyManpower / activeDays) : 0;
             const activeOrderDays = dailyPlanOrderTotals.filter((v, i) => !isSunday(days[i]) && v > 0).length;
-            const planOrderPerDay = activeOrderDays > 0
+            let planOrderPerDay = activeOrderDays > 0
                 ? dailyPlanOrderTotals.reduce((sum, v, i) => sum + (!isSunday(days[i]) ? v : 0), 0) / activeOrderDays
                 : 0;
 
+            if (!(planOrderPerDay > 0)) {
+                const totalDoorOrderFromHeader = Number(
+                    String(document.getElementById('mpTotalDoorOrder')?.textContent || '0').replace(/,/g, '')
+                ) || 0;
+                const workingDayCount = days.filter(d => !isSunday(d)).length || 1;
+                planOrderPerDay = totalDoorOrderFromHeader / workingDayCount;
+            }
+
             setText('mpAvgManpower', avgPlanManpower > 0 ? avgPlanManpower.toFixed(2) : '0');
             setText('mpPeakManpower', String(peakManpower));
-            updateMpPlanActualSummary(planOrderPerDay, avgPlanManpower);
+            updateMpPlanActualSummary(planOrderPerDay, avgPlanManpower, rows);
         }
 
         function switchManpowerStation(stationName) {
