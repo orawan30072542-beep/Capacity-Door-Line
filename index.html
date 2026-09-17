@@ -7049,20 +7049,26 @@ function updateLobSubLineVisibility() {
                 effectiveProductionDays = plannedDates.size || days.filter(d => !isSunday(d)).length || 1;
             }
 
-            const totalDoorOrderForPlan = Number(totalDoorOrderAllDays || 0);
-            const numberOfPlanDays = Number(productionDayCount || 0);
+            // IMPORTANT:
+            // Use the Total Door Order already calculated in the top KPI and divide by
+            // the resolved number of production-plan days. This prevents Plan from
+            // becoming 0 when dailyPlanOrderTotals cannot resolve the day count.
+            const totalDoorOrderForPlan = Number(effectiveTotalDoorOrder || 0);
+            const numberOfPlanDays = Math.max(1, Number(effectiveProductionDays || 0));
 
             // Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
-            const planOrderPerDay = numberOfPlanDays > 0
+            const planOrderPerDay = totalDoorOrderForPlan > 0
                 ? totalDoorOrderForPlan / numberOfPlanDays
                 : 0;
 
-            const avgManpowerKpi = Number(
-                String(document.getElementById('mpAvgManpower')?.textContent || '0').replace(/[^0-9.-]/g, '')
-            ) || 0;
-            const avgPlanManpower = activeDays > 0
-                ? totalDailyManpower / activeDays
-                : avgManpowerKpi;
+            // Plan Manpower = average required manpower across production days.
+            // Use the same daily manpower totals already calculated for the table.
+            const manpowerProductionDays = dailyMpTotals.filter((v, i) =>
+                !isSunday(days[i]) && Number(v || 0) > 0
+            );
+            const avgPlanManpower = manpowerProductionDays.length > 0
+                ? manpowerProductionDays.reduce((sum, v) => sum + Number(v || 0), 0) / manpowerProductionDays.length
+                : (activeDays > 0 ? totalDailyManpower / activeDays : 0);
 
             // Summary uses the highest Lead Time from all active production rows.
             const summaryAvgLeadTime = summaryMaxLeadTime;
