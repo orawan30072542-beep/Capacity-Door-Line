@@ -1185,7 +1185,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">Actual Door Output / Day · ด้านขวา = / Hour</div>
+                                    <div class="text-[8px] text-slate-500">Door C: Σ(3600 ÷ Avg. Lead Time × Ratio) × Working Hours</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6632,16 +6632,94 @@ function updateLobSubLineVisibility() {
             renderManpowerTable(currentDailyData);
         }
 
+
+        // ===== Door C Actual Output: same production structure as Plan =====
+        // UPH = (3600 / Avg Lead Time C-1 × Ratio C-1)
+        //     + (3600 / Avg Lead Time C-2 × Ratio C-2)
+        //     + (3600 / Avg Lead Time C-3 × Ratio C-3)
+        // Avg Lead Time and Ratio are calculated from the active Daily Plan models
+        // that Master Model routes to each C-line.
+        function getDoorCActualOutputLikePlan(data) {
+            const cLines = ['C-1', 'C-2', 'C-3'];
+            const result = {};
+            let totalUPH = 0;
+
+            cLines.forEach(cLine => {
+                let weightedLeadTimeSum = 0;
+                let weightedRatioSum = 0;
+                let totalBaseOrder = 0;
+
+                (data?.groups || []).forEach(group => {
+                    (group?.models || []).forEach(model => {
+                        const modelName = String(model?.name || '').trim();
+                        if (!modelName) return;
+
+                        const cfg = getMasterConfigForModel(modelName);
+                        if (cfg.station !== 'Door C') return;
+
+                        const route = (getDoorCRoutingDetails(modelName) || [])
+                            .find(r => r.line === cLine);
+                        if (!route) return;
+
+                        const modelOrder = (model.orders || []).reduce(
+                            (sum, v) => sum + Math.max(0, Number(v) || 0), 0
+                        );
+                        if (modelOrder <= 0) return;
+
+                        const leadTime = Math.max(
+                            0,
+                            Number(getLeadTimeForManpower(modelName, 'Door C')) || 0
+                        );
+                        if (leadTime <= 0) return;
+
+                        const ratio = Math.max(
+                            0,
+                            Number(getDoorCManualRatio(modelName, cLine, route.qty)) || 0
+                        );
+
+                        weightedLeadTimeSum += leadTime * modelOrder;
+                        weightedRatioSum += ratio * modelOrder;
+                        totalBaseOrder += modelOrder;
+                    });
+                });
+
+                const avgLeadTime = totalBaseOrder > 0
+                    ? weightedLeadTimeSum / totalBaseOrder
+                    : 0;
+                const avgRatio = totalBaseOrder > 0
+                    ? weightedRatioSum / totalBaseOrder
+                    : 0;
+
+                const uph = avgLeadTime > 0 && avgRatio > 0
+                    ? (3600 / avgLeadTime) * avgRatio
+                    : 0;
+
+                result[cLine] = { avgLeadTime, ratio: avgRatio, uph };
+                totalUPH += uph;
+            });
+
+            return { lines: result, totalUPH };
+        }
+
         function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
             const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
-            // Actual Output แสดงรูปแบบเดียวกับ Plan:
-            // ซ้าย = Actual Output / Day, ขวา = Actual Output / Hour
-            // Formula = (3600 / Lead Time) × Actual Manpower
-            const actualOutputPerHour = avgLeadTime > 0
-                ? (3600 / avgLeadTime) * actualManpower
-                : 0;
+            // Actual Output:
+            // Door C = Σ[(3600 / Avg Lead Time C-line) × Ratio C-line]
+            //          แล้วคูณ Working Hours เพื่อเป็น Actual Output / Day
+            // ไลน์อื่นคงสูตรเดิมไว้
+            let actualOutputPerHour = 0;
+
+            if (currentManpowerStation === 'Door C') {
+                const doorCActual = getDoorCActualOutputLikePlan(currentDailyData);
+                actualOutputPerHour = Number(doorCActual.totalUPH || 0);
+            } else {
+                actualOutputPerHour = avgLeadTime > 0
+                    ? (3600 / avgLeadTime) * actualManpower
+                    : 0;
+            }
+
             const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
