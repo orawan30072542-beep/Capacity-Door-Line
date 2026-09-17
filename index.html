@@ -1104,7 +1104,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
                                     <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
                                     <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
-                                    <div id="mpActualOutputFormula" class="text-[8px] text-slate-500 mt-1">คำนวณจาก Max Lead Time × 85% × Current Manpower</div>
                                 </div>
                             </div>
                         </div>
@@ -6552,7 +6551,6 @@ function updateLobSubLineVisibility() {
             if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
             if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
 
-            const formulaEl = document.getElementById('mpActualOutputFormula');
             if (formulaEl) {
                 formulaEl.textContent = avgLeadTime > 0
                     ? `(3600 / ${avgLeadTime.toFixed(2)}s) × 85% × ${actualManpower} คน × ${hours.toFixed(1)} hr`
