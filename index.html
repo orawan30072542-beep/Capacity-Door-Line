@@ -6602,12 +6602,6 @@ function updateLobSubLineVisibility() {
             if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
             if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
 
-            if (formulaEl) {
-                formulaEl.textContent = avgLeadTime > 0
-                    ? `(3600 / ${avgLeadTime.toFixed(2)}s) × 85% × ${actualManpower} คน × ${hours.toFixed(1)} hr`
-                    : 'ยังไม่มี Max Lead Time จาก Work Process';
-            }
-
             const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
             const manpowerDiff = Math.ceil(actualManpower) - Math.ceil(planManpower);
             const orderDiff = actualOutput - planOrderPerDay;
@@ -6621,7 +6615,7 @@ function updateLobSubLineVisibility() {
                 return `${n > 0 ? '+' : ''}${n.toLocaleString()}`;
             };
 
-            setText('mpPlanOrderDay', Math.round(planOrderPerDay).toLocaleString());
+            setText('mpPlanOrderDay', planOrderPerDay > 0 ? Math.round(planOrderPerDay).toLocaleString() : '0');
             setText('mpPlanManpower', planManpower > 0 ? Math.ceil(planManpower).toLocaleString() : '0');
             setText('mpOutputAchievement', `${performance.toFixed(1)}%`);
             setText('mpOutputAchievementDetail',
@@ -7053,10 +7047,11 @@ function updateLobSubLineVisibility() {
             // Use the Total Door Order already calculated in the top KPI and divide by
             // the resolved number of production-plan days. This prevents Plan from
             // becoming 0 when dailyPlanOrderTotals cannot resolve the day count.
-            const totalDoorOrderForPlan = Number(effectiveTotalDoorOrder || 0);
+            const totalDoorOrderForPlan = Number(totalDoorOrderAllDays || 0);
             const numberOfPlanDays = Math.max(1, Number(effectiveProductionDays || 0));
 
             // Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
+            // totalDoorOrderAllDays is exactly the value displayed in the Total Door Order KPI.
             const planOrderPerDay = totalDoorOrderForPlan > 0
                 ? totalDoorOrderForPlan / numberOfPlanDays
                 : 0;
