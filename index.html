@@ -1195,7 +1195,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                         <div id="mpActualUnitOutputDay" class="text-lg text-emerald-300">0</div>
                                     </div>
                                     <div class="mt-1.5 pt-1.5 border-t border-slate-700/60">
-                                        <div class="text-[8px] text-slate-500">จำนวนฝาที่ผลิตได้ / วัน</div>
+                                        <div class="text-[8px] text-slate-500">Actual Capacity / Day</div>
                                         <div class="mp-daily-hourly-row">
                                             <div id="mpActualOutputInput" class="text-base text-white">0</div>
                                             <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6647,8 +6647,7 @@ function updateLobSubLineVisibility() {
                 : 0;
             let actualOutput = actualOutputPerHour * hours;
 
-            // Door C can supply a section-based output:
-            // (C-1 + C-2) calculated together + C-3 calculated separately.
+            // Actual Output / Day receives the precomputed Actual Capacity / Day average.
             if (Number.isFinite(Number(actualOutputOverride)) && actualOutputOverride !== null) {
                 actualOutput = Math.max(0, Number(actualOutputOverride) || 0);
                 actualOutputPerHour = hours > 0 ? actualOutput / hours : 0;
@@ -6721,6 +6720,39 @@ function updateLobSubLineVisibility() {
             const orderDiffEl = document.getElementById('mpOrderDiff');
             if (mpDiffEl) mpDiffEl.className = `text-lg mt-1 ${manpowerDiff >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
             if (orderDiffEl) orderDiffEl.className = `text-lg mt-1 ${orderDiff >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+        }
+
+
+        function getSummaryActualCapacityPerDay(data, station, hours) {
+            if (!data || !Array.isArray(data.days) || !Array.isArray(data.groups)) return 0;
+            const days = data.days;
+            const groups = getManpowerGroupsForStation(station);
+
+            const averageCapacityForGroup = (groupName) => {
+                const values = days.map((day, dayIndex) => {
+                    if (isSunday(day)) return 0;
+                    const r = calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours);
+                    return Number(r.actualCapacity || 0);
+                }).filter(v => v > 0);
+
+                return values.length
+                    ? values.reduce((sum, v) => sum + v, 0) / values.length
+                    : 0;
+            };
+
+            if (station === 'Door C') {
+                const avgC1 = averageCapacityForGroup('C-1');
+                const avgC2 = averageCapacityForGroup('C-2');
+                const avgC3 = averageCapacityForGroup('C-3');
+
+                // C1/C2 = use the lower average capacity (bottleneck), then add C3 average.
+                return Math.min(avgC1, avgC2) + avgC3;
+            }
+
+            const groupAverages = groups.map(averageCapacityForGroup).filter(v => v > 0);
+            return groupAverages.length
+                ? groupAverages.reduce((sum, v) => sum + v, 0) / groupAverages.length
+                : 0;
         }
 
         function renderManpowerTable(data) {
@@ -7249,46 +7281,20 @@ function updateLobSubLineVisibility() {
                 ? totalDoorOrderAllDays / totalOrderAllDays
                 : 1;
 
-            let doorCActualOutput = null;
-            if (station === 'Door C' && doorCActualSections) {
-                const actualManpower = getMpPlanActualInput('manpower');
-                const c12PlanMp = doorCAvgC1 + doorCAvgC2;
-                const c3PlanMp = doorCAvgC3;
-                const totalPlanMp = c12PlanMp + c3PlanMp;
-
-                // Split Current Manpower by the manpower requirement of the two sections.
-                const c12ActualMp = totalPlanMp > 0 ? actualManpower * (c12PlanMp / totalPlanMp) : 0;
-                const c3ActualMp  = totalPlanMp > 0 ? actualManpower * (c3PlanMp / totalPlanMp) : 0;
-
-                const c12Ratio = doorCActualSections.C12.totalOrder > 0
-                    ? doorCActualSections.C12.doorOrder / doorCActualSections.C12.totalOrder
-                    : 0;
-                const c3Ratio = doorCActualSections.C3.totalOrder > 0
-                    ? doorCActualSections.C3.doorOrder / doorCActualSections.C3.totalOrder
-                    : 0;
-
-                const c12LeadTime = doorCActualSections.C12.maxLeadTime;
-                const c3LeadTime = doorCActualSections.C3.maxLeadTime;
-
-                // 1) C-1 + C-2 calculated together.
-                const c12Output = c12LeadTime > 0
-                    ? (3600 / c12LeadTime) * 0.85 * c12ActualMp * hours * c12Ratio
-                    : 0;
-                // 2) C-3 calculated separately.
-                const c3Output = c3LeadTime > 0
-                    ? (3600 / c3LeadTime) * 0.85 * c3ActualMp * hours * c3Ratio
-                    : 0;
-
-                // 3) Final Door C Actual Output = combined C-1/C-2 + C-3.
-                doorCActualOutput = c12Output + c3Output;
-            }
+            // Actual Output / Day (lower value) = Actual Capacity average.
+            // Door C = MIN(Avg C-1, Avg C-2) + Avg C-3.
+            const summaryActualCapacityPerDay = getSummaryActualCapacityPerDay(
+                data,
+                station,
+                hours
+            );
 
             updateMpPlanActualSummary(
                 planOrderPerDay,
                 avgPlanManpower,
                 summaryAvgLeadTime,
                 summaryDoorRatio,
-                doorCActualOutput,
+                summaryActualCapacityPerDay,
                 planUnitOrderPerDay
             );
         }
