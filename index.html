@@ -1005,13 +1005,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 class="w-14 bg-slate-950 border border-orange-500/30 rounded px-1.5 py-1 text-center text-xs font-bold text-orange-300 focus:outline-none focus:border-orange-400">
                         </label>
 
-                        <label class="flex items-center gap-2 bg-slate-900/70 border border-emerald-500/25 rounded-lg px-2.5 py-1.5">
-                            <span class="text-[10px] font-semibold text-emerald-300">Efficiency %</span>
-                            <input id="efficiencyPercentInput" type="number" min="1" max="100" step="1" value="85"
-                                onchange="saveEfficiencyPercent(this.value)"
-                                class="w-14 bg-slate-950 border border-emerald-500/30 rounded px-1.5 py-1 text-center text-xs font-bold text-emerald-300 focus:outline-none focus:border-emerald-400">
-                        </label>
-
                     <span class="text-xs text-slate-300">ชม.</span>
                     <button onclick="saveShiftHours()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow">
                         บันทึกชั่วโมง
@@ -1111,7 +1104,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
                                     <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
                                     <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
-                                    <div id="mpActualOutputFormula" class="text-[8px] text-slate-500 mt-1">คำนวณจาก Max Lead Time × Current Manpower</div>
+                                    <div id="mpActualOutputFormula" class="text-[8px] text-slate-500 mt-1">คำนวณจาก Max Lead Time × 85% × Current Manpower</div>
                                 </div>
                             </div>
                         </div>
@@ -6095,27 +6088,11 @@ function updateLobSubLineVisibility() {
         }
 
         function getEfficiencyPercent() {
-            const saved = localStorage.getItem('haier_manpower_efficiency_percent');
-            if (saved === null || saved === '') return 85;
-            return Math.min(100, Math.max(1, Number(saved) || 85));
+            return 85;
         }
 
         function getEfficiencyRate() {
-            return getEfficiencyPercent() / 100;
-        }
-
-        function saveEfficiencyPercent(value) {
-            const pct = Math.min(100, Math.max(1, Number(value) || 85));
-            localStorage.setItem('haier_manpower_efficiency_percent', String(pct));
-
-            const input = document.getElementById('efficiencyPercentInput');
-            if (input && Number(input.value) !== pct) input.value = pct;
-
-            // Recalculate all capacity/manpower views immediately.
-            renderManpowerTable(currentDailyData);
-            renderCapacityTable(currentDailyData);
-            renderUnifiedTable(currentDailyData);
-            setTimeout(applyBackBottomHourlyCapacityColumns, 0);
+            return 0.85;
         }
 
         function getBottomOutLineManpower(station, groupName) {
@@ -6566,7 +6543,7 @@ function updateLobSubLineVisibility() {
 
             // Actual Output / Day = (3600 / Lead Time) × Current Manpower × Working Hours
             const actualOutputPerHour = avgLeadTime > 0
-                ? (3600 / avgLeadTime) * actualManpower
+                ? (3600 / avgLeadTime) * 0.85 * actualManpower
                 : 0;
             const actualOutput = actualOutputPerHour * hours;
 
@@ -6578,7 +6555,7 @@ function updateLobSubLineVisibility() {
             const formulaEl = document.getElementById('mpActualOutputFormula');
             if (formulaEl) {
                 formulaEl.textContent = avgLeadTime > 0
-                    ? `(3600 / ${avgLeadTime.toFixed(2)}s) × ${actualManpower} คน × ${hours.toFixed(1)} hr`
+                    ? `(3600 / ${avgLeadTime.toFixed(2)}s) × 85% × ${actualManpower} คน × ${hours.toFixed(1)} hr`
                     : 'ยังไม่มี Max Lead Time จาก Work Process';
             }
 
@@ -6624,9 +6601,6 @@ function updateLobSubLineVisibility() {
             const station = currentManpowerStation || 'Door A';
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
-
-            const efficiencyInput = document.getElementById('efficiencyPercentInput');
-            if (efficiencyInput) efficiencyInput.value = getEfficiencyPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
 
             const stationLabel = document.getElementById('manpowerStationLabel');
