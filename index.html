@@ -512,6 +512,43 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 }
 /* old below-number style no longer used */
 #mpPlanOrderUPH.mp-plan-uph{display:none!important}
+
+/* ===== Summary Capacity Plan & Acual ===== */
+#summaryCapacityPlanActual .scp-main-value{
+    color:#f59e0b !important;
+    font-size:14px !important;
+    line-height:1.05 !important;
+    font-weight:800 !important;
+}
+#summaryCapacityPlanActual .scp-hour-value{
+    color:#ffffff !important;
+    font-size:8.4px !important; /* 40% smaller than daily value */
+    line-height:1.05 !important;
+    font-weight:400 !important;
+    margin-top:3px !important;
+}
+#summaryCapacityPlanActual .scp-diff-value{
+    color:#f87171 !important;
+    font-size:14px !important;
+    line-height:1.05 !important;
+    font-weight:800 !important;
+}
+#summaryCapacityPlanActual .scp-diff-hour{
+    color:#f87171 !important;
+    font-size:8.4px !important;
+    line-height:1.05 !important;
+    font-weight:400 !important;
+    margin-top:3px !important;
+}
+#summaryCapacityPlanActual table th{
+    color:#dbeafe !important;
+    font-size:11px !important;
+    font-weight:800 !important;
+}
+#summaryCapacityPlanActual table td{
+    font-size:11px !important;
+}
+
 </style>
 
 <style>
@@ -1222,6 +1259,24 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </div>
                         </div>
                     </div>
+                    <!-- Summary Capacity Plan & Acual -->
+                    <div id="summaryCapacityPlanActual" class="bg-slate-900/55 border border-amber-500/20 rounded-xl overflow-hidden mt-1">
+                        <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-amber-950/30 to-slate-950/20">
+                            <div class="text-sm font-bold text-white">Summary Capacity Plan & Acual</div>
+                            <div class="text-[9px] text-slate-400 mt-0.5">
+                                Daily Plan Import / Order Required from Master Model / Diff
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="tableSummaryCapacityPlanActual" class="w-full text-left border-collapse" style="min-width:100%;">
+                                <thead>
+                                    <tr id="summaryCapacityPlanActualHead" class="bg-slate-950/90 border-b border-bordercolor"></tr>
+                                </thead>
+                                <tbody id="summaryCapacityPlanActualBody" class="divide-y divide-bordercolor/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
 
                     <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
@@ -6936,6 +6991,151 @@ function updateLobSubLineVisibility() {
             };
         }
 
+
+        // ===== Summary Capacity Plan & Acual =====
+        // Row 1 = imported Daily Plan, separated by production line.
+        // Row 2 = TOTAL from "ยอดรวมออเดอร์รายวันที่ต้องผลิต"
+        // Row 3 = Diff = Required - Plan.
+        function getSummaryCapacityLineNames(station) {
+            if (station === 'Door C') return ['C-1', 'C-2', 'C-3'];
+            if (station === 'Back Plate' || station === 'Bottom Plate') return ['Line#1', 'Line#2'];
+            return [station];
+        }
+
+        function getSummaryCapacityPlanOrder(data, station, lineName, dayIndex) {
+            let total = 0;
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+                    const cfg = getMasterConfigForModel(modelName);
+                    let belongs = false;
+
+                    if (station === 'Door C') {
+                        belongs = cfg.station === 'Door C' &&
+                            (getDoorCRoutingDetails(modelName) || []).some(route => route.line === lineName);
+                    } else if (station === 'Back Plate') {
+                        belongs = cfg.backPlateSource === 'ผลิตเอง' &&
+                            (cfg.backPlateLine || 'Line#1') === lineName;
+                    } else if (station === 'Bottom Plate') {
+                        belongs = cfg.bottomSource === 'ผลิตเอง' &&
+                            (cfg.bottomLine || 'Line#1') === lineName;
+                    } else {
+                        belongs = cfg.station === station;
+                    }
+
+                    if (!belongs) return;
+                    total += Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                });
+            });
+            return total;
+        }
+
+        function getSummaryCapacityRequiredOrder(data, station, lineName, dayIndex, hours) {
+            if (station === 'Door C') {
+                // Exact physical C-line order from Master Routing × Ratio.
+                const kpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
+                return Number(kpi?.dailyDoorCOrder?.[lineName]?.[dayIndex] || 0);
+            }
+
+            if (station === 'Back Plate' || station === 'Bottom Plate') {
+                // Exact TOTAL logic of the daily-order summary for Line#1 / Line#2.
+                return getSummaryCapacityPlanOrder(data, station, lineName, dayIndex);
+            }
+
+            // Exact TOTAL logic used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต".
+            const metrics = getDayCapacityMetrics(data.groups, data.days, dayIndex, station, hours);
+            return Number(metrics?.totalQty || 0);
+        }
+
+        function renderSummaryCapacityPlanActual(data) {
+            const head = document.getElementById('summaryCapacityPlanActualHead');
+            const body = document.getElementById('summaryCapacityPlanActualBody');
+            const table = document.getElementById('tableSummaryCapacityPlanActual');
+            if (!head || !body || !table || !data?.days || !data?.groups) return;
+
+            const station = currentManpowerStation || 'Door A';
+            const days = data.days;
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const lines = getSummaryCapacityLineNames(station);
+
+            const lineWidth = 90;
+            const dataWidth = 175;
+            const dayWidth = 72;
+            table.style.width = `${lineWidth + dataWidth + days.length * dayWidth}px`;
+            table.style.minWidth = '100%';
+
+            head.innerHTML = `
+                <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-center" style="width:${lineWidth}px;min-width:${lineWidth}px;">Line</th>
+                <th class="px-3 py-2.5 bg-slate-950/95 sticky z-30 text-left" style="left:${lineWidth}px;width:${dataWidth}px;min-width:${dataWidth}px;">ข้อมูล</th>
+                ${days.map(day => `<th class="px-2 py-2.5 bg-slate-950/95 text-center whitespace-nowrap" style="min-width:${dayWidth}px;">${day}</th>`).join('')}
+            `;
+
+            const dailyCell = (dayValue, hourValue, isSundayDay) => {
+                if (isSundayDay) return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                    <div class="scp-main-value">${Math.round(dayValue).toLocaleString()}</div>
+                    <div class="scp-hour-value">${Math.round(hourValue).toLocaleString()}</div>
+                </td>`;
+            };
+
+            const diffCell = (dayValue, hourValue, isSundayDay) => {
+                if (isSundayDay) return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                const sign = n => {
+                    const v = Math.round(n);
+                    return `${v > 0 ? '+' : ''}${v.toLocaleString()}`;
+                };
+                return `<td class="px-2 py-2.5 text-center border-l border-rose-900/30 bg-rose-950/10">
+                    <div class="scp-diff-value">${sign(dayValue)}</div>
+                    <div class="scp-diff-hour">${sign(hourValue)}</div>
+                </td>`;
+            };
+
+            let html = '';
+
+            lines.forEach(lineName => {
+                const plan = days.map((day, i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityPlanOrder(data, station, lineName, i)
+                );
+                const required = days.map((day, i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityRequiredOrder(data, station, lineName, i, hours)
+                );
+                const diff = days.map((_, i) => required[i] - plan[i]);
+
+                // Row 1: imported plan.
+                html += `<tr class="bg-amber-950/10">
+                    <td rowspan="3" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
+                        ${lineName}
+                    </td>
+                    <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Plan Order
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">จากไฟล์แผนผลิตที่นำเข้า</div>
+                    </td>
+                    ${plan.map((v,i) => dailyCell(v, hours > 0 ? v / hours : 0, isSunday(days[i]))).join('')}
+                </tr>`;
+
+                // Row 2: required TOTAL from Master Model daily-order summary.
+                html += `<tr class="bg-amber-950/5">
+                    <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Required Order
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">จากยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
+                    </td>
+                    ${required.map((v,i) => dailyCell(v, hours > 0 ? v / hours : 0, isSunday(days[i]))).join('')}
+                </tr>`;
+
+                // Row 3: Diff Required - Plan.
+                html += `<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Diff
+                        <div class="text-[8px] text-rose-300/70 font-normal mt-0.5">Required − Plan</div>
+                    </td>
+                    ${diff.map((v,i) => diffCell(v, hours > 0 ? v / hours : 0, isSunday(days[i]))).join('')}
+                </tr>`;
+            });
+
+            body.innerHTML = html;
+        }
+
         function renderManpowerTable(data) {
             const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
@@ -6949,6 +7149,7 @@ function updateLobSubLineVisibility() {
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+            renderSummaryCapacityPlanActual(data);
 
             const stationLabel = document.getElementById('manpowerStationLabel');
             if (stationLabel) stationLabel.textContent = station;
