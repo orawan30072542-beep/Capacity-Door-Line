@@ -6746,6 +6746,16 @@ function updateLobSubLineVisibility() {
             let activeDays = 0;
             let peakManpower = 0;
             const dailyMpTotals = new Array(days.length).fill(0);
+            // Door C Plan Manpower must be calculated as:
+            // Avg(C-1) + Avg(C-2) + Avg(C-3).
+            // C-1 and C-2 are divided by 4 because 1 unit = 4 pcs.
+            const doorCGroupDailyMp = station === 'Door C'
+                ? {
+                    'C-1': new Array(days.length).fill(0),
+                    'C-2': new Array(days.length).fill(0),
+                    'C-3': new Array(days.length).fill(0)
+                  }
+                : null;
             const dailyPlanOrderTotals = new Array(days.length).fill(0);
             let summaryMaxLeadTime = 0;
 
@@ -6966,14 +6976,17 @@ function updateLobSubLineVisibility() {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
                     const rawDailyManpower = Number(r.totalManpowerCombined || 0);
-                    const selectedDoorCLine = (typeof getSelectedLobDoorCLine === 'function')
-                        ? getSelectedLobDoorCLine()
-                        : (document.getElementById('lobDoorCLineSelect')?.value || '');
-                    const doorCDivisor = currentManpowerStation === 'Door C'
-                        && (selectedDoorCLine === 'C-1' || selectedDoorCLine === 'C-2')
+                    // IMPORTANT: use the current Manpower group itself, not the LOB selector.
+                    // C-1 / C-2: 1 unit = 4 pcs => manpower ÷ 4. C-3 remains unchanged.
+                    const doorCDivisor = station === 'Door C'
+                        && (groupName === 'C-1' || groupName === 'C-2')
                         ? 4
                         : 1;
-                    dailyMpTotals[i] += rawDailyManpower / doorCDivisor;
+                    const adjustedDailyManpower = rawDailyManpower / doorCDivisor;
+                    dailyMpTotals[i] += adjustedDailyManpower;
+                    if (doorCGroupDailyMp && doorCGroupDailyMp[groupName]) {
+                        doorCGroupDailyMp[groupName][i] += adjustedDailyManpower;
+                    }
                     const summaryDoorOrder = Number(r.doorOrder || 0);
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
@@ -7124,9 +7137,29 @@ function updateLobSubLineVisibility() {
             const manpowerProductionDays = dailyMpTotals.filter((v, i) =>
                 !isSunday(days[i]) && Number(v || 0) > 0
             );
-            const avgPlanManpower = manpowerProductionDays.length > 0
-                ? manpowerProductionDays.reduce((sum, v) => sum + Number(v || 0), 0) / manpowerProductionDays.length
-                : (activeDays > 0 ? totalDailyManpower / activeDays : 0);
+
+            let avgPlanManpower = 0;
+            if (station === 'Door C' && doorCGroupDailyMp) {
+                const averageDoorCGroup = (groupName) => {
+                    const values = doorCGroupDailyMp[groupName].filter((v, i) =>
+                        !isSunday(days[i]) && Number(v || 0) > 0
+                    );
+                    return values.length > 0
+                        ? values.reduce((sum, v) => sum + Number(v || 0), 0) / values.length
+                        : 0;
+                };
+
+                const avgC1 = averageDoorCGroup('C-1');
+                const avgC2 = averageDoorCGroup('C-2');
+                const avgC3 = averageDoorCGroup('C-3');
+
+                // Door C Plan Manpower = Avg C-1 + Avg C-2 + Avg C-3
+                avgPlanManpower = avgC1 + avgC2 + avgC3;
+            } else {
+                avgPlanManpower = manpowerProductionDays.length > 0
+                    ? manpowerProductionDays.reduce((sum, v) => sum + Number(v || 0), 0) / manpowerProductionDays.length
+                    : (activeDays > 0 ? totalDailyManpower / activeDays : 0);
+            }
 
             // Summary uses the highest Lead Time from all active production rows.
             const summaryAvgLeadTime = summaryMaxLeadTime;
