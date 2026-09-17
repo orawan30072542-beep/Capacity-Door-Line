@@ -1130,7 +1130,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
-                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต (เฉลี่ย/วัน)</div>
+                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
                                     <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
@@ -7049,8 +7049,12 @@ function updateLobSubLineVisibility() {
                 effectiveProductionDays = plannedDates.size || days.filter(d => !isSunday(d)).length || 1;
             }
 
-            const planOrderPerDay = productionDayCount > 0
-                ? totalDoorOrderAllDays / productionDayCount
+            const totalDoorOrderForPlan = Number(totalDoorOrderAllDays || 0);
+            const numberOfPlanDays = Number(productionDayCount || 0);
+
+            // Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
+            const planOrderPerDay = numberOfPlanDays > 0
+                ? totalDoorOrderForPlan / numberOfPlanDays
                 : 0;
 
             const avgManpowerKpi = Number(
