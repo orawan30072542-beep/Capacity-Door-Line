@@ -7144,11 +7144,16 @@ function updateLobSubLineVisibility() {
             const totalDoorOrderForPlan = Number(totalDoorOrderAllDays || 0);
             const numberOfPlanDays = Math.max(1, Number(effectiveProductionDays || 0));
 
-            // Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
-            // totalDoorOrderAllDays is exactly the value displayed in the Total Door Order KPI.
-            const planOrderPerDay = totalDoorOrderForPlan > 0
+            // Base Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
+            // Final Plan Order / Day must include Short %.
+            const basePlanOrderPerDay = totalDoorOrderForPlan > 0
                 ? totalDoorOrderForPlan / numberOfPlanDays
                 : 0;
+            const planShortPercent = Math.max(
+                0,
+                parseFloat(document.getElementById('shortPercentInput')?.value) || 0
+            );
+            const planOrderPerDay = basePlanOrderPerDay * (1 + planShortPercent / 100);
 
             // Plan Manpower = average required manpower across production days.
             // Use the same daily manpower totals already calculated for the table.
