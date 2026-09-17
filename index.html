@@ -2682,18 +2682,8 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
         function getMasterConfigForModel(modelName) {
             let cfg;
 
-            // Match Daily Plan model names to Master Model by normalized name.
-            // Prevents later Daily Plan rows from being missed because of spaces/case/hyphen formatting.
-            const rawModelName = String(modelName || '').trim();
-            const normalizedModelName = normalizeModelName(rawModelName);
-            const matchedMasterKey = Object.prototype.hasOwnProperty.call(masterModelConfig, rawModelName)
-                ? rawModelName
-                : Object.keys(masterModelConfig || {}).find(key =>
-                    normalizeModelName(String(key || '').trim()) === normalizedModelName
-                );
-
-            if (matchedMasterKey && masterModelConfig[matchedMasterKey]) {
-                cfg = masterModelConfig[matchedMasterKey];
+            if (masterModelConfig[modelName]) {
+                cfg = masterModelConfig[modelName];
             } else {
                 const isGlass = modelName.toUpperCase().includes('GLASS');
                 cfg = {
@@ -6086,6 +6076,49 @@ function updateLobSubLineVisibility() {
             });
         }
 
+
+        // ===== Door C TOTAL ORDER — SAME DAILY-ORDER SOURCE =====
+        // Total Order in the Manpower table must be the sum of ALL Daily Plan rows
+        // that belong to the physical C-line. It is BEFORE multiplying the C-line Ratio.
+        //
+        // C-1 = BM T-Door + BM23 + BM29
+        // C-2 = BM23 + BM29
+        // C-3 = every model whose Master routing contains C-3
+        function getDoorCTotalOrderFromDailyProductionSummary(data, dayIndex, cLine) {
+            let total = 0;
+
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+
+                    const normalized = normalizeModelName(modelName);
+                    const compact = normalized.replace(/[\s_\-]+/g, '');
+                    const isBMTDoor = compact.includes('BMTDOOR');
+                    const isBM23 = compact.includes('BM23');
+                    const isBM29 = compact.includes('BM29');
+
+                    let belongs = false;
+                    if (cLine === 'C-1') {
+                        belongs = isBMTDoor || isBM23 || isBM29;
+                    } else if (cLine === 'C-2') {
+                        belongs = isBM23 || isBM29;
+                    } else if (cLine === 'C-3') {
+                        belongs = (getDoorCRoutingDetails(modelName) || [])
+                            .some(route => route.line === 'C-3');
+                    }
+
+                    if (!belongs) return;
+
+                    // Same raw Daily Plan order used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต".
+                    // Sum every matching model/row; DO NOT multiply Ratio here.
+                    total += Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                });
+            });
+
+            return total;
+        }
+
         function getManpowerGroupsForStation(station) {
             if (station === 'Door C') return ['C-1', 'C-2', 'C-3'];
             if (station === 'Back Plate' || station === 'Bottom Plate') return ['Line#1', 'Line#2'];
@@ -6815,11 +6848,6 @@ function updateLobSubLineVisibility() {
             const days = Array.isArray(data?.days) ? data.days : [];
             const dailyUnitOrder = new Array(days.length).fill(0);
             const dailyDoorOrder = new Array(days.length).fill(0);
-            const dailyDoorCBaseOrder = {
-                'C-1': new Array(days.length).fill(0),
-                'C-2': new Array(days.length).fill(0),
-                'C-3': new Array(days.length).fill(0)
-            };
             const dailyDoorCOrder = {
                 'C-1': new Array(days.length).fill(0),
                 'C-2': new Array(days.length).fill(0),
@@ -6838,10 +6866,8 @@ function updateLobSubLineVisibility() {
                     let belongs = false;
 
                     if (station === 'Door C') {
-                        // Door C order source is the actual C-1/C-2/C-3 routing.
-                        // Do not require cfg.station exact match here; otherwise BM23/BM29
-                        // can be skipped even though their Master routing belongs to Door C.
-                        belongs = (getDoorCRoutingDetails(modelName) || []).length > 0;
+                        belongs = cfg.station === 'Door C' &&
+                            (getDoorCRoutingDetails(modelName) || []).length > 0;
                     } else if (station === 'Back Plate') {
                         belongs = cfg.backPlateSource === 'ผลิตเอง';
                     } else if (station === 'Bottom Plate') {
@@ -6864,27 +6890,10 @@ function updateLobSubLineVisibility() {
                             // C-line Order = Model Order × Ratio ของ C-line นั้นเท่านั้น
                             (getDoorCRoutingDetails(modelName) || []).forEach(route => {
                                 if (!dailyDoorCOrder[route.line]) return;
-
-                                // Door C physical-line order rule:
-                                // C-1 = BM T-Door + BM23 + BM29
-                                // C-2 = BM23 + BM29
-                                // C-3 = follow Master routing (TM/FUF/BM T-Door routes)
-                                const n = normalizeModelName(modelName);
-                                const compactN = n.replace(/[\s_\-]+/g, '');
-                                const isBMTDoor = compactN.includes('BMTDOOR');
-                                const isBM23 = compactN.includes('BM23');
-                                const isBM29 = compactN.includes('BM29');
-                                if (route.line === 'C-1' && !(isBMTDoor || isBM23 || isBM29)) return;
-                                if (route.line === 'C-2' && !(isBM23 || isBM29)) return;
-
                                 const ratio = Math.max(
                                     0,
                                     Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
                                 );
-                                // Sum ALL Daily Plan rows/models routed to this physical C-line.
-                                // Base Order = unit order before Ratio.
-                                // Door Order = required physical pieces after Ratio.
-                                dailyDoorCBaseOrder[route.line][dayIndex] += order;
                                 const lineOrder = order * ratio;
                                 dailyDoorCOrder[route.line][dayIndex] += lineOrder;
                                 totalDoorCOrder[route.line] += lineOrder;
@@ -6909,7 +6918,6 @@ function updateLobSubLineVisibility() {
                 totalDoorOrder,
                 dailyUnitOrder,
                 dailyDoorOrder,
-                dailyDoorCBaseOrder,
                 dailyDoorCOrder,
                 totalDoorCOrder
             };
@@ -7007,12 +7015,12 @@ function updateLobSubLineVisibility() {
                     zoneClass: 'violet',
                     label: 'Total Order',
                     subLabel: station === 'Door C'
-                        ? 'รวม Daily Plan ทุกบรรทัดที่ Route เข้า C-Line · ยังไม่คูณ Ratio'
+                        ? 'รวมจากยอดออเดอร์รายวันที่ต้องผลิต · ยังไม่คูณ Ratio'
                         : 'ไม่คูณ Ratio',
                     cls: 'text-white',
                     format: (v, row) => {
                         const displayOrder = station === 'Door C'
-                            ? Number(row.masterBaseOrder || 0)
+                            ? Number(row.masterBaseOrder ?? row.totalOrder ?? 0)
                             : Number(v || 0);
                         const displayUPH = hours > 0 ? displayOrder / hours : 0;
                         return displayOrder > 0
@@ -7028,16 +7036,10 @@ function updateLobSubLineVisibility() {
                     label: 'Door Order',
                     subLabel: 'คูณ Ratio',
                     cls: 'text-violet-300',
-                    format: (v, row) => {
-                        const displayDoorOrder = station === 'Door C'
-                            ? Number(row.masterProductionOrder || 0)
-                            : Number(v || 0);
-                        const displayDoorUPH = hours > 0 ? displayDoorOrder / hours : 0;
-                        return displayDoorOrder > 0
-                            ? `<div class="mp-num-top mp-top-door">${Math.round(displayDoorOrder).toLocaleString()}</div>
-                               <div class="mp-num-bottom">${Math.round(displayDoorUPH).toLocaleString()}</div>`
-                            : '-';
-                    }
+                    format: (v, row) => v > 0
+                        ? `<div class="mp-num-top mp-top-door">${Math.round(v).toLocaleString()}</div>
+                           <div class="mp-num-bottom">${Math.round(row.doorOrderUPH).toLocaleString()}</div>`
+                        : '-'
                 },
                 {
                     key: 'shortageOrder',
@@ -7184,26 +7186,26 @@ function updateLobSubLineVisibility() {
                     result.doorCGroupName = groupName;
 
                     if (station === 'Door C') {
-                        // Authoritative C-line orders come directly from ALL Daily Plan rows
-                        // + Master Model routing, not from Work Process/Lead Time rows.
-                        result.masterBaseOrder = Number(
-                            doorCMasterOrderKpis?.dailyDoorCBaseOrder?.[groupName]?.[dayIndex] || 0
+                        // Total Order: pull from the same Daily Plan source as
+                        // "ยอดรวมออเดอร์รายวันที่ต้องผลิต" and sum ALL rows for this C-line.
+                        // This value is BEFORE Ratio.
+                        result.masterBaseOrder = getDoorCTotalOrderFromDailyProductionSummary(
+                            data, dayIndex, groupName
                         );
+                        result.totalOrder = result.masterBaseOrder;
+                        result.totalOrderUPH = hours > 0 ? result.totalOrder / hours : 0;
+
+                        // Door Order remains the physical order after Ratio.
                         result.masterProductionOrder = Number(
                             doorCMasterOrderKpis?.dailyDoorCOrder?.[groupName]?.[dayIndex] || 0
                         );
 
-                        result.totalOrder = result.masterBaseOrder;
-                        result.doorOrder = result.masterProductionOrder;
-                        result.totalOrderUPH = hours > 0 ? result.totalOrder / hours : 0;
-                        result.doorOrderUPH = hours > 0 ? result.doorOrder / hours : 0;
-
-                        const shortRate = 1 + (getShortPercent() / 100);
-                        result.shortageOrder = result.doorOrder * shortRate;
-                        result.shortageOrderUPH = hours > 0 ? result.shortageOrder / hours : 0;
-
-                        result.effectiveDoorCRatio = result.masterBaseOrder > 0
-                            ? result.masterProductionOrder / result.masterBaseOrder
+                        // Ratio for manpower conversion. This also supports a mixed day
+                        // where models on the same C-line have different Master ratios.
+                        const baseUnitOrder = Math.max(0, Number(result.totalOrder || 0));
+                        const physicalDoorOrder = Math.max(0, Number(result.doorOrder || 0));
+                        result.effectiveDoorCRatio = baseUnitOrder > 0
+                            ? physicalDoorOrder / baseUnitOrder
                             : 1;
                     } else {
                         result.masterProductionOrder = Number(result.totalOrder || 0);
