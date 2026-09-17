@@ -492,6 +492,26 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
     margin-top:4px !important;
     opacity:.95;
 }
+
+#mpPlanActualSummary .mp-daily-hourly-row{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    margin-top:1px;
+}
+#mpPlanActualSummary .mp-daily-hourly-row > .text-lg{
+    margin-top:8px !important;
+}
+#mpPlanActualSummary .mp-inline-hourly{
+    color:#ffffff !important;
+    font-size:16px !important;
+    line-height:1 !important;
+    font-weight:400 !important;
+    opacity:.98;
+    white-space:nowrap;
+}
+/* old below-number style no longer used */
+#mpPlanOrderUPH.mp-plan-uph{display:none!important}
 </style>
 
 <style>
@@ -1140,8 +1160,10 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
                                     <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
-                                    <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
-                                    <div id="mpPlanOrderUPH" class="mp-plan-uph">0</div>
+                                    <div class="mp-daily-hourly-row">
+                                        <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
+                                        <div id="mpPlanOrderUPH" class="mp-inline-hourly">0</div>
+                                    </div>
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Manpower</div>
@@ -1164,7 +1186,10 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
                                     <div class="text-[8px] text-slate-500">ยอดผลิตจริง / วัน</div>
-                                    <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
+                                    <div class="mp-daily-hourly-row">
+                                        <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
+                                        <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -6611,6 +6636,14 @@ function updateLobSubLineVisibility() {
             const outEl = document.getElementById('mpActualOutputInput');
             if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
             if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
+
+            const actualHourlyEl = document.getElementById('mpActualOutputHourly');
+            if (actualHourlyEl) {
+                const actualOutputHourly = hours > 0 ? actualOutput / hours : 0;
+                actualHourlyEl.textContent = actualOutputHourly > 0
+                    ? Math.round(actualOutputHourly).toLocaleString()
+                    : '0';
+            }
 
             const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
             const manpowerDiff = Math.ceil(actualManpower) - Math.ceil(planManpower);
