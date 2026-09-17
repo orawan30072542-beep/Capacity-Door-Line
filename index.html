@@ -6965,7 +6965,15 @@ function updateLobSubLineVisibility() {
                 dayResults.forEach((r, i) => {
                     totalOrderAllDays += r.totalOrder;
                     totalDoorOrderAllDays += r.doorOrder;
-                    dailyMpTotals[i] += Number(r.totalManpowerCombined || 0);
+                    const rawDailyManpower = Number(r.totalManpowerCombined || 0);
+                    const selectedDoorCLine = (typeof getSelectedLobDoorCLine === 'function')
+                        ? getSelectedLobDoorCLine()
+                        : (document.getElementById('lobDoorCLineSelect')?.value || '');
+                    const doorCDivisor = currentManpowerStation === 'Door C'
+                        && (selectedDoorCLine === 'C-1' || selectedDoorCLine === 'C-2')
+                        ? 4
+                        : 1;
+                    dailyMpTotals[i] += rawDailyManpower / doorCDivisor;
                     const summaryDoorOrder = Number(r.doorOrder || 0);
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
