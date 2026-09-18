@@ -6870,12 +6870,23 @@ function updateLobSubLineVisibility() {
             } else {
                 // Other lines: manpower also comes from the selected line's Line Balance.
                 const summaryLines = getSummaryCapacityLineNames(currentManpowerStation);
-                const manpowerValues = summaryLines.map(lineName =>
-                    getSummaryLineBalanceManpower(currentManpowerStation, lineName)
-                );
-                actualManpower = manpowerValues.length
-                    ? manpowerValues.reduce((sum, value) => sum + value, 0) / manpowerValues.length
-                    : 0;
+
+                if (currentManpowerStation === 'Back Plate' || currentManpowerStation === 'Bottom Plate') {
+                    // Back/Bottom: ห้ามรวม/เฉลี่ย Manpower ของ Line#1 กับ Line#2
+                    // ใช้ไลน์ย่อยที่เลือกอยู่ ถ้าไม่มี selector ให้ใช้ Line#1 เป็นค่าเริ่มต้น
+                    const physicalLine =
+                        document.getElementById('manpowerPlateLineSelect')?.value ||
+                        document.getElementById('lobPlateLineSelect')?.value ||
+                        summaryLines[0] || 'Line#1';
+                    actualManpower = getSummaryLineBalanceManpower(currentManpowerStation, physicalLine);
+                } else {
+                    const manpowerValues = summaryLines.map(lineName =>
+                        getSummaryLineBalanceManpower(currentManpowerStation, lineName)
+                    );
+                    actualManpower = manpowerValues.length
+                        ? manpowerValues.reduce((sum, value) => sum + value, 0) / manpowerValues.length
+                        : 0;
+                }
 
                 actualOutputPerHour = avgLeadTime > 0
                     ? (3600 / avgLeadTime) * actualManpower
@@ -7157,33 +7168,45 @@ function updateLobSubLineVisibility() {
         // จำนวนพนักงานสำหรับ Capacity Actual ดึงจาก Line Balance Layout
         // นับเฉพาะ object ประเภท employee ที่ถูกบันทึกไว้ใน Layout ของไลน์นั้น
         function getSummaryLineBalanceManpower(station, lineName) {
-            let layoutKey = '';
+            let layoutKeys = [];
 
             if (station === 'Door A') {
-                layoutKey = 'haier_lob_layout_shared_v4_Door_A';
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_A'];
             } else if (station === 'Door B') {
-                layoutKey = 'haier_lob_layout_shared_v4_Door_B';
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_B'];
             } else if (station === 'Door C') {
                 // Door Bend C-1 / C-2 / C-3 แยก Layout กัน
-                layoutKey = `haier_lob_layout_shared_v4_Door_C_${lineName}`;
+                layoutKeys = [`haier_lob_layout_shared_v4_Door_C_${lineName}`];
             } else if (station === 'Door Glass') {
-                layoutKey = 'haier_lob_layout_shared_v4_Door_Glass';
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_Glass'];
             } else if (station === 'Back Plate') {
-                layoutKey = 'haier_lob_layout_shared_v4_Back_Plate';
+                // Back Plate แยกจำนวนพนักงาน Line#1 / Line#2
+                layoutKeys = [
+                    `haier_lob_layout_shared_v4_Back_Plate_${lineName}`,
+                    `haier_lob_layout_shared_v4_Back_Plate_${String(lineName).replace('#','')}`,
+                    `haier_lob_layout_shared_v4_Back_Plate_${String(lineName).replace('Line#','Line')}`
+                ];
             } else if (station === 'Bottom Plate') {
-                layoutKey = 'haier_lob_layout_shared_v4_Bottom_Plate';
+                // Bottom Plate แยกจำนวนพนักงาน Line#1 / Line#2
+                layoutKeys = [
+                    `haier_lob_layout_shared_v4_Bottom_Plate_${lineName}`,
+                    `haier_lob_layout_shared_v4_Bottom_Plate_${String(lineName).replace('#','')}`,
+                    `haier_lob_layout_shared_v4_Bottom_Plate_${String(lineName).replace('Line#','Line')}`
+                ];
             }
 
-            if (!layoutKey) return 0;
-
-            try {
-                const saved = JSON.parse(localStorage.getItem(layoutKey) || '[]');
-                if (!Array.isArray(saved)) return 0;
-                return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
-            } catch (err) {
-                console.warn('Cannot read Line Balance manpower:', station, lineName, err);
-                return 0;
+            for (const layoutKey of layoutKeys) {
+                try {
+                    const raw = localStorage.getItem(layoutKey);
+                    if (raw === null) continue;
+                    const saved = JSON.parse(raw);
+                    if (!Array.isArray(saved)) continue;
+                    return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
+                } catch (err) {
+                    console.warn('Cannot read Line Balance manpower:', station, lineName, layoutKey, err);
+                }
             }
+            return 0;
         }
 
         function renderSummaryCapacityPlanActual(data) {
