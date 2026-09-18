@@ -7140,7 +7140,7 @@ function updateLobSubLineVisibility() {
     
                 // Row 1: imported plan.
                 html += `<tr class="bg-amber-950/10">
-                    <td rowspan="3" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
+                    <td rowspan="4" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
                         ${lineName}
                     </td>
                     <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
@@ -7175,6 +7175,32 @@ function updateLobSubLineVisibility() {
                             <div class="text-white text-[8px] font-normal mt-0.5">sec</div>
                            </td>`
                     ).join('')}
+                </tr>`;
+
+                // Row 4: Capacity Actual
+                // (3600 / Lead Time รวม) × Working Hours × 85% × Actual Manpower
+                const actualManpower = Math.max(
+                    0,
+                    Number(document.getElementById('mpActualManpowerInput')?.value) || 0
+                );
+                html += `<tr class="bg-emerald-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-emerald-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Capacity Actual
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">(3600 ÷ Lead Time) × Hours × 85% × Actual MP</div>
+                    </td>
+                    ${leadTimes.map((leadTime,i) => {
+                        if (isSunday(days[i])) {
+                            return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                        }
+                        const hourlyCapacity = leadTime > 0
+                            ? (3600 / leadTime) * 0.85 * actualManpower
+                            : 0;
+                        const dailyCapacity = hourlyCapacity * hours;
+                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="text-emerald-300 text-sm font-bold">${Math.round(dailyCapacity).toLocaleString()}</div>
+                            <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
+                        </td>`;
+                    }).join('')}
                 </tr>`;
 
             });
