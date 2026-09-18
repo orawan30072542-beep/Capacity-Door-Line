@@ -7257,6 +7257,35 @@ function updateLobSubLineVisibility() {
                     result.doorCGroupName = groupName;
 
                     if (station === 'Door C') {
+                        // FIX: keep Total Order and Door Order as two different quantities.
+                        // Total Order = Daily Plan routed to this C-line BEFORE Ratio.
+                        // Door Order  = Σ(Daily Plan of each model × that model's Master Ratio).
+                        let cLineBaseOrder = 0;
+                        let cLineDoorOrder = 0;
+                        (data?.groups || []).forEach(g => {
+                            (g?.models || []).forEach(m => {
+                                const modelName = String(m?.name || '').trim();
+                                if (!modelName) return;
+                                const baseOrder = Math.max(0, Number(m?.orders?.[dayIndex]) || 0);
+                                if (baseOrder <= 0) return;
+
+                                const route = (getDoorCRoutingDetails(modelName) || [])
+                                    .find(r => String(r?.line || '') === String(groupName || ''));
+                                if (!route) return;
+
+                                const ratio = Math.max(0, Number(route?.qty ?? route?.ratio ?? 0) || 0);
+                                if (ratio <= 0) return;
+
+                                cLineBaseOrder += baseOrder;
+                                cLineDoorOrder += baseOrder * ratio;
+                            });
+                        });
+
+                        result.totalOrder = Math.round(cLineBaseOrder);
+                        result.totalOrderUPH = hours > 0 ? cLineBaseOrder / hours : 0;
+                        result.doorOrder = Math.round(cLineDoorOrder);
+                        result.doorOrderUPH = hours > 0 ? cLineDoorOrder / hours : 0;
+
                         // Authoritative physical order for this C-line/day.
                         result.masterProductionOrder = Number(
                             doorCMasterOrderKpis?.dailyDoorCOrder?.[groupName]?.[dayIndex] || 0
