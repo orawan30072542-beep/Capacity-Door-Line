@@ -7221,7 +7221,7 @@ function updateLobSubLineVisibility() {
                     }).join('')}
                 </tr>`;
 
-                // Row 4: Difference = Required Order - Capacity Actual
+                // Row 4: Difference = Capacity Actual - Required Order
                 html += `<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
                     <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
                         Difference
@@ -7235,9 +7235,9 @@ function updateLobSubLineVisibility() {
                             ? (3600 / leadTime) * lineBalanceManpower * ratio
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
-                        const difference = required[i] - dailyCapacity;
+                        const difference = dailyCapacity - required[i];
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="${difference > 0 ? 'text-rose-300' : 'text-emerald-300'} text-sm font-bold">${Math.round(difference).toLocaleString()}</div>
+                            <div class="${difference < 0 ? 'text-rose-300' : 'text-emerald-300'} text-sm font-bold">${Math.round(difference).toLocaleString()}</div>
                         </td>`;
                     }).join('')}
                 </tr>`;
