@@ -543,6 +543,23 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
             line-height: 1.15 !important;
             font-weight: 600 !important;
         }
+
+        /* ===== Summary Capacity colors / sizes ===== */
+        #summaryCapacityPlanActual tr.scp-plan-row .scp-main-value {
+            color: #38bdf8 !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        #summaryCapacityPlanActual tr.scp-required-row .scp-main-value {
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        #summaryCapacityPlanActual tr.scp-capacity-row .scp-capacity-value {
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
 </style>
 
 <style>
@@ -7253,7 +7270,7 @@ function updateLobSubLineVisibility() {
                 );
     
                 // Row 1: imported plan.
-                html += `<tr class="bg-amber-950/10">
+                html += `<tr class="scp-plan-row bg-amber-950/10">
                     <td rowspan="4" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
                         ${lineName}
                     </td>
@@ -7265,7 +7282,7 @@ function updateLobSubLineVisibility() {
                 </tr>`;
 
                 // Row 2: required TOTAL from Master Model daily-order summary.
-                html += `<tr class="bg-amber-950/5">
+                html += `<tr class="scp-capacity-row scp-required-row bg-amber-950/5">
                     <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
                         Required Order
                         <div class="text-[8px] text-slate-400 font-normal mt-0.5">จากยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
@@ -7297,7 +7314,7 @@ function updateLobSubLineVisibility() {
                         const dailyCapacity = hourlyCapacity * hours;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
                             <div class="text-slate-400 text-[8px] font-normal mb-0.5">LT ${leadTime.toFixed(1)} s</div>
-                            <div class="text-emerald-300 text-sm font-bold">${Math.round(dailyCapacity).toLocaleString()}</div>
+                            <div class="scp-capacity-value text-[11px] font-semibold">${Math.round(dailyCapacity).toLocaleString()}</div>
                             <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
                         </td>`;
                     }).join('')}
