@@ -6309,8 +6309,8 @@ function updateLobSubLineVisibility() {
         function calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours) {
             // Door C C-1 Actual Capacity:
             // Weighted LT = Σ[(LT RR × Order BM) + (LT RL × Order BM)] ÷ Σ(Order BM + Order BM)
-            // Actual UPH = (3600 ÷ Weighted LT) × 85%
-            // Actual Capacity / Day = Actual UPH × Working Hours
+            // Capacity / Hour = (3600 ÷ Weighted LT) × 85% × Manpower from Line Balance
+            // Capacity / Day = Capacity / Hour × Working Hours
             if (station === 'Door C' && groupName === 'C-1') {
                 let totalOrder = 0;
                 let weightedLtSum = 0;
@@ -6330,7 +6330,6 @@ function updateLobSubLineVisibility() {
                         const rrLT = Math.max(0, Number(getDoorTypeLeadTime(m.name, 'RR')) || 0);
                         const rlLT = Math.max(0, Number(getDoorTypeLeadTime(m.name, 'RL')) || 0);
 
-                        // Door Order remains based on Master routing ratio.
                         totalOrder += baseOrder * multiplier;
 
                         if (rrLT > 0) {
@@ -6349,8 +6348,10 @@ function updateLobSubLineVisibility() {
                     ? weightedLtSum / weightedOrderSum
                     : 0;
 
-                const actualUPH = weightedLeadTime > 0
-                    ? (3600 / weightedLeadTime) * 0.85
+                const lineBalanceManpower = Math.max(0, Number(getSummaryLineBalanceManpower('Door C', 'C-1')) || 0);
+
+                const actualUPH = weightedLeadTime > 0 && lineBalanceManpower > 0
+                    ? (3600 / weightedLeadTime) * 0.85 * lineBalanceManpower
                     : 0;
 
                 const actualCapacity = actualUPH > 0 && hours > 0
@@ -6377,13 +6378,17 @@ function updateLobSubLineVisibility() {
                     status,
                     requiredHoursAtActualUPH: actualUPH > 0 ? totalOrder / actualUPH : 0,
                     modelsWithCapacity,
-                    weightedLeadTime
+                    weightedLeadTime,
+                    lineBalanceManpower
                 };
             }
 
             let totalOrder = 0;
             let requiredHoursAtActualUPH = 0;
             let modelsWithCapacity = 0;
+            // C-3: Actual Capacity must include routing Ratio.
+            let c3BaseOrder = 0;
+            let c3RatioOrder = 0;
 
             data.groups.forEach(g => {
                 g.models.forEach(m => {
@@ -6407,10 +6412,13 @@ function updateLobSubLineVisibility() {
 
             // Effective / weighted Actual UPH ของ Product Mix ในวันนั้น
             // = Total Order ÷ Σ(Order ของแต่ละ Model ÷ Actual UPH ของ Model)
-            const actualUPH =
-                totalOrder > 0 && requiredHoursAtActualUPH > 0
+            const baseActualUPH = totalOrder > 0 && requiredHoursAtActualUPH > 0
                     ? totalOrder / requiredHoursAtActualUPH
                     : 0;
+            const c3Ratio = (station === 'Door C' && groupName === 'C-3' && c3BaseOrder > 0)
+                ? (c3RatioOrder / c3BaseOrder)
+                : 1;
+            const actualUPH = baseActualUPH * c3Ratio;
 
             const actualCapacity = actualUPH > 0 && hours > 0 ? actualUPH * hours : 0;
             const gap = actualCapacity - totalOrder;
