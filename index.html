@@ -1132,7 +1132,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Total Order</div>
-                            <div class="text-[9px] text-slate-500">ออเดอร์ผลิตตามแผน · ผลิตเองตาม Master Model · ยังไม่คูณ Ratio</div>
+                            <div class="text-[9px] text-slate-500">อ้างอิง Door Order · ยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
                             <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
@@ -7086,7 +7086,7 @@ function updateLobSubLineVisibility() {
                     zoneClass: 'violet',
                     label: 'Total Order',
                     subLabel: station === 'Door C'
-                        ? 'Daily Plan · ผลิตเองตาม Master Model · ยังไม่คูณ Ratio'
+                        ? 'Door Order · ยอดรวมออเดอร์รายวันที่ต้องผลิต'
                         : 'ไม่คูณ Ratio',
                     cls: 'text-white',
                     format: (v, row) => {
@@ -7281,8 +7281,10 @@ function updateLobSubLineVisibility() {
                             });
                         });
 
-                        result.totalOrder = Math.round(cLineBaseOrder);
-                        result.totalOrderUPH = hours > 0 ? cLineBaseOrder / hours : 0;
+                        // Total Order must come from the daily production summary:
+                        // Door Order = ยอดรวมออเดอร์รายวันที่ต้องผลิต
+                        result.totalOrder = Math.round(cLineDoorOrder);
+                        result.totalOrderUPH = hours > 0 ? cLineDoorOrder / hours : 0;
                         result.doorOrder = Math.round(cLineDoorOrder);
                         result.doorOrderUPH = hours > 0 ? cLineDoorOrder / hours : 0;
 
