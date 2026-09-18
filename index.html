@@ -7096,6 +7096,39 @@ function updateLobSubLineVisibility() {
             return totalOrder > 0 ? weightedLeadTime / totalOrder : 0;
         }
 
+
+        // จำนวนพนักงานสำหรับ Capacity Actual ดึงจาก Line Balance Layout
+        // นับเฉพาะ object ประเภท employee ที่ถูกบันทึกไว้ใน Layout ของไลน์นั้น
+        function getSummaryLineBalanceManpower(station, lineName) {
+            let layoutKey = '';
+
+            if (station === 'Door A') {
+                layoutKey = 'haier_lob_layout_shared_v4_Door_A';
+            } else if (station === 'Door B') {
+                layoutKey = 'haier_lob_layout_shared_v4_Door_B';
+            } else if (station === 'Door C') {
+                // Door Bend C-1 / C-2 / C-3 แยก Layout กัน
+                layoutKey = `haier_lob_layout_shared_v4_Door_C_${lineName}`;
+            } else if (station === 'Door Glass') {
+                layoutKey = 'haier_lob_layout_shared_v4_Door_Glass';
+            } else if (station === 'Back Plate') {
+                layoutKey = 'haier_lob_layout_shared_v4_Back_Plate';
+            } else if (station === 'Bottom Plate') {
+                layoutKey = 'haier_lob_layout_shared_v4_Bottom_Plate';
+            }
+
+            if (!layoutKey) return 0;
+
+            try {
+                const saved = JSON.parse(localStorage.getItem(layoutKey) || '[]');
+                if (!Array.isArray(saved)) return 0;
+                return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
+            } catch (err) {
+                console.warn('Cannot read Line Balance manpower:', station, lineName, err);
+                return 0;
+            }
+        }
+
         function renderSummaryCapacityPlanActual(data) {
             const head = document.getElementById('summaryCapacityPlanActualHead');
             const body = document.getElementById('summaryCapacityPlanActualBody');
@@ -7178,22 +7211,21 @@ function updateLobSubLineVisibility() {
                 </tr>`;
 
                 // Row 4: Capacity Actual
-                // (3600 / Lead Time รวม) × Working Hours × 85% × Actual Manpower
-                const actualManpower = Math.max(
-                    0,
-                    Number(document.getElementById('mpActualManpowerInput')?.value) || 0
-                );
+                // Manpower = จำนวน Employee ที่บันทึกใน Line Balance Layout ของไลน์นั้น
+                // Capacity / Day = (3600 / Lead Time รวม) × Working Hours × 85% × Line Balance Manpower
+                const lineBalanceManpower = getSummaryLineBalanceManpower(station, lineName);
                 html += `<tr class="bg-emerald-950/10 border-b-2 border-slate-700/70">
                     <td class="px-3 py-2.5 text-emerald-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
                         Capacity Actual
-                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">(3600 ÷ Lead Time) × Hours × 85% × Actual MP</div>
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">(3600 ÷ Lead Time) × Hours × 85% × MP จาก Line Balance</div>
+                        <div class="text-[8px] text-cyan-300 font-normal mt-0.5">Line Balance MP: ${lineBalanceManpower} คน</div>
                     </td>
                     ${leadTimes.map((leadTime,i) => {
                         if (isSunday(days[i])) {
                             return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
                         }
-                        const hourlyCapacity = leadTime > 0
-                            ? (3600 / leadTime) * 0.85 * actualManpower
+                        const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
+                            ? (3600 / leadTime) * 0.85 * lineBalanceManpower
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
