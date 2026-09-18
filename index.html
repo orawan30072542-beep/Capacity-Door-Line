@@ -8340,5 +8340,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 </script>
+
+<style id="mp-table-compact-color-final">
+/* ===== Manpower daily table: compact 11px + requested colors ===== */
+#tableManpowerCapacity .mp-num-top,
+#tableManpowerCapacity .mp-num-bottom,
+#tableManpowerCapacity .mp-num-main{
+    font-size:11px !important;
+    line-height:1.05 !important;
+}
+
+/* Door Order = dark blue */
+#tableManpowerCapacity .mp-top-door{
+    color:#2563eb !important;
+}
+
+/* Order + Short = light blue */
+#tableManpowerCapacity .mp-top-short{
+    color:#7dd3fc !important;
+}
+
+/* Actual Capacity = cyan */
+#tableManpowerCapacity .mp-top-capacity{
+    color:#22d3ee !important;
+}
+
+/* Total Order = orange */
+#tableManpowerCapacity .mp-top-order{
+    color:#f97316 !important;
+}
+
+/* Manpower values = 11px */
+#tableManpowerCapacity td .mp-num-main{
+    font-size:11px !important;
+}
+</style>
 </body>
 </html
