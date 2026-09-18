@@ -7196,21 +7196,7 @@ function updateLobSubLineVisibility() {
                 const leadTimes = days.map((day, i) =>
                     isSunday(day) ? 0 : getSummaryCapacityLeadTime(data, station, lineName, i)
                 );
-                html += `<tr class="bg-cyan-950/5">
-                    <td class="px-3 py-2.5 text-cyan-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
-                        Lead Time รวม
-                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">Σ(Lead Time × Order) ÷ Σ Order</div>
-                    </td>
-                    ${leadTimes.map((v,i) => isSunday(days[i])
-                        ? `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`
-                        : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="text-cyan-300 text-sm font-bold">${v > 0 ? v.toFixed(1) : '0'}</div>
-                            <div class="text-white text-[8px] font-normal mt-0.5">sec</div>
-                           </td>`
-                    ).join('')}
-                </tr>`;
-
-                // Row 4: Capacity Actual
+                // Row 3: Capacity Actual
                 // Manpower = จำนวน Employee ที่บันทึกใน Line Balance Layout ของไลน์นั้น
                 // Ratio รายวัน = Required Order / Plan Order เพื่อรองรับ Ratio ของ routing จริงในวันนั้น
                 const lineBalanceManpower = getSummaryLineBalanceManpower(station, lineName);
@@ -7231,6 +7217,27 @@ function updateLobSubLineVisibility() {
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
                             <div class="text-emerald-300 text-sm font-bold">${Math.round(dailyCapacity).toLocaleString()}</div>
                             <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
+                        </td>`;
+                    }).join('')}
+                </tr>`;
+
+                // Row 4: Difference = Required Order - Capacity Actual
+                html += `<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Difference
+                    </td>
+                    ${leadTimes.map((leadTime,i) => {
+                        if (isSunday(days[i])) {
+                            return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                        }
+                        const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio
+                            : 0;
+                        const dailyCapacity = hourlyCapacity * hours;
+                        const difference = required[i] - dailyCapacity;
+                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="${difference > 0 ? 'text-rose-300' : 'text-emerald-300'} text-sm font-bold">${Math.round(difference).toLocaleString()}</div>
                         </td>`;
                     }).join('')}
                 </tr>`;
