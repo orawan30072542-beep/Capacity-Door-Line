@@ -1132,7 +1132,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Total Order</div>
-                            <div class="text-[9px] text-slate-500">ยังไม่คูณ Ratio</div>
+                            <div class="text-[9px] text-slate-500">ออเดอร์ผลิตตามแผน · ผลิตเองตาม Master Model · ยังไม่คูณ Ratio</div>
                             <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
@@ -7046,7 +7046,7 @@ function updateLobSubLineVisibility() {
                     zoneClass: 'violet',
                     label: 'Total Order',
                     subLabel: station === 'Door C'
-                        ? 'Daily Plan × Ratio · ผลิตเองตาม Master Model'
+                        ? 'Daily Plan · ผลิตเองตาม Master Model · ยังไม่คูณ Ratio'
                         : 'ไม่คูณ Ratio',
                     cls: 'text-white',
                     format: (v, row) => {
