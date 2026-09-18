@@ -1202,7 +1202,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Manpower</div>
-                                    <div class="text-[8px] text-slate-500">เฉลี่ยจาก Line Balance ของไลน์</div>
+                                    <div class="text-[8px] text-slate-500">พนักงานรวมจาก Line Balance</div>
                                     <input id="mpActualManpowerInput" type="number" min="0" step="0.1" value="0" readonly
                                         class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none cursor-default">
                                 </div>
@@ -6864,7 +6864,8 @@ function updateLobSubLineVisibility() {
                 const doorCAverage = getDoorCCapacityActualAverage(currentDailyData);
 
                 // Current summary follows Line Balance / Capacity Actual directly.
-                actualManpower = doorCAverage.avgManpower;
+                // KPI Actual Manpower = พนักงานรวม C-1 + C-2 + C-3
+                actualManpower = doorCAverage.lineResults.reduce((sum, item) => sum + item.manpower, 0);
                 actualOutput = doorCAverage.avgCapacityActual;
                 actualOutputPerHour = hours > 0 ? actualOutput / hours : 0;
             } else {
@@ -6872,13 +6873,11 @@ function updateLobSubLineVisibility() {
                 const summaryLines = getSummaryCapacityLineNames(currentManpowerStation);
 
                 if (currentManpowerStation === 'Back Plate' || currentManpowerStation === 'Bottom Plate') {
-                    // Back/Bottom: ห้ามรวม/เฉลี่ย Manpower ของ Line#1 กับ Line#2
-                    // ใช้ไลน์ย่อยที่เลือกอยู่ ถ้าไม่มี selector ให้ใช้ Line#1 เป็นค่าเริ่มต้น
-                    const physicalLine =
-                        document.getElementById('manpowerPlateLineSelect')?.value ||
-                        document.getElementById('lobPlateLineSelect')?.value ||
-                        summaryLines[0] || 'Line#1';
-                    actualManpower = getSummaryLineBalanceManpower(currentManpowerStation, physicalLine);
+                    // KPI Actual Manpower = พนักงานรวม Line#1 + Line#2
+                    // Capacity Actual ด้านล่างยังคำนวณแยกพนักงานตามไลน์ผลิตเหมือนเดิม
+                    actualManpower = summaryLines.reduce((sum, lineName) =>
+                        sum + getSummaryLineBalanceManpower(currentManpowerStation, lineName), 0
+                    );
                 } else {
                     const manpowerValues = summaryLines.map(lineName =>
                         getSummaryLineBalanceManpower(currentManpowerStation, lineName)
@@ -7312,8 +7311,11 @@ function updateLobSubLineVisibility() {
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
                         const difference = dailyCapacity - required[i];
+                        const requiredHourly = hours > 0 ? required[i] / hours : 0;
+                        const differenceHourly = hourlyCapacity - requiredHourly;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
                             <div class="${difference < 0 ? 'text-rose-300' : 'text-emerald-300'} text-sm font-bold">${Math.round(difference).toLocaleString()}</div>
+                            <div class="${differenceHourly < 0 ? 'text-rose-300' : 'text-white'} text-[8px] font-normal mt-0.5">${Math.round(differenceHourly).toLocaleString()}</div>
                         </td>`;
                     }).join('')}
                 </tr>`;
