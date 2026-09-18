@@ -7168,6 +7168,16 @@ function updateLobSubLineVisibility() {
         // จำนวนพนักงานสำหรับ Capacity Actual ดึงจาก Line Balance Layout
         // นับเฉพาะ object ประเภท employee ที่ถูกบันทึกไว้ใน Layout ของไลน์นั้น
         function getSummaryLineBalanceManpower(station, lineName) {
+            // Fixed manpower for Back Plate / Bottom Plate physical lines
+            if (station === 'Bottom Plate') {
+                if (lineName === 'Line#1') return 10;
+                if (lineName === 'Line#2') return 11;
+            }
+            if (station === 'Back Plate') {
+                if (lineName === 'Line#1') return 5;
+                if (lineName === 'Line#2') return 11;
+            }
+
             let layoutKeys = [];
 
             if (station === 'Door A') {
@@ -7175,24 +7185,9 @@ function updateLobSubLineVisibility() {
             } else if (station === 'Door B') {
                 layoutKeys = ['haier_lob_layout_shared_v4_Door_B'];
             } else if (station === 'Door C') {
-                // Door Bend C-1 / C-2 / C-3 แยก Layout กัน
                 layoutKeys = [`haier_lob_layout_shared_v4_Door_C_${lineName}`];
             } else if (station === 'Door Glass') {
                 layoutKeys = ['haier_lob_layout_shared_v4_Door_Glass'];
-            } else if (station === 'Back Plate') {
-                // Back Plate แยกจำนวนพนักงาน Line#1 / Line#2
-                layoutKeys = [
-                    `haier_lob_layout_shared_v4_Back_Plate_${lineName}`,
-                    `haier_lob_layout_shared_v4_Back_Plate_${String(lineName).replace('#','')}`,
-                    `haier_lob_layout_shared_v4_Back_Plate_${String(lineName).replace('Line#','Line')}`
-                ];
-            } else if (station === 'Bottom Plate') {
-                // Bottom Plate แยกจำนวนพนักงาน Line#1 / Line#2
-                layoutKeys = [
-                    `haier_lob_layout_shared_v4_Bottom_Plate_${lineName}`,
-                    `haier_lob_layout_shared_v4_Bottom_Plate_${String(lineName).replace('#','')}`,
-                    `haier_lob_layout_shared_v4_Bottom_Plate_${String(lineName).replace('Line#','Line')}`
-                ];
             }
 
             for (const layoutKey of layoutKeys) {
