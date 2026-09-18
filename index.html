@@ -512,6 +512,54 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
 }
 /* old below-number style no longer used */
 #mpPlanOrderUPH.mp-plan-uph{display:none!important}
+
+/* ===== Summary Capacity Plan & Acual ===== */
+#summaryCapacityPlanActual .scp-main-value{
+    color:#f59e0b !important;
+    font-size:14px !important;
+    line-height:1.05 !important;
+    font-weight:800 !important;
+}
+#summaryCapacityPlanActual .scp-hour-value{
+    color:#ffffff !important;
+    font-size:8.4px !important; /* 40% smaller than daily value */
+    line-height:1.05 !important;
+    font-weight:400 !important;
+    margin-top:3px !important;
+}
+#summaryCapacityPlanActual table th{
+    color:#dbeafe !important;
+    font-size:11px !important;
+    font-weight:800 !important;
+}
+#summaryCapacityPlanActual table td{
+    font-size:11px !important;
+}
+
+
+        /* Smaller daily-order number: Plan Order / Required Order */
+        #tableSummaryCapacityPlanActual .scp-main-value {
+            font-size: 11px !important;
+            line-height: 1.15 !important;
+            font-weight: 600 !important;
+        }
+
+        /* ===== Summary Capacity colors / sizes ===== */
+        #summaryCapacityPlanActual tr.scp-plan-row .scp-main-value {
+            color: #38bdf8 !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        #summaryCapacityPlanActual tr.scp-required-row .scp-main-value {
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        #summaryCapacityPlanActual tr.scp-capacity-row .scp-capacity-value {
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
 </style>
 
 <style>
@@ -1132,7 +1180,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
                             <div class="text-[10px] text-slate-400">Total Order</div>
-                            <div class="text-[9px] text-slate-500">อ้างอิง Door Order · ยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
+                            <div class="text-[9px] text-slate-500">ยังไม่คูณ Ratio</div>
                             <div id="mpTotalOrder" class="text-lg font-bold text-white mt-1">0</div>
                         </div>
                         <div class="bg-slate-900/60 border border-bordercolor rounded-xl p-3">
@@ -1178,14 +1226,13 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Manpower</div>
-                                    <div class="text-[8px] text-slate-500">พนักงานที่มีตอนนี้</div>
-                                    <input id="mpActualManpowerInput" type="number" min="0" step="1" value="0"
-                                        onchange="saveMpPlanActualInput('manpower', this.value)"
-                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none">
+                                    <div class="text-[8px] text-slate-500">พนักงานรวมจาก Line Balance</div>
+                                    <input id="mpActualManpowerInput" type="number" min="0" step="0.1" value="0" readonly
+                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none cursor-default">
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">Door C: (C-1 + C-2 + Avg C-3) × Actual MP × Working Hours</div>
+                                    <div class="text-[8px] text-slate-500">Door C: Avg C-1 + Avg C-2 + Avg C-3</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -1222,6 +1269,24 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </div>
                         </div>
                     </div>
+                    <!-- Summary Capacity Plan & Acual -->
+                    <div id="summaryCapacityPlanActual" class="bg-slate-900/55 border border-amber-500/20 rounded-xl overflow-hidden mt-1">
+                        <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-amber-950/30 to-slate-950/20">
+                            <div class="text-sm font-bold text-white">Summary Capacity Plan & Acual</div>
+                            <div class="text-[9px] text-slate-400 mt-0.5">
+                                Daily Plan Import / Order Required from Master Model / Diff
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="tableSummaryCapacityPlanActual" class="w-full text-left border-collapse" style="min-width:100%;">
+                                <thead>
+                                    <tr id="summaryCapacityPlanActualHead" class="bg-slate-950/90 border-b border-bordercolor"></tr>
+                                </thead>
+                                <tbody id="summaryCapacityPlanActualBody" class="divide-y divide-bordercolor/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
 
                     <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
@@ -1232,7 +1297,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 
                     <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
                         <div class="max-h-[620px] overflow-auto relative rounded-lg border border-bordercolor/50">
-                            <table id="tableManpowerCapacity" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
+                            <table id="tableManpowerCapacity" style="display:none !important;" class="text-left border-collapse text-[10px]" style="table-layout:fixed; min-width:100%;">
                                 <thead>
                                     <tr class="border-b border-bordercolor text-slate-300 bg-slate-900"></tr>
                                 </thead>
@@ -6076,6 +6141,49 @@ function updateLobSubLineVisibility() {
             });
         }
 
+
+        // ===== Door C TOTAL ORDER — SAME DAILY-ORDER SOURCE =====
+        // Total Order in the Manpower table must be the sum of ALL Daily Plan rows
+        // that belong to the physical C-line. It is BEFORE multiplying the C-line Ratio.
+        //
+        // C-1 = BM T-Door + BM23 + BM29
+        // C-2 = BM23 + BM29
+        // C-3 = every model whose Master routing contains C-3
+        function getDoorCTotalOrderFromDailyProductionSummary(data, dayIndex, cLine) {
+            let total = 0;
+
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+
+                    const normalized = normalizeModelName(modelName);
+                    const compact = normalized.replace(/[\s_\-]+/g, '');
+                    const isBMTDoor = compact.includes('BMTDOOR');
+                    const isBM23 = compact.includes('BM23');
+                    const isBM29 = compact.includes('BM29');
+
+                    let belongs = false;
+                    if (cLine === 'C-1') {
+                        belongs = isBMTDoor || isBM23 || isBM29;
+                    } else if (cLine === 'C-2') {
+                        belongs = isBM23 || isBM29;
+                    } else if (cLine === 'C-3') {
+                        belongs = (getDoorCRoutingDetails(modelName) || [])
+                            .some(route => route.line === 'C-3');
+                    }
+
+                    if (!belongs) return;
+
+                    // Same raw Daily Plan order used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต".
+                    // Sum every matching model/row; DO NOT multiply Ratio here.
+                    total += Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                });
+            });
+
+            return total;
+        }
+
         function getManpowerGroupsForStation(station) {
             if (station === 'Door C') return ['C-1', 'C-2', 'C-3'];
             if (station === 'Back Plate' || station === 'Bottom Plate') return ['Line#1', 'Line#2'];
@@ -6306,117 +6414,10 @@ function updateLobSubLineVisibility() {
             return maxCT > 0 ? 3600 / maxCT : 0;
         }
 
-        function getSummaryLineBalanceManpower(station, lineName) {
-            // Read saved employee objects directly from the physical Line Balance layout.
-            // Door C Bend keeps separate legacy layouts for C-1 / C-2 / C-3.
-            let layoutKey = '';
-            if (station === 'Door C') {
-                layoutKey = `haier_lob_layout_shared_v4_Door_C_${lineName}`;
-            } else if (station === 'Back Plate' || station === 'Bottom Plate') {
-                // Fixed manpower values confirmed for plate lines.
-                if (station === 'Back Plate' && lineName === 'Line#1') return 5;
-                if (station === 'Back Plate' && lineName === 'Line#2') return 11;
-                if (station === 'Bottom Plate' && lineName === 'Line#1') return 10;
-                if (station === 'Bottom Plate' && lineName === 'Line#2') return 11;
-                layoutKey = `haier_lob_layout_shared_v4_${station.replace(/\s+/g, '_')}`;
-            } else {
-                layoutKey = `haier_lob_layout_shared_v4_${String(station || '').replace(/\s+/g, '_')}`;
-            }
-
-            try {
-                const raw = localStorage.getItem(layoutKey);
-                if (raw === null) return 0;
-                const saved = JSON.parse(raw);
-                if (!Array.isArray(saved)) return 0;
-                return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
-            } catch (err) {
-                return 0;
-            }
-        }
-
         function calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours) {
-            // Door C C-1 Actual Capacity:
-            // Weighted LT = Σ[(LT RR × Order BM) + (LT RL × Order BM)] ÷ Σ(Order BM + Order BM)
-            // Capacity / Hour = (3600 ÷ Weighted LT) × 85% × Manpower from Line Balance
-            // Capacity / Day = Capacity / Hour × Working Hours
-            if (station === 'Door C' && groupName === 'C-1') {
-                let totalOrder = 0;
-                let weightedLtSum = 0;
-                let weightedOrderSum = 0;
-                let modelsWithCapacity = 0;
-
-                data.groups.forEach(g => {
-                    g.models.forEach(m => {
-                        if (!modelBelongsToManpowerGroup(m.name, station, groupName)) return;
-
-                        const baseOrder = Math.round(Number(m.orders[dayIndex]) || 0);
-                        if (baseOrder <= 0) return;
-
-                        const multiplier = getManpowerOrderMultiplier(m.name, station, groupName);
-                        if (multiplier <= 0) return;
-
-                        const rrLT = Math.max(0, Number(getDoorTypeLeadTime(m.name, 'RR')) || 0);
-                        const rlLT = Math.max(0, Number(getDoorTypeLeadTime(m.name, 'RL')) || 0);
-
-                        totalOrder += baseOrder * multiplier;
-
-                        if (rrLT > 0) {
-                            weightedLtSum += rrLT * baseOrder;
-                            weightedOrderSum += baseOrder;
-                        }
-                        if (rlLT > 0) {
-                            weightedLtSum += rlLT * baseOrder;
-                            weightedOrderSum += baseOrder;
-                        }
-                        if (rrLT > 0 || rlLT > 0) modelsWithCapacity++;
-                    });
-                });
-
-                const weightedLeadTime = weightedOrderSum > 0
-                    ? weightedLtSum / weightedOrderSum
-                    : 0;
-
-                const lineBalanceManpower = Math.max(0, Number(getSummaryLineBalanceManpower('Door C', 'C-1')) || 0);
-
-                const actualUPH = weightedLeadTime > 0 && lineBalanceManpower > 0
-                    ? (3600 / weightedLeadTime) * 0.85 * lineBalanceManpower
-                    : 0;
-
-                const actualCapacity = actualUPH > 0 && hours > 0
-                    ? actualUPH * hours
-                    : 0;
-
-                const planUPH = hours > 0 ? totalOrder / hours : 0;
-                const gap = actualCapacity - totalOrder;
-                const gapPerHour = actualUPH - planUPH;
-                const coverage = totalOrder > 0 ? (actualCapacity / totalOrder) * 100 : 0;
-                const status =
-                    totalOrder <= 0 ? 'NO PLAN' :
-                    coverage >= 100 ? 'NO SHORT' :
-                    'RISK SHORT';
-
-                return {
-                    totalOrder: Math.round(totalOrder),
-                    planUPH,
-                    actualUPH,
-                    actualCapacity,
-                    gap,
-                    gapPerHour,
-                    coverage,
-                    status,
-                    requiredHoursAtActualUPH: actualUPH > 0 ? totalOrder / actualUPH : 0,
-                    modelsWithCapacity,
-                    weightedLeadTime,
-                    lineBalanceManpower
-                };
-            }
-
             let totalOrder = 0;
             let requiredHoursAtActualUPH = 0;
             let modelsWithCapacity = 0;
-            // C-3: Actual Capacity must include routing Ratio.
-            let c3BaseOrder = 0;
-            let c3RatioOrder = 0;
 
             data.groups.forEach(g => {
                 g.models.forEach(m => {
@@ -6427,10 +6428,6 @@ function updateLobSubLineVisibility() {
                     if (baseOrder <= 0 || multiplier <= 0) return;
 
                     const productionOrder = baseOrder * multiplier;
-                    if (station === 'Door C' && groupName === 'C-3') {
-                        c3BaseOrder += baseOrder;
-                        c3RatioOrder += productionOrder;
-                    }
                     const modelActualUPH = getCapacityRequirementModelUPH(m.name, station);
                     if (modelActualUPH <= 0) return;
 
@@ -6444,13 +6441,10 @@ function updateLobSubLineVisibility() {
 
             // Effective / weighted Actual UPH ของ Product Mix ในวันนั้น
             // = Total Order ÷ Σ(Order ของแต่ละ Model ÷ Actual UPH ของ Model)
-            const baseActualUPH = totalOrder > 0 && requiredHoursAtActualUPH > 0
+            const actualUPH =
+                totalOrder > 0 && requiredHoursAtActualUPH > 0
                     ? totalOrder / requiredHoursAtActualUPH
                     : 0;
-            const c3Ratio = (station === 'Door C' && groupName === 'C-3' && c3BaseOrder > 0)
-                ? (c3RatioOrder / c3BaseOrder)
-                : 1;
-            const actualUPH = baseActualUPH * c3Ratio;
 
             const actualCapacity = actualUPH > 0 && hours > 0 ? actualUPH * hours : 0;
             const gap = actualCapacity - totalOrder;
@@ -6833,31 +6827,98 @@ function updateLobSubLineVisibility() {
             };
         }
 
+
+        // ===== Current summary from Capacity Actual / Line Balance =====
+        // Door C:
+        // Actual Output / Day = Average(C-1 Capacity Actual, C-2 Capacity Actual, C-3 Capacity Actual)
+        // Actual Manpower = Average(C-1 LB MP, C-2 LB MP, C-3 LB MP)
+        function getDoorCCapacityActualAverage(data) {
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const days = data?.days || [];
+            const cLines = ['C-1', 'C-2', 'C-3'];
+
+            const lineResults = cLines.map(lineName => {
+                const manpower = getSummaryLineBalanceManpower('Door C', lineName);
+                const dailyCapacities = [];
+
+                days.forEach((day, i) => {
+                    if (isSunday(day)) return;
+
+                    const plan = getSummaryCapacityPlanOrder(data, 'Door C', lineName, i);
+                    const required = getSummaryCapacityRequiredOrder(data, 'Door C', lineName, i, hours);
+                    const leadTime = getSummaryCapacityLeadTime(data, 'Door C', lineName, i);
+
+                    // Only average actual production days for this physical C-line.
+                    if (plan <= 0 && required <= 0) return;
+
+                    const ratio = plan > 0 ? (required / plan) : 0;
+                    const hourlyCapacity = leadTime > 0 && manpower > 0
+                        ? (3600 / leadTime) * manpower * ratio
+                        : 0;
+
+                    dailyCapacities.push(hourlyCapacity * hours);
+                });
+
+                const avgCapacity = dailyCapacities.length
+                    ? dailyCapacities.reduce((sum, value) => sum + value, 0) / dailyCapacities.length
+                    : 0;
+
+                return { lineName, manpower, avgCapacity };
+            });
+
+            // Actual Output / Day = Avg Capacity C-1 + Avg Capacity C-2 + Avg Capacity C-3
+            const avgCapacityActual = lineResults.reduce((sum, item) => sum + item.avgCapacity, 0);
+
+            const avgManpower = lineResults.length
+                ? lineResults.reduce((sum, item) => sum + item.manpower, 0) / lineResults.length
+                : 0;
+
+            return { lineResults, avgCapacityActual, avgManpower };
+        }
+
         function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
-            const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
+            let actualManpower = 0;
+            let actualOutput = 0;
             let actualOutputPerHour = 0;
 
             if (currentManpowerStation === 'Door C') {
-                const doorCActual = getDoorCActualOutputPerPerson(currentDailyData);
+                const doorCAverage = getDoorCCapacityActualAverage(currentDailyData);
 
-                // Example concept:
-                // C1 ≈ 2 + C2 ≈ 3 + C3 average ≈ 7 = ≈12 pcs/person/hour.
-                // Then multiply by actual manpower.
-                actualOutputPerHour = doorCActual.totalUPHPerPerson * actualManpower;
+                // Current summary follows Line Balance / Capacity Actual directly.
+                // KPI Actual Manpower = พนักงานรวม C-1 + C-2 + C-3
+                actualManpower = doorCAverage.lineResults.reduce((sum, item) => sum + item.manpower, 0);
+                actualOutput = doorCAverage.avgCapacityActual;
+                actualOutputPerHour = hours > 0 ? actualOutput / hours : 0;
             } else {
-                // Other production lines keep the direct Lead Time × Actual Manpower logic.
+                // Other lines: manpower also comes from the selected line's Line Balance.
+                const summaryLines = getSummaryCapacityLineNames(currentManpowerStation);
+
+                if (currentManpowerStation === 'Back Plate' || currentManpowerStation === 'Bottom Plate') {
+                    // KPI Actual Manpower = พนักงานรวม Line#1 + Line#2
+                    // Capacity Actual ด้านล่างยังคำนวณแยกพนักงานตามไลน์ผลิตเหมือนเดิม
+                    actualManpower = summaryLines.reduce((sum, lineName) =>
+                        sum + getSummaryLineBalanceManpower(currentManpowerStation, lineName), 0
+                    );
+                } else {
+                    const manpowerValues = summaryLines.map(lineName =>
+                        getSummaryLineBalanceManpower(currentManpowerStation, lineName)
+                    );
+                    actualManpower = manpowerValues.length
+                        ? manpowerValues.reduce((sum, value) => sum + value, 0) / manpowerValues.length
+                        : 0;
+                }
+
                 actualOutputPerHour = avgLeadTime > 0
                     ? (3600 / avgLeadTime) * actualManpower
                     : 0;
+                actualOutput = actualOutputPerHour * hours;
             }
-
-            const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
             const outEl = document.getElementById('mpActualOutputInput');
-            if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
+            if (mpInput) mpInput.value = Number.isInteger(actualManpower) ? actualManpower : actualManpower.toFixed(1);
             if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
 
             const actualHourlyEl = document.getElementById('mpActualOutputHourly');
@@ -7007,6 +7068,288 @@ function updateLobSubLineVisibility() {
             };
         }
 
+
+        // ===== Summary Capacity Plan & Acual =====
+        // Row 1 = imported Daily Plan, separated by production line.
+        // Row 2 = TOTAL from "ยอดรวมออเดอร์รายวันที่ต้องผลิต"
+                function getSummaryCapacityLineNames(station) {
+            if (station === 'Door C') return ['C-1', 'C-2', 'C-3'];
+            if (station === 'Back Plate' || station === 'Bottom Plate') return ['Line#1', 'Line#2'];
+            return [station];
+        }
+
+        function getSummaryCapacityPlanOrder(data, station, lineName, dayIndex) {
+            let total = 0;
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+                    const cfg = getMasterConfigForModel(modelName);
+                    let belongs = false;
+
+                    if (station === 'Door C') {
+                        belongs = cfg.station === 'Door C' &&
+                            (getDoorCRoutingDetails(modelName) || []).some(route => route.line === lineName);
+                    } else if (station === 'Back Plate') {
+                        belongs = cfg.backPlateSource === 'ผลิตเอง' &&
+                            (cfg.backPlateLine || 'Line#1') === lineName;
+                    } else if (station === 'Bottom Plate') {
+                        belongs = cfg.bottomSource === 'ผลิตเอง' &&
+                            (cfg.bottomLine || 'Line#1') === lineName;
+                    } else {
+                        belongs = cfg.station === station;
+                    }
+
+                    if (!belongs) return;
+                    total += Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                });
+            });
+            return total;
+        }
+
+        function getSummaryCapacityRequiredOrder(data, station, lineName, dayIndex, hours) {
+            if (station === 'Door C') {
+                // Exact physical C-line order from Master Routing × Ratio.
+                const kpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
+                return Number(kpi?.dailyDoorCOrder?.[lineName]?.[dayIndex] || 0);
+            }
+
+            if (station === 'Back Plate' || station === 'Bottom Plate') {
+                // Exact TOTAL logic of the daily-order summary for Line#1 / Line#2.
+                return getSummaryCapacityPlanOrder(data, station, lineName, dayIndex);
+            }
+
+            // Exact TOTAL logic used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต".
+            const metrics = getDayCapacityMetrics(data.groups, data.days, dayIndex, station, hours);
+            return Number(metrics?.totalQty || 0);
+        }
+
+
+        // Weighted Lead Time for Summary Capacity Plan & Acual
+        // Formula: Σ(Lead Time × Order) ÷ Σ(Order)
+        // Door C C-1 uses RR + RL Lead Time for each active BM model.
+        // Door C C-2 uses VEG + FB/FT; C-3 uses RR + FR.
+        function getSummaryCapacityLeadTime(data, station, lineName, dayIndex) {
+            let weightedLeadTime = 0;
+            let totalOrder = 0;
+
+            (data?.groups || []).forEach(group => {
+                (group?.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+
+                    const order = Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                    if (order <= 0) return;
+
+                    const cfg = getMasterConfigForModel(modelName);
+                    let belongs = false;
+                    let leadTime = 0;
+
+                    if (station === 'Door C') {
+                        belongs = cfg.station === 'Door C' &&
+                            (getDoorCRoutingDetails(modelName) || []).some(route => route.line === lineName);
+                        if (!belongs) return;
+
+                        if (lineName === 'C-1') {
+                            const rr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0);
+                            const rl = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RL')) || 0);
+                            leadTime = rr + rl;
+                        } else if (lineName === 'C-2') {
+                            const veg = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'VEG')) || 0);
+                            const fb = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FB')) || 0);
+                            const ft = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FT')) || 0);
+                            leadTime = veg + fb + ft;
+                        } else if (lineName === 'C-3') {
+                            const rr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0);
+                            const fr = Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FR')) || 0);
+                            leadTime = rr + fr;
+                        }
+                    } else if (station === 'Back Plate') {
+                        belongs = cfg.backPlateSource === 'ผลิตเอง' &&
+                            (cfg.backPlateLine || 'Line#1') === lineName;
+                        if (belongs) leadTime = getLeadTimeForManpower(modelName, station);
+                    } else if (station === 'Bottom Plate') {
+                        belongs = cfg.bottomSource === 'ผลิตเอง' &&
+                            (cfg.bottomLine || 'Line#1') === lineName;
+                        if (belongs) leadTime = getLeadTimeForManpower(modelName, station);
+                    } else {
+                        belongs = cfg.station === station;
+                        if (belongs) leadTime = getLeadTimeForManpower(modelName, station);
+                    }
+
+                    if (!belongs || leadTime <= 0) return;
+                    weightedLeadTime += leadTime * order;
+                    totalOrder += order;
+                });
+            });
+
+            return totalOrder > 0 ? weightedLeadTime / totalOrder : 0;
+        }
+
+
+        // จำนวนพนักงานสำหรับ Capacity Actual ดึงจาก Line Balance Layout
+        // นับเฉพาะ object ประเภท employee ที่ถูกบันทึกไว้ใน Layout ของไลน์นั้น
+        function getSummaryLineBalanceManpower(station, lineName) {
+            // Fixed manpower for Back Plate / Bottom Plate physical lines
+            if (station === 'Bottom Plate') {
+                if (lineName === 'Line#1') return 10;
+                if (lineName === 'Line#2') return 11;
+            }
+            if (station === 'Back Plate') {
+                if (lineName === 'Line#1') return 5;
+                if (lineName === 'Line#2') return 11;
+            }
+
+            let layoutKeys = [];
+
+            if (station === 'Door A') {
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_A'];
+            } else if (station === 'Door B') {
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_B'];
+            } else if (station === 'Door C') {
+                layoutKeys = [`haier_lob_layout_shared_v4_Door_C_${lineName}`];
+            } else if (station === 'Door Glass') {
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_Glass'];
+            }
+
+            for (const layoutKey of layoutKeys) {
+                try {
+                    const raw = localStorage.getItem(layoutKey);
+                    if (raw === null) continue;
+                    const saved = JSON.parse(raw);
+                    if (!Array.isArray(saved)) continue;
+                    return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
+                } catch (err) {
+                    console.warn('Cannot read Line Balance manpower:', station, lineName, layoutKey, err);
+                }
+            }
+            return 0;
+        }
+
+        function renderSummaryCapacityPlanActual(data) {
+            const head = document.getElementById('summaryCapacityPlanActualHead');
+            const body = document.getElementById('summaryCapacityPlanActualBody');
+            const table = document.getElementById('tableSummaryCapacityPlanActual');
+            if (!head || !body || !table || !data?.days || !data?.groups) return;
+
+            const station = currentManpowerStation || 'Door A';
+            const days = data.days;
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const lines = getSummaryCapacityLineNames(station);
+
+            const lineWidth = 90;
+            const dataWidth = 175;
+            const dayWidth = 72;
+            table.style.width = `${lineWidth + dataWidth + days.length * dayWidth}px`;
+            table.style.minWidth = '100%';
+
+            head.innerHTML = `
+                <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-center" style="width:${lineWidth}px;min-width:${lineWidth}px;">Line</th>
+                <th class="px-3 py-2.5 bg-slate-950/95 sticky z-30 text-left" style="left:${lineWidth}px;width:${dataWidth}px;min-width:${dataWidth}px;">ข้อมูล</th>
+                ${days.map(day => `<th class="px-2 py-2.5 bg-slate-950/95 text-center whitespace-nowrap" style="min-width:${dayWidth}px;">${day}</th>`).join('')}
+            `;
+
+            const dailyCell = (dayValue, hourValue, isSundayDay) => {
+                if (isSundayDay) return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                    <div class="scp-main-value">${Math.round(dayValue).toLocaleString()}</div>
+                    <div class="scp-hour-value">${Math.round(hourValue).toLocaleString()}</div>
+                </td>`;
+            };
+
+
+            let html = '';
+
+            lines.forEach(lineName => {
+                const plan = days.map((day, i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityPlanOrder(data, station, lineName, i)
+                );
+                const required = days.map((day, i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityRequiredOrder(data, station, lineName, i, hours)
+                );
+    
+                // Row 1: imported plan.
+                html += `<tr class="scp-plan-row bg-amber-950/10">
+                    <td rowspan="4" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
+                        ${lineName}
+                    </td>
+                    <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Plan Order
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">จากไฟล์แผนผลิตที่นำเข้า</div>
+                    </td>
+                    ${plan.map((v,i) => dailyCell(v, hours > 0 ? v / hours : 0, isSunday(days[i]))).join('')}
+                </tr>`;
+
+                // Row 2: required TOTAL from Master Model daily-order summary.
+                html += `<tr class="scp-capacity-row scp-required-row bg-amber-950/5">
+                    <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Required Order
+                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">จากยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
+                    </td>
+                    ${required.map((v,i) => dailyCell(v, hours > 0 ? v / hours : 0, isSunday(days[i]))).join('')}
+                </tr>`;
+
+                // Row 3: Weighted Lead Time = Σ(Lead Time × Order) ÷ Σ(Order)
+                const leadTimes = days.map((day, i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityLeadTime(data, station, lineName, i)
+                );
+                // Row 3: Capacity Actual
+                // Manpower = จำนวน Employee ที่บันทึกใน Line Balance Layout ของไลน์นั้น
+                // Ratio รายวัน = Required Order / Plan Order เพื่อรองรับ Ratio ของ routing จริงในวันนั้น
+                const lineBalanceManpower = getSummaryLineBalanceManpower(station, lineName);
+                html += `<tr class="bg-emerald-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-emerald-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Capacity Actual
+                        <div class="text-[8px] text-cyan-300 font-normal mt-0.5">Line Balance MP: ${lineBalanceManpower} คน</div>
+                    </td>
+                    ${leadTimes.map((leadTime,i) => {
+                        if (isSunday(days[i])) {
+                            return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                        }
+                        const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+                        const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio * plateEfficiency
+                            : 0;
+                        const dailyCapacity = hourlyCapacity * hours;
+                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="text-slate-400 text-[8px] font-normal mb-0.5">LT ${leadTime.toFixed(1)} s</div>
+                            <div class="scp-capacity-value" style="color:#f59e0b!important;font-size:11px!important;font-weight:600!important;">${Math.round(dailyCapacity).toLocaleString()}</div>
+                            <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
+                        </td>`;
+                    }).join('')}
+                </tr>`;
+
+                // Row 4: Difference = Capacity Actual - Required Order
+                html += `<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Difference
+                    </td>
+                    ${leadTimes.map((leadTime,i) => {
+                        if (isSunday(days[i])) {
+                            return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                        }
+                        const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+                        const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio * plateEfficiency
+                            : 0;
+                        const dailyCapacity = hourlyCapacity * hours;
+                        const difference = dailyCapacity - required[i];
+                        const requiredHourly = hours > 0 ? required[i] / hours : 0;
+                        const differenceHourly = hourlyCapacity - requiredHourly;
+                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="${difference < 0 ? 'text-rose-300' : 'text-emerald-300'} text-[11px] font-bold">${Math.round(difference).toLocaleString()}</div>
+                            <div class="${differenceHourly < 0 ? 'text-rose-300' : 'text-white'} text-[8px] font-normal mt-0.5">${Math.round(differenceHourly).toLocaleString()}</div>
+                        </td>`;
+                    }).join('')}
+                </tr>`;
+
+            });
+
+            body.innerHTML = html;
+        }
+
         function renderManpowerTable(data) {
             const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
@@ -7020,6 +7363,7 @@ function updateLobSubLineVisibility() {
             const shortInput = document.getElementById('shortPercentInput');
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
+            renderSummaryCapacityPlanActual(data);
 
             const stationLabel = document.getElementById('manpowerStationLabel');
             if (stationLabel) stationLabel.textContent = station;
@@ -7086,12 +7430,12 @@ function updateLobSubLineVisibility() {
                     zoneClass: 'violet',
                     label: 'Total Order',
                     subLabel: station === 'Door C'
-                        ? 'Door Order · ยอดรวมออเดอร์รายวันที่ต้องผลิต'
+                        ? 'รวมจากยอดออเดอร์รายวันที่ต้องผลิต · ยังไม่คูณ Ratio'
                         : 'ไม่คูณ Ratio',
                     cls: 'text-white',
                     format: (v, row) => {
                         const displayOrder = station === 'Door C'
-                            ? Number(row.masterProductionOrder || 0)
+                            ? Number(row.masterBaseOrder ?? row.totalOrder ?? 0)
                             : Number(v || 0);
                         const displayUPH = hours > 0 ? displayOrder / hours : 0;
                         return displayOrder > 0
@@ -7224,9 +7568,8 @@ function updateLobSubLineVisibility() {
                 }
             );
 
-            // Final yellow row: total manpower required by the production plan for each day.
-            // Uses the same manpower values shown for each physical line/group above.
-            const dailyPlanRequiredManpower = new Array(days.length).fill(0);
+            // Required manpower by production plan (daily total)
+            const dailyRequiredPlanManpower = new Array(days.length).fill(0);
 
             groups.forEach((groupName, groupIndex) => {
                 const dayResults = days.map((day, dayIndex) => {
@@ -7261,38 +7604,16 @@ function updateLobSubLineVisibility() {
                     result.doorCGroupName = groupName;
 
                     if (station === 'Door C') {
-                        // FIX: keep Total Order and Door Order as two different quantities.
-                        // Total Order = Daily Plan routed to this C-line BEFORE Ratio.
-                        // Door Order  = Σ(Daily Plan of each model × that model's Master Ratio).
-                        let cLineBaseOrder = 0;
-                        let cLineDoorOrder = 0;
-                        (data?.groups || []).forEach(g => {
-                            (g?.models || []).forEach(m => {
-                                const modelName = String(m?.name || '').trim();
-                                if (!modelName) return;
-                                const baseOrder = Math.max(0, Number(m?.orders?.[dayIndex]) || 0);
-                                if (baseOrder <= 0) return;
+                        // Total Order: pull from the same Daily Plan source as
+                        // "ยอดรวมออเดอร์รายวันที่ต้องผลิต" and sum ALL rows for this C-line.
+                        // This value is BEFORE Ratio.
+                        result.masterBaseOrder = getDoorCTotalOrderFromDailyProductionSummary(
+                            data, dayIndex, groupName
+                        );
+                        result.totalOrder = result.masterBaseOrder;
+                        result.totalOrderUPH = hours > 0 ? result.totalOrder / hours : 0;
 
-                                const route = (getDoorCRoutingDetails(modelName) || [])
-                                    .find(r => String(r?.line || '') === String(groupName || ''));
-                                if (!route) return;
-
-                                const ratio = Math.max(0, Number(route?.qty ?? route?.ratio ?? 0) || 0);
-                                if (ratio <= 0) return;
-
-                                cLineBaseOrder += baseOrder;
-                                cLineDoorOrder += baseOrder * ratio;
-                            });
-                        });
-
-                        // Total Order must come from the daily production summary:
-                        // Door Order = ยอดรวมออเดอร์รายวันที่ต้องผลิต
-                        result.totalOrder = Math.round(cLineDoorOrder);
-                        result.totalOrderUPH = hours > 0 ? cLineDoorOrder / hours : 0;
-                        result.doorOrder = Math.round(cLineDoorOrder);
-                        result.doorOrderUPH = hours > 0 ? cLineDoorOrder / hours : 0;
-
-                        // Authoritative physical order for this C-line/day.
+                        // Door Order remains the physical order after Ratio.
                         result.masterProductionOrder = Number(
                             doorCMasterOrderKpis?.dailyDoorCOrder?.[groupName]?.[dayIndex] || 0
                         );
@@ -7318,37 +7639,6 @@ function updateLobSubLineVisibility() {
                     result.capacityGap = capResult.gap;
                     result.capacityGapPerHour = capResult.gapPerHour;
                     result.capacityStatus = capResult.status;
-
-                    // C-3 manpower correction:
-                    // Additional manpower is based ONLY on the hourly shortage gap,
-                    // not on the full order and not on Ratio a second time.
-                    if (station === 'Door C' && groupName === 'C-3') {
-                        const requiredPerHour = Math.max(0, Number(result.requiredOrderPerHour || result.doorOrderUPH || 0));
-                        const actualPerHour = Math.max(0, Number(result.actualUPH || 0));
-                        const shortagePerHour = Math.max(0, requiredPerHour - actualPerHour);
-
-                        // Capacity/person/hour before multiplying by current Line Balance manpower.
-                        const currentLBManpower = Math.max(0, Number(getSummaryLineBalanceManpower('Door C', 'C-3')) || 0);
-                        let capacityPerPersonHour = 0;
-                        if (actualPerHour > 0 && currentLBManpower > 0) {
-                            capacityPerPersonHour = actualPerHour / currentLBManpower;
-                        } else {
-                            // fallback to the existing C-3 product-mix capacity/person/hour
-                            capacityPerPersonHour = Math.max(0, Number(result.effectiveUPM85 || 0));
-                        }
-
-                        const additionalManpower = shortagePerHour > 0 && capacityPerPersonHour > 0
-                            ? Math.ceil(shortagePerHour / capacityPerPersonHour)
-                            : 0;
-
-                        result.c3ShortagePerHour = shortagePerHour;
-                        result.c3CapacityPerPersonHour = capacityPerPersonHour;
-                        result.manpowerCalc = shortagePerHour > 0 && capacityPerPersonHour > 0
-                            ? shortagePerHour / capacityPerPersonHour
-                            : 0;
-                        result.manpowerRequired = additionalManpower;
-                        result.manpowerPerHour = additionalManpower;
-                    }
 
                     // Back Plate / Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
                     const outLine = getBottomOutLineManpower(station, groupName);
@@ -7406,11 +7696,10 @@ function updateLobSubLineVisibility() {
                         : 1;
                     dailyMpTotals[i] += rawDailyManpower / doorCManpowerDivisor;
 
-                    // Manpower required to achieve the planned Door Order.
-                    // Door C C-1/C-2 preserve the existing ÷4 display rule; C-3 is unchanged.
-                    const displayedRequiredManpower = Math.ceil(rawDailyManpower / doorCManpowerDivisor);
-                    dailyPlanRequiredManpower[i] += displayedRequiredManpower;
-
+                    // Bottom yellow row = manpower required to meet that day's production order.
+                    // Preserve Door C rule: C-1/C-2 ÷4, C-3 unchanged.
+                    const requiredPlanMp = Math.ceil(rawDailyManpower / doorCManpowerDivisor);
+                    dailyRequiredPlanManpower[i] += requiredPlanMp;
                     const summaryDoorOrder = Number(r.doorOrder || 0);
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
@@ -7497,30 +7786,28 @@ function updateLobSubLineVisibility() {
                 });
             });
 
-            // Add bottom yellow summary row after all groups.
+            // ===== Bottom yellow row: Required Manpower to Meet Production Order =====
             if (groups.length > 0) {
-                const planMpRow = document.createElement('tr');
-                planMpRow.className = 'mp-plan-required-row';
-                let planMpHtml = `
-                    <td colspan="2"
-                        class="px-2 py-2 sticky left-0 z-30 border-t-2 border-yellow-300 border-r border-yellow-500/50"
-                        style="background:#facc15;color:#422006;">
-                        <div class="text-[11px] font-black leading-tight">พนักงานที่ต้องใช้ตามแผนผลิต</div>
-                        <div class="text-[8px] font-bold mt-0.5">Required Manpower to Meet Production Order</div>
+                const trPlanMp = document.createElement('tr');
+                trPlanMp.className = 'mp-required-plan-yellow-row';
+
+                let htmlPlanMp = `
+                    <td colspan="2" class="mp-required-plan-label">
+                        <div>พนักงานที่ต้องใช้ตามแผนผลิต</div>
+                        <div class="mp-required-plan-sub">Required Manpower to Meet Production Order</div>
                     </td>`;
 
                 days.forEach((day, i) => {
-                    const isSun = isSunday(day);
-                    const mp = Math.max(0, Math.ceil(Number(dailyPlanRequiredManpower[i] || 0)));
-                    planMpHtml += `
-                        <td class="px-1 py-2 text-center border-t-2 border-yellow-300"
-                            style="background:${isSun ? '#713f12' : '#facc15'};color:${isSun ? '#fde68a' : '#422006'};">
-                            ${isSun ? '—' : `<div class="text-[11px] font-black">${mp} คน</div>`}
-                        </td>`;
+                    if (isSunday(day)) {
+                        htmlPlanMp += `<td class="mp-required-plan-cell mp-required-plan-sunday">—</td>`;
+                    } else {
+                        const mp = Math.max(0, Math.ceil(Number(dailyRequiredPlanManpower[i] || 0)));
+                        htmlPlanMp += `<td class="mp-required-plan-cell">${mp} คน</td>`;
+                    }
                 });
 
-                planMpRow.innerHTML = planMpHtml;
-                tbody.appendChild(planMpRow);
+                trPlanMp.innerHTML = htmlPlanMp;
+                tbody.appendChild(trPlanMp);
             }
 
             dailyMpTotals.forEach((mp, i) => {
@@ -8553,50 +8840,65 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<style id="mp-table-compact-color-final">
-/* ===== Manpower daily table: compact 11px + requested colors ===== */
-#tableManpowerCapacity .mp-num-top,
-#tableManpowerCapacity .mp-num-bottom,
-#tableManpowerCapacity .mp-num-main{
-    font-size:11px !important;
-    line-height:1.05 !important;
+<style id="summary-capacity-final-color-fix">
+/* FINAL OVERRIDE — Summary Capacity */
+#summaryCapacityPlanActual tr.scp-plan-row td .scp-main-value,
+#summaryCapacityPlanActual .scp-plan-row .scp-main-value {
+    color: #38bdf8 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
 }
-
-/* Door Order = dark blue */
-#tableManpowerCapacity .mp-top-door{
-    color:#2563eb !important;
+#summaryCapacityPlanActual tr.scp-required-row td .scp-main-value,
+#summaryCapacityPlanActual .scp-required-row .scp-main-value {
+    color: #ea580c !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
 }
-
-/* Order + Short = light blue */
-#tableManpowerCapacity .mp-top-short{
-    color:#7dd3fc !important;
-}
-
-/* Actual Capacity = cyan */
-#tableManpowerCapacity .mp-top-capacity{
-    color:#22d3ee !important;
-}
-
-/* Total Order = orange */
-#tableManpowerCapacity .mp-top-order{
-    color:#f97316 !important;
-}
-
-/* Manpower values = 11px */
-#tableManpowerCapacity td .mp-num-main{
-    font-size:11px !important;
+#summaryCapacityPlanActual tr.scp-capacity-row td .scp-capacity-value,
+#summaryCapacityPlanActual .scp-capacity-row .scp-capacity-value {
+    color: #f59e0b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
 }
 </style>
 
-<style id="mp-plan-required-yellow-row-final">
-#tableManpowerCapacity .mp-plan-required-row td{
+<style id="mp-required-plan-yellow-row-style">
+#tableManpowerCapacity .mp-required-plan-yellow-row td{
     background:#facc15 !important;
     color:#422006 !important;
+    border-top:2px solid #fde047 !important;
+    border-bottom:2px solid #eab308 !important;
     font-weight:900 !important;
 }
-#tableManpowerCapacity .mp-plan-required-row td:first-child{
-    box-shadow:inset 0 2px 0 #fde047;
+#tableManpowerCapacity .mp-required-plan-label{
+    position:sticky;
+    left:0;
+    z-index:30;
+    text-align:left !important;
+    padding:7px 9px !important;
+}
+#tableManpowerCapacity .mp-required-plan-label > div:first-child{
+    font-size:11px !important;
+    line-height:1.15 !important;
+}
+#tableManpowerCapacity .mp-required-plan-sub{
+    font-size:8px !important;
+    line-height:1.1 !important;
+    margin-top:2px;
+    color:#713f12 !important;
+}
+#tableManpowerCapacity .mp-required-plan-cell{
+    text-align:center !important;
+    font-size:11px !important;
+    line-height:1.1 !important;
+    padding:7px 4px !important;
+    white-space:nowrap;
+}
+#tableManpowerCapacity .mp-required-plan-sunday{
+    background:#a16207 !important;
+    color:#fef3c7 !important;
 }
 </style>
+
 </body>
 </html
