@@ -7212,20 +7212,20 @@ function updateLobSubLineVisibility() {
 
                 // Row 4: Capacity Actual
                 // Manpower = จำนวน Employee ที่บันทึกใน Line Balance Layout ของไลน์นั้น
-                // Capacity / Day = (3600 / Lead Time รวม) × Working Hours × 85% × Line Balance Manpower
+                // Ratio รายวัน = Required Order / Plan Order เพื่อรองรับ Ratio ของ routing จริงในวันนั้น
                 const lineBalanceManpower = getSummaryLineBalanceManpower(station, lineName);
                 html += `<tr class="bg-emerald-950/10 border-b-2 border-slate-700/70">
                     <td class="px-3 py-2.5 text-emerald-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
                         Capacity Actual
-                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">(3600 ÷ Lead Time) × Hours × 85% × MP จาก Line Balance</div>
                         <div class="text-[8px] text-cyan-300 font-normal mt-0.5">Line Balance MP: ${lineBalanceManpower} คน</div>
                     </td>
                     ${leadTimes.map((leadTime,i) => {
                         if (isSunday(days[i])) {
                             return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
                         }
+                        const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
                         const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
-                            ? (3600 / leadTime) * 0.85 * lineBalanceManpower
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
