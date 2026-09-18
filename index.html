@@ -6307,6 +6307,80 @@ function updateLobSubLineVisibility() {
         }
 
         function calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours) {
+            // Door C C-1 Actual Capacity:
+            // Weighted LT = Σ[(LT RR × Order BM) + (LT RL × Order BM)] ÷ Σ(Order BM + Order BM)
+            // Actual UPH = (3600 ÷ Weighted LT) × 85%
+            // Actual Capacity / Day = Actual UPH × Working Hours
+            if (station === 'Door C' && groupName === 'C-1') {
+                let totalOrder = 0;
+                let weightedLtSum = 0;
+                let weightedOrderSum = 0;
+                let modelsWithCapacity = 0;
+
+                data.groups.forEach(g => {
+                    g.models.forEach(m => {
+                        if (!modelBelongsToManpowerGroup(m.name, station, groupName)) return;
+
+                        const baseOrder = Math.round(Number(m.orders[dayIndex]) || 0);
+                        if (baseOrder <= 0) return;
+
+                        const multiplier = getManpowerOrderMultiplier(m.name, station, groupName);
+                        if (multiplier <= 0) return;
+
+                        const rrLT = Math.max(0, Number(getDoorTypeLeadTime(m.name, 'RR')) || 0);
+                        const rlLT = Math.max(0, Number(getDoorTypeLeadTime(m.name, 'RL')) || 0);
+
+                        // Door Order remains based on Master routing ratio.
+                        totalOrder += baseOrder * multiplier;
+
+                        if (rrLT > 0) {
+                            weightedLtSum += rrLT * baseOrder;
+                            weightedOrderSum += baseOrder;
+                        }
+                        if (rlLT > 0) {
+                            weightedLtSum += rlLT * baseOrder;
+                            weightedOrderSum += baseOrder;
+                        }
+                        if (rrLT > 0 || rlLT > 0) modelsWithCapacity++;
+                    });
+                });
+
+                const weightedLeadTime = weightedOrderSum > 0
+                    ? weightedLtSum / weightedOrderSum
+                    : 0;
+
+                const actualUPH = weightedLeadTime > 0
+                    ? (3600 / weightedLeadTime) * 0.85
+                    : 0;
+
+                const actualCapacity = actualUPH > 0 && hours > 0
+                    ? actualUPH * hours
+                    : 0;
+
+                const planUPH = hours > 0 ? totalOrder / hours : 0;
+                const gap = actualCapacity - totalOrder;
+                const gapPerHour = actualUPH - planUPH;
+                const coverage = totalOrder > 0 ? (actualCapacity / totalOrder) * 100 : 0;
+                const status =
+                    totalOrder <= 0 ? 'NO PLAN' :
+                    coverage >= 100 ? 'NO SHORT' :
+                    'RISK SHORT';
+
+                return {
+                    totalOrder: Math.round(totalOrder),
+                    planUPH,
+                    actualUPH,
+                    actualCapacity,
+                    gap,
+                    gapPerHour,
+                    coverage,
+                    status,
+                    requiredHoursAtActualUPH: actualUPH > 0 ? totalOrder / actualUPH : 0,
+                    modelsWithCapacity,
+                    weightedLeadTime
+                };
+            }
+
             let totalOrder = 0;
             let requiredHoursAtActualUPH = 0;
             let modelsWithCapacity = 0;
