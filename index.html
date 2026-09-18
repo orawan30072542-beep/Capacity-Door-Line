@@ -6309,6 +6309,48 @@ function updateLobSubLineVisibility() {
             return { partSupply: 0, loadToCart: 0, delivery: 0, total: 0 };
         }
 
+
+        function calculatePlanRequiredManpowerByDay(data, dayIndex, station, hours) {
+            if (!data || !Array.isArray(data.groups) || !(hours > 0)) return 0;
+
+            let totalWorkSeconds = 0;
+            const groups = getManpowerGroupsForStation(station) || [];
+
+            groups.forEach(groupName => {
+                data.groups.forEach(g => {
+                    (g.models || []).forEach(m => {
+                        if (!modelBelongsToManpowerGroup(m.name, station, groupName)) return;
+
+                        const baseOrder = Math.max(0, Number(m.orders?.[dayIndex]) || 0);
+                        if (baseOrder <= 0) return;
+
+                        const multiplier = Math.max(
+                            0,
+                            Number(getManpowerOrderMultiplier(m.name, station, groupName)) || 0
+                        );
+                        if (multiplier <= 0) return;
+
+                        const leadTime = Math.max(
+                            0,
+                            Number(getLeadTimeForManpower(m.name, station)) || 0
+                        );
+                        if (leadTime <= 0) return;
+
+                        // จำนวนออเดอร์ที่ต้องผลิตจริงของ Model ใน Physical Line นี้
+                        const productionOrder = baseOrder * multiplier;
+
+                        // Σ(Lead Time ของรุ่น × จำนวนออเดอร์)
+                        totalWorkSeconds += leadTime * productionOrder;
+                    });
+                });
+            });
+
+            const availableSecondsPerPerson = hours * 3600;
+            return availableSecondsPerPerson > 0
+                ? Math.ceil(totalWorkSeconds / availableSecondsPerPerson)
+                : 0;
+        }
+
         function calculateManpowerByGroupDay(data, dayIndex, station, groupName, hours) {
             // Total Order = Order ที่ไลน์ต้องผลิตก่อนคูณ Ratio
             // Door Order  = Order ที่ต้องทำจริงหลังคูณ Ratio
@@ -7568,9 +7610,6 @@ function updateLobSubLineVisibility() {
                 }
             );
 
-            // Required manpower by production plan (daily total)
-            const dailyRequiredPlanManpower = new Array(days.length).fill(0);
-
             groups.forEach((groupName, groupIndex) => {
                 const dayResults = days.map((day, dayIndex) => {
                     if (isSunday(day)) {
@@ -7695,11 +7734,6 @@ function updateLobSubLineVisibility() {
                         ? 4
                         : 1;
                     dailyMpTotals[i] += rawDailyManpower / doorCManpowerDivisor;
-
-                    // Bottom yellow row = manpower required to meet that day's production order.
-                    // Preserve Door C rule: C-1/C-2 ÷4, C-3 unchanged.
-                    const requiredPlanMp = Math.ceil(rawDailyManpower / doorCManpowerDivisor);
-                    dailyRequiredPlanManpower[i] += requiredPlanMp;
                     const summaryDoorOrder = Number(r.doorOrder || 0);
                     dailyPlanOrderTotals[i] += summaryDoorOrder;
 
@@ -7786,28 +7820,40 @@ function updateLobSubLineVisibility() {
                 });
             });
 
-            // ===== Bottom yellow row: Required Manpower to Meet Production Order =====
-            if (groups.length > 0) {
-                const trPlanMp = document.createElement('tr');
-                trPlanMp.className = 'mp-required-plan-yellow-row';
 
-                let htmlPlanMp = `
-                    <td colspan="2" class="mp-required-plan-label">
+            // ===== PLAN REQUIRED MANPOWER — FINAL YELLOW ROW =====
+            // Formula:
+            // CEILING( Σ(Lead Time model × production order model) ÷ (Working Hours × 3600) )
+            if (groups.length > 0) {
+                const trPlanRequired = document.createElement('tr');
+                trPlanRequired.className = 'mp-plan-required-formula-row';
+
+                let rowHtml = `
+                    <td colspan="2" class="mp-plan-required-formula-label">
                         <div>พนักงานที่ต้องใช้ตามแผนผลิต</div>
-                        <div class="mp-required-plan-sub">Required Manpower to Meet Production Order</div>
+                        <div class="mp-plan-required-formula-sub">
+                            Σ(Lead Time × Order) ÷ (Working Hours × 3,600)
+                        </div>
                     </td>`;
 
-                days.forEach((day, i) => {
+                days.forEach((day, dayIndex) => {
                     if (isSunday(day)) {
-                        htmlPlanMp += `<td class="mp-required-plan-cell mp-required-plan-sunday">—</td>`;
-                    } else {
-                        const mp = Math.max(0, Math.ceil(Number(dailyRequiredPlanManpower[i] || 0)));
-                        htmlPlanMp += `<td class="mp-required-plan-cell">${mp} คน</td>`;
+                        rowHtml += `<td class="mp-plan-required-formula-cell mp-plan-required-formula-sunday">—</td>`;
+                        return;
                     }
+
+                    const requiredMp = calculatePlanRequiredManpowerByDay(
+                        data, dayIndex, station, hours
+                    );
+
+                    rowHtml += `
+                        <td class="mp-plan-required-formula-cell">
+                            <div class="mp-plan-required-formula-value">${requiredMp} คน</div>
+                        </td>`;
                 });
 
-                trPlanMp.innerHTML = htmlPlanMp;
-                tbody.appendChild(trPlanMp);
+                trPlanRequired.innerHTML = rowHtml;
+                tbody.appendChild(trPlanRequired);
             }
 
             dailyMpTotals.forEach((mp, i) => {
@@ -8862,41 +8908,48 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
-<style id="mp-required-plan-yellow-row-style">
-#tableManpowerCapacity .mp-required-plan-yellow-row td{
+<style id="mp-plan-required-formula-yellow-style">
+#tableManpowerCapacity .mp-plan-required-formula-row td{
     background:#facc15 !important;
     color:#422006 !important;
     border-top:2px solid #fde047 !important;
-    border-bottom:2px solid #eab308 !important;
-    font-weight:900 !important;
+    border-bottom:2px solid #ca8a04 !important;
 }
-#tableManpowerCapacity .mp-required-plan-label{
+#tableManpowerCapacity .mp-plan-required-formula-label{
     position:sticky;
     left:0;
     z-index:30;
-    text-align:left !important;
     padding:7px 9px !important;
+    text-align:left !important;
+    font-weight:900 !important;
 }
-#tableManpowerCapacity .mp-required-plan-label > div:first-child{
+#tableManpowerCapacity .mp-plan-required-formula-label > div:first-child{
     font-size:11px !important;
     line-height:1.15 !important;
 }
-#tableManpowerCapacity .mp-required-plan-sub{
+#tableManpowerCapacity .mp-plan-required-formula-sub{
+    margin-top:2px;
     font-size:8px !important;
     line-height:1.1 !important;
-    margin-top:2px;
     color:#713f12 !important;
+    font-weight:700 !important;
 }
-#tableManpowerCapacity .mp-required-plan-cell{
-    text-align:center !important;
-    font-size:11px !important;
-    line-height:1.1 !important;
+#tableManpowerCapacity .mp-plan-required-formula-cell{
     padding:7px 4px !important;
+    text-align:center !important;
     white-space:nowrap;
 }
-#tableManpowerCapacity .mp-required-plan-sunday{
+#tableManpowerCapacity .mp-plan-required-formula-value{
+    font-size:11px !important;
+    line-height:1.1 !important;
+    font-weight:900 !important;
+    color:#422006 !important;
+}
+#tableManpowerCapacity .mp-plan-required-formula-sunday{
     background:#a16207 !important;
     color:#fef3c7 !important;
+    font-size:11px !important;
+    font-weight:900 !important;
 }
 </style>
 
