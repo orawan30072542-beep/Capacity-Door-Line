@@ -7284,6 +7284,37 @@ function updateLobSubLineVisibility() {
                     result.capacityGapPerHour = capResult.gapPerHour;
                     result.capacityStatus = capResult.status;
 
+                    // C-3 manpower correction:
+                    // Additional manpower is based ONLY on the hourly shortage gap,
+                    // not on the full order and not on Ratio a second time.
+                    if (station === 'Door C' && groupName === 'C-3') {
+                        const requiredPerHour = Math.max(0, Number(result.requiredOrderPerHour || result.doorOrderUPH || 0));
+                        const actualPerHour = Math.max(0, Number(result.actualUPH || 0));
+                        const shortagePerHour = Math.max(0, requiredPerHour - actualPerHour);
+
+                        // Capacity/person/hour before multiplying by current Line Balance manpower.
+                        const currentLBManpower = Math.max(0, Number(getSummaryLineBalanceManpower('Door C', 'C-3')) || 0);
+                        let capacityPerPersonHour = 0;
+                        if (actualPerHour > 0 && currentLBManpower > 0) {
+                            capacityPerPersonHour = actualPerHour / currentLBManpower;
+                        } else {
+                            // fallback to the existing C-3 product-mix capacity/person/hour
+                            capacityPerPersonHour = Math.max(0, Number(result.effectiveUPM85 || 0));
+                        }
+
+                        const additionalManpower = shortagePerHour > 0 && capacityPerPersonHour > 0
+                            ? Math.ceil(shortagePerHour / capacityPerPersonHour)
+                            : 0;
+
+                        result.c3ShortagePerHour = shortagePerHour;
+                        result.c3CapacityPerPersonHour = capacityPerPersonHour;
+                        result.manpowerCalc = shortagePerHour > 0 && capacityPerPersonHour > 0
+                            ? shortagePerHour / capacityPerPersonHour
+                            : 0;
+                        result.manpowerRequired = additionalManpower;
+                        result.manpowerPerHour = additionalManpower;
+                    }
+
                     // Back Plate / Bottom Plate Out Line: เพิ่มพนักงานเฉพาะวันที่มี Order ผลิต
                     const outLine = getBottomOutLineManpower(station, groupName);
                     const hasProduction = Number(result.shortageOrder || result.doorOrder || result.totalOrder || 0) > 0;
