@@ -1202,14 +1202,13 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Manpower</div>
-                                    <div class="text-[8px] text-slate-500">พนักงานที่มีตอนนี้</div>
-                                    <input id="mpActualManpowerInput" type="number" min="0" step="1" value="0"
-                                        onchange="saveMpPlanActualInput('manpower', this.value)"
-                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none">
+                                    <div class="text-[8px] text-slate-500">เฉลี่ยจาก Line Balance ของไลน์</div>
+                                    <input id="mpActualManpowerInput" type="number" min="0" step="0.1" value="0" readonly
+                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none cursor-default">
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">Door C: (C-1 + C-2 + Avg C-3) × Actual MP × Working Hours</div>
+                                    <div class="text-[8px] text-slate-500">Door C: ค่าเฉลี่ย Capacity Actual ของ C-1, C-2, C-3</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6804,31 +6803,89 @@ function updateLobSubLineVisibility() {
             };
         }
 
+
+        // ===== Current summary from Capacity Actual / Line Balance =====
+        // Door C:
+        // Actual Output / Day = Average(C-1 Capacity Actual, C-2 Capacity Actual, C-3 Capacity Actual)
+        // Actual Manpower = Average(C-1 LB MP, C-2 LB MP, C-3 LB MP)
+        function getDoorCCapacityActualAverage(data) {
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const days = data?.days || [];
+            const cLines = ['C-1', 'C-2', 'C-3'];
+
+            const lineResults = cLines.map(lineName => {
+                const manpower = getSummaryLineBalanceManpower('Door C', lineName);
+                const dailyCapacities = [];
+
+                days.forEach((day, i) => {
+                    if (isSunday(day)) return;
+
+                    const plan = getSummaryCapacityPlanOrder(data, 'Door C', lineName, i);
+                    const required = getSummaryCapacityRequiredOrder(data, 'Door C', lineName, i, hours);
+                    const leadTime = getSummaryCapacityLeadTime(data, 'Door C', lineName, i);
+
+                    // Only average actual production days for this physical C-line.
+                    if (plan <= 0 && required <= 0) return;
+
+                    const ratio = plan > 0 ? (required / plan) : 0;
+                    const hourlyCapacity = leadTime > 0 && manpower > 0
+                        ? (3600 / leadTime) * manpower * ratio
+                        : 0;
+
+                    dailyCapacities.push(hourlyCapacity * hours);
+                });
+
+                const avgCapacity = dailyCapacities.length
+                    ? dailyCapacities.reduce((sum, value) => sum + value, 0) / dailyCapacities.length
+                    : 0;
+
+                return { lineName, manpower, avgCapacity };
+            });
+
+            const avgCapacityActual = lineResults.length
+                ? lineResults.reduce((sum, item) => sum + item.avgCapacity, 0) / lineResults.length
+                : 0;
+
+            const avgManpower = lineResults.length
+                ? lineResults.reduce((sum, item) => sum + item.manpower, 0) / lineResults.length
+                : 0;
+
+            return { lineResults, avgCapacityActual, avgManpower };
+        }
+
         function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
-            const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
+            let actualManpower = 0;
+            let actualOutput = 0;
             let actualOutputPerHour = 0;
 
             if (currentManpowerStation === 'Door C') {
-                const doorCActual = getDoorCActualOutputPerPerson(currentDailyData);
+                const doorCAverage = getDoorCCapacityActualAverage(currentDailyData);
 
-                // Example concept:
-                // C1 ≈ 2 + C2 ≈ 3 + C3 average ≈ 7 = ≈12 pcs/person/hour.
-                // Then multiply by actual manpower.
-                actualOutputPerHour = doorCActual.totalUPHPerPerson * actualManpower;
+                // Current summary follows Line Balance / Capacity Actual directly.
+                actualManpower = doorCAverage.avgManpower;
+                actualOutput = doorCAverage.avgCapacityActual;
+                actualOutputPerHour = hours > 0 ? actualOutput / hours : 0;
             } else {
-                // Other production lines keep the direct Lead Time × Actual Manpower logic.
+                // Other lines: manpower also comes from the selected line's Line Balance.
+                const summaryLines = getSummaryCapacityLineNames(currentManpowerStation);
+                const manpowerValues = summaryLines.map(lineName =>
+                    getSummaryLineBalanceManpower(currentManpowerStation, lineName)
+                );
+                actualManpower = manpowerValues.length
+                    ? manpowerValues.reduce((sum, value) => sum + value, 0) / manpowerValues.length
+                    : 0;
+
                 actualOutputPerHour = avgLeadTime > 0
                     ? (3600 / avgLeadTime) * actualManpower
                     : 0;
+                actualOutput = actualOutputPerHour * hours;
             }
-
-            const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
             const outEl = document.getElementById('mpActualOutputInput');
-            if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
+            if (mpInput) mpInput.value = Number.isInteger(actualManpower) ? actualManpower : actualManpower.toFixed(1);
             if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
 
             const actualHourlyEl = document.getElementById('mpActualOutputHourly');
