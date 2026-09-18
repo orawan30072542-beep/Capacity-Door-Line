@@ -7290,6 +7290,7 @@ function updateLobSubLineVisibility() {
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="text-black text-[8px] font-normal mb-0.5">Lead Time ${leadTime.toFixed(1)} s</div>
                             <div class="text-emerald-300 text-sm font-bold">${Math.round(dailyCapacity).toLocaleString()}</div>
                             <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
                         </td>`;
