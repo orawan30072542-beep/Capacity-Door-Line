@@ -7314,7 +7314,7 @@ function updateLobSubLineVisibility() {
                         const dailyCapacity = hourlyCapacity * hours;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
                             <div class="text-slate-400 text-[8px] font-normal mb-0.5">LT ${leadTime.toFixed(1)} s</div>
-                            <div class="scp-capacity-value text-[11px] font-semibold">${Math.round(dailyCapacity).toLocaleString()}</div>
+                            <div class="scp-capacity-value" style="color:#f59e0b!important;font-size:11px!important;font-weight:600!important;">${Math.round(dailyCapacity).toLocaleString()}</div>
                             <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
                         </td>`;
                     }).join('')}
@@ -7338,7 +7338,7 @@ function updateLobSubLineVisibility() {
                         const requiredHourly = hours > 0 ? required[i] / hours : 0;
                         const differenceHourly = hourlyCapacity - requiredHourly;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="${difference < 0 ? 'text-rose-300' : 'text-emerald-300'} text-sm font-bold">${Math.round(difference).toLocaleString()}</div>
+                            <div class="${difference < 0 ? 'text-rose-300' : 'text-emerald-300'} text-[11px] font-bold">${Math.round(difference).toLocaleString()}</div>
                             <div class="${differenceHourly < 0 ? 'text-rose-300' : 'text-white'} text-[8px] font-normal mt-0.5">${Math.round(differenceHourly).toLocaleString()}</div>
                         </td>`;
                     }).join('')}
@@ -8806,5 +8806,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 </script>
+
+<style id="summary-capacity-final-color-fix">
+/* FINAL OVERRIDE — Summary Capacity */
+#summaryCapacityPlanActual tr.scp-plan-row td .scp-main-value,
+#summaryCapacityPlanActual .scp-plan-row .scp-main-value {
+    color: #38bdf8 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+#summaryCapacityPlanActual tr.scp-required-row td .scp-main-value,
+#summaryCapacityPlanActual .scp-required-row .scp-main-value {
+    color: #ea580c !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+#summaryCapacityPlanActual tr.scp-capacity-row td .scp-capacity-value,
+#summaryCapacityPlanActual .scp-capacity-row .scp-capacity-value {
+    color: #f59e0b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+</style>
 </body>
 </html
