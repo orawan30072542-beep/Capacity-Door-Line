@@ -7307,8 +7307,9 @@ function updateLobSubLineVisibility() {
                             return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
                         }
                         const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
                         const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
-                            ? (3600 / leadTime) * lineBalanceManpower * ratio
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio * plateEfficiency
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
                         return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
@@ -7329,8 +7330,9 @@ function updateLobSubLineVisibility() {
                             return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
                         }
                         const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
                         const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
-                            ? (3600 / leadTime) * lineBalanceManpower * ratio
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio * plateEfficiency
                             : 0;
                         const dailyCapacity = hourlyCapacity * hours;
                         const difference = dailyCapacity - required[i];
