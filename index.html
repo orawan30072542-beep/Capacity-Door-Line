@@ -6306,6 +6306,34 @@ function updateLobSubLineVisibility() {
             return maxCT > 0 ? 3600 / maxCT : 0;
         }
 
+        function getSummaryLineBalanceManpower(station, lineName) {
+            // Read saved employee objects directly from the physical Line Balance layout.
+            // Door C Bend keeps separate legacy layouts for C-1 / C-2 / C-3.
+            let layoutKey = '';
+            if (station === 'Door C') {
+                layoutKey = `haier_lob_layout_shared_v4_Door_C_${lineName}`;
+            } else if (station === 'Back Plate' || station === 'Bottom Plate') {
+                // Fixed manpower values confirmed for plate lines.
+                if (station === 'Back Plate' && lineName === 'Line#1') return 5;
+                if (station === 'Back Plate' && lineName === 'Line#2') return 11;
+                if (station === 'Bottom Plate' && lineName === 'Line#1') return 10;
+                if (station === 'Bottom Plate' && lineName === 'Line#2') return 11;
+                layoutKey = `haier_lob_layout_shared_v4_${station.replace(/\s+/g, '_')}`;
+            } else {
+                layoutKey = `haier_lob_layout_shared_v4_${String(station || '').replace(/\s+/g, '_')}`;
+            }
+
+            try {
+                const raw = localStorage.getItem(layoutKey);
+                if (raw === null) return 0;
+                const saved = JSON.parse(raw);
+                if (!Array.isArray(saved)) return 0;
+                return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
+            } catch (err) {
+                return 0;
+            }
+        }
+
         function calculateCapacityRequirementByGroupDay(data, dayIndex, station, groupName, hours) {
             // Door C C-1 Actual Capacity:
             // Weighted LT = Σ[(LT RR × Order BM) + (LT RL × Order BM)] ÷ Σ(Order BM + Order BM)
@@ -6399,6 +6427,10 @@ function updateLobSubLineVisibility() {
                     if (baseOrder <= 0 || multiplier <= 0) return;
 
                     const productionOrder = baseOrder * multiplier;
+                    if (station === 'Door C' && groupName === 'C-3') {
+                        c3BaseOrder += baseOrder;
+                        c3RatioOrder += productionOrder;
+                    }
                     const modelActualUPH = getCapacityRequirementModelUPH(m.name, station);
                     if (modelActualUPH <= 0) return;
 
