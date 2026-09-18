@@ -536,6 +536,30 @@ div:has(>.mp-actual-header),section:has(>.mp-actual-header),div:has(>.mp-capacit
     font-size:11px !important;
 }
 
+
+        /* Smaller daily-order number: Plan Order / Required Order */
+        #tableSummaryCapacityPlanActual .scp-main-value {
+            font-size: 11px !important;
+            line-height: 1.15 !important;
+            font-weight: 600 !important;
+        }
+
+        /* ===== Summary Capacity colors / sizes ===== */
+        #summaryCapacityPlanActual tr.scp-plan-row .scp-main-value {
+            color: #38bdf8 !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        #summaryCapacityPlanActual tr.scp-required-row .scp-main-value {
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
+        #summaryCapacityPlanActual tr.scp-capacity-row .scp-capacity-value {
+            color: #f59e0b !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+        }
 </style>
 
 <style>
@@ -1202,14 +1226,13 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Manpower</div>
-                                    <div class="text-[8px] text-slate-500">พนักงานที่มีตอนนี้</div>
-                                    <input id="mpActualManpowerInput" type="number" min="0" step="1" value="0"
-                                        onchange="saveMpPlanActualInput('manpower', this.value)"
-                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none">
+                                    <div class="text-[8px] text-slate-500">พนักงานรวมจาก Line Balance</div>
+                                    <input id="mpActualManpowerInput" type="number" min="0" step="0.1" value="0" readonly
+                                        class="w-full mt-1 bg-transparent border-0 p-0 text-lg text-emerald-300 focus:outline-none cursor-default">
                                 </div>
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Actual Output / Day</div>
-                                    <div class="text-[8px] text-slate-500">Door C: (C-1 + C-2 + Avg C-3) × Actual MP × Working Hours</div>
+                                    <div class="text-[8px] text-slate-500">Door C: Avg C-1 + Avg C-2 + Avg C-3</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpActualOutputInput" class="text-lg text-emerald-300 mt-1">0</div>
                                         <div id="mpActualOutputHourly" class="mp-inline-hourly">0</div>
@@ -6804,31 +6827,98 @@ function updateLobSubLineVisibility() {
             };
         }
 
+
+        // ===== Current summary from Capacity Actual / Line Balance =====
+        // Door C:
+        // Actual Output / Day = Average(C-1 Capacity Actual, C-2 Capacity Actual, C-3 Capacity Actual)
+        // Actual Manpower = Average(C-1 LB MP, C-2 LB MP, C-3 LB MP)
+        function getDoorCCapacityActualAverage(data) {
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const days = data?.days || [];
+            const cLines = ['C-1', 'C-2', 'C-3'];
+
+            const lineResults = cLines.map(lineName => {
+                const manpower = getSummaryLineBalanceManpower('Door C', lineName);
+                const dailyCapacities = [];
+
+                days.forEach((day, i) => {
+                    if (isSunday(day)) return;
+
+                    const plan = getSummaryCapacityPlanOrder(data, 'Door C', lineName, i);
+                    const required = getSummaryCapacityRequiredOrder(data, 'Door C', lineName, i, hours);
+                    const leadTime = getSummaryCapacityLeadTime(data, 'Door C', lineName, i);
+
+                    // Only average actual production days for this physical C-line.
+                    if (plan <= 0 && required <= 0) return;
+
+                    const ratio = plan > 0 ? (required / plan) : 0;
+                    const hourlyCapacity = leadTime > 0 && manpower > 0
+                        ? (3600 / leadTime) * manpower * ratio
+                        : 0;
+
+                    dailyCapacities.push(hourlyCapacity * hours);
+                });
+
+                const avgCapacity = dailyCapacities.length
+                    ? dailyCapacities.reduce((sum, value) => sum + value, 0) / dailyCapacities.length
+                    : 0;
+
+                return { lineName, manpower, avgCapacity };
+            });
+
+            // Actual Output / Day = Avg Capacity C-1 + Avg Capacity C-2 + Avg Capacity C-3
+            const avgCapacityActual = lineResults.reduce((sum, item) => sum + item.avgCapacity, 0);
+
+            const avgManpower = lineResults.length
+                ? lineResults.reduce((sum, item) => sum + item.manpower, 0) / lineResults.length
+                : 0;
+
+            return { lineResults, avgCapacityActual, avgManpower };
+        }
+
         function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
-            const actualManpower = getMpPlanActualInput('manpower');
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
+            let actualManpower = 0;
+            let actualOutput = 0;
             let actualOutputPerHour = 0;
 
             if (currentManpowerStation === 'Door C') {
-                const doorCActual = getDoorCActualOutputPerPerson(currentDailyData);
+                const doorCAverage = getDoorCCapacityActualAverage(currentDailyData);
 
-                // Example concept:
-                // C1 ≈ 2 + C2 ≈ 3 + C3 average ≈ 7 = ≈12 pcs/person/hour.
-                // Then multiply by actual manpower.
-                actualOutputPerHour = doorCActual.totalUPHPerPerson * actualManpower;
+                // Current summary follows Line Balance / Capacity Actual directly.
+                // KPI Actual Manpower = พนักงานรวม C-1 + C-2 + C-3
+                actualManpower = doorCAverage.lineResults.reduce((sum, item) => sum + item.manpower, 0);
+                actualOutput = doorCAverage.avgCapacityActual;
+                actualOutputPerHour = hours > 0 ? actualOutput / hours : 0;
             } else {
-                // Other production lines keep the direct Lead Time × Actual Manpower logic.
+                // Other lines: manpower also comes from the selected line's Line Balance.
+                const summaryLines = getSummaryCapacityLineNames(currentManpowerStation);
+
+                if (currentManpowerStation === 'Back Plate' || currentManpowerStation === 'Bottom Plate') {
+                    // KPI Actual Manpower = พนักงานรวม Line#1 + Line#2
+                    // Capacity Actual ด้านล่างยังคำนวณแยกพนักงานตามไลน์ผลิตเหมือนเดิม
+                    actualManpower = summaryLines.reduce((sum, lineName) =>
+                        sum + getSummaryLineBalanceManpower(currentManpowerStation, lineName), 0
+                    );
+                } else {
+                    const manpowerValues = summaryLines.map(lineName =>
+                        getSummaryLineBalanceManpower(currentManpowerStation, lineName)
+                    );
+                    actualManpower = manpowerValues.length
+                        ? manpowerValues.reduce((sum, value) => sum + value, 0) / manpowerValues.length
+                        : 0;
+                }
+
                 actualOutputPerHour = avgLeadTime > 0
                     ? (3600 / avgLeadTime) * actualManpower
                     : 0;
+                actualOutput = actualOutputPerHour * hours;
             }
-
-            const actualOutput = actualOutputPerHour * hours;
 
             const mpInput = document.getElementById('mpActualManpowerInput');
             const outEl = document.getElementById('mpActualOutputInput');
-            if (mpInput && document.activeElement !== mpInput) mpInput.value = actualManpower || 0;
+            if (mpInput) mpInput.value = Number.isInteger(actualManpower) ? actualManpower : actualManpower.toFixed(1);
             if (outEl) outEl.textContent = Math.round(actualOutput).toLocaleString();
 
             const actualHourlyEl = document.getElementById('mpActualOutputHourly');
@@ -7096,6 +7186,46 @@ function updateLobSubLineVisibility() {
             return totalOrder > 0 ? weightedLeadTime / totalOrder : 0;
         }
 
+
+        // จำนวนพนักงานสำหรับ Capacity Actual ดึงจาก Line Balance Layout
+        // นับเฉพาะ object ประเภท employee ที่ถูกบันทึกไว้ใน Layout ของไลน์นั้น
+        function getSummaryLineBalanceManpower(station, lineName) {
+            // Fixed manpower for Back Plate / Bottom Plate physical lines
+            if (station === 'Bottom Plate') {
+                if (lineName === 'Line#1') return 10;
+                if (lineName === 'Line#2') return 11;
+            }
+            if (station === 'Back Plate') {
+                if (lineName === 'Line#1') return 5;
+                if (lineName === 'Line#2') return 11;
+            }
+
+            let layoutKeys = [];
+
+            if (station === 'Door A') {
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_A'];
+            } else if (station === 'Door B') {
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_B'];
+            } else if (station === 'Door C') {
+                layoutKeys = [`haier_lob_layout_shared_v4_Door_C_${lineName}`];
+            } else if (station === 'Door Glass') {
+                layoutKeys = ['haier_lob_layout_shared_v4_Door_Glass'];
+            }
+
+            for (const layoutKey of layoutKeys) {
+                try {
+                    const raw = localStorage.getItem(layoutKey);
+                    if (raw === null) continue;
+                    const saved = JSON.parse(raw);
+                    if (!Array.isArray(saved)) continue;
+                    return saved.filter(obj => String(obj?.type || '').toLowerCase() === 'employee').length;
+                } catch (err) {
+                    console.warn('Cannot read Line Balance manpower:', station, lineName, layoutKey, err);
+                }
+            }
+            return 0;
+        }
+
         function renderSummaryCapacityPlanActual(data) {
             const head = document.getElementById('summaryCapacityPlanActualHead');
             const body = document.getElementById('summaryCapacityPlanActualBody');
@@ -7139,8 +7269,8 @@ function updateLobSubLineVisibility() {
                 );
     
                 // Row 1: imported plan.
-                html += `<tr class="bg-amber-950/10">
-                    <td rowspan="3" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
+                html += `<tr class="scp-plan-row bg-amber-950/10">
+                    <td rowspan="4" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">
                         ${lineName}
                     </td>
                     <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
@@ -7151,7 +7281,7 @@ function updateLobSubLineVisibility() {
                 </tr>`;
 
                 // Row 2: required TOTAL from Master Model daily-order summary.
-                html += `<tr class="bg-amber-950/5">
+                html += `<tr class="scp-capacity-row scp-required-row bg-amber-950/5">
                     <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
                         Required Order
                         <div class="text-[8px] text-slate-400 font-normal mt-0.5">จากยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
@@ -7163,18 +7293,56 @@ function updateLobSubLineVisibility() {
                 const leadTimes = days.map((day, i) =>
                     isSunday(day) ? 0 : getSummaryCapacityLeadTime(data, station, lineName, i)
                 );
-                html += `<tr class="bg-cyan-950/5">
-                    <td class="px-3 py-2.5 text-cyan-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
-                        Lead Time รวม
-                        <div class="text-[8px] text-slate-400 font-normal mt-0.5">Σ(Lead Time × Order) ÷ Σ Order</div>
+                // Row 3: Capacity Actual
+                // Manpower = จำนวน Employee ที่บันทึกใน Line Balance Layout ของไลน์นั้น
+                // Ratio รายวัน = Required Order / Plan Order เพื่อรองรับ Ratio ของ routing จริงในวันนั้น
+                const lineBalanceManpower = getSummaryLineBalanceManpower(station, lineName);
+                html += `<tr class="bg-emerald-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-emerald-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Capacity Actual
+                        <div class="text-[8px] text-cyan-300 font-normal mt-0.5">Line Balance MP: ${lineBalanceManpower} คน</div>
                     </td>
-                    ${leadTimes.map((v,i) => isSunday(days[i])
-                        ? `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`
-                        : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="text-cyan-300 text-sm font-bold">${v > 0 ? v.toFixed(1) : '0'}</div>
-                            <div class="text-white text-[8px] font-normal mt-0.5">sec</div>
-                           </td>`
-                    ).join('')}
+                    ${leadTimes.map((leadTime,i) => {
+                        if (isSunday(days[i])) {
+                            return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                        }
+                        const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+                        const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio * plateEfficiency
+                            : 0;
+                        const dailyCapacity = hourlyCapacity * hours;
+                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="text-slate-400 text-[8px] font-normal mb-0.5">LT ${leadTime.toFixed(1)} s</div>
+                            <div class="scp-capacity-value" style="color:#f59e0b!important;font-size:11px!important;font-weight:600!important;">${Math.round(dailyCapacity).toLocaleString()}</div>
+                            <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(hourlyCapacity).toLocaleString()}</div>
+                        </td>`;
+                    }).join('')}
+                </tr>`;
+
+                // Row 4: Difference = Capacity Actual - Required Order
+                html += `<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
+                    <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
+                        Difference
+                    </td>
+                    ${leadTimes.map((leadTime,i) => {
+                        if (isSunday(days[i])) {
+                            return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                        }
+                        const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                        const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+                        const hourlyCapacity = leadTime > 0 && lineBalanceManpower > 0
+                            ? (3600 / leadTime) * lineBalanceManpower * ratio * plateEfficiency
+                            : 0;
+                        const dailyCapacity = hourlyCapacity * hours;
+                        const difference = dailyCapacity - required[i];
+                        const requiredHourly = hours > 0 ? required[i] / hours : 0;
+                        const differenceHourly = hourlyCapacity - requiredHourly;
+                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="${difference < 0 ? 'text-rose-300' : 'text-emerald-300'} text-[11px] font-bold">${Math.round(difference).toLocaleString()}</div>
+                            <div class="${differenceHourly < 0 ? 'text-rose-300' : 'text-white'} text-[8px] font-normal mt-0.5">${Math.round(differenceHourly).toLocaleString()}</div>
+                        </td>`;
+                    }).join('')}
                 </tr>`;
 
             });
@@ -8639,5 +8807,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 </script>
+
+<style id="summary-capacity-final-color-fix">
+/* FINAL OVERRIDE — Summary Capacity */
+#summaryCapacityPlanActual tr.scp-plan-row td .scp-main-value,
+#summaryCapacityPlanActual .scp-plan-row .scp-main-value {
+    color: #38bdf8 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+#summaryCapacityPlanActual tr.scp-required-row td .scp-main-value,
+#summaryCapacityPlanActual .scp-required-row .scp-main-value {
+    color: #ea580c !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+#summaryCapacityPlanActual tr.scp-capacity-row td .scp-capacity-value,
+#summaryCapacityPlanActual .scp-capacity-row .scp-capacity-value {
+    color: #f59e0b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+</style>
 </body>
 </html
