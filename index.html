@@ -7855,7 +7855,7 @@ function updateLobSubLineVisibility() {
             head.innerHTML=`
                 <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-left min-w-[165px]">DOOR</th>
                 ${columns.map(c=>c.type==='week'
-                    ? `<th class="weekly-sum-col px-3 py-2.5 text-center whitespace-nowrap">${c.label}</th>`
+                    ? `<th class="weekly-sum-col px-3 py-2.5 text-center whitespace-nowrap">${c.label}</th><th class="daily-week-separator" aria-hidden="true"></th>`
                     : `<th class="px-2 py-2.5 bg-slate-950/95 text-center text-sky-300 whitespace-nowrap min-w-[72px]">${c.label}</th>`
                 ).join('')}
                 <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap">TOTAL</th>`;
@@ -7885,7 +7885,7 @@ body.innerHTML=rows.length?rows.map(row=>{
                             <div class="cab-separator"></div>
                             <div class="plan-value"><span>P :</span> ${Math.round(production).toLocaleString()}</div>`;
                         return c.type==='week'
-                            ? `<td class="weekly-sum-col px-3 py-2.5 text-center">${cellInner}</td>`
+                            ? `<td class="weekly-sum-col px-3 py-2.5 text-center">${cellInner}</td><td class="daily-week-separator" aria-hidden="true"></td>`
                             : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">${cellInner}</td>`;
                     }).join('')}
                     <td class="px-3 py-2.5 text-center border-l border-bordercolor/40">
@@ -7916,7 +7916,7 @@ body.innerHTML=rows.length?rows.map(row=>{
                         <div class="text-sky-300 text-[11px] font-black">${value>0?Math.round(value).toLocaleString():'—'}</div>
                         <div class="production-ratio-value">${production>0?Math.round(production).toLocaleString():'—'}</div>`;
                     return c.type==='week'
-                        ? `<td class="weekly-sum-col px-3 py-2.5 text-center font-black">${inner}</td>`
+                        ? `<td class="weekly-sum-col px-3 py-2.5 text-center font-black">${inner}</td><td class="daily-week-separator" aria-hidden="true"></td>`
                         : `<td class="px-2 py-2.5 text-center font-black">${inner}</td>`;
                 }).join('')}
                 <td class="px-3 py-2.5 text-center font-black">
@@ -10314,6 +10314,104 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 #summaryDailyOrderByDoor table th,
 #summaryDailyOrderByDoor table td{
     box-sizing:border-box !important;
+}
+</style>
+
+
+<script id="exact-summary-column-geometry-final">
+(function(){
+    function parseDateLabel(txt){
+        const m=String(txt||'').trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if(!m) return null;
+        let y=m[3]?Number(m[3]):2026; if(y<100)y+=2000;
+        return new Date(y,Number(m[1])-1,Number(m[2]));
+    }
+    function applyWidth(cell,w){
+        if(!cell)return;
+        cell.style.setProperty('width',w+'px','important');
+        cell.style.setProperty('min-width',w+'px','important');
+        cell.style.setProperty('max-width',w+'px','important');
+        cell.style.setProperty('box-sizing','border-box','important');
+    }
+    function alignTables(){
+        const upper=document.getElementById('tableSummaryCapacityPlanActual');
+        const lower=document.getElementById('tableSummaryDailyOrderByDoor');
+        if(!upper||!lower)return;
+
+        // Fixed table geometry: upper Line+Type = lower DOOR = 120px.
+        upper.style.setProperty('table-layout','fixed','important');
+        lower.style.setProperty('table-layout','fixed','important');
+
+        const uh=Array.from(upper.querySelectorAll('thead th'));
+        const lh=Array.from(lower.querySelectorAll('thead th'));
+
+        if(uh[0]) applyWidth(uh[0],60);
+        if(uh[1]) applyWidth(uh[1],60);
+        if(lh[0]) applyWidth(lh[0],120);
+
+        function sizeHeaderAndColumn(table, heads, leadingCount){
+            heads.forEach((th,idx)=>{
+                if(idx<leadingCount)return;
+                let w=68;
+                if(th.classList.contains('scp-week-separator')||th.classList.contains('daily-week-separator')) w=10;
+                else if(th.classList.contains('scp-weekly-sum-col')||th.classList.contains('weekly-sum-col')) w=76;
+                else {
+                    const d=parseDateLabel(th.textContent);
+                    if(d && d.getDay()===0) w=20;
+                }
+                applyWidth(th,w);
+                table.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{
+                    if(tr.children[idx]) applyWidth(tr.children[idx],w);
+                });
+            });
+        }
+        sizeHeaderAndColumn(upper,uh,2);
+        sizeHeaderAndColumn(lower,lh,1);
+
+        upper.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{
+            if(tr.children[0]) applyWidth(tr.children[0],60);
+            if(tr.children[1]) applyWidth(tr.children[1],60);
+        });
+        lower.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{
+            if(tr.children[0]) applyWidth(tr.children[0],120);
+        });
+
+        const upperWidth=uh.reduce((n,th)=>n+(parseFloat(getComputedStyle(th).width)||0),0);
+        const lowerWidth=lh.reduce((n,th)=>n+(parseFloat(getComputedStyle(th).width)||0),0);
+        if(upperWidth){
+            upper.style.setProperty('width',upperWidth+'px','important');
+            upper.style.setProperty('min-width',upperWidth+'px','important');
+        }
+        if(lowerWidth){
+            lower.style.setProperty('width',lowerWidth+'px','important');
+            lower.style.setProperty('min-width',lowerWidth+'px','important');
+        }
+    }
+
+    const a=window.renderSummaryCapacityPlanActual;
+    if(typeof a==='function') window.renderSummaryCapacityPlanActual=function(){
+        const r=a.apply(this,arguments); setTimeout(alignTables,0); return r;
+    };
+    const b=window.renderSummaryDailyOrderByDoor;
+    if(typeof b==='function') window.renderSummaryDailyOrderByDoor=function(){
+        const r=b.apply(this,arguments); setTimeout(alignTables,0); return r;
+    };
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(alignTables,0));
+    window.addEventListener('resize',()=>setTimeout(alignTables,0));
+})();
+</script>
+<style id="exact-summary-column-geometry-style-final">
+#tableSummaryCapacityPlanActual,
+#tableSummaryDailyOrderByDoor{
+    table-layout:fixed !important;
+}
+#tableSummaryDailyOrderByDoor .daily-week-separator{
+    width:10px !important;
+    min-width:10px !important;
+    max-width:10px !important;
+    padding:0 !important;
+    border:0 !important;
+    background:#fff !important;
 }
 </style>
 
