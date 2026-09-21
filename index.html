@@ -7635,6 +7635,70 @@ function updateLobSubLineVisibility() {
             return Math.max(0, Number(cfg.qtyPerSet) || 1);
         }
 
+
+        function getSummaryDoorCapacityByDay(doorName, modelNames, station, dayIndex, hours) {
+            if (!(hours > 0) || !Array.isArray(modelNames) || !modelNames.length) return 0;
+
+            let totalCapacity = 0;
+
+            modelNames.forEach(modelName => {
+                const cfg = getMasterConfigForModel(modelName);
+
+                if (station === 'Door C') {
+                    if (cfg.station !== 'Door C') return;
+                    const routes = getDoorCRoutingDetails(modelName) || [];
+                    routes.forEach(route => {
+                        const lineName = route.line;
+                        const ratio = Math.max(0, Number(route?.qty || route?.ratio || 0));
+                        if (!lineName || ratio <= 0) return;
+
+                        let leadTime = 0;
+                        if (lineName === 'C-1') {
+                            leadTime =
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0) +
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RL')) || 0);
+                        } else if (lineName === 'C-2') {
+                            leadTime =
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'VEG')) || 0) +
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FB')) || 0) +
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FT')) || 0);
+                        } else if (lineName === 'C-3') {
+                            leadTime =
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0) +
+                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FR')) || 0);
+                        }
+
+                        const mp = getSummaryLineBalanceManpower('Door C', lineName);
+                        if (leadTime > 0 && mp > 0) {
+                            totalCapacity += (3600 / leadTime) * 0.85 * mp * ratio * hours;
+                        }
+                    });
+                    return;
+                }
+
+                let lineName = station;
+                if (station === 'Back Plate') {
+                    if (cfg.backPlateSource !== 'ผลิตเอง') return;
+                    lineName = cfg.backPlateLine || 'Line#1';
+                } else if (station === 'Bottom Plate') {
+                    if (cfg.bottomSource !== 'ผลิตเอง') return;
+                    lineName = cfg.bottomLine || 'Line#1';
+                } else if (cfg.station !== station) {
+                    return;
+                }
+
+                const leadTime = Math.max(0, Number(getLeadTimeForManpower(modelName, station)) || 0);
+                const mp = getSummaryLineBalanceManpower(station, lineName);
+                const efficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+
+                if (leadTime > 0 && mp > 0) {
+                    totalCapacity += (3600 / leadTime) * mp * efficiency * hours;
+                }
+            });
+
+            return totalCapacity;
+        }
+
         function renderSummaryDailyOrderByDoor(data) {
             const head = document.getElementById('summaryDailyOrderByDoorHead');
             const body = document.getElementById('summaryDailyOrderByDoorBody');
@@ -7643,6 +7707,7 @@ function updateLobSubLineVisibility() {
             if (!head || !body || !foot || !table || !data?.days || !data?.groups) return;
 
             const station = currentManpowerStation || 'Door A';
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
             const days = data.days || [];
             const columns = getDailyWeeklySummaryColumns(days);
             const doorMap = new Map();
@@ -7683,7 +7748,8 @@ function updateLobSubLineVisibility() {
                 door,
                 rawOrders:item.orders,
                 rawProduction:item.production,
-                models:Array.from(item.models).sort((a,b)=>a.localeCompare(b))
+                models:Array.from(item.models).sort((a,b)=>a.localeCompare(b)),
+                rawCapacity:new Array(days.length).fill(0)
             })).filter(r=>r.rawOrders.some(v=>v>0)).sort((a,b)=>{
                 const ai=DAILY_ORDER_DOOR_SORT.indexOf(a.door), bi=DAILY_ORDER_DOOR_SORT.indexOf(b.door);
                 if(ai!==-1||bi!==-1){if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;}
@@ -7698,9 +7764,20 @@ function updateLobSubLineVisibility() {
                 ).join('')}
                 <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap">TOTAL</th>`;
 
+
+            rows.forEach(row => {
+                days.forEach((day, dayIndex) => {
+                    const hasPlan = Number(row.rawOrders[dayIndex] || 0) > 0;
+                    row.rawCapacity[dayIndex] = hasPlan
+                        ? getSummaryDoorCapacityByDay(row.door, row.models, station, dayIndex, hours)
+                        : 0;
+                });
+            });
+
             body.innerHTML=rows.length?rows.map(row=>{
                 const total=row.rawOrders.reduce((a,b)=>a+Number(b||0),0);
                 const totalProduction=row.rawProduction.reduce((a,b)=>a+Number(b||0),0);
+                const totalCapacity=row.rawCapacity.reduce((a,b)=>a+Number(b||0),0);
                 return `<tr>
                     <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
                         <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
@@ -7713,16 +7790,23 @@ function updateLobSubLineVisibility() {
                         const production=c.type==='week'
                             ? c.indexes.reduce((sum,i)=>sum+Number(row.rawProduction[i]||0),0)
                             : Number(row.rawProduction[c.index]||0);
+                        const capacity=c.type==='week'
+                            ? c.indexes.reduce((sum,i)=>sum+Number(row.rawCapacity[i]||0),0)
+                            : Number(row.rawCapacity[c.index]||0);
                         const cellInner=`
-                            <div class="text-sky-300 text-[11px] font-bold">${value>0?Math.round(value).toLocaleString():'—'}</div>
-                            <div class="production-ratio-value">${production>0?Math.round(production).toLocaleString():'—'}</div>`;
+                            <div class="cab-value"><span>Cab :</span> ${value>0?Math.round(value).toLocaleString():'—'}</div>
+                            <div class="cab-separator"></div>
+                            <div class="plan-value"><span>P :</span> ${production>0?Math.round(production).toLocaleString():'—'}</div>
+                            <div class="actual-capacity-value"><span>A :</span> ${capacity>0?Math.round(capacity).toLocaleString():'—'}</div>`;
                         return c.type==='week'
                             ? `<td class="weekly-sum-col px-3 py-2.5 text-center">${cellInner}</td>`
                             : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">${cellInner}</td>`;
                     }).join('')}
                     <td class="px-3 py-2.5 text-center border-l border-bordercolor/40">
-                        <div class="text-amber-300 text-[11px] font-black">${Math.round(total).toLocaleString()}</div>
-                        <div class="production-ratio-value">${Math.round(totalProduction).toLocaleString()}</div>
+                        <div class="cab-value"><span>Cab :</span> ${Math.round(total).toLocaleString()}</div>
+                        <div class="cab-separator"></div>
+                        <div class="plan-value"><span>P :</span> ${Math.round(totalProduction).toLocaleString()}</div>
+                        <div class="actual-capacity-value"><span>A :</span> ${Math.round(totalCapacity).toLocaleString()}</div>
                     </td>
                 </tr>`;
             }).join(''):`<tr><td colspan="${columns.length+2}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
@@ -7734,7 +7818,7 @@ function updateLobSubLineVisibility() {
             foot.innerHTML=`<tr>
                 <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 font-black">
                     <div class="text-cyan-200 text-[11px]">TOTAL ORDER</div>
-                    <div class="production-ratio-label">D:</div>
+                    <div class="production-ratio-label">P:</div>
                 </td>
                 ${columns.map(c=>{
                     const value=c.type==='week'
@@ -9413,7 +9497,7 @@ document.addEventListener('DOMContentLoaded', () => {
     font-weight:900 !important;
 }
 #summaryDailyOrderByDoor .production-ratio-value::before{
-    content:"D: ";
+    content:"P: ";
     color:#eab308;
     font-size:7px;
     font-weight:700;
@@ -9425,6 +9509,42 @@ document.addEventListener('DOMContentLoaded', () => {
     font-weight:900 !important;
 }
 #summaryDailyOrderByDoor .weekly-sum-col .production-ratio-value{
+    color:#fef08a !important;
+}
+</style>
+
+
+<style id="cab-plan-actual-capacity-style">
+#summaryDailyOrderByDoor .cab-value{
+    color:#7dd3fc !important;
+    font-size:10px !important;
+    font-weight:900 !important;
+    line-height:1.1 !important;
+}
+#summaryDailyOrderByDoor .cab-value span{color:#bae6fd !important;}
+#summaryDailyOrderByDoor .cab-separator{
+    height:1px;
+    background:rgba(148,163,184,.42);
+    margin:4px 2px 3px;
+}
+#summaryDailyOrderByDoor .plan-value{
+    color:#facc15 !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+}
+#summaryDailyOrderByDoor .actual-capacity-value{
+    color:#facc15 !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    margin-top:2px;
+}
+#summaryDailyOrderByDoor .weekly-sum-col .cab-separator{
+    background:rgba(255,255,255,.48);
+}
+#summaryDailyOrderByDoor .weekly-sum-col .plan-value,
+#summaryDailyOrderByDoor .weekly-sum-col .actual-capacity-value{
     color:#fef08a !important;
 }
 </style>
