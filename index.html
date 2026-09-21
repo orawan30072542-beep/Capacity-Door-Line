@@ -7293,6 +7293,84 @@ function updateLobSubLineVisibility() {
 
             let html = '';
 
+            // Back Plate / Bottom Plate: show a combined Line#1 + Line#2 summary first.
+            if ((station === 'Back Plate' || station === 'Bottom Plate') && lines.length >= 2) {
+                const totalPlan = days.map((day,i) =>
+                    isSunday(day) ? 0 : lines.reduce((sum,lineName) =>
+                        sum + getSummaryCapacityPlanOrder(data,station,lineName,i),0)
+                );
+                const totalRequired = days.map((day,i) =>
+                    isSunday(day) ? 0 : lines.reduce((sum,lineName) =>
+                        sum + getSummaryCapacityRequiredOrder(data,station,lineName,i,hours),0)
+                );
+                const totalActualDay = new Array(days.length).fill(0);
+                const totalActualUPH = new Array(days.length).fill(0);
+
+                lines.forEach(lineName => {
+                    const linePlan = days.map((day,i) =>
+                        isSunday(day) ? 0 : getSummaryCapacityPlanOrder(data,station,lineName,i)
+                    );
+                    const lineRequired = days.map((day,i) =>
+                        isSunday(day) ? 0 : getSummaryCapacityRequiredOrder(data,station,lineName,i,hours)
+                    );
+                    const lineLT = days.map((day,i) =>
+                        isSunday(day) ? 0 : getSummaryCapacityLeadTime(data,station,lineName,i)
+                    );
+                    const mp = getSummaryLineBalanceManpower(station,lineName);
+
+                    days.forEach((day,i) => {
+                        if (isSunday(day) || !(linePlan[i] > 0 || lineRequired[i] > 0)) return;
+                        const ratio = linePlan[i] > 0 ? lineRequired[i] / linePlan[i] : 0;
+                        const uph = lineLT[i] > 0 && mp > 0
+                            ? (3600 / lineLT[i]) * mp * ratio * 0.85
+                            : 0;
+                        totalActualUPH[i] += uph;
+                        totalActualDay[i] += uph * hours;
+                    });
+                });
+
+                const renderTotalCells = (mode) => columns.map(c => {
+                    const idx = c.type === 'week' ? c.indexes : [c.index];
+                    if (c.type === 'day') {
+                        const i = c.index;
+                        if (isSunday(days[i]) || !(totalPlan[i] > 0 || totalRequired[i] > 0)) {
+                            return `<td class="scp-no-production border-l border-bordercolor/40"></td>`;
+                        }
+                    }
+
+                    let cab, p, a;
+                    if (mode === 'day') {
+                        cab = sumIndexes(totalPlan,idx);
+                        p = sumIndexes(totalRequired,idx);
+                        a = sumIndexes(totalActualDay,idx);
+                    } else if (c.type === 'week') {
+                        const activeDays = idx.filter(i => !isSunday(days[i]) && (totalPlan[i] > 0 || totalRequired[i] > 0)).length;
+                        const weekHours = hours * activeDays;
+                        cab = weekHours > 0 ? sumIndexes(totalPlan,idx) / weekHours : 0;
+                        p = weekHours > 0 ? sumIndexes(totalRequired,idx) / weekHours : 0;
+                        a = weekHours > 0 ? sumIndexes(totalActualDay,idx) / weekHours : 0;
+                    } else {
+                        const i = c.index;
+                        cab = hours > 0 ? totalPlan[i] / hours : 0;
+                        p = hours > 0 ? totalRequired[i] / hours : 0;
+                        a = totalActualUPH[i];
+                    }
+                    return summaryCell(cab,p,a,a-p,c.type==='week',false);
+                }).join('');
+
+                html += `<tr class="scp-total-2lines-row">
+                    <td rowspan="2" class="scp-total-line-label px-3 py-2.5 text-center font-black sticky left-0 z-20 border-r border-bordercolor">
+                        TOTAL<br><span>Line#1 + Line#2</span>
+                    </td>
+                    <td class="scp-total-type-cell sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">Day</td>
+                    ${renderTotalCells('day')}
+                </tr>`;
+                html += `<tr class="scp-total-2lines-row scp-total-uph-row">
+                    <td class="scp-total-type-cell sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">UPH</td>
+                    ${renderTotalCells('uph')}
+                </tr>`;
+            }
+
             lines.forEach(lineName => {
                 const plan = days.map((day,i) =>
                     isSunday(day) ? 0 : getSummaryCapacityPlanOrder(data, station, lineName, i)
@@ -9637,6 +9715,34 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 #tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-positive{
     background:linear-gradient(rgba(34,197,94,.18),rgba(34,197,94,.18)),#075985 !important;
+}
+</style>
+
+
+<style id="back-bottom-total-two-lines-style">
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td{
+    border-top:2px solid #22d3ee !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-uph-row td{
+    border-top:1px solid rgba(34,211,238,.25) !important;
+    border-bottom:3px solid #22d3ee !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-line-label{
+    background:#083344 !important;
+    color:#67e8f9 !important;
+    font-size:11px !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-line-label span{
+    color:#e0f2fe !important;
+    font-size:8px !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#164e63 !important;
+    color:#ffffff !important;
+    text-align:center;
+    font-size:10px;
+    font-weight:900;
+    padding:8px 6px;
 }
 </style>
 
