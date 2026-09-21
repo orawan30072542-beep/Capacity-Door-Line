@@ -10183,5 +10183,139 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
+
+<script id="both-summary-date-alignment-final">
+(function(){
+    function parseHeaderDate(text){
+        const m = String(text || '').trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if(!m) return null;
+        let year = m[3] ? Number(m[3]) : 2026;
+        if(year < 100) year += 2000;
+        return new Date(year, Number(m[1]) - 1, Number(m[2]));
+    }
+
+    function markSunday(table){
+        if(!table) return;
+        const heads = Array.from(table.querySelectorAll('thead th'));
+        heads.forEach((th, idx) => {
+            th.classList.remove('summary-sunday-col');
+            const d = parseHeaderDate(th.textContent);
+            if(!d || d.getDay() !== 0) return;
+            th.classList.add('summary-sunday-col');
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                const td = tr.children[idx];
+                if(td) td.classList.add('summary-sunday-col');
+            });
+        });
+    }
+
+    function sync(){
+        markSunday(document.getElementById('tableSummaryCapacityPlanActual'));
+        markSunday(document.getElementById('tableSummaryDailyOrderByDoor'));
+        /* fallback for alternate lower-table id */
+        markSunday(document.querySelector('#summaryDailyOrderByDoor table'));
+    }
+
+    const f1 = window.renderSummaryCapacityPlanActual;
+    if(typeof f1 === 'function'){
+        window.renderSummaryCapacityPlanActual = function(){
+            const r = f1.apply(this, arguments);
+            setTimeout(sync,0);
+            return r;
+        };
+    }
+    const f2 = window.renderSummaryDailyOrderByDoor;
+    if(typeof f2 === 'function'){
+        window.renderSummaryDailyOrderByDoor = function(){
+            const r = f2.apply(this, arguments);
+            setTimeout(sync,0);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded', sync);
+    setTimeout(sync,0);
+})();
+</script>
+
+<style id="both-summary-date-alignment-style-final">
+/* Capacity table normal dates */
+#tableSummaryCapacityPlanActual thead th:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator):not(.summary-sunday-col),
+#tableSummaryCapacityPlanActual tbody td:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator):not(.summary-sunday-col){
+    width:68px !important; min-width:68px !important; max-width:68px !important;
+}
+
+/* Lower Daily Order table normal dates */
+#tableSummaryDailyOrderByDoor thead th:not(:first-child):not(.summary-sunday-col),
+#summaryDailyOrderByDoor table thead th:not(:first-child):not(.summary-sunday-col){
+    width:68px !important; min-width:68px !important; max-width:68px !important;
+}
+
+/* Sunday = 20px in BOTH tables */
+#tableSummaryCapacityPlanActual .summary-sunday-col,
+#tableSummaryDailyOrderByDoor .summary-sunday-col,
+#summaryDailyOrderByDoor table .summary-sunday-col{
+    width:20px !important;
+    min-width:20px !important;
+    max-width:20px !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+    overflow:hidden !important;
+}
+
+/* Keep upper weekly widths consistent */
+#tableSummaryCapacityPlanActual .scp-weekly-sum-col{
+    width:76px !important; min-width:76px !important; max-width:76px !important;
+}
+#tableSummaryCapacityPlanActual .scp-week-separator{
+    width:10px !important; min-width:10px !important; max-width:10px !important;
+}
+</style>
+
+
+<style id="align-first-date-column-both-tables-final">
+/*
+Align the START of the first date column (9/21) in both tables.
+Upper table has Line + Type before dates.
+Lower table has only DOOR before dates.
+Therefore: Line 60 + Type 60 = DOOR 120.
+*/
+#tableSummaryCapacityPlanActual th:first-child,
+#tableSummaryCapacityPlanActual td:first-child{
+    width:60px !important;
+    min-width:60px !important;
+    max-width:60px !important;
+}
+#tableSummaryCapacityPlanActual th:nth-child(2),
+#tableSummaryCapacityPlanActual td:nth-child(2){
+    width:60px !important;
+    min-width:60px !important;
+    max-width:60px !important;
+}
+
+#tableSummaryDailyOrderByDoor th:first-child,
+#tableSummaryDailyOrderByDoor td:first-child,
+#summaryDailyOrderByDoor table th:first-child,
+#summaryDailyOrderByDoor table td:first-child{
+    width:120px !important;
+    min-width:120px !important;
+    max-width:120px !important;
+}
+
+/* Prevent padding from changing the fixed column geometry */
+#tableSummaryCapacityPlanActual,
+#tableSummaryDailyOrderByDoor,
+#summaryDailyOrderByDoor table{
+    box-sizing:border-box !important;
+}
+#tableSummaryCapacityPlanActual th,
+#tableSummaryCapacityPlanActual td,
+#tableSummaryDailyOrderByDoor th,
+#tableSummaryDailyOrderByDoor td,
+#summaryDailyOrderByDoor table th,
+#summaryDailyOrderByDoor table td{
+    box-sizing:border-box !important;
+}
+</style>
+
 </body>
 </html
