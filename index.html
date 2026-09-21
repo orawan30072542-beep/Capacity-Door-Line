@@ -1157,14 +1157,6 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Back Plate / Bottom Plate Line#1 / Line#2: Load to Cart 1 คน รวมอยู่ใน In Line | Out Line = Part Supply 1 + Delivery 1 (รวม 2 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours
                             </p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <div class="flex items-center gap-1 bg-slate-900/80 border border-cyan-500/25 rounded-xl p-1">
-                                <span class="text-[9px] text-slate-400 font-semibold px-2">Forecast:</span>
-                                <button type="button" id="forecastDailyBtn" onclick="setForecastPeriod('daily')" class="forecast-period-btn active">รายวัน</button>
-                                <button type="button" id="forecastWeeklyBtn" onclick="setForecastPeriod('weekly')" class="forecast-period-btn">รายสัปดาห์</button>
-                                <button type="button" id="forecastMonthlyBtn" onclick="setForecastPeriod('monthly')" class="forecast-period-btn">รายเดือน</button>
-                            </div>
-                        </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                             <span class="text-[10px] text-slate-400 font-semibold">เลือกไลน์ผลิต:</span>
                             <select id="manpowerLineSelect"
@@ -7542,6 +7534,70 @@ function updateLobSubLineVisibility() {
             return Array.from(buckets.values());
         }
 
+        function getIsoWeekNumberForSummary(dateValue) {
+            const d0 = parseForecastDate(dateValue);
+            if (!d0) return '';
+            const d = new Date(Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function getDailyWeeklySummaryColumns(days) {
+            const cols = [];
+            let weekIndexes = [];
+            let currentWeek = null;
+
+            const flushWeek = () => {
+                if (!weekIndexes.length) return;
+                const weekNo = currentWeek || getIsoWeekNumberForSummary(days[weekIndexes[0]]);
+                cols.push({
+                    type:'week',
+                    label:`SUM W${weekNo}`,
+                    indexes:[...weekIndexes]
+                });
+                weekIndexes = [];
+            };
+
+            days.forEach((day, i) => {
+                const d = parseForecastDate(day);
+                if (!d) {
+                    flushWeek();
+                    cols.push({type:'day',label:String(day),index:i});
+                    return;
+                }
+
+                const weekNo = getIsoWeekNumberForSummary(day);
+                if (currentWeek !== null && weekNo !== currentWeek) flushWeek();
+                currentWeek = weekNo;
+
+                // Sunday is not shown as a daily production column.
+                // It closes the current Mon-Sun week and the SUM column is inserted here.
+                if (d.getDay() === 0) {
+                    flushWeek();
+                    currentWeek = null;
+                    return;
+                }
+
+                cols.push({
+                    type:'day',
+                    label:`${d.getMonth()+1}/${d.getDate()}`,
+                    index:i
+                });
+                weekIndexes.push(i);
+
+                // If imported data ends on Saturday, close the week immediately.
+                if (d.getDay() === 6) {
+                    flushWeek();
+                    currentWeek = null;
+                }
+            });
+
+            flushWeek();
+            return cols;
+        }
+
         function renderSummaryDailyOrderByDoor(data) {
             const head = document.getElementById('summaryDailyOrderByDoorHead');
             const body = document.getElementById('summaryDailyOrderByDoorBody');
@@ -7550,17 +7606,15 @@ function updateLobSubLineVisibility() {
             if (!head || !body || !foot || !table || !data?.days || !data?.groups) return;
 
             const station = currentManpowerStation || 'Door A';
-            updateForecastPeriodButtons();
-            const forecastTitle = document.querySelector('#summaryDailyOrderByDoor .text-sm.font-bold');
-            if (forecastTitle) {
-                const label = currentForecastPeriod === 'weekly' ? 'Weekly' : currentForecastPeriod === 'monthly' ? 'Monthly' : 'Daily';
-                forecastTitle.textContent = `Summary ${label} Order By Model / Door`;
-            }
             const days = data.days || [];
-            const buckets = getForecastBuckets(days);
+            const columns = getDailyWeeklySummaryColumns(days);
             const doorMap = new Map();
 
-            // Door -> { orders[day], models Set }
+            const title = document.querySelector('#summaryDailyOrderByDoor .text-sm.font-bold');
+            if (title) title.textContent = 'Summary Daily Order By Model / Door';
+            const subtitle = document.querySelector('#summaryDailyOrderByDoor .text-\\[9px\\].text-slate-400');
+            if (subtitle) subtitle.textContent = 'Order รายวัน พร้อม SUM รายสัปดาห์หลังวันอาทิตย์';
+
             (data.groups || []).forEach(group => {
                 (group.models || []).forEach(model => {
                     const modelName = String(model?.name || '').trim();
@@ -7568,108 +7622,71 @@ function updateLobSubLineVisibility() {
                     if (!modelBelongsToSelectedSummaryStation(modelName, station)) return;
 
                     const doorName = getDailyOrderDoorName(modelName);
-                    if (!doorName) return; // show only the mapping explicitly supplied
+                    if (!doorName) return;
 
                     if (!doorMap.has(doorName)) {
-                        doorMap.set(doorName, {
-                            orders: new Array(days.length).fill(0),
-                            models: new Set()
-                        });
+                        doorMap.set(doorName,{orders:new Array(days.length).fill(0),models:new Set()});
                     }
-
-                    const item = doorMap.get(doorName);
+                    const item=doorMap.get(doorName);
                     item.models.add(modelName);
-
-                    days.forEach((day, dayIndex) => {
+                    days.forEach((day,i)=>{
                         if (isSunday(day)) return;
-                        const order = Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
-                        item.orders[dayIndex] += order; // same Door = SUM all mapped Models
+                        item.orders[i] += Math.max(0,Number(model?.orders?.[i])||0);
                     });
                 });
             });
 
-            const rows = Array.from(doorMap.entries())
-                .map(([door, item]) => ({
-                    door,
-                    orders: buckets.map(bucket => bucket.indexes.reduce((sum,idx) => sum + Number(item.orders[idx] || 0), 0)),
-                    models: Array.from(item.models).sort((a,b) => a.localeCompare(b))
-                }))
-                .filter(r => r.orders.some(v => v > 0))
-                .sort((a,b) => {
-                    const ai = DAILY_ORDER_DOOR_SORT.indexOf(a.door);
-                    const bi = DAILY_ORDER_DOOR_SORT.indexOf(b.door);
-                    if (ai !== -1 || bi !== -1) {
-                        if (ai === -1) return 1;
-                        if (bi === -1) return -1;
-                        return ai - bi;
-                    }
-                    return a.door.localeCompare(b.door);
-                });
+            const rows=Array.from(doorMap.entries()).map(([door,item])=>({
+                door,
+                rawOrders:item.orders,
+                models:Array.from(item.models).sort((a,b)=>a.localeCompare(b))
+            })).filter(r=>r.rawOrders.some(v=>v>0)).sort((a,b)=>{
+                const ai=DAILY_ORDER_DOOR_SORT.indexOf(a.door), bi=DAILY_ORDER_DOOR_SORT.indexOf(b.door);
+                if(ai!==-1||bi!==-1){if(ai===-1)return 1;if(bi===-1)return -1;return ai-bi;}
+                return a.door.localeCompare(b.door);
+            });
 
-            const doorWidth = 165;
-            const dayWidth = 76;
-            const totalWidth = 90;
-            table.style.width = `${doorWidth + buckets.length * dayWidth + totalWidth}px`;
-            table.style.minWidth = '100%';
+            head.innerHTML=`
+                <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-left min-w-[165px]">DOOR</th>
+                ${columns.map(c=>c.type==='week'
+                    ? `<th class="weekly-sum-col px-3 py-2.5 text-center whitespace-nowrap">${c.label}</th>`
+                    : `<th class="px-2 py-2.5 bg-slate-950/95 text-center text-sky-300 whitespace-nowrap min-w-[72px]">${c.label}</th>`
+                ).join('')}
+                <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap">TOTAL</th>`;
 
-            head.innerHTML = `
-                <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-left"
-                    style="width:${doorWidth}px;min-width:${doorWidth}px;">DOOR</th>
-                ${buckets.map(bucket => `
-                    <th class="px-2 py-2.5 bg-slate-950/95 text-center text-sky-300 whitespace-nowrap"
-                        style="min-width:${dayWidth}px;">${bucket.label}</th>`).join('')}
-                <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap"
-                    style="min-width:${totalWidth}px;">TOTAL</th>
-            `;
-
-            body.innerHTML = rows.length ? rows.map(row => {
-                const total = row.orders.reduce((sum,v) => sum + Number(v || 0), 0);
-                return `
-                    <tr class="hover:bg-slate-800/35">
-                        <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
-                            <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
-                            <div class="text-slate-500 text-[8px] mt-0.5 leading-tight">
-                                ${row.models.join(' + ')}
-                            </div>
-                        </td>
-                        ${row.orders.map((order,i) => {
-                            const dailySunday = currentForecastPeriod === 'daily' && isSunday(days[buckets[i]?.indexes?.[0]]);
-                            if (dailySunday) {
-                                return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
-                            }
-                            return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
-                                <div class="text-sky-300 text-[11px] font-bold">${order > 0 ? Math.round(order).toLocaleString() : '—'}</div>
-                            </td>`;
-                        }).join('')}
-                        <td class="px-3 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="text-amber-300 text-[11px] font-black">${Math.round(total).toLocaleString()}</div>
-                        </td>
-                    </tr>`;
-            }).join('') : `
-                <tr>
-                    <td colspan="${buckets.length + 2}" class="px-4 py-6 text-center text-slate-500">
-                        ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก
+            body.innerHTML=rows.length?rows.map(row=>{
+                const total=row.rawOrders.reduce((a,b)=>a+Number(b||0),0);
+                return `<tr>
+                    <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
+                        <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
+                        <div class="text-slate-500 text-[8px] mt-0.5 leading-tight">${row.models.join(' + ')}</div>
                     </td>
+                    ${columns.map(c=>{
+                        const value=c.type==='week'
+                            ? c.indexes.reduce((sum,i)=>sum+Number(row.rawOrders[i]||0),0)
+                            : Number(row.rawOrders[c.index]||0);
+                        return c.type==='week'
+                            ? `<td class="weekly-sum-col px-3 py-2.5 text-center"><div class="text-[11px] font-black">${Math.round(value).toLocaleString()}</div></td>`
+                            : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40"><div class="text-sky-300 text-[11px] font-bold">${value>0?Math.round(value).toLocaleString():'—'}</div></td>`;
+                    }).join('')}
+                    <td class="px-3 py-2.5 text-center border-l border-bordercolor/40 text-amber-300 text-[11px] font-black">${Math.round(total).toLocaleString()}</td>
                 </tr>`;
+            }).join(''):`<tr><td colspan="${columns.length+2}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
 
-            const dailyTotals = buckets.map((bucket,i) =>
-                rows.reduce((sum,row) => sum + Number(row.orders[i] || 0), 0)
-            );
-            const grandTotal = dailyTotals.reduce((sum,v) => sum + v, 0);
-
-            foot.innerHTML = `
-                <tr style="background:rgba(8,47,73,.60);">
-                    <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 text-cyan-200 font-black text-[11px]">
-                        TOTAL ORDER / DAY
-                    </td>
-                    ${dailyTotals.map((value,i) => `
-                        <td class="px-2 py-2.5 text-center font-black ${isSunday(days[i]) ? 'text-slate-500' : 'text-sky-300'}">
-                            ${(currentForecastPeriod === 'daily' && isSunday(days[buckets[i]?.indexes?.[0]])) ? '—' : Math.round(value).toLocaleString()}
-                        </td>`).join('')}
-                    <td class="px-3 py-2.5 text-center text-amber-300 font-black">
-                        ${Math.round(grandTotal).toLocaleString()}
-                    </td>
-                </tr>`;
+            const dailyTotals=days.map((day,i)=>isSunday(day)?0:rows.reduce((sum,r)=>sum+Number(r.rawOrders[i]||0),0));
+            const grandTotal=dailyTotals.reduce((a,b)=>a+b,0);
+            foot.innerHTML=`<tr>
+                <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 text-cyan-200 font-black text-[11px]">TOTAL ORDER</td>
+                ${columns.map(c=>{
+                    const value=c.type==='week'
+                        ? c.indexes.reduce((sum,i)=>sum+Number(dailyTotals[i]||0),0)
+                        : Number(dailyTotals[c.index]||0);
+                    return c.type==='week'
+                        ? `<td class="weekly-sum-col px-3 py-2.5 text-center font-black">${Math.round(value).toLocaleString()}</td>`
+                        : `<td class="px-2 py-2.5 text-center font-black text-sky-300">${value>0?Math.round(value).toLocaleString():'—'}</td>`;
+                }).join('')}
+                <td class="px-3 py-2.5 text-center text-amber-300 font-black">${Math.round(grandTotal).toLocaleString()}</td>
+            </tr>`;
         }
 
         function renderManpowerTable(data) {
@@ -9293,6 +9310,28 @@ document.addEventListener('DOMContentLoaded', () => {
     border-color:rgba(34,211,238,.65);
     color:#67e8f9;
     box-shadow:inset 0 0 0 1px rgba(34,211,238,.12);
+}
+</style>
+
+
+<style id="weekly-summary-column-style">
+#summaryDailyOrderByDoor .weekly-sum-col{
+    background:#0284c7 !important;
+    color:#ffffff !important;
+    border-left:2px solid #38bdf8 !important;
+    border-right:2px solid #38bdf8 !important;
+    font-weight:900 !important;
+}
+#summaryDailyOrderByDoor thead .weekly-sum-col{
+    background:#0369a1 !important;
+    color:#e0f2fe !important;
+}
+#summaryDailyOrderByDoor tbody .weekly-sum-col{
+    background:rgba(2,132,199,.88) !important;
+}
+#summaryDailyOrderByDoor tfoot .weekly-sum-col{
+    background:#0ea5e9 !important;
+    color:#ffffff !important;
 }
 </style>
 
