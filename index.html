@@ -1292,7 +1292,7 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-cyan-950/30 to-slate-950/20">
                             <div class="text-sm font-bold text-white">Summary Capacity Plan & Acual By Model</div>
                             <div class="text-[9px] text-slate-400 mt-0.5">
-                                สรุป Order และ Actual Capacity แยกตาม Model รายวัน
+                                แถวแรกเป็นรุ่น และแสดงออเดอร์รายวัน — Model ชื่อเดียวกันจะรวมยอดเข้าด้วยกันอัตโนมัติ
                             </div>
                         </div>
                         <div class="overflow-x-auto">
@@ -7461,10 +7461,13 @@ function updateLobSubLineVisibility() {
             if (!body || !foot || !table || !data?.days || !data?.groups) return;
 
             const station = currentManpowerStation || 'Door A';
-            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
             const days = data.days || [];
 
-            const models = [];
+            // รวม Model ชื่อเดียวกันเข้าด้วยกันก่อน
+            // ถ้า Model ซ้ำหลาย Product Group / หลายรายการ:
+            // Order ของวันเดียวกัน = ผลบวกของ Model ชื่อเดียวกันทั้งหมด
+            const modelMap = new Map();
+
             (data.groups || []).forEach(group => {
                 (group.models || []).forEach(model => {
                     const modelName = String(model?.name || '').trim();
@@ -7478,94 +7481,76 @@ function updateLobSubLineVisibility() {
                     else belongs = cfg.station === station;
                     if (!belongs) return;
 
-                    const daily = days.map((day, i) => {
-                        const isSun = isSunday(day);
-                        const baseOrder = isSun ? 0 : Math.max(0, Number(model?.orders?.[i]) || 0);
-                        const requiredOrder = isSun ? 0 : getSummaryModelRequiredOrder(modelName, station, baseOrder);
+                    if (!modelMap.has(modelName)) {
+                        modelMap.set(modelName, new Array(days.length).fill(0));
+                    }
 
-                        // Actual capacity for this model for ONE production day.
-                        const actualCapacity = (!isSun && requiredOrder > 0)
-                            ? getSummaryModelActualCapacity(modelName, station, 1, hours)
-                            : 0;
-
-                        const difference = actualCapacity - requiredOrder;
-                        const achievement = requiredOrder > 0 ? (actualCapacity / requiredOrder) * 100 : 0;
-                        return {baseOrder, requiredOrder, actualCapacity, difference, achievement, isSun};
+                    const dailyOrders = modelMap.get(modelName);
+                    days.forEach((day, i) => {
+                        if (isSunday(day)) return;
+                        const baseOrder = Math.max(0, Number(model?.orders?.[i]) || 0);
+                        dailyOrders[i] += baseOrder;
                     });
-
-                    if (!daily.some(d => d.baseOrder > 0 || d.requiredOrder > 0)) return;
-                    models.push({modelName, daily});
                 });
             });
 
-            models.sort((a,b) => a.modelName.localeCompare(b.modelName));
+            const models = Array.from(modelMap.entries())
+                .map(([modelName, orders]) => ({modelName, orders}))
+                .filter(m => m.orders.some(v => v > 0))
+                .sort((a,b) => a.modelName.localeCompare(b.modelName));
 
-            // Rebuild header: Model + one column per day.
+            // Header: รุ่น | วันที่...
             table.querySelector('thead').innerHTML = `
                 <tr>
-                    <th class="px-3 py-2.5 text-cyan-200 sticky left-0 z-20 bg-slate-950">Model</th>
+                    <th class="px-3 py-2.5 text-cyan-200 sticky left-0 z-20 bg-slate-950 whitespace-nowrap">รุ่น / Model</th>
                     ${days.map(day => `
                         <th class="px-2 py-2.5 text-center text-sky-300 whitespace-nowrap">
                             ${formatDateShort(day)}
                         </th>`).join('')}
+                    <th class="px-3 py-2.5 text-center text-amber-300 whitespace-nowrap">รวม / Total</th>
                 </tr>`;
 
-            body.innerHTML = models.length ? models.map(m => `
-                <tr class="hover:bg-slate-800/35">
-                    <td class="px-3 py-2.5 font-bold text-white sticky left-0 z-10 bg-[#101a34] whitespace-nowrap">
-                        ${m.modelName}
+            body.innerHTML = models.length ? models.map(m => {
+                const total = m.orders.reduce((sum,v) => sum + Number(v || 0), 0);
+                return `
+                    <tr class="hover:bg-slate-800/35">
+                        <td class="px-3 py-2.5 font-bold text-white sticky left-0 z-10 bg-[#101a34] whitespace-nowrap">
+                            ${m.modelName}
+                        </td>
+                        ${m.orders.map((order, i) => `
+                            <td class="px-2 py-2.5 text-center ${isSunday(days[i]) ? 'bg-slate-950/50 text-slate-600' : 'text-sky-300'} font-bold">
+                                ${isSunday(days[i]) ? '—' : (order > 0 ? Math.round(order).toLocaleString() : '—')}
+                            </td>`).join('')}
+                        <td class="px-3 py-2.5 text-center text-amber-300 font-black">
+                            ${Math.round(total).toLocaleString()}
+                        </td>
+                    </tr>`;
+            }).join('') : `
+                <tr>
+                    <td colspan="${days.length + 2}" class="px-4 py-6 text-center text-slate-500">
+                        ไม่มีข้อมูล Model สำหรับไลน์ที่เลือก
                     </td>
-                    ${m.daily.map(d => {
-                        if (d.isSun) {
-                            return `<td class="px-2 py-2 text-center bg-slate-950/50 text-slate-600">—</td>`;
-                        }
-                        if (d.requiredOrder <= 0 && d.baseOrder <= 0) {
-                            return `<td class="px-2 py-2 text-center text-slate-600">—</td>`;
-                        }
-                        return `
-                            <td class="px-2 py-2 text-center min-w-[112px]">
-                                <div class="text-[10px] text-sky-300 font-bold">${Math.round(d.requiredOrder).toLocaleString()}</div>
-                                <div class="text-[8px] text-slate-500">Order</div>
-                                <div class="text-[10px] text-emerald-300 font-bold mt-1">${Math.round(d.actualCapacity).toLocaleString()}</div>
-                                <div class="text-[8px] text-slate-500">Actual</div>
-                                <div class="text-[9px] font-bold mt-1 ${d.difference < 0 ? 'text-rose-300' : 'text-emerald-300'}">
-                                    ${d.difference >= 0 ? '+' : ''}${Math.round(d.difference).toLocaleString()}
-                                </div>
-                                <div class="text-[8px] ${d.achievement < 100 ? 'text-rose-300' : 'text-violet-300'}">
-                                    ${d.achievement.toFixed(1)}%
-                                </div>
-                            </td>`;
-                    }).join('')}
-                </tr>`).join('') :
-                `<tr><td colspan="${days.length + 1}" class="px-4 py-6 text-center text-slate-500">ไม่มีข้อมูล Model สำหรับไลน์ที่เลือก</td></tr>`;
+                </tr>`;
 
-            // Daily total row.
-            const totals = days.map((day, i) => {
-                let order = 0, actual = 0;
-                models.forEach(m => {
-                    order += Number(m.daily[i]?.requiredOrder || 0);
-                    actual += Number(m.daily[i]?.actualCapacity || 0);
-                });
-                const diff = actual - order;
-                const ach = order > 0 ? actual / order * 100 : 0;
-                return {order, actual, diff, ach, isSun:isSunday(day)};
+            // รวม Order ของทุก Model รายวัน
+            const dailyTotals = days.map((day, i) => {
+                if (isSunday(day)) return 0;
+                return models.reduce((sum,m) => sum + Number(m.orders[i] || 0), 0);
             });
+            const grandTotal = dailyTotals.reduce((sum,v) => sum + v, 0);
 
             foot.innerHTML = `
                 <tr style="background:rgba(8,47,73,.55);">
-                    <td class="px-3 py-2.5 font-black text-cyan-200 sticky left-0 z-10 bg-cyan-950">TOTAL / DAY</td>
-                    ${totals.map(t => t.isSun ? `
-                        <td class="px-2 py-2 text-center text-slate-500">—</td>` : `
-                        <td class="px-2 py-2 text-center min-w-[112px]">
-                            <div class="text-[10px] font-black text-sky-300">${Math.round(t.order).toLocaleString()}</div>
-                            <div class="text-[8px] text-slate-400">Order</div>
-                            <div class="text-[10px] font-black text-emerald-300 mt-1">${Math.round(t.actual).toLocaleString()}</div>
-                            <div class="text-[8px] text-slate-400">Actual</div>
-                            <div class="text-[9px] font-black mt-1 ${t.diff < 0 ? 'text-rose-300' : 'text-emerald-300'}">
-                                ${t.diff >= 0 ? '+' : ''}${Math.round(t.diff).toLocaleString()}
-                            </div>
-                            <div class="text-[8px] font-bold ${t.ach < 100 ? 'text-rose-300' : 'text-violet-300'}">${t.ach.toFixed(1)}%</div>
+                    <td class="px-3 py-2.5 font-black text-cyan-200 sticky left-0 z-10 bg-cyan-950 whitespace-nowrap">
+                        TOTAL ORDER / DAY
+                    </td>
+                    ${dailyTotals.map((v,i) => `
+                        <td class="px-2 py-2.5 text-center font-black ${isSunday(days[i]) ? 'text-slate-500' : 'text-sky-300'}">
+                            ${isSunday(days[i]) ? '—' : Math.round(v).toLocaleString()}
                         </td>`).join('')}
+                    <td class="px-3 py-2.5 text-center font-black text-amber-300">
+                        ${Math.round(grandTotal).toLocaleString()}
+                    </td>
                 </tr>`;
         }
 
