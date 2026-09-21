@@ -7639,13 +7639,13 @@ function updateLobSubLineVisibility() {
         function getSummaryDoorCapacityByDay(doorName, modelNames, station, dayIndex, hours, data) {
             if (!(hours > 0) || !Array.isArray(modelNames) || !modelNames.length) return 0;
 
-            // Exact Actual formula requested:
-            // A/hour = (3600 / Weighted Lead Time) × 85%
+            // Actual Capacity uses MAX CT (not Lead Time) and does NOT multiply manpower.
+            // A/hour = (3600 / MAX CT) × 85%
             // A/day  = A/hour × Working Hours
             //
-            // Important: calculate EACH physical production line separately,
-            // then sum capacities. Do not add manpower repeatedly per model.
-            const buckets = new Map();
+            // If several models are produced in the same Door row/day,
+            // use the highest CT among the models actually produced that day.
+            let maxCT = 0;
 
             const getModelData = (modelName) => {
                 let found = null;
@@ -7656,16 +7656,6 @@ function updateLobSubLineVisibility() {
                     return !!found;
                 });
                 return found;
-            };
-
-            const addWork = (lineName, leadTime, orderWeight) => {
-                leadTime = Math.max(0, Number(leadTime) || 0);
-                orderWeight = Math.max(0, Number(orderWeight) || 0);
-                if (!lineName || leadTime <= 0 || orderWeight <= 0) return;
-                if (!buckets.has(lineName)) buckets.set(lineName, {weightedLT:0, order:0});
-                const b = buckets.get(lineName);
-                b.weightedLT += leadTime * orderWeight;
-                b.order += orderWeight;
             };
 
             modelNames.forEach(modelName => {
@@ -7680,67 +7670,39 @@ function updateLobSubLineVisibility() {
 
                     (getDoorCRoutingDetails(modelName) || []).forEach(route => {
                         const lineName = route.line;
-                        let leadTime = 0;
+                        let types = [];
 
-                        if (lineName === 'C-1') {
-                            leadTime =
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'RR')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'RL')) || 0);
-                        } else if (lineName === 'C-2') {
-                            leadTime =
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'VEG')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'FB')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'FT')) || 0);
-                        } else if (lineName === 'C-3') {
-                            leadTime =
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'RR')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName,'FR')) || 0);
-                        }
+                        if (lineName === 'C-1') types = ['RR','RL'];
+                        else if (lineName === 'C-2') types = ['VEG','FB','FT'];
+                        else if (lineName === 'C-3') types = ['RR','FR'];
 
-                        const ratio = Math.max(
-                            0,
-                            Number(getDoorCManualRatio(modelName, lineName, route.qty)) || 0
-                        );
-                        addWork(lineName, leadTime, cabinetOrder * ratio);
+                        types.forEach(type => {
+                            const ct = Math.max(0, Number(getDoorTypeLeadTime(modelName, type)) || 0);
+                            if (ct > maxCT) maxCT = ct;
+                        });
                     });
                     return;
                 }
 
-                let lineName = station;
                 let belongs = false;
-
                 if (station === 'Back Plate') {
                     belongs = cfg.backPlateSource === 'ผลิตเอง';
-                    lineName = cfg.backPlateLine || 'Line#1';
                 } else if (station === 'Bottom Plate') {
                     belongs = cfg.bottomSource === 'ผลิตเอง';
-                    lineName = cfg.bottomLine || 'Line#1';
                 } else {
                     belongs = cfg.station === station;
                 }
                 if (!belongs) return;
 
-                const leadTime = Math.max(0, Number(getLeadTimeForManpower(modelName, station)) || 0);
-                const productionRatio = Math.max(
-                    0,
-                    Number(getSummaryDoorProductionRatioMultiplier(modelName, station)) || 1
-                );
-                addWork(lineName, leadTime, cabinetOrder * productionRatio);
+                // Existing dashboard Max CT helper.
+                const ct = Math.max(0, Number(getModelMaxCT(modelName, station)) || 0);
+                if (ct > maxCT) maxCT = ct;
             });
 
-            let dailyCapacity = 0;
+            if (!(maxCT > 0)) return 0;
 
-            buckets.forEach((b, lineName) => {
-                if (!(b.order > 0) || !(b.weightedLT > 0)) return;
-
-                const weightedLeadTime = b.weightedLT / b.order;
-                if (weightedLeadTime > 0) {
-                    const actualPerHour = (3600 / weightedLeadTime) * 0.85;
-                    dailyCapacity += actualPerHour * hours;
-                }
-            });
-
-            return dailyCapacity;
+            const actualPerHour = (3600 / maxCT) * 0.85;
+            return actualPerHour * hours;
         }
 
         function renderSummaryDailyOrderByDoor(data) {
