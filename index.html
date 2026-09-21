@@ -1157,6 +1157,14 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Back Plate / Bottom Plate Line#1 / Line#2: Load to Cart 1 คน รวมอยู่ใน In Line | Out Line = Part Supply 1 + Delivery 1 (รวม 2 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours
                             </p>
                         </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex items-center gap-1 bg-slate-900/80 border border-cyan-500/25 rounded-xl p-1">
+                                <span class="text-[9px] text-slate-400 font-semibold px-2">Forecast:</span>
+                                <button type="button" id="forecastDailyBtn" onclick="setForecastPeriod('daily')" class="forecast-period-btn active">รายวัน</button>
+                                <button type="button" id="forecastWeeklyBtn" onclick="setForecastPeriod('weekly')" class="forecast-period-btn">รายสัปดาห์</button>
+                                <button type="button" id="forecastMonthlyBtn" onclick="setForecastPeriod('monthly')" class="forecast-period-btn">รายเดือน</button>
+                            </div>
+                        </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                             <span class="text-[10px] text-slate-400 font-semibold">เลือกไลน์ผลิต:</span>
                             <select id="manpowerLineSelect"
@@ -7467,6 +7475,73 @@ function updateLobSubLineVisibility() {
             return cfg.station === station;
         }
 
+
+        let currentForecastPeriod = localStorage.getItem('haier_forecast_period_v1') || 'daily';
+
+        function setForecastPeriod(period) {
+            if (!['daily','weekly','monthly'].includes(period)) period = 'daily';
+            currentForecastPeriod = period;
+            localStorage.setItem('haier_forecast_period_v1', period);
+            updateForecastPeriodButtons();
+            if (typeof dailyPlanData !== 'undefined' && dailyPlanData) {
+                renderManpowerTable(dailyPlanData);
+            }
+        }
+
+        function updateForecastPeriodButtons() {
+            ['daily','weekly','monthly'].forEach(p => {
+                const id = p === 'daily' ? 'forecastDailyBtn' : p === 'weekly' ? 'forecastWeeklyBtn' : 'forecastMonthlyBtn';
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('active', currentForecastPeriod === p);
+            });
+        }
+
+        function parseForecastDate(value) {
+            const text = String(value || '').trim();
+            let m = text.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
+            if (m) {
+                let y = Number(m[3] || new Date().getFullYear());
+                if (y < 100) y += 2000;
+                if (y > 2400) y -= 543;
+                return new Date(y, Number(m[2])-1, Number(m[1]));
+            }
+            const d = new Date(text);
+            return isNaN(d) ? null : d;
+        }
+
+        function getForecastBuckets(days) {
+            if (currentForecastPeriod === 'daily') {
+                return days.map((day,i) => ({label:String(day), indexes:[i]}));
+            }
+
+            const buckets = new Map();
+            days.forEach((day,i) => {
+                const d = parseForecastDate(day);
+                if (!d) {
+                    const key = `raw_${i}`;
+                    buckets.set(key,{label:String(day),indexes:[i]});
+                    return;
+                }
+
+                let key, label;
+                if (currentForecastPeriod === 'monthly') {
+                    key = `${d.getFullYear()}-${d.getMonth()}`;
+                    label = d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'});
+                } else {
+                    const monday = new Date(d);
+                    const dow = (d.getDay()+6)%7;
+                    monday.setDate(d.getDate()-dow);
+                    const sunday = new Date(monday);
+                    sunday.setDate(monday.getDate()+6);
+                    key = monday.toISOString().slice(0,10);
+                    label = `${monday.getDate()}/${monday.getMonth()+1}–${sunday.getDate()}/${sunday.getMonth()+1}`;
+                }
+                if (!buckets.has(key)) buckets.set(key,{label,indexes:[]});
+                buckets.get(key).indexes.push(i);
+            });
+            return Array.from(buckets.values());
+        }
+
         function renderSummaryDailyOrderByDoor(data) {
             const head = document.getElementById('summaryDailyOrderByDoorHead');
             const body = document.getElementById('summaryDailyOrderByDoorBody');
@@ -7475,7 +7550,14 @@ function updateLobSubLineVisibility() {
             if (!head || !body || !foot || !table || !data?.days || !data?.groups) return;
 
             const station = currentManpowerStation || 'Door A';
+            updateForecastPeriodButtons();
+            const forecastTitle = document.querySelector('#summaryDailyOrderByDoor .text-sm.font-bold');
+            if (forecastTitle) {
+                const label = currentForecastPeriod === 'weekly' ? 'Weekly' : currentForecastPeriod === 'monthly' ? 'Monthly' : 'Daily';
+                forecastTitle.textContent = `Summary ${label} Order By Model / Door`;
+            }
             const days = data.days || [];
+            const buckets = getForecastBuckets(days);
             const doorMap = new Map();
 
             // Door -> { orders[day], models Set }
@@ -7509,7 +7591,7 @@ function updateLobSubLineVisibility() {
             const rows = Array.from(doorMap.entries())
                 .map(([door, item]) => ({
                     door,
-                    orders: item.orders,
+                    orders: buckets.map(bucket => bucket.indexes.reduce((sum,idx) => sum + Number(item.orders[idx] || 0), 0)),
                     models: Array.from(item.models).sort((a,b) => a.localeCompare(b))
                 }))
                 .filter(r => r.orders.some(v => v > 0))
@@ -7527,15 +7609,15 @@ function updateLobSubLineVisibility() {
             const doorWidth = 165;
             const dayWidth = 76;
             const totalWidth = 90;
-            table.style.width = `${doorWidth + days.length * dayWidth + totalWidth}px`;
+            table.style.width = `${doorWidth + buckets.length * dayWidth + totalWidth}px`;
             table.style.minWidth = '100%';
 
             head.innerHTML = `
                 <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-left"
                     style="width:${doorWidth}px;min-width:${doorWidth}px;">DOOR</th>
-                ${days.map(day => `
+                ${buckets.map(bucket => `
                     <th class="px-2 py-2.5 bg-slate-950/95 text-center text-sky-300 whitespace-nowrap"
-                        style="min-width:${dayWidth}px;">${day}</th>`).join('')}
+                        style="min-width:${dayWidth}px;">${bucket.label}</th>`).join('')}
                 <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap"
                     style="min-width:${totalWidth}px;">TOTAL</th>
             `;
@@ -7551,7 +7633,8 @@ function updateLobSubLineVisibility() {
                             </div>
                         </td>
                         ${row.orders.map((order,i) => {
-                            if (isSunday(days[i])) {
+                            const dailySunday = currentForecastPeriod === 'daily' && isSunday(days[buckets[i]?.indexes?.[0]]);
+                            if (dailySunday) {
                                 return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
                             }
                             return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
@@ -7564,15 +7647,14 @@ function updateLobSubLineVisibility() {
                     </tr>`;
             }).join('') : `
                 <tr>
-                    <td colspan="${days.length + 2}" class="px-4 py-6 text-center text-slate-500">
+                    <td colspan="${buckets.length + 2}" class="px-4 py-6 text-center text-slate-500">
                         ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก
                     </td>
                 </tr>`;
 
-            const dailyTotals = days.map((day,i) => {
-                if (isSunday(day)) return 0;
-                return rows.reduce((sum,row) => sum + Number(row.orders[i] || 0), 0);
-            });
+            const dailyTotals = buckets.map((bucket,i) =>
+                rows.reduce((sum,row) => sum + Number(row.orders[i] || 0), 0)
+            );
             const grandTotal = dailyTotals.reduce((sum,v) => sum + v, 0);
 
             foot.innerHTML = `
@@ -7582,7 +7664,7 @@ function updateLobSubLineVisibility() {
                     </td>
                     ${dailyTotals.map((value,i) => `
                         <td class="px-2 py-2.5 text-center font-black ${isSunday(days[i]) ? 'text-slate-500' : 'text-sky-300'}">
-                            ${isSunday(days[i]) ? '—' : Math.round(value).toLocaleString()}
+                            ${(currentForecastPeriod === 'daily' && isSunday(days[buckets[i]?.indexes?.[0]])) ? '—' : Math.round(value).toLocaleString()}
                         </td>`).join('')}
                     <td class="px-3 py-2.5 text-center text-amber-300 font-black">
                         ${Math.round(grandTotal).toLocaleString()}
@@ -9190,6 +9272,27 @@ document.addEventListener('DOMContentLoaded', () => {
     #manpower-section > div:first-child{
         top: 69px !important;
     }
+}
+</style>
+
+
+<style id="forecast-period-style">
+.forecast-period-btn{
+    border:1px solid rgba(71,85,105,.75);
+    background:rgba(15,23,42,.8);
+    color:#94a3b8;
+    padding:5px 9px;
+    border-radius:8px;
+    font-size:9px;
+    font-weight:800;
+    transition:.15s ease;
+}
+.forecast-period-btn:hover{color:#e2e8f0;border-color:rgba(34,211,238,.45);}
+.forecast-period-btn.active{
+    background:rgba(8,145,178,.20);
+    border-color:rgba(34,211,238,.65);
+    color:#67e8f9;
+    box-shadow:inset 0 0 0 1px rgba(34,211,238,.12);
 }
 </style>
 
