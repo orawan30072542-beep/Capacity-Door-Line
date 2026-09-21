@@ -7490,15 +7490,40 @@ function updateLobSubLineVisibility() {
 
         function parseForecastDate(value) {
             const text = String(value || '').trim();
+            if (!text) return null;
+
+            // Accept M/D, M/D/YYYY, D/M/YYYY and ISO.
+            // Daily Plan headers in this dashboard are primarily M/D (e.g. 9/21).
             let m = text.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?$/);
             if (m) {
-                let y = Number(m[3] || new Date().getFullYear());
+                const a = Number(m[1]);
+                const b = Number(m[2]);
+                let y = Number(m[3] || 2026);
                 if (y < 100) y += 2000;
                 if (y > 2400) y -= 543;
-                return new Date(y, Number(m[2])-1, Number(m[1]));
+
+                let month, day;
+                if (!m[3]) {
+                    // Header without year: M/D
+                    month = a;
+                    day = b;
+                } else if (a > 12) {
+                    // Clearly D/M/YYYY
+                    day = a;
+                    month = b;
+                } else {
+                    // Prefer M/D/YYYY for dashboard plan headers
+                    month = a;
+                    day = b;
+                }
+
+                const d = new Date(y, month - 1, day);
+                if (d.getFullYear() === y && d.getMonth() === month - 1 && d.getDate() === day) return d;
+                return null;
             }
+
             const d = new Date(text);
-            return isNaN(d) ? null : d;
+            return isNaN(d.getTime()) ? null : d;
         }
 
         function getForecastBuckets(days) {
@@ -7546,41 +7571,34 @@ function updateLobSubLineVisibility() {
 
         function getDailyWeeklySummaryColumns(days) {
             const cols = [];
+            let activeWeek = null;
             let weekIndexes = [];
-            let weekNo = null;
 
-            const flushWeek = () => {
+            const flush = () => {
                 if (!weekIndexes.length) return;
                 cols.push({
-                    type:'week',
-                    label:`SUM W${weekNo || ''}`,
-                    indexes:[...weekIndexes]
+                    type: 'week',
+                    label: `SUM W${activeWeek}`,
+                    indexes: [...weekIndexes]
                 });
                 weekIndexes = [];
             };
 
             days.forEach((day, i) => {
                 const d = parseForecastDate(day);
-
-                // If a date cannot be parsed, keep it as a normal daily column.
                 if (!d) {
+                    flush();
+                    activeWeek = null;
                     cols.push({type:'day', label:String(day), index:i});
                     return;
                 }
 
-                const thisWeek = getIsoWeekNumberForSummary(day);
+                const week = getIsoWeekNumberForSummary(day);
 
-                // Start/continue one weekly bucket. Do NOT SUM after every day.
-                if (weekNo === null) weekNo = thisWeek;
+                // Close previous week only when the ISO week actually changes.
+                if (activeWeek !== null && week !== activeWeek) flush();
+                activeWeek = week;
 
-                // If the imported range crosses into a new ISO week without an
-                // explicit Sunday column, close the previous week once.
-                if (thisWeek !== weekNo && weekIndexes.length) {
-                    flushWeek();
-                    weekNo = thisWeek;
-                }
-
-                // Keep every date visible, including Sunday.
                 cols.push({
                     type:'day',
                     label:`${d.getMonth()+1}/${d.getDate()}`,
@@ -7588,16 +7606,15 @@ function updateLobSubLineVisibility() {
                 });
                 weekIndexes.push(i);
 
-                // Weekly SUM appears only after Sunday.
+                // If Sunday exists in imported plan, close the week after Sunday.
                 if (d.getDay() === 0) {
-                    flushWeek();
-                    weekNo = null;
+                    flush();
+                    activeWeek = null;
                 }
             });
 
-            // If the imported data ends before Sunday, show one SUM for the
-            // remaining partial week at the end (not after each day).
-            flushWeek();
+            // Partial last week
+            flush();
             return cols;
         }
 
