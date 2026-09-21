@@ -7734,7 +7734,7 @@ function updateLobSubLineVisibility() {
             foot.innerHTML=`<tr>
                 <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 font-black">
                     <div class="text-cyan-200 text-[11px]">TOTAL ORDER</div>
-                    <div class="production-ratio-label">ผลิตตาม Ratio</div>
+                    <div class="production-ratio-label">D:</div>
                 </td>
                 ${columns.map(c=>{
                     const value=c.type==='week'
@@ -9413,7 +9413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     font-weight:900 !important;
 }
 #summaryDailyOrderByDoor .production-ratio-value::before{
-    content:"Ratio ";
+    content:"D: ";
     color:#eab308;
     font-size:7px;
     font-weight:700;
