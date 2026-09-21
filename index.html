@@ -10952,5 +10952,51 @@ c.style.setProperty('text-align','center','important');c.style.setProperty('vert
 const o=window.renderSummaryCapacityPlanActual;if(typeof o==='function')window.renderSummaryCapacityPlanActual=function(){const r=o.apply(this,arguments);requestAnimationFrame(a);return r};
 document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTimeout(a,100)})();
 </script>
+
+<style id="capacity-monsat-40px-final">
+#tableSummaryCapacityPlanActual thead th:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator):not(.summary-sunday-col):not(.scp-sunday-20),
+#tableSummaryCapacityPlanActual tbody td:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator):not(.summary-sunday-col):not(.scp-sunday-20){
+    width:40px !important;
+    min-width:40px !important;
+    max-width:40px !important;
+}
+</style>
+<script id="capacity-monsat-40px-runtime-final">
+(function(){
+    function setW(el,w){
+        if(!el)return;
+        ['width','min-width','max-width'].forEach(p=>el.style.setProperty(p,w+'px','important'));
+    }
+    function parseDate(txt){
+        const m=String(txt||'').trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if(!m)return null;
+        let y=m[3]?Number(m[3]):2026;if(y<100)y+=2000;
+        return new Date(y,Number(m[1])-1,Number(m[2]));
+    }
+    function apply(){
+        const t=document.getElementById('tableSummaryCapacityPlanActual');
+        if(!t)return;
+        const hs=[...t.querySelectorAll('thead th')];
+        hs.forEach((th,i)=>{
+            if(i<2)return;
+            const d=parseDate(th.textContent);
+            if(!d || d.getDay()===0)return;
+            setW(th,40);
+            t.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>setW(tr.children[i],40));
+        });
+    }
+    const old=window.renderSummaryCapacityPlanActual;
+    if(typeof old==='function'){
+        window.renderSummaryCapacityPlanActual=function(){
+            const r=old.apply(this,arguments);
+            requestAnimationFrame(apply);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(apply));
+    setTimeout(apply,100);
+})();
+</script>
+
 </body>
 </html
