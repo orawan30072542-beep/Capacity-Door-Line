@@ -10744,15 +10744,15 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 </script>
 
 
-<style id="capacity-line-type-60-centered-final">
+<style id="capacity-line-type-58-centered-final">
 /* Summary Capacity Plan & Acual: reduce Line / Type and center contents */
 #tableSummaryCapacityPlanActual th:first-child,
 #tableSummaryCapacityPlanActual td:first-child,
 #tableSummaryCapacityPlanActual th:nth-child(2),
 #tableSummaryCapacityPlanActual td:nth-child(2){
-    width:60px !important;
-    min-width:60px !important;
-    max-width:60px !important;
+    width:58px !important;
+    min-width:58px !important;
+    max-width:58px !important;
     text-align:center !important;
     vertical-align:middle !important;
     padding-left:3px !important;
@@ -10767,7 +10767,7 @@ Therefore: Line 60 + Type 60 = DOOR 120.
     margin-right:auto !important;
 }
 </style>
-<script id="capacity-line-type-60-centered-runtime-final">
+<script id="capacity-line-type-58-centered-runtime-final">
 (function(){
     function apply(){
         const table=document.getElementById('tableSummaryCapacityPlanActual');
@@ -10776,7 +10776,7 @@ Therefore: Line 60 + Type 60 = DOOR 120.
             [0,1].forEach(i=>{
                 const c=tr.children[i];
                 if(!c)return;
-                ['width','min-width','max-width'].forEach(p=>c.style.setProperty(p,'60px','important'));
+                ['width','min-width','max-width'].forEach(p=>c.style.setProperty(p,'58px','important'));
                 c.style.setProperty('text-align','center','important');
                 c.style.setProperty('vertical-align','middle','important');
             });
