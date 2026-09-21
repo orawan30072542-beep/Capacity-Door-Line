@@ -7258,121 +7258,117 @@ function updateLobSubLineVisibility() {
             const columns = getDailyWeeklySummaryColumns(days);
 
             const lineWidth = 90;
-            const dataWidth = 175;
-            const dayWidth = 72;
-            const weekWidth = 86;
+            const typeWidth = 72;
+            const dayWidth = 92;
+            const weekWidth = 100;
             const totalWidth = columns.reduce((sum,c)=>sum+(c.type==='week'?weekWidth:dayWidth),0);
-            table.style.width = `${lineWidth + dataWidth + totalWidth}px`;
+            table.style.width = `${lineWidth + typeWidth + totalWidth}px`;
             table.style.minWidth = '100%';
 
             head.innerHTML = `
                 <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-center" style="width:${lineWidth}px;min-width:${lineWidth}px;">Line</th>
-                <th class="px-3 py-2.5 bg-slate-950/95 sticky z-30 text-left" style="left:${lineWidth}px;width:${dataWidth}px;min-width:${dataWidth}px;">ข้อมูล</th>
+                <th class="px-2 py-2.5 bg-slate-950/95 sticky z-30 text-center" style="left:${lineWidth}px;width:${typeWidth}px;min-width:${typeWidth}px;">Type</th>
                 ${columns.map(c => c.type==='week'
                     ? `<th class="scp-weekly-sum-col px-2 py-2.5 text-center whitespace-nowrap" style="min-width:${weekWidth}px;">${c.label}</th>`
                     : `<th class="px-2 py-2.5 bg-slate-950/95 text-center whitespace-nowrap" style="min-width:${dayWidth}px;">${c.label}</th>`
                 ).join('')}
             `;
 
-            const sumIndexes=(arr,indexes)=>indexes.reduce((sum,i)=>sum+Number(arr[i]||0),0);
-            const cell=(main,hour,week=false,extra='')=>`
-                <td class="${week?'scp-weekly-sum-col ':''}px-2 py-2.5 text-center border-l border-bordercolor/40">
-                    ${extra}
-                    <div class="scp-main-value">${Math.round(main).toLocaleString()}</div>
-                    <div class="scp-hour-value">${Math.round(hour).toLocaleString()}</div>
+            const sumIndexes = (arr,indexes) => indexes.reduce((sum,i)=>sum+Number(arr[i]||0),0);
+
+            const summaryCell = (cab, p, a, diff, isWeek=false, blank=false) => {
+                if (blank) {
+                    return `<td class="scp-no-production border-l border-bordercolor/40"></td>`;
+                }
+                const diffClass = diff < 0 ? 'scp-negative' : 'scp-positive';
+                const sign = diff > 0 ? '+' : '';
+                return `<td class="${isWeek?'scp-weekly-sum-col ':''}${diffClass} px-2 py-2 text-center border-l border-bordercolor/40">
+                    <div class="scp-cab">Cab : ${Math.round(cab).toLocaleString()}</div>
+                    <div class="scp-divider"></div>
+                    <div class="scp-p">P : ${Math.round(p).toLocaleString()}</div>
+                    <div class="scp-a">A : ${Math.round(a).toLocaleString()}</div>
+                    <div class="scp-diff">(${sign}${Math.round(diff).toLocaleString()})</div>
                 </td>`;
+            };
 
-            let html='';
+            let html = '';
 
-            lines.forEach(lineName=>{
-                const plan=days.map((day,i)=>isSunday(day)?0:getSummaryCapacityPlanOrder(data,station,lineName,i));
-                const required=days.map((day,i)=>isSunday(day)?0:getSummaryCapacityRequiredOrder(data,station,lineName,i,hours));
-                const leadTimes=days.map((day,i)=>isSunday(day)?0:getSummaryCapacityLeadTime(data,station,lineName,i));
-                const lineBalanceManpower=getSummaryLineBalanceManpower(station,lineName);
+            lines.forEach(lineName => {
+                const plan = days.map((day,i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityPlanOrder(data, station, lineName, i)
+                );
+                const required = days.map((day,i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityRequiredOrder(data, station, lineName, i, hours)
+                );
+                const leadTimes = days.map((day,i) =>
+                    isSunday(day) ? 0 : getSummaryCapacityLeadTime(data, station, lineName, i)
+                );
 
-                const capacityDaily=[];
-                const capacityHourly=[];
-                const diffDaily=[];
-                const diffHourly=[];
+                const lineBalanceManpower = getSummaryLineBalanceManpower(station, lineName);
+                const actualDay = [];
+                const actualUPH = [];
 
-                days.forEach((day,i)=>{
-                    if(isSunday(day)){
-                        capacityDaily[i]=0; capacityHourly[i]=0; diffDaily[i]=0; diffHourly[i]=0;
+                days.forEach((day,i) => {
+                    if (isSunday(day) || !(plan[i] > 0 || required[i] > 0)) {
+                        actualDay[i] = 0;
+                        actualUPH[i] = 0;
                         return;
                     }
-                    const ratio=plan[i]>0?(required[i]/plan[i]):0;
-                    const plateEfficiency=(station==='Back Plate'||station==='Bottom Plate')?0.85:1;
-                    const hourly=leadTimes[i]>0&&lineBalanceManpower>0
-                        ?(3600/leadTimes[i])*lineBalanceManpower*ratio*plateEfficiency:0;
-                    const daily=hourly*hours;
-                    capacityHourly[i]=hourly;
-                    capacityDaily[i]=daily;
-                    diffDaily[i]=daily-required[i];
-                    diffHourly[i]=hourly-(hours>0?required[i]/hours:0);
+                    const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                    const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+                    const hourlyCapacity = leadTimes[i] > 0 && lineBalanceManpower > 0
+                        ? (3600 / leadTimes[i]) * lineBalanceManpower * ratio * plateEfficiency
+                        : 0;
+                    actualUPH[i] = hourlyCapacity;
+                    actualDay[i] = hourlyCapacity * hours;
                 });
 
-                const renderSimple=(arr)=>columns.map(c=>{
-                    if(c.type==='week'){
-                        const main=sumIndexes(arr,c.indexes);
-                        const hr=hours>0?main/hours:0;
-                        return cell(main,hr,true);
+                const renderDayCells = () => columns.map(c => {
+                    if (c.type === 'week') {
+                        const cab = sumIndexes(plan,c.indexes);
+                        const p = sumIndexes(required,c.indexes);
+                        const a = sumIndexes(actualDay,c.indexes);
+                        return summaryCell(cab,p,a,a-p,true,false);
                     }
-                    const i=c.index;
-                    if(isSunday(days[i])) return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
-                    return cell(arr[i],hours>0?arr[i]/hours:0,false);
+                    const i = c.index;
+                    const blank = isSunday(days[i]) || !(plan[i] > 0 || required[i] > 0);
+                    return summaryCell(plan[i],required[i],actualDay[i],actualDay[i]-required[i],false,blank);
                 }).join('');
 
-                html+=`<tr class="scp-plan-row bg-amber-950/10">
-                    <td rowspan="4" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">${lineName}</td>
-                    <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
-                        Plan Order<div class="text-[8px] text-slate-400 font-normal mt-0.5">จากไฟล์แผนผลิตที่นำเข้า</div>
-                    </td>${renderSimple(plan)}</tr>`;
+                const renderUPHCells = () => columns.map(c => {
+                    if (c.type === 'week') {
+                        // Weekly UPH is based on the weekly Day totals / working hours.
+                        const cabDay = sumIndexes(plan,c.indexes);
+                        const pDay = sumIndexes(required,c.indexes);
+                        const aDay = sumIndexes(actualDay,c.indexes);
+                        const activeDays = c.indexes.filter(i => !isSunday(days[i]) && (plan[i] > 0 || required[i] > 0)).length;
+                        const weekHours = hours * activeDays;
+                        const cab = weekHours > 0 ? cabDay / weekHours : 0;
+                        const p = weekHours > 0 ? pDay / weekHours : 0;
+                        const a = weekHours > 0 ? aDay / weekHours : 0;
+                        return summaryCell(cab,p,a,a-p,true,false);
+                    }
+                    const i = c.index;
+                    const blank = isSunday(days[i]) || !(plan[i] > 0 || required[i] > 0);
+                    const cab = hours > 0 ? plan[i] / hours : 0;
+                    const p = hours > 0 ? required[i] / hours : 0;
+                    const a = actualUPH[i];
+                    return summaryCell(cab,p,a,a-p,false,blank);
+                }).join('');
 
-                html+=`<tr class="scp-capacity-row scp-required-row bg-amber-950/5">
-                    <td class="px-3 py-2.5 text-amber-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
-                        Required Order<div class="text-[8px] text-slate-400 font-normal mt-0.5">จากยอดรวมออเดอร์รายวันที่ต้องผลิต</div>
-                    </td>${renderSimple(required)}</tr>`;
+                html += `<tr class="scp-day-row">
+                    <td rowspan="2" class="px-3 py-2.5 text-center font-bold text-cyan-300 bg-slate-950/95 sticky left-0 z-20 border-r border-bordercolor">${lineName}</td>
+                    <td class="scp-type-cell sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">Day</td>
+                    ${renderDayCells()}
+                </tr>`;
 
-                html+=`<tr class="bg-emerald-950/10 border-b-2 border-slate-700/70">
-                    <td class="px-3 py-2.5 text-emerald-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">
-                        Capacity Actual<div class="text-[8px] text-cyan-300 font-normal mt-0.5">Line Balance MP: ${lineBalanceManpower} คน</div>
-                    </td>
-                    ${columns.map(c=>{
-                        if(c.type==='week'){
-                            const d=sumIndexes(capacityDaily,c.indexes);
-                            const h=sumIndexes(capacityHourly,c.indexes);
-                            const activeLT=c.indexes.map(i=>leadTimes[i]).filter(v=>v>0);
-                            const avgLT=activeLT.length?activeLT.reduce((a,b)=>a+b,0)/activeLT.length:0;
-                            return `<td class="scp-weekly-sum-col px-2 py-2.5 text-center border-l border-bordercolor/40">
-                                <div class="text-sky-100 text-[8px] font-normal mb-0.5">${avgLT>0?'LT '+avgLT.toFixed(1)+' s':''}</div>
-                                <div style="color:#fef08a;font-size:11px;font-weight:800;">${Math.round(d).toLocaleString()}</div>
-                                <div class="text-white text-[8px] mt-0.5">${Math.round(h).toLocaleString()}</div>
-                            </td>`;
-                        }
-                        const i=c.index;
-                        if(isSunday(days[i])) return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
-                        return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="text-slate-400 text-[8px] font-normal mb-0.5">LT ${leadTimes[i].toFixed(1)} s</div>
-                            <div class="scp-capacity-value" style="color:#f59e0b!important;font-size:11px!important;font-weight:600!important;">${Math.round(capacityDaily[i]).toLocaleString()}</div>
-                            <div class="text-white text-[8px] font-normal mt-0.5">${Math.round(capacityHourly[i]).toLocaleString()}</div>
-                        </td>`;
-                    }).join('')}</tr>`;
-
-                html+=`<tr class="bg-rose-950/10 border-b-2 border-slate-700/70">
-                    <td class="px-3 py-2.5 text-rose-300 font-semibold bg-slate-900/95 sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">Difference</td>
-                    ${columns.map(c=>{
-                        const idx=c.type==='week'?c.indexes:[c.index];
-                        if(c.type==='day'&&isSunday(days[c.index])) return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
-                        const d=sumIndexes(diffDaily,idx);
-                        const h=sumIndexes(diffHourly,idx);
-                        return `<td class="${c.type==='week'?'scp-weekly-sum-col ':''}px-2 py-2.5 text-center border-l border-bordercolor/40">
-                            <div class="${d<0?'text-rose-300':'text-emerald-300'} text-[11px] font-bold">${Math.round(d).toLocaleString()}</div>
-                            <div class="${h<0?'text-rose-200':'text-white'} text-[8px] mt-0.5">${Math.round(h).toLocaleString()}</div>
-                        </td>`;
-                    }).join('')}</tr>`;
+                html += `<tr class="scp-uph-row border-b-2 border-slate-700/70">
+                    <td class="scp-type-cell sticky z-20 border-r border-bordercolor" style="left:${lineWidth}px;">UPH</td>
+                    ${renderUPHCells()}
+                </tr>`;
             });
 
-            body.innerHTML=html;
+            body.innerHTML = html;
         }
 
 
@@ -7775,21 +7771,9 @@ function updateLobSubLineVisibility() {
                     : `<th class="px-2 py-2.5 bg-slate-950/95 text-center text-sky-300 whitespace-nowrap min-w-[72px]">${c.label}</th>`
                 ).join('')}
                 <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap">TOTAL</th>`;
-
-
-            rows.forEach(row => {
-                days.forEach((day, dayIndex) => {
-                    const hasPlan = Number(row.rawOrders[dayIndex] || 0) > 0;
-                    row.rawCapacity[dayIndex] = hasPlan
-                        ? getSummaryDoorCapacityByDay(row.door, row.models, station, dayIndex, hours, data)
-                        : 0;
-                });
-            });
-
-            body.innerHTML=rows.length?rows.map(row=>{
+body.innerHTML=rows.length?rows.map(row=>{
                 const total=row.rawOrders.reduce((a,b)=>a+Number(b||0),0);
                 const totalProduction=row.rawProduction.reduce((a,b)=>a+Number(b||0),0);
-                const totalCapacity=row.rawCapacity.reduce((a,b)=>a+Number(b||0),0);
                 return `<tr>
                     <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
                         <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
@@ -7802,9 +7786,6 @@ function updateLobSubLineVisibility() {
                         const production=c.type==='week'
                             ? c.indexes.reduce((sum,i)=>sum+Number(row.rawProduction[i]||0),0)
                             : Number(row.rawProduction[c.index]||0);
-                        const capacity=c.type==='week'
-                            ? c.indexes.reduce((sum,i)=>sum+Number(row.rawCapacity[i]||0),0)
-                            : Number(row.rawCapacity[c.index]||0);
 
                         // Daily date with no production plan = solid/shaded blank cell, no text.
                         if (c.type === 'day' && !(value > 0)) {
@@ -7814,8 +7795,7 @@ function updateLobSubLineVisibility() {
                         const cellInner=`
                             <div class="cab-value"><span>Cab :</span> ${Math.round(value).toLocaleString()}</div>
                             <div class="cab-separator"></div>
-                            <div class="plan-value"><span>P :</span> ${Math.round(production).toLocaleString()}</div>
-                            <div class="actual-capacity-value"><span>A :</span> ${Math.round(capacity).toLocaleString()}</div>`;
+                            <div class="plan-value"><span>P :</span> ${Math.round(production).toLocaleString()}</div>`;
                         return c.type==='week'
                             ? `<td class="weekly-sum-col px-3 py-2.5 text-center">${cellInner}</td>`
                             : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">${cellInner}</td>`;
@@ -7824,7 +7804,6 @@ function updateLobSubLineVisibility() {
                         <div class="cab-value"><span>Cab :</span> ${Math.round(total).toLocaleString()}</div>
                         <div class="cab-separator"></div>
                         <div class="plan-value"><span>P :</span> ${Math.round(totalProduction).toLocaleString()}</div>
-                        <div class="actual-capacity-value"><span>A :</span> ${Math.round(totalCapacity).toLocaleString()}</div>
                     </td>
                 </tr>`;
             }).join(''):`<tr><td colspan="${columns.length+2}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
@@ -9551,18 +9530,10 @@ document.addEventListener('DOMContentLoaded', () => {
     font-weight:900 !important;
     line-height:1.15 !important;
 }
-#summaryDailyOrderByDoor .actual-capacity-value{
-    color:#facc15 !important;
-    font-size:9px !important;
-    font-weight:900 !important;
-    line-height:1.15 !important;
-    margin-top:2px;
-}
 #summaryDailyOrderByDoor .weekly-sum-col .cab-separator{
     background:rgba(255,255,255,.48);
 }
-#summaryDailyOrderByDoor .weekly-sum-col .plan-value,
-#summaryDailyOrderByDoor .weekly-sum-col .actual-capacity-value{
+#summaryDailyOrderByDoor .weekly-sum-col .plan-value{
     color:#fef08a !important;
 }
 </style>
@@ -9594,6 +9565,78 @@ document.addEventListener('DOMContentLoaded', () => {
 #tableSummaryCapacityPlanActual thead .scp-weekly-sum-col{
     background:#0369a1 !important;
     color:#e0f2fe !important;
+}
+</style>
+
+
+<style id="summary-capacity-cab-p-a-style">
+#tableSummaryCapacityPlanActual .scp-type-cell{
+    background:#0f172a !important;
+    color:#e2e8f0 !important;
+    text-align:center;
+    font-size:10px;
+    font-weight:900;
+    padding:8px 6px;
+}
+#tableSummaryCapacityPlanActual .scp-cab{
+    color:#7dd3fc !important;
+    font-size:10px !important;
+    font-weight:900 !important;
+    line-height:1.1;
+}
+#tableSummaryCapacityPlanActual .scp-divider{
+    height:1px;
+    margin:4px 5px 3px;
+    background:rgba(226,232,240,.45);
+}
+#tableSummaryCapacityPlanActual .scp-p{
+    color:#facc15 !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    line-height:1.15;
+}
+#tableSummaryCapacityPlanActual .scp-a{
+    color:#ffffff !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    line-height:1.15;
+    margin-top:2px;
+}
+#tableSummaryCapacityPlanActual .scp-diff{
+    font-size:9px !important;
+    font-weight:900 !important;
+    margin-top:3px;
+}
+#tableSummaryCapacityPlanActual td.scp-negative{
+    background:rgba(239,68,68,.16) !important;
+}
+#tableSummaryCapacityPlanActual td.scp-negative .scp-diff{
+    color:#fca5a5 !important;
+}
+#tableSummaryCapacityPlanActual td.scp-positive{
+    background:rgba(34,197,94,.14) !important;
+}
+#tableSummaryCapacityPlanActual td.scp-positive .scp-diff{
+    color:#86efac !important;
+}
+#tableSummaryCapacityPlanActual td.scp-no-production{
+    background:#111827 !important;
+    min-width:92px;
+    padding:0 !important;
+}
+#tableSummaryCapacityPlanActual .scp-weekly-sum-col{
+    border-left:2px solid #38bdf8 !important;
+    border-right:2px solid #38bdf8 !important;
+}
+#tableSummaryCapacityPlanActual thead .scp-weekly-sum-col{
+    background:#0369a1 !important;
+    color:#e0f2fe !important;
+}
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-negative{
+    background:linear-gradient(rgba(239,68,68,.20),rgba(239,68,68,.20)),#075985 !important;
+}
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-positive{
+    background:linear-gradient(rgba(34,197,94,.18),rgba(34,197,94,.18)),#075985 !important;
 }
 </style>
 
