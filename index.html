@@ -7639,39 +7639,46 @@ function updateLobSubLineVisibility() {
         function getSummaryDoorCapacityByDay(doorName, modelNames, station, dayIndex, hours) {
             if (!(hours > 0) || !Array.isArray(modelNames) || !modelNames.length) return 0;
 
-            let totalCapacity = 0;
+            // A = (3600 / Lead Time) × 85% × Manpower × Working Hours
+            // Capacity is calculated only for models/doors that actually have a production plan that day.
+            let weightedLeadTimeSum = 0;
+            let weightedOrderSum = 0;
+            let manpower = 0;
 
             modelNames.forEach(modelName => {
                 const cfg = getMasterConfigForModel(modelName);
+                const modelData = (currentManpowerData?.models || []).find(m =>
+                    normalizeModelName(m.model) === normalizeModelName(modelName)
+                );
+                const baseOrder = Math.max(0, Number(modelData?.orders?.[dayIndex]) || 0);
+                if (baseOrder <= 0) return;
 
                 if (station === 'Door C') {
                     if (cfg.station !== 'Door C') return;
-                    const routes = getDoorCRoutingDetails(modelName) || [];
-                    routes.forEach(route => {
+
+                    (getDoorCRoutingDetails(modelName) || []).forEach(route => {
                         const lineName = route.line;
                         const ratio = Math.max(0, Number(route?.qty || route?.ratio || 0));
                         if (!lineName || ratio <= 0) return;
 
-                        let leadTime = 0;
-                        if (lineName === 'C-1') {
-                            leadTime =
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RL')) || 0);
-                        } else if (lineName === 'C-2') {
-                            leadTime =
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'VEG')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FB')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FT')) || 0);
-                        } else if (lineName === 'C-3') {
-                            leadTime =
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0) +
-                                Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FR')) || 0);
-                        }
+                        let ltParts = [];
+                        if (lineName === 'C-1') ltParts = ['RR','RL'];
+                        else if (lineName === 'C-2') ltParts = ['VEG','FB','FT'];
+                        else if (lineName === 'C-3') ltParts = ['RR','FR'];
 
-                        const mp = getSummaryLineBalanceManpower('Door C', lineName);
-                        if (leadTime > 0 && mp > 0) {
-                            totalCapacity += (3600 / leadTime) * 0.85 * mp * ratio * hours;
-                        }
+                        const validLT = ltParts
+                            .map(t => Math.max(0, Number(getDoorTypeLeadTime(modelName, t)) || 0))
+                            .filter(v => v > 0);
+
+                        if (!validLT.length) return;
+
+                        // Lead Time for this routed model = sum of the door-type work content.
+                        const modelLT = validLT.reduce((a,b) => a+b, 0);
+                        const physicalOrder = baseOrder * ratio;
+                        weightedLeadTimeSum += modelLT * physicalOrder;
+                        weightedOrderSum += physicalOrder;
+
+                        manpower += Math.max(0, Number(getSummaryLineBalanceManpower('Door C', lineName)) || 0);
                     });
                     return;
                 }
@@ -7687,16 +7694,21 @@ function updateLobSubLineVisibility() {
                     return;
                 }
 
-                const leadTime = Math.max(0, Number(getLeadTimeForManpower(modelName, station)) || 0);
-                const mp = getSummaryLineBalanceManpower(station, lineName);
-                const efficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+                const lt = Math.max(0, Number(getLeadTimeForManpower(modelName, station)) || 0);
+                if (lt <= 0) return;
 
-                if (leadTime > 0 && mp > 0) {
-                    totalCapacity += (3600 / leadTime) * mp * efficiency * hours;
-                }
+                weightedLeadTimeSum += lt * baseOrder;
+                weightedOrderSum += baseOrder;
+                manpower = Math.max(
+                    manpower,
+                    Math.max(0, Number(getSummaryLineBalanceManpower(station, lineName)) || 0)
+                );
             });
 
-            return totalCapacity;
+            if (!(weightedOrderSum > 0) || !(weightedLeadTimeSum > 0) || !(manpower > 0)) return 0;
+
+            const leadTime = weightedLeadTimeSum / weightedOrderSum;
+            return (3600 / leadTime) * 0.85 * manpower * hours;
         }
 
         function renderSummaryDailyOrderByDoor(data) {
@@ -7793,11 +7805,17 @@ function updateLobSubLineVisibility() {
                         const capacity=c.type==='week'
                             ? c.indexes.reduce((sum,i)=>sum+Number(row.rawCapacity[i]||0),0)
                             : Number(row.rawCapacity[c.index]||0);
+
+                        // Daily date with no production plan = solid/shaded blank cell, no text.
+                        if (c.type === 'day' && !(value > 0)) {
+                            return `<td class="no-production-cell border-l border-bordercolor/40"></td>`;
+                        }
+
                         const cellInner=`
-                            <div class="cab-value"><span>Cab :</span> ${value>0?Math.round(value).toLocaleString():'—'}</div>
+                            <div class="cab-value"><span>Cab :</span> ${Math.round(value).toLocaleString()}</div>
                             <div class="cab-separator"></div>
-                            <div class="plan-value"><span>P :</span> ${production>0?Math.round(production).toLocaleString():'—'}</div>
-                            <div class="actual-capacity-value"><span>A :</span> ${capacity>0?Math.round(capacity).toLocaleString():'—'}</div>`;
+                            <div class="plan-value"><span>P :</span> ${Math.round(production).toLocaleString()}</div>
+                            <div class="actual-capacity-value"><span>A :</span> ${Math.round(capacity).toLocaleString()}</div>`;
                         return c.type==='week'
                             ? `<td class="weekly-sum-col px-3 py-2.5 text-center">${cellInner}</td>`
                             : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">${cellInner}</td>`;
@@ -9546,6 +9564,21 @@ document.addEventListener('DOMContentLoaded', () => {
 #summaryDailyOrderByDoor .weekly-sum-col .plan-value,
 #summaryDailyOrderByDoor .weekly-sum-col .actual-capacity-value{
     color:#fef08a !important;
+}
+</style>
+
+
+<style id="no-production-shaded-cell-style">
+#summaryDailyOrderByDoor td.no-production-cell{
+    background:#111827 !important;
+    min-width:72px;
+    height:48px;
+    padding:0 !important;
+}
+#summaryDailyOrderByDoor td.no-production-cell::before,
+#summaryDailyOrderByDoor td.no-production-cell::after{
+    content:none !important;
+    display:none !important;
 }
 </style>
 
