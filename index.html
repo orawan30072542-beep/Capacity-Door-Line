@@ -10037,5 +10037,151 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
+
+<style id="two-summary-tables-same-format-final">
+/* Make Summary Capacity Plan & Acual visually match Summary Daily Order By Model / Door */
+#tableSummaryCapacityPlanActual{
+    border-collapse:collapse !important;
+    table-layout:fixed !important;
+}
+#tableSummaryCapacityPlanActual th,
+#tableSummaryCapacityPlanActual td{
+    border-color:#1e293b !important;
+}
+
+/* Line / Type columns follow the same compact left-side style */
+#tableSummaryCapacityPlanActual th:first-child,
+#tableSummaryCapacityPlanActual td:first-child{
+    width:120px !important;
+    min-width:120px !important;
+}
+#tableSummaryCapacityPlanActual th:nth-child(2),
+#tableSummaryCapacityPlanActual td:nth-child(2){
+    width:68px !important;
+    min-width:68px !important;
+}
+
+/* Every normal daily column = same 68px width as Summary Daily Order */
+#tableSummaryCapacityPlanActual thead th:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator),
+#tableSummaryCapacityPlanActual tbody td:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator){
+    width:68px !important;
+    min-width:68px !important;
+    max-width:68px !important;
+    padding:7px 4px !important;
+}
+
+/* Do not collapse dates with no production; keep same width as the lower table */
+#tableSummaryCapacityPlanActual th.scp-no-production-head,
+#tableSummaryCapacityPlanActual td.scp-no-production-compact{
+    width:68px !important;
+    min-width:68px !important;
+    max-width:68px !important;
+    padding:7px 4px !important;
+}
+#tableSummaryCapacityPlanActual th.scp-no-production-head{
+    font-size:9px !important;
+    overflow:visible !important;
+}
+
+/* Weekly SUM uses the same strong blue block style as Summary Daily Order */
+#tableSummaryCapacityPlanActual .scp-weekly-sum-col{
+    width:76px !important;
+    min-width:76px !important;
+    max-width:76px !important;
+    background:#0369a1 !important;
+    background-image:none !important;
+    color:#fff !important;
+    border-left:1px solid #38bdf8 !important;
+    border-right:1px solid #38bdf8 !important;
+}
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col{
+    background:#075985 !important;
+}
+
+/* Keep the requested white week separator, but narrow and consistent */
+#tableSummaryCapacityPlanActual .scp-week-separator{
+    width:10px !important;
+    min-width:10px !important;
+    max-width:10px !important;
+    padding:0 !important;
+    background:#fff !important;
+    border:0 !important;
+}
+
+/* Match lower table typography/spacing */
+#tableSummaryCapacityPlanActual thead th{
+    height:31px !important;
+    padding-top:6px !important;
+    padding-bottom:6px !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+    text-align:center !important;
+}
+#tableSummaryCapacityPlanActual tbody td{
+    font-size:9px !important;
+    line-height:1.35 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td:not(.scp-week-separator),
+#tableSummaryCapacityPlanActual .scp-total-uph-row td:not(.scp-week-separator),
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#082f49 !important;
+    background-image:none !important;
+}
+</style>
+
+
+<script id="summary-capacity-sunday-20px-final">
+(function(){
+    function markSundayColumns20px(){
+        const table = document.getElementById('tableSummaryCapacityPlanActual');
+        if(!table) return;
+        const heads = Array.from(table.querySelectorAll('thead th'));
+        heads.forEach((th, idx) => {
+            const txt = (th.textContent || '').trim();
+            if(!txt || /^SUM\s/i.test(txt) || idx < 2 || th.classList.contains('scp-week-separator')) return;
+            const parts = txt.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+            if(!parts) return;
+            const month = Number(parts[1]), day = Number(parts[2]);
+            let year = parts[3] ? Number(parts[3]) : 2026;
+            if(year < 100) year += 2000;
+            const d = new Date(year, month - 1, day);
+            if(d.getDay() === 0){
+                th.classList.add('scp-sunday-20');
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const cell = tr.children[idx];
+                    if(cell) cell.classList.add('scp-sunday-20');
+                });
+            }
+        });
+    }
+
+    const original = window.renderSummaryCapacityPlanActual;
+    if(typeof original === 'function'){
+        window.renderSummaryCapacityPlanActual = function(){
+            const result = original.apply(this, arguments);
+            markSundayColumns20px();
+            return result;
+        };
+    }
+    document.addEventListener('DOMContentLoaded', markSundayColumns20px);
+    setTimeout(markSundayColumns20px, 0);
+})();
+</script>
+<style id="summary-capacity-sunday-20px-style">
+#tableSummaryCapacityPlanActual th.scp-sunday-20,
+#tableSummaryCapacityPlanActual td.scp-sunday-20{
+    width:20px !important;
+    min-width:20px !important;
+    max-width:20px !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+}
+#tableSummaryCapacityPlanActual th.scp-sunday-20{
+    font-size:7px !important;
+    overflow:hidden !important;
+}
+</style>
+
 </body>
 </html
