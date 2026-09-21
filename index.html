@@ -10472,5 +10472,276 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 }
 </style>
 
+
+<script id="capacity-normal-date-25px-final">
+(function(){
+    function parseDateLabel(txt){
+        const m=String(txt||'').trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if(!m) return null;
+        let y=m[3]?Number(m[3]):2026;
+        if(y<100)y+=2000;
+        return new Date(y,Number(m[1])-1,Number(m[2]));
+    }
+    function setW(el,w){
+        if(!el)return;
+        ['width','min-width','max-width'].forEach(p=>el.style.setProperty(p,w+'px','important'));
+    }
+    function applyCapacityDateWidths(){
+        const table=document.getElementById('tableSummaryCapacityPlanActual');
+        if(!table)return;
+        const heads=Array.from(table.querySelectorAll('thead th'));
+        heads.forEach((th,idx)=>{
+            if(idx<2)return;
+            let w;
+            if(th.classList.contains('scp-week-separator')) w=10;
+            else if(th.classList.contains('scp-weekly-sum-col')) w=76;
+            else{
+                const d=parseDateLabel(th.textContent);
+                if(!d)return;
+                w=d.getDay()===0 ? 20 : 25;
+            }
+            setW(th,w);
+            table.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{
+                if(tr.children[idx]) setW(tr.children[idx],w);
+            });
+        });
+    }
+    const old=window.renderSummaryCapacityPlanActual;
+    if(typeof old==='function'){
+        window.renderSummaryCapacityPlanActual=function(){
+            const r=old.apply(this,arguments);
+            requestAnimationFrame(applyCapacityDateWidths);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(applyCapacityDateWidths));
+    setTimeout(applyCapacityDateWidths,50);
+})();
+</script>
+<style id="capacity-normal-date-25px-style-final">
+#tableSummaryCapacityPlanActual thead th:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator):not(.summary-sunday-col):not(.scp-sunday-20),
+#tableSummaryCapacityPlanActual tbody td:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator):not(.summary-sunday-col):not(.scp-sunday-20){
+    width:25px !important;
+    min-width:25px !important;
+    max-width:25px !important;
+}
+</style>
+
+
+<style id="summary-two-tables-clean-darkblue-final">
+/* ===== Shared visual language ===== */
+#tableSummaryCapacityPlanActual,
+#tableSummaryDailyOrderByDoor,
+#summaryDailyOrderByDoor table{
+    border-collapse:separate !important;
+    border-spacing:0 !important;
+    table-layout:fixed !important;
+    background:#0b1220 !important;
+    color:#dbeafe !important;
+    font-variant-numeric:tabular-nums;
+}
+#tableSummaryCapacityPlanActual th,
+#tableSummaryCapacityPlanActual td,
+#tableSummaryDailyOrderByDoor th,
+#tableSummaryDailyOrderByDoor td,
+#summaryDailyOrderByDoor table th,
+#summaryDailyOrderByDoor table td{
+    box-sizing:border-box !important;
+    border-right:1px solid #1e293b !important;
+    border-bottom:1px solid #1e293b !important;
+    vertical-align:middle !important;
+}
+
+/* Header: dark navy, low contrast */
+#tableSummaryCapacityPlanActual thead th,
+#tableSummaryDailyOrderByDoor thead th,
+#summaryDailyOrderByDoor table thead th{
+    background:#111c2e !important;
+    color:#93c5fd !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+    height:34px !important;
+    padding:6px 4px !important;
+    text-align:center !important;
+    white-space:nowrap !important;
+}
+
+/* Body */
+#tableSummaryCapacityPlanActual tbody td,
+#tableSummaryDailyOrderByDoor tbody td,
+#summaryDailyOrderByDoor table tbody td{
+    background:#0b1220 !important;
+    color:#cbd5e1 !important;
+    font-size:9px !important;
+    line-height:1.35 !important;
+    padding:7px 5px !important;
+}
+#tableSummaryCapacityPlanActual tbody tr:hover td,
+#tableSummaryDailyOrderByDoor tbody tr:hover td,
+#summaryDailyOrderByDoor table tbody tr:hover td{
+    background:#101d31 !important;
+}
+
+/* ===== Capacity table geometry =====
+   Keep Line + Type equal to lower DOOR width, so dates start aligned. */
+#tableSummaryCapacityPlanActual th:first-child,
+#tableSummaryCapacityPlanActual td:first-child{
+    width:85px !important; min-width:85px !important; max-width:85px !important;
+    text-align:left !important;
+}
+#tableSummaryCapacityPlanActual th:nth-child(2),
+#tableSummaryCapacityPlanActual td:nth-child(2){
+    width:85px !important; min-width:85px !important; max-width:85px !important;
+    text-align:center !important;
+}
+
+/* ===== Daily Order geometry ===== */
+#tableSummaryDailyOrderByDoor th:first-child,
+#tableSummaryDailyOrderByDoor td:first-child,
+#summaryDailyOrderByDoor table th:first-child,
+#summaryDailyOrderByDoor table td:first-child{
+    width:170px !important; min-width:170px !important; max-width:170px !important;
+    text-align:left !important;
+}
+
+/* Normal date columns: readable, compact, SAME on both tables */
+#tableSummaryCapacityPlanActual thead th:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator),
+#tableSummaryCapacityPlanActual tbody td:not(:first-child):not(:nth-child(2)):not(.scp-weekly-sum-col):not(.scp-week-separator),
+#tableSummaryDailyOrderByDoor thead th:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator),
+#tableSummaryDailyOrderByDoor tbody td:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator),
+#summaryDailyOrderByDoor table thead th:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator),
+#summaryDailyOrderByDoor table tbody td:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator){
+    width:58px !important; min-width:58px !important; max-width:58px !important;
+    padding-left:4px !important; padding-right:4px !important;
+    text-align:center !important;
+}
+
+/* Sunday: slightly narrower but still readable */
+#tableSummaryCapacityPlanActual .summary-sunday-col,
+#tableSummaryCapacityPlanActual .scp-sunday-20,
+#tableSummaryDailyOrderByDoor .summary-sunday-col,
+#summaryDailyOrderByDoor table .summary-sunday-col{
+    width:44px !important; min-width:44px !important; max-width:44px !important;
+    background:#0d1727 !important;
+    color:#7dd3fc !important;
+}
+
+/* Weekly summary: muted blue, not bright */
+#tableSummaryCapacityPlanActual .scp-weekly-sum-col,
+#tableSummaryDailyOrderByDoor .weekly-sum-col,
+#summaryDailyOrderByDoor table .weekly-sum-col{
+    width:76px !important; min-width:76px !important; max-width:76px !important;
+    background:#12304a !important;
+    background-image:none !important;
+    color:#bfdbfe !important;
+    border-left:1px solid #245273 !important;
+    border-right:1px solid #245273 !important;
+    font-weight:800 !important;
+}
+
+/* Week separator: use dark spacing instead of bright white */
+#tableSummaryCapacityPlanActual .scp-week-separator,
+#tableSummaryDailyOrderByDoor .daily-week-separator,
+#summaryDailyOrderByDoor table .daily-week-separator{
+    width:8px !important; min-width:8px !important; max-width:8px !important;
+    padding:0 !important;
+    border:0 !important;
+    background:#070d17 !important;
+}
+
+/* Capacity hierarchy */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td:not(.scp-week-separator),
+#tableSummaryCapacityPlanActual .scp-total-uph-row td:not(.scp-week-separator),
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#0e2a43 !important;
+    background-image:none !important;
+    color:#e0f2fe !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-line-label{
+    font-weight:900 !important;
+    color:#bae6fd !important;
+}
+
+/* Keep +/- readable using restrained text only, no loud backgrounds */
+#tableSummaryCapacityPlanActual .text-green-400,
+#tableSummaryCapacityPlanActual .text-emerald-400{
+    color:#67e8f9 !important;
+}
+#tableSummaryCapacityPlanActual .text-red-400,
+#tableSummaryCapacityPlanActual .text-rose-400{
+    color:#fda4af !important;
+}
+
+/* Cab / P / A hierarchy */
+#tableSummaryCapacityPlanActual td,
+#tableSummaryDailyOrderByDoor td,
+#summaryDailyOrderByDoor table td{
+    text-shadow:none !important;
+}
+</style>
+
+<script id="summary-two-tables-clean-width-enforcer-final">
+(function(){
+    function setW(el,w){
+        if(!el)return;
+        ['width','min-width','max-width'].forEach(p=>el.style.setProperty(p,w+'px','important'));
+    }
+    function isSundayLabel(txt){
+        const m=String(txt||'').trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if(!m)return false;
+        let y=m[3]?Number(m[3]):2026;if(y<100)y+=2000;
+        return new Date(y,Number(m[1])-1,Number(m[2])).getDay()===0;
+    }
+    function enforce(){
+        const upper=document.getElementById('tableSummaryCapacityPlanActual');
+        const lower=document.getElementById('tableSummaryDailyOrderByDoor') ||
+                    document.querySelector('#summaryDailyOrderByDoor table');
+
+        if(upper){
+            const h=[...upper.querySelectorAll('thead th')];
+            setW(h[0],85); setW(h[1],85);
+            upper.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{
+                setW(tr.children[0],85); setW(tr.children[1],85);
+            });
+            h.forEach((th,i)=>{
+                if(i<2)return;
+                let w=58;
+                if(th.classList.contains('scp-week-separator'))w=8;
+                else if(th.classList.contains('scp-weekly-sum-col'))w=76;
+                else if(isSundayLabel(th.textContent))w=44;
+                setW(th,w);
+                upper.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>setW(tr.children[i],w));
+            });
+        }
+        if(lower){
+            const h=[...lower.querySelectorAll('thead th')];
+            setW(h[0],170);
+            lower.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>setW(tr.children[0],170));
+            h.forEach((th,i)=>{
+                if(i<1)return;
+                let w=58;
+                if(th.classList.contains('daily-week-separator'))w=8;
+                else if(th.classList.contains('weekly-sum-col'))w=76;
+                else if(isSundayLabel(th.textContent))w=44;
+                setW(th,w);
+                lower.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>setW(tr.children[i],w));
+            });
+        }
+    }
+    const a=window.renderSummaryCapacityPlanActual;
+    if(typeof a==='function')window.renderSummaryCapacityPlanActual=function(){
+        const r=a.apply(this,arguments);requestAnimationFrame(enforce);return r;
+    };
+    const b=window.renderSummaryDailyOrderByDoor;
+    if(typeof b==='function')window.renderSummaryDailyOrderByDoor=function(){
+        const r=b.apply(this,arguments);requestAnimationFrame(enforce);return r;
+    };
+    document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(enforce));
+    window.addEventListener('resize',()=>requestAnimationFrame(enforce));
+    setTimeout(enforce,100);
+})();
+</script>
+
 </body>
 </html
