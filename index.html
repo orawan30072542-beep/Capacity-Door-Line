@@ -1287,6 +1287,32 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         </div>
                     </div>
 
+                    <!-- Summary Capacity Plan & Acual By Model -->
+                    <div id="summaryCapacityPlanActualByModel" class="bg-slate-900/55 border border-cyan-500/20 rounded-xl overflow-hidden mt-3">
+                        <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-cyan-950/30 to-slate-950/20">
+                            <div class="text-sm font-bold text-white">Summary Capacity Plan & Acual By Model</div>
+                            <div class="text-[9px] text-slate-400 mt-0.5">
+                                สรุปออเดอร์รวมของแต่ละ Model เทียบกับ Actual Capacity
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="tableSummaryCapacityByModel" class="w-full text-left border-collapse" style="min-width:760px;">
+                                <thead class="bg-slate-950/90">
+                                    <tr>
+                                        <th class="px-3 py-2.5 text-cyan-200">Model</th>
+                                        <th class="px-3 py-2.5 text-center text-sky-300">Total Order</th>
+                                        <th class="px-3 py-2.5 text-center text-amber-300">Required Order</th>
+                                        <th class="px-3 py-2.5 text-center text-emerald-300">Actual Capacity</th>
+                                        <th class="px-3 py-2.5 text-center text-rose-300">Difference</th>
+                                        <th class="px-3 py-2.5 text-center text-violet-300">Achievement</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryCapacityByModelBody" class="divide-y divide-bordercolor/50"></tbody>
+                                <tfoot id="summaryCapacityByModelFoot" class="border-t-2 border-cyan-500/30"></tfoot>
+                            </table>
+                        </div>
+                    </div>
+
 
                     <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
@@ -7350,6 +7376,168 @@ function updateLobSubLineVisibility() {
             body.innerHTML = html;
         }
 
+        // ===== Summary Capacity Plan & Acual By Model =====
+        function getSummaryModelRequiredOrder(modelName, station, baseOrder) {
+            const cfg = getMasterConfigForModel(modelName);
+            if (baseOrder <= 0) return 0;
+
+            if (station === 'Door C') {
+                if (cfg.station !== 'Door C') return 0;
+                return (getDoorCRoutingDetails(modelName) || []).reduce((sum, route) => {
+                    return sum + baseOrder * Math.max(0, Number(route?.qty || route?.ratio || 0));
+                }, 0);
+            }
+
+            if (station === 'Back Plate') {
+                return cfg.backPlateSource === 'ผลิตเอง' ? baseOrder : 0;
+            }
+            if (station === 'Bottom Plate') {
+                return cfg.bottomSource === 'ผลิตเอง' ? baseOrder : 0;
+            }
+            return cfg.station === station ? baseOrder : 0;
+        }
+
+        function getSummaryModelActualCapacity(modelName, station, productionDays, hours) {
+            if (productionDays <= 0 || hours <= 0) return 0;
+            const cfg = getMasterConfigForModel(modelName);
+
+            if (station === 'Door C') {
+                if (cfg.station !== 'Door C') return 0;
+                const routes = getDoorCRoutingDetails(modelName) || [];
+                let totalDoorCapacity = 0;
+
+                routes.forEach(route => {
+                    const lineName = route.line;
+                    const ratio = Math.max(0, Number(route?.qty || route?.ratio || 0));
+                    if (!lineName || ratio <= 0) return;
+
+                    let leadTime = 0;
+                    if (lineName === 'C-1') {
+                        leadTime =
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0) +
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RL')) || 0);
+                    } else if (lineName === 'C-2') {
+                        leadTime =
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'VEG')) || 0) +
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FB')) || 0) +
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FT')) || 0);
+                    } else if (lineName === 'C-3') {
+                        leadTime =
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'RR')) || 0) +
+                            Math.max(0, Number(getDoorTypeLeadTime(modelName, 'FR')) || 0);
+                    }
+
+                    const mp = getSummaryLineBalanceManpower('Door C', lineName);
+                    if (leadTime > 0 && mp > 0) {
+                        totalDoorCapacity += (3600 / leadTime) * mp * ratio * hours * productionDays;
+                    }
+                });
+                return totalDoorCapacity;
+            }
+
+            let lineName = station;
+            if (station === 'Back Plate') {
+                if (cfg.backPlateSource !== 'ผลิตเอง') return 0;
+                lineName = cfg.backPlateLine || 'Line#1';
+            } else if (station === 'Bottom Plate') {
+                if (cfg.bottomSource !== 'ผลิตเอง') return 0;
+                lineName = cfg.bottomLine || 'Line#1';
+            } else if (cfg.station !== station) {
+                return 0;
+            }
+
+            const leadTime = Math.max(0, Number(getLeadTimeForManpower(modelName, station)) || 0);
+            const mp = getSummaryLineBalanceManpower(station, lineName);
+            const efficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
+            return leadTime > 0 && mp > 0
+                ? (3600 / leadTime) * mp * efficiency * hours * productionDays
+                : 0;
+        }
+
+        function renderSummaryCapacityByModel(data) {
+            const body = document.getElementById('summaryCapacityByModelBody');
+            const foot = document.getElementById('summaryCapacityByModelFoot');
+            if (!body || !foot || !data?.days || !data?.groups) return;
+
+            const station = currentManpowerStation || 'Door A';
+            const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
+            const productionDays = data.days.filter(day => !isSunday(day)).length;
+
+            const rows = [];
+            (data.groups || []).forEach(group => {
+                (group.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+
+                    const cfg = getMasterConfigForModel(modelName);
+                    let belongs = false;
+                    if (station === 'Door C') belongs = cfg.station === 'Door C';
+                    else if (station === 'Back Plate') belongs = cfg.backPlateSource === 'ผลิตเอง';
+                    else if (station === 'Bottom Plate') belongs = cfg.bottomSource === 'ผลิตเอง';
+                    else belongs = cfg.station === station;
+                    if (!belongs) return;
+
+                    let totalOrder = 0;
+                    let requiredOrder = 0;
+                    (data.days || []).forEach((day, i) => {
+                        if (isSunday(day)) return;
+                        const baseOrder = Math.max(0, Number(model?.orders?.[i]) || 0);
+                        totalOrder += baseOrder;
+                        requiredOrder += getSummaryModelRequiredOrder(modelName, station, baseOrder);
+                    });
+
+                    if (totalOrder <= 0 && requiredOrder <= 0) return;
+
+                    const actualCapacity = getSummaryModelActualCapacity(
+                        modelName, station, productionDays, hours
+                    );
+                    const difference = actualCapacity - requiredOrder;
+                    const achievement = requiredOrder > 0 ? (actualCapacity / requiredOrder) * 100 : 0;
+
+                    rows.push({
+                        modelName, totalOrder, requiredOrder, actualCapacity, difference, achievement
+                    });
+                });
+            });
+
+            rows.sort((a,b) => b.requiredOrder - a.requiredOrder || a.modelName.localeCompare(b.modelName));
+
+            body.innerHTML = rows.length ? rows.map(r => `
+                <tr class="hover:bg-slate-800/35">
+                    <td class="px-3 py-2.5 font-bold text-white">${r.modelName}</td>
+                    <td class="px-3 py-2.5 text-center text-sky-300 font-semibold">${Math.round(r.totalOrder).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center text-amber-300 font-semibold">${Math.round(r.requiredOrder).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center text-emerald-300 font-semibold">${Math.round(r.actualCapacity).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center ${r.difference < 0 ? 'text-rose-300' : 'text-emerald-300'} font-bold">${Math.round(r.difference).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center ${r.achievement < 100 ? 'text-rose-300' : 'text-violet-300'} font-bold">${r.achievement.toFixed(1)}%</td>
+                </tr>
+            `).join('') : `
+                <tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">ไม่มีข้อมูล Model สำหรับไลน์ที่เลือก</td></tr>
+            `;
+
+            const totals = rows.reduce((a,r) => {
+                a.totalOrder += r.totalOrder;
+                a.requiredOrder += r.requiredOrder;
+                a.actualCapacity += r.actualCapacity;
+                return a;
+            }, {totalOrder:0, requiredOrder:0, actualCapacity:0});
+
+            const totalDiff = totals.actualCapacity - totals.requiredOrder;
+            const totalAch = totals.requiredOrder > 0 ? totals.actualCapacity / totals.requiredOrder * 100 : 0;
+
+            foot.innerHTML = `
+                <tr style="background:rgba(8,47,73,.55);">
+                    <td class="px-3 py-2.5 font-black text-cyan-200">TOTAL</td>
+                    <td class="px-3 py-2.5 text-center font-black text-sky-300">${Math.round(totals.totalOrder).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center font-black text-amber-300">${Math.round(totals.requiredOrder).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center font-black text-emerald-300">${Math.round(totals.actualCapacity).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center font-black ${totalDiff < 0 ? 'text-rose-300' : 'text-emerald-300'}">${Math.round(totalDiff).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center font-black ${totalAch < 100 ? 'text-rose-300' : 'text-violet-300'}">${totalAch.toFixed(1)}%</td>
+                </tr>
+            `;
+        }
+
+
         function renderManpowerTable(data) {
             const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
@@ -7364,6 +7552,7 @@ function updateLobSubLineVisibility() {
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
             renderSummaryCapacityPlanActual(data);
+            renderSummaryCapacityByModel(data);
 
             const stationLabel = document.getElementById('manpowerStationLabel');
             if (stationLabel) stationLabel.textContent = station;
@@ -8904,6 +9093,24 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 #tableManpowerCapacity .mp-plan-required-fixed-sunday{
     background:#a16207!important;color:#fef3c7!important;
+}
+</style>
+
+
+<style id="summary-capacity-by-model-style">
+#summaryCapacityPlanActualByModel table th{
+    font-size:11px!important;
+    font-weight:800!important;
+    white-space:nowrap;
+}
+#summaryCapacityPlanActualByModel table td{
+    font-size:11px!important;
+}
+#summaryCapacityPlanActualByModel tbody tr{
+    border-bottom:1px solid rgba(71,85,105,.42)!important;
+}
+#summaryCapacityPlanActualByModel tfoot td{
+    font-size:11px!important;
 }
 </style>
 
