@@ -7636,7 +7636,7 @@ function updateLobSubLineVisibility() {
         }
 
 
-        function getSummaryDoorCapacityByDay(doorName, modelNames, station, dayIndex, hours) {
+        function getSummaryDoorCapacityByDay(doorName, modelNames, station, dayIndex, hours, data) {
             if (!(hours > 0) || !Array.isArray(modelNames) || !modelNames.length) return 0;
 
             // A = (3600 / Lead Time) × 85% × Manpower × Working Hours
@@ -7647,9 +7647,17 @@ function updateLobSubLineVisibility() {
 
             modelNames.forEach(modelName => {
                 const cfg = getMasterConfigForModel(modelName);
-                const modelData = (currentManpowerData?.models || []).find(m =>
-                    normalizeModelName(m.model) === normalizeModelName(modelName)
-                );
+                let modelData = null;
+                (data?.groups || []).some(group => {
+                    const found = (group?.models || []).find(m =>
+                        normalizeModelName(m?.name || m?.model || '') === normalizeModelName(modelName)
+                    );
+                    if (found) {
+                        modelData = found;
+                        return true;
+                    }
+                    return false;
+                });
                 const baseOrder = Math.max(0, Number(modelData?.orders?.[dayIndex]) || 0);
                 if (baseOrder <= 0) return;
 
@@ -7781,7 +7789,7 @@ function updateLobSubLineVisibility() {
                 days.forEach((day, dayIndex) => {
                     const hasPlan = Number(row.rawOrders[dayIndex] || 0) > 0;
                     row.rawCapacity[dayIndex] = hasPlan
-                        ? getSummaryDoorCapacityByDay(row.door, row.models, station, dayIndex, hours)
+                        ? getSummaryDoorCapacityByDay(row.door, row.models, station, dayIndex, hours, data)
                         : 0;
                 });
             });
