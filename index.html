@@ -10795,5 +10795,55 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 })();
 </script>
 
+
+<style id="daily-order-monsat-78px-final">
+#tableSummaryDailyOrderByDoor thead th:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator):not(.summary-sunday-col),
+#tableSummaryDailyOrderByDoor tbody td:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator):not(.summary-sunday-col),
+#summaryDailyOrderByDoor table thead th:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator):not(.summary-sunday-col),
+#summaryDailyOrderByDoor table tbody td:not(:first-child):not(.weekly-sum-col):not(.daily-week-separator):not(.summary-sunday-col){
+    width:78px !important;
+    min-width:78px !important;
+    max-width:78px !important;
+}
+</style>
+<script id="daily-order-monsat-78px-runtime-final">
+(function(){
+    function parseDateLabel(txt){
+        const m=String(txt||'').trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+        if(!m)return null;
+        let y=m[3]?Number(m[3]):2026;if(y<100)y+=2000;
+        return new Date(y,Number(m[1])-1,Number(m[2]));
+    }
+    function setW(el,w){
+        if(!el)return;
+        ['width','min-width','max-width'].forEach(p=>el.style.setProperty(p,w+'px','important'));
+    }
+    function apply(){
+        const table=document.getElementById('tableSummaryDailyOrderByDoor') ||
+                    document.querySelector('#summaryDailyOrderByDoor table');
+        if(!table)return;
+        const heads=[...table.querySelectorAll('thead th')];
+        heads.forEach((th,i)=>{
+            if(i===0)return;
+            if(th.classList.contains('weekly-sum-col') || th.classList.contains('daily-week-separator')) return;
+            const d=parseDateLabel(th.textContent);
+            if(!d || d.getDay()===0)return;
+            setW(th,78);
+            table.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>setW(tr.children[i],78));
+        });
+    }
+    const old=window.renderSummaryDailyOrderByDoor;
+    if(typeof old==='function'){
+        window.renderSummaryDailyOrderByDoor=function(){
+            const r=old.apply(this,arguments);
+            requestAnimationFrame(apply);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(apply));
+    setTimeout(apply,100);
+})();
+</script>
+
 </body>
 </html
