@@ -9854,5 +9854,49 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
+
+<style id="summary-capacity-total-blue-match">
+/* TOTAL area: blue styling aligned with "ตารางสรุปแผนการผลิตและยอดรายวัน" */
+#tableSummaryCapacityPlanActual .scp-total-line-label{
+    background:#0369a1 !important;
+    color:#ffffff !important;
+    border-color:#38bdf8 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-line-label span{
+    color:#e0f2fe !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#075985 !important;
+    color:#ffffff !important;
+    border-color:#38bdf8 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td:not(.scp-weekly-sum-col):not(.scp-week-separator):not(.scp-no-production){
+    background:rgba(3,105,161,.30) !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-uph-row td:not(.scp-weekly-sum-col):not(.scp-week-separator):not(.scp-no-production){
+    background:rgba(7,89,133,.34) !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td{
+    border-top-color:#38bdf8 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-uph-row td{
+    border-bottom-color:#38bdf8 !important;
+}
+/* Keep the 10px week divider pure white */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row .scp-week-separator,
+#tableSummaryCapacityPlanActual .scp-total-uph-row .scp-week-separator{
+    background:#ffffff !important;
+}
+/* Weekly +/- cells keep their status treatment */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td.scp-weekly-sum-col.scp-positive,
+#tableSummaryCapacityPlanActual .scp-total-uph-row td.scp-weekly-sum-col.scp-positive{
+    background:linear-gradient(rgba(34,197,94,.16),rgba(34,197,94,.16)),#075985 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td.scp-weekly-sum-col.scp-negative,
+#tableSummaryCapacityPlanActual .scp-total-uph-row td.scp-weekly-sum-col.scp-negative{
+    background:linear-gradient(rgba(239,68,68,.18),rgba(239,68,68,.18)),#075985 !important;
+}
+</style>
+
 </body>
 </html
