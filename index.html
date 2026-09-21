@@ -1287,6 +1287,25 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                         </div>
                     </div>
 
+                    <!-- Daily Order By Door / Model Group -->
+                    <div id="summaryDailyOrderByDoor" class="bg-slate-900/55 border border-sky-500/20 rounded-xl overflow-hidden mt-3">
+                        <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-sky-950/30 to-slate-950/20">
+                            <div class="text-sm font-bold text-white">Summary Daily Order By Model / Door</div>
+                            <div class="text-[9px] text-slate-400 mt-0.5">
+                                รวม Order รายวันของ Model ที่อยู่ในกลุ่ม Door เดียวกัน
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="tableSummaryDailyOrderByDoor" class="text-left border-collapse" style="min-width:100%;">
+                                <thead>
+                                    <tr id="summaryDailyOrderByDoorHead" class="bg-slate-950/90 border-b border-bordercolor"></tr>
+                                </thead>
+                                <tbody id="summaryDailyOrderByDoorBody" class="divide-y divide-bordercolor/50"></tbody>
+                                <tfoot id="summaryDailyOrderByDoorFoot" class="border-t-2 border-sky-500/30"></tfoot>
+                            </table>
+                        </div>
+                    </div>
+
 
                     <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
@@ -7350,6 +7369,227 @@ function updateLobSubLineVisibility() {
             body.innerHTML = html;
         }
 
+
+        // ===== Daily Order By Model / Door =====
+        // Exact mapping supplied by user. Model names are normalized only for spaces/case.
+        const DAILY_ORDER_DOOR_MAP = {
+            '159c': '159',
+            '159f': '159',
+            '199c': '199',
+            '199f': '199',
+            'tm545#212': 'TM545',
+            'tm545#235': 'TM545',
+            'g3 eco 320': 'G3 ECO',
+            'g3 eco 350': 'G3 ECO',
+            't door': 'TD US',
+            'tm10': 'TM10&12',
+            'tm12': 'TM10&12',
+
+            'fuf14 d': 'FUF14 (D,S,L)',
+            'fuf14 l': 'FUF14 (D,S,L)',
+            'fuf14 s': 'FUF14 (D,S,L)',
+            'fuf14 q': 'FUF14 (Q)',
+
+            'fuf18 d': 'FUF18&22 (D,S,L)',
+            'fuf18 l': 'FUF18&22 (D,S,L)',
+            'fuf18 s': 'FUF18&22 (D,S,L)',
+            'fuf18 q': 'FUF18&22 (Q)',
+            'fuf22 d': 'FUF18&22 (D,S,L)',
+            'fuf22 l': 'FUF18&22 (D,S,L)',
+            'fuf22 s': 'FUF18&22 (D,S,L)',
+            'fuf22 q': 'FUF18&22 (Q)',
+
+            't door h metal': 'TD H',
+            't door h metal wd': 'TD H',
+            't door h glass': 'TD H',
+            't door h glass wd': 'TD H',
+
+            't door 520': 'TD 520',
+            't door 520 u1': 'TD 520',
+            't door 520 wd': 'TD 520',
+
+            'sbs 550': 'SBS',
+            'sbs 550 wd': 'SBS',
+            'sbs 620': 'SBS',
+            'sbs 620 wd': 'SBS',
+            'sbs 620 glass': 'SBS',
+            'sbs 620 glass wd': 'SBS',
+
+            'bm23': 'BM',
+            'bm23 café': 'BM',
+            'bm23 cafe': 'BM',
+            'bm23 dnd': 'BM DND',
+
+            'bm t-door 23 café': 'BM TD',
+            'bm t-door 23 cafe': 'BM TD',
+            'bm t-door 23': 'BM TD',
+
+            'bm29': 'BM',
+            'bm29 café': 'BM',
+            'bm29 cafe': 'BM',
+            'bm29 dnd': 'BM DND',
+
+            'bm t-door 28 café': 'BM TD',
+            'bm t-door 28 cafe': 'BM TD',
+            'bm t-door 28': 'BM TD',
+
+            'tm14': 'TM14',
+            'tm-19 k': 'TM19&21',
+            'tm-19 l': 'TM19&21',
+            'tm-21 k': 'TM19&21',
+            'tm-21 t': 'TM19&21'
+        };
+
+        const DAILY_ORDER_DOOR_SORT = [
+            '159','199','TM545','G3 ECO','TD US','TM10&12',
+            'FUF14 (D,S,L)','FUF14 (Q)',
+            'FUF18&22 (D,S,L)','FUF18&22 (Q)',
+            'TD H','TD 520','SBS','BM','BM DND','BM TD',
+            'TM14','TM19&21'
+        ];
+
+        function normalizeDailyOrderDoorModelName(value) {
+            return String(value || '')
+                .trim()
+                .replace(/\s+/g, ' ')
+                .toLocaleLowerCase();
+        }
+
+        function getDailyOrderDoorName(modelName) {
+            return DAILY_ORDER_DOOR_MAP[normalizeDailyOrderDoorModelName(modelName)] || '';
+        }
+
+        function modelBelongsToSelectedSummaryStation(modelName, station) {
+            const cfg = getMasterConfigForModel(modelName);
+            if (station === 'Door C') return cfg.station === 'Door C';
+            if (station === 'Back Plate') return cfg.backPlateSource === 'ผลิตเอง';
+            if (station === 'Bottom Plate') return cfg.bottomSource === 'ผลิตเอง';
+            return cfg.station === station;
+        }
+
+        function renderSummaryDailyOrderByDoor(data) {
+            const head = document.getElementById('summaryDailyOrderByDoorHead');
+            const body = document.getElementById('summaryDailyOrderByDoorBody');
+            const foot = document.getElementById('summaryDailyOrderByDoorFoot');
+            const table = document.getElementById('tableSummaryDailyOrderByDoor');
+            if (!head || !body || !foot || !table || !data?.days || !data?.groups) return;
+
+            const station = currentManpowerStation || 'Door A';
+            const days = data.days || [];
+            const doorMap = new Map();
+
+            // Door -> { orders[day], models Set }
+            (data.groups || []).forEach(group => {
+                (group.models || []).forEach(model => {
+                    const modelName = String(model?.name || '').trim();
+                    if (!modelName) return;
+                    if (!modelBelongsToSelectedSummaryStation(modelName, station)) return;
+
+                    const doorName = getDailyOrderDoorName(modelName);
+                    if (!doorName) return; // show only the mapping explicitly supplied
+
+                    if (!doorMap.has(doorName)) {
+                        doorMap.set(doorName, {
+                            orders: new Array(days.length).fill(0),
+                            models: new Set()
+                        });
+                    }
+
+                    const item = doorMap.get(doorName);
+                    item.models.add(modelName);
+
+                    days.forEach((day, dayIndex) => {
+                        if (isSunday(day)) return;
+                        const order = Math.max(0, Number(model?.orders?.[dayIndex]) || 0);
+                        item.orders[dayIndex] += order; // same Door = SUM all mapped Models
+                    });
+                });
+            });
+
+            const rows = Array.from(doorMap.entries())
+                .map(([door, item]) => ({
+                    door,
+                    orders: item.orders,
+                    models: Array.from(item.models).sort((a,b) => a.localeCompare(b))
+                }))
+                .filter(r => r.orders.some(v => v > 0))
+                .sort((a,b) => {
+                    const ai = DAILY_ORDER_DOOR_SORT.indexOf(a.door);
+                    const bi = DAILY_ORDER_DOOR_SORT.indexOf(b.door);
+                    if (ai !== -1 || bi !== -1) {
+                        if (ai === -1) return 1;
+                        if (bi === -1) return -1;
+                        return ai - bi;
+                    }
+                    return a.door.localeCompare(b.door);
+                });
+
+            const doorWidth = 165;
+            const dayWidth = 76;
+            const totalWidth = 90;
+            table.style.width = `${doorWidth + days.length * dayWidth + totalWidth}px`;
+            table.style.minWidth = '100%';
+
+            head.innerHTML = `
+                <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-left"
+                    style="width:${doorWidth}px;min-width:${doorWidth}px;">DOOR</th>
+                ${days.map(day => `
+                    <th class="px-2 py-2.5 bg-slate-950/95 text-center text-sky-300 whitespace-nowrap"
+                        style="min-width:${dayWidth}px;">${day}</th>`).join('')}
+                <th class="px-3 py-2.5 bg-slate-950/95 text-center text-amber-300 whitespace-nowrap"
+                    style="min-width:${totalWidth}px;">TOTAL</th>
+            `;
+
+            body.innerHTML = rows.length ? rows.map(row => {
+                const total = row.orders.reduce((sum,v) => sum + Number(v || 0), 0);
+                return `
+                    <tr class="hover:bg-slate-800/35">
+                        <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
+                            <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
+                            <div class="text-slate-500 text-[8px] mt-0.5 leading-tight">
+                                ${row.models.join(' + ')}
+                            </div>
+                        </td>
+                        ${row.orders.map((order,i) => {
+                            if (isSunday(days[i])) {
+                                return `<td class="px-2 py-2.5 text-center bg-slate-950 text-slate-600 border-l border-bordercolor/40">—</td>`;
+                            }
+                            return `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">
+                                <div class="text-sky-300 text-[11px] font-bold">${order > 0 ? Math.round(order).toLocaleString() : '—'}</div>
+                            </td>`;
+                        }).join('')}
+                        <td class="px-3 py-2.5 text-center border-l border-bordercolor/40">
+                            <div class="text-amber-300 text-[11px] font-black">${Math.round(total).toLocaleString()}</div>
+                        </td>
+                    </tr>`;
+            }).join('') : `
+                <tr>
+                    <td colspan="${days.length + 2}" class="px-4 py-6 text-center text-slate-500">
+                        ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก
+                    </td>
+                </tr>`;
+
+            const dailyTotals = days.map((day,i) => {
+                if (isSunday(day)) return 0;
+                return rows.reduce((sum,row) => sum + Number(row.orders[i] || 0), 0);
+            });
+            const grandTotal = dailyTotals.reduce((sum,v) => sum + v, 0);
+
+            foot.innerHTML = `
+                <tr style="background:rgba(8,47,73,.60);">
+                    <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 text-cyan-200 font-black text-[11px]">
+                        TOTAL ORDER / DAY
+                    </td>
+                    ${dailyTotals.map((value,i) => `
+                        <td class="px-2 py-2.5 text-center font-black ${isSunday(days[i]) ? 'text-slate-500' : 'text-sky-300'}">
+                            ${isSunday(days[i]) ? '—' : Math.round(value).toLocaleString()}
+                        </td>`).join('')}
+                    <td class="px-3 py-2.5 text-center text-amber-300 font-black">
+                        ${Math.round(grandTotal).toLocaleString()}
+                    </td>
+                </tr>`;
+        }
+
         function renderManpowerTable(data) {
             const table = document.getElementById('tableManpowerCapacity');
             if (!table || !data || !data.days || !data.groups) return;
@@ -7364,6 +7604,7 @@ function updateLobSubLineVisibility() {
             if (shortInput) shortInput.value = getShortPercent();
             const hours = parseFloat(document.getElementById('shiftHoursInput').value) || 8;
             renderSummaryCapacityPlanActual(data);
+            renderSummaryDailyOrderByDoor(data);
 
             const stationLabel = document.getElementById('manpowerStationLabel');
             if (stationLabel) stationLabel.textContent = station;
@@ -8904,6 +9145,24 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 #tableManpowerCapacity .mp-plan-required-fixed-sunday{
     background:#a16207!important;color:#fef3c7!important;
+}
+</style>
+
+
+<style id="summary-daily-order-by-door-style">
+#summaryDailyOrderByDoor table th{
+    font-size:11px!important;
+    font-weight:800!important;
+    color:#dbeafe!important;
+}
+#summaryDailyOrderByDoor table td{
+    font-size:11px!important;
+}
+#summaryDailyOrderByDoor tbody tr{
+    border-bottom:1px solid rgba(71,85,105,.42)!important;
+}
+#summaryDailyOrderByDoor tbody tr:nth-child(even){
+    background:rgba(30,41,59,.22)!important;
 }
 </style>
 
