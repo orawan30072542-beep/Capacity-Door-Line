@@ -7618,6 +7618,23 @@ function updateLobSubLineVisibility() {
             return cols;
         }
 
+        function getSummaryDoorProductionRatioMultiplier(modelName, station) {
+            const cfg = getMasterConfigForModel(modelName);
+
+            if (station === 'Door C') {
+                return (getDoorCRoutingDetails(modelName) || []).reduce((sum, route) => {
+                    const ratio = Math.max(
+                        0,
+                        Number(getDoorCManualRatio(modelName, route.line, route.qty)) || 0
+                    );
+                    return sum + ratio;
+                }, 0);
+            }
+
+            if (station === 'Back Plate' || station === 'Bottom Plate') return 1;
+            return Math.max(0, Number(cfg.qtyPerSet) || 1);
+        }
+
         function renderSummaryDailyOrderByDoor(data) {
             const head = document.getElementById('summaryDailyOrderByDoorHead');
             const body = document.getElementById('summaryDailyOrderByDoorBody');
@@ -7645,12 +7662,19 @@ function updateLobSubLineVisibility() {
                     if (!doorName) return;
 
                     if (!doorMap.has(doorName)) {
-                        doorMap.set(doorName,{orders:new Array(days.length).fill(0),models:new Set()});
+                        doorMap.set(doorName,{
+                            orders:new Array(days.length).fill(0),
+                            production:new Array(days.length).fill(0),
+                            models:new Set()
+                        });
                     }
                     const item=doorMap.get(doorName);
                     item.models.add(modelName);
+                    const productionRatio = getSummaryDoorProductionRatioMultiplier(modelName, station);
                     days.forEach((day,i)=>{
-                        item.orders[i] += Math.max(0,Number(model?.orders?.[i])||0);
+                        const order = Math.max(0,Number(model?.orders?.[i])||0);
+                        item.orders[i] += order;
+                        item.production[i] += order * productionRatio;
                     });
                 });
             });
@@ -7658,6 +7682,7 @@ function updateLobSubLineVisibility() {
             const rows=Array.from(doorMap.entries()).map(([door,item])=>({
                 door,
                 rawOrders:item.orders,
+                rawProduction:item.production,
                 models:Array.from(item.models).sort((a,b)=>a.localeCompare(b))
             })).filter(r=>r.rawOrders.some(v=>v>0)).sort((a,b)=>{
                 const ai=DAILY_ORDER_DOOR_SORT.indexOf(a.door), bi=DAILY_ORDER_DOOR_SORT.indexOf(b.door);
@@ -7675,6 +7700,7 @@ function updateLobSubLineVisibility() {
 
             body.innerHTML=rows.length?rows.map(row=>{
                 const total=row.rawOrders.reduce((a,b)=>a+Number(b||0),0);
+                const totalProduction=row.rawProduction.reduce((a,b)=>a+Number(b||0),0);
                 return `<tr>
                     <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
                         <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
@@ -7684,27 +7710,50 @@ function updateLobSubLineVisibility() {
                         const value=c.type==='week'
                             ? c.indexes.reduce((sum,i)=>sum+Number(row.rawOrders[i]||0),0)
                             : Number(row.rawOrders[c.index]||0);
+                        const production=c.type==='week'
+                            ? c.indexes.reduce((sum,i)=>sum+Number(row.rawProduction[i]||0),0)
+                            : Number(row.rawProduction[c.index]||0);
+                        const cellInner=`
+                            <div class="text-sky-300 text-[11px] font-bold">${value>0?Math.round(value).toLocaleString():'—'}</div>
+                            <div class="production-ratio-value">${production>0?Math.round(production).toLocaleString():'—'}</div>`;
                         return c.type==='week'
-                            ? `<td class="weekly-sum-col px-3 py-2.5 text-center"><div class="text-[11px] font-black">${Math.round(value).toLocaleString()}</div></td>`
-                            : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40"><div class="text-sky-300 text-[11px] font-bold">${value>0?Math.round(value).toLocaleString():'—'}</div></td>`;
+                            ? `<td class="weekly-sum-col px-3 py-2.5 text-center">${cellInner}</td>`
+                            : `<td class="px-2 py-2.5 text-center border-l border-bordercolor/40">${cellInner}</td>`;
                     }).join('')}
-                    <td class="px-3 py-2.5 text-center border-l border-bordercolor/40 text-amber-300 text-[11px] font-black">${Math.round(total).toLocaleString()}</td>
+                    <td class="px-3 py-2.5 text-center border-l border-bordercolor/40">
+                        <div class="text-amber-300 text-[11px] font-black">${Math.round(total).toLocaleString()}</div>
+                        <div class="production-ratio-value">${Math.round(totalProduction).toLocaleString()}</div>
+                    </td>
                 </tr>`;
             }).join(''):`<tr><td colspan="${columns.length+2}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
 
             const dailyTotals=days.map((day,i)=>rows.reduce((sum,r)=>sum+Number(r.rawOrders[i]||0),0));
+            const dailyProductionTotals=days.map((day,i)=>rows.reduce((sum,r)=>sum+Number(r.rawProduction[i]||0),0));
             const grandTotal=dailyTotals.reduce((a,b)=>a+b,0);
+            const grandProductionTotal=dailyProductionTotals.reduce((a,b)=>a+b,0);
             foot.innerHTML=`<tr>
-                <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 text-cyan-200 font-black text-[11px]">TOTAL ORDER</td>
+                <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 font-black">
+                    <div class="text-cyan-200 text-[11px]">TOTAL ORDER</div>
+                    <div class="production-ratio-label">ผลิตตาม Ratio</div>
+                </td>
                 ${columns.map(c=>{
                     const value=c.type==='week'
                         ? c.indexes.reduce((sum,i)=>sum+Number(dailyTotals[i]||0),0)
                         : Number(dailyTotals[c.index]||0);
+                    const production=c.type==='week'
+                        ? c.indexes.reduce((sum,i)=>sum+Number(dailyProductionTotals[i]||0),0)
+                        : Number(dailyProductionTotals[c.index]||0);
+                    const inner=`
+                        <div class="text-sky-300 text-[11px] font-black">${value>0?Math.round(value).toLocaleString():'—'}</div>
+                        <div class="production-ratio-value">${production>0?Math.round(production).toLocaleString():'—'}</div>`;
                     return c.type==='week'
-                        ? `<td class="weekly-sum-col px-3 py-2.5 text-center font-black">${Math.round(value).toLocaleString()}</td>`
-                        : `<td class="px-2 py-2.5 text-center font-black text-sky-300">${value>0?Math.round(value).toLocaleString():'—'}</td>`;
+                        ? `<td class="weekly-sum-col px-3 py-2.5 text-center font-black">${inner}</td>`
+                        : `<td class="px-2 py-2.5 text-center font-black">${inner}</td>`;
                 }).join('')}
-                <td class="px-3 py-2.5 text-center text-amber-300 font-black">${Math.round(grandTotal).toLocaleString()}</td>
+                <td class="px-3 py-2.5 text-center font-black">
+                    <div class="text-amber-300 text-[11px]">${Math.round(grandTotal).toLocaleString()}</div>
+                    <div class="production-ratio-value">${Math.round(grandProductionTotal).toLocaleString()}</div>
+                </td>
             </tr>`;
         }
 
@@ -9351,6 +9400,32 @@ document.addEventListener('DOMContentLoaded', () => {
 #summaryDailyOrderByDoor tfoot .weekly-sum-col{
     background:#0ea5e9 !important;
     color:#ffffff !important;
+}
+</style>
+
+
+<style id="summary-production-ratio-yellow-style">
+#summaryDailyOrderByDoor .production-ratio-value{
+    margin-top:3px;
+    color:#facc15 !important;
+    font-size:9px !important;
+    line-height:1.05 !important;
+    font-weight:900 !important;
+}
+#summaryDailyOrderByDoor .production-ratio-value::before{
+    content:"Ratio ";
+    color:#eab308;
+    font-size:7px;
+    font-weight:700;
+}
+#summaryDailyOrderByDoor .production-ratio-label{
+    margin-top:3px;
+    color:#facc15 !important;
+    font-size:8px !important;
+    font-weight:900 !important;
+}
+#summaryDailyOrderByDoor .weekly-sum-col .production-ratio-value{
+    color:#fef08a !important;
 }
 </style>
 
