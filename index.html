@@ -10296,9 +10296,9 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 #tableSummaryDailyOrderByDoor td:first-child,
 #summaryDailyOrderByDoor table th:first-child,
 #summaryDailyOrderByDoor table td:first-child{
-    width:300px !important;
-    min-width:300px !important;
-    max-width:300px !important;
+    width:120px !important;
+    min-width:120px !important;
+    max-width:120px !important;
 }
 
 /* Prevent padding from changing the fixed column geometry */
@@ -10347,7 +10347,7 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 
         if(uh[0]) applyWidth(uh[0],60);
         if(uh[1]) applyWidth(uh[1],60);
-        if(lh[0]) applyWidth(lh[0],120);
+        if(lh[0]) applyWidth(lh[0],170);
 
         function sizeHeaderAndColumn(table, heads, leadingCount){
             heads.forEach((th,idx)=>{
@@ -10373,7 +10373,7 @@ Therefore: Line 60 + Type 60 = DOOR 120.
             if(tr.children[1]) applyWidth(tr.children[1],60);
         });
         lower.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{
-            if(tr.children[0]) applyWidth(tr.children[0],120);
+            if(tr.children[0]) applyWidth(tr.children[0],170);
         });
 
         const upperWidth=uh.reduce((n,th)=>n+(parseFloat(getComputedStyle(th).width)||0),0);
@@ -10416,12 +10416,59 @@ Therefore: Line 60 + Type 60 = DOOR 120.
 </style>
 
 
-<style id="daily-order-door-column-600px-final">
+<script id="force-daily-door-column-170-final">
+(function(){
+    function forceDoor200(){
+        const table = document.getElementById('tableSummaryDailyOrderByDoor')
+            || document.querySelector('#summaryDailyOrderByDoor table');
+        if(!table) return;
+
+        table.style.setProperty('table-layout','fixed','important');
+
+        let cg = table.querySelector('colgroup[data-door-width-control="1"]');
+        if(!cg){
+            cg = document.createElement('colgroup');
+            cg.setAttribute('data-door-width-control','1');
+            const count = Math.max(1, table.querySelectorAll('thead th').length);
+            for(let i=0;i<count;i++) cg.appendChild(document.createElement('col'));
+            table.insertBefore(cg, table.firstChild);
+        }
+        const firstCol = cg.children[0];
+        if(firstCol){
+            firstCol.style.setProperty('width','170px','important');
+            firstCol.style.setProperty('min-width','170px','important');
+        }
+
+        table.querySelectorAll('tr').forEach(tr=>{
+            const cell = tr.children[0];
+            if(!cell) return;
+            cell.style.setProperty('width','170px','important');
+            cell.style.setProperty('min-width','170px','important');
+            cell.style.setProperty('max-width','170px','important');
+            cell.style.setProperty('box-sizing','border-box','important');
+        });
+    }
+
+    const old = window.renderSummaryDailyOrderByDoor;
+    if(typeof old === 'function'){
+        window.renderSummaryDailyOrderByDoor = function(){
+            const r = old.apply(this,arguments);
+            requestAnimationFrame(forceDoor200);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(forceDoor200));
+    setTimeout(forceDoor200,50);
+})();
+</script>
+<style id="force-daily-door-column-190-style-final">
 #tableSummaryDailyOrderByDoor th:first-child,
 #tableSummaryDailyOrderByDoor td:first-child,
 #summaryDailyOrderByDoor table th:first-child,
 #summaryDailyOrderByDoor table td:first-child{
- width:600px !important; min-width:600px !important; max-width:600px !important; box-sizing:border-box !important;
+    width:190px !important;
+    min-width:190px !important;
+    max-width:190px !important;
 }
 </style>
 
