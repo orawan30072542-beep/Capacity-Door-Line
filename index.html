@@ -1158,18 +1158,20 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
-                            <span class="text-[10px] text-slate-400 font-semibold">เลือกไลน์ผลิต:</span>
-                            <select id="manpowerLineSelect"
-                                onchange="switchManpowerStation(this.value)"
-                                class="bg-slate-800 border border-bordercolor text-emerald-300 text-xs font-bold rounded-lg px-3 py-1.5 focus:outline-none">
-                                <option value="Door A">Door A</option>
-                                <option value="Door B">Door B</option>
-                                <option value="Door C">Door C</option>
-                                <option value="Door Glass">Door Glass</option>
-                                <option value="Back Plate">Back Plate</option>
-                                <option value="Bottom Plate">Bottom Plate</option>
+                            <span class="text-[10px] text-slate-400 font-semibold">Group Station:</span>
+                            <div id="manpowerLineButtons" class="flex flex-wrap gap-1.5">
+                                <button type="button" data-line="Door A" onclick="switchManpowerStation('Door A')" class="mp-line-btn">Door A</button>
+                                <button type="button" data-line="Door B" onclick="switchManpowerStation('Door B')" class="mp-line-btn">Door B</button>
+                                <button type="button" data-line="Door C" onclick="switchManpowerStation('Door C')" class="mp-line-btn">Door C</button>
+                                <button type="button" data-line="Door Glass" onclick="switchManpowerStation('Door Glass')" class="mp-line-btn">Door Glass</button>
+                                <button type="button" data-line="Back Plate" onclick="switchManpowerStation('Back Plate')" class="mp-line-btn">Back Plate</button>
+                                <button type="button" data-line="Bottom Plate" onclick="switchManpowerStation('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
+                            </div>
+                            <select id="manpowerLineSelect" onchange="switchManpowerStation(this.value)" class="hidden">
+                                <option value="Door A">Door A</option><option value="Door B">Door B</option><option value="Door C">Door C</option>
+                                <option value="Door Glass">Door Glass</option><option value="Back Plate">Back Plate</option><option value="Bottom Plate">Bottom Plate</option>
                             </select>
-                            <span id="manpowerStationLabel" class="text-emerald-300 font-bold text-xs bg-emerald-950/50 px-3 py-1.5 rounded-lg border border-emerald-500/30">Door A</span>
+                            <span id="manpowerStationLabel" class="hidden">Door A</span>
                         </div>
                     </div>
 
@@ -8497,6 +8499,12 @@ body.innerHTML=rows.length?rows.map(row=>{
         }
 
         function switchManpowerStation(stationName) {
+            document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn => {
+                const active = btn.dataset.line === stationName;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
             currentManpowerStation = stationName;
 
             const label = document.getElementById('manpowerStationLabel');
@@ -9986,6 +9994,30 @@ document.addEventListener('DOMContentLoaded', () => {
     border-color:#3b82f6 !important;
     color:#ffffff !important;
     font-weight:800 !important;
+}
+</style>
+
+
+<style id="manpower-clickable-line-buttons">
+#manpowerLineButtons .mp-line-btn{
+    background:#1e293b;
+    border:1px solid #26364d;
+    color:#e2e8f0;
+    border-radius:8px;
+    padding:6px 11px;
+    font-size:10px;
+    font-weight:800;
+    line-height:1;
+    cursor:pointer;
+    transition:.15s ease;
+}
+#manpowerLineButtons .mp-line-btn:hover{background:#263754;border-color:#475569;}
+#manpowerLineButtons .mp-line-btn.active,
+#manpowerLineButtons .mp-line-btn[aria-pressed="true"]{
+    background:#2563eb !important;
+    border-color:#3b82f6 !important;
+    color:#fff !important;
+    box-shadow:0 0 0 1px rgba(59,130,246,.18);
 }
 </style>
 
