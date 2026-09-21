@@ -9166,5 +9166,32 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
+
+<style id="manpower-sticky-control-header">
+/* ===== Sticky Manpower & Capacity top control ===== */
+#manpower-section > div:first-child{
+    position: sticky !important;
+    top: 73px !important; /* below the global top header */
+    z-index: 55 !important;
+    background: #131E3E !important;
+    border: 1px solid rgba(51,65,85,.95) !important;
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+    box-shadow: 0 10px 24px rgba(2,6,23,.38) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Prevent content underneath from visually bleeding through */
+#manpower-section{
+    isolation: isolate;
+}
+
+@media (max-width: 640px){
+    #manpower-section > div:first-child{
+        top: 69px !important;
+    }
+}
+</style>
+
 </body>
 </html
