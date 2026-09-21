@@ -1150,11 +1150,11 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
                                 <div class="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
                                 <h2 class="mp-overview-title text-base sm:text-lg font-bold text-white tracking-wide">Manpower & Capacity Requirement Overview Actual</h2>
                             <p class="text-[10px] text-slate-400 mt-1">
-                                จัดข้อมูลเป็น 4 โซน: Order Plan → Capacity → Manpower (In + Out) → Result / Risk
+                                
                             </p>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-1 ml-3">
-                                สรุปกำลังคนและ Capacity ตามไลน์ผลิต | Back Plate / Bottom Plate Line#1 / Line#2: Load to Cart 1 คน รวมอยู่ใน In Line | Out Line = Part Supply 1 + Delivery 1 (รวม 2 คน/ไลน์) | Order/Hour = Order + Short % ÷ Working Hours
+                                 |  |  | 
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -9895,6 +9895,67 @@ document.addEventListener('DOMContentLoaded', () => {
 #tableSummaryCapacityPlanActual .scp-total-2lines-row td.scp-weekly-sum-col.scp-negative,
 #tableSummaryCapacityPlanActual .scp-total-uph-row td.scp-weekly-sum-col.scp-negative{
     background:linear-gradient(rgba(239,68,68,.18),rgba(239,68,68,.18)),#075985 !important;
+}
+</style>
+
+
+<style id="summary-capacity-total-solid-blue">
+/* TOTAL Line#1 + Line#2: solid blue, no transparency */
+#tableSummaryCapacityPlanActual .scp-total-line-label{
+    background:#075985 !important;
+    color:#ffffff !important;
+    opacity:1 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#0c4a6e !important;
+    color:#ffffff !important;
+    opacity:1 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td:not(.scp-weekly-sum-col):not(.scp-week-separator):not(.scp-no-production),
+#tableSummaryCapacityPlanActual .scp-total-uph-row td:not(.scp-weekly-sum-col):not(.scp-week-separator):not(.scp-no-production){
+    background:#0f3f5f !important;
+    opacity:1 !important;
+}
+/* Keep the week separator pure white */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row .scp-week-separator,
+#tableSummaryCapacityPlanActual .scp-total-uph-row .scp-week-separator{
+    background:#ffffff !important;
+    opacity:1 !important;
+}
+</style>
+
+
+<style id="total-deep-blue-solid-final">
+/* TOTAL Line#1 + Line#2: dark blue solid 100% — no transparency */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td:not(.scp-week-separator),
+#tableSummaryCapacityPlanActual .scp-total-uph-row td:not(.scp-week-separator),
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#082f49 !important;
+    background-image:none !important;
+    opacity:1 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-line-label{
+    color:#ffffff !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    color:#ffffff !important;
+}
+/* TOTAL weekly cells also stay solid dark blue; only +/- text shows status */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td.scp-weekly-sum-col.scp-positive,
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td.scp-weekly-sum-col.scp-negative,
+#tableSummaryCapacityPlanActual .scp-total-uph-row td.scp-weekly-sum-col.scp-positive,
+#tableSummaryCapacityPlanActual .scp-total-uph-row td.scp-weekly-sum-col.scp-negative{
+    background:#082f49 !important;
+    background-image:none !important;
+    opacity:1 !important;
+}
+/* Keep week separator white */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row .scp-week-separator,
+#tableSummaryCapacityPlanActual .scp-total-uph-row .scp-week-separator{
+    background:#ffffff !important;
+    background-image:none !important;
+    opacity:1 !important;
 }
 </style>
 
