@@ -9964,5 +9964,30 @@ document.addEventListener('DOMContentLoaded', () => {
 #plan-order{display:none !important;}
 </style>
 
+
+<style id="group-station-click-filter-style">
+#daily-order-summary .summary-station-filter,
+#daily-order-summary [id^="sum-btn-"]{
+    cursor:pointer !important;
+    user-select:none !important;
+    border-radius:8px !important;
+    transition:background .15s ease,border-color .15s ease,transform .08s ease !important;
+}
+#daily-order-summary [id^="sum-btn-"]:hover{
+    background:#263754 !important;
+    border-color:#475569 !important;
+}
+#daily-order-summary [id^="sum-btn-"]:active{
+    transform:scale(.97);
+}
+#daily-order-summary [id^="sum-btn-"].active,
+#daily-order-summary [id^="sum-btn-"][aria-pressed="true"]{
+    background:#2563eb !important;
+    border-color:#3b82f6 !important;
+    color:#ffffff !important;
+    font-weight:800 !important;
+}
+</style>
+
 </body>
 </html
