@@ -7256,6 +7256,14 @@ function updateLobSubLineVisibility() {
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
             const lines = getSummaryCapacityLineNames(station);
             const columns = getDailyWeeklySummaryColumns(days);
+            const noOrderDay = days.map((day,i) => {
+                if (isSunday(day)) return true;
+                return !lines.some(lineName => {
+                    const cab = getSummaryCapacityPlanOrder(data, station, lineName, i);
+                    const req = getSummaryCapacityRequiredOrder(data, station, lineName, i, hours);
+                    return Number(cab || 0) > 0 || Number(req || 0) > 0;
+                });
+            });
 
             const lineWidth = 90;
             const typeWidth = 72;
@@ -7269,8 +7277,8 @@ function updateLobSubLineVisibility() {
                 <th class="px-3 py-2.5 bg-slate-950/95 sticky left-0 z-30 text-center" style="width:${lineWidth}px;min-width:${lineWidth}px;">Line</th>
                 <th class="px-2 py-2.5 bg-slate-950/95 sticky z-30 text-center" style="left:${lineWidth}px;width:${typeWidth}px;min-width:${typeWidth}px;">Type</th>
                 ${columns.map(c => c.type==='week'
-                    ? `<th class="scp-weekly-sum-col px-2 py-2.5 text-center whitespace-nowrap" style="min-width:${weekWidth}px;">${c.label}</th>`
-                    : `<th class="px-2 py-2.5 bg-slate-950/95 text-center whitespace-nowrap" style="min-width:${dayWidth}px;">${c.label}</th>`
+                    ? `<th class="scp-week-divider text-center whitespace-nowrap">${c.label}</th>`
+                    : `<th class="${noOrderDay[c.index] ? 'scp-noorder-head' : ''} px-2 py-2.5 bg-slate-950/95 text-center whitespace-nowrap">${c.label}</th>`
                 ).join('')}
             `;
 
@@ -7278,11 +7286,11 @@ function updateLobSubLineVisibility() {
 
             const summaryCell = (cab, p, a, diff, isWeek=false, blank=false) => {
                 if (blank) {
-                    return `<td class="scp-no-production border-l border-bordercolor/40"></td>`;
+                    return `<td class="scp-no-production scp-compact-noorder border-l border-bordercolor/40"></td>`;
                 }
                 const diffClass = diff < 0 ? 'scp-negative' : 'scp-positive';
                 const sign = diff > 0 ? '+' : '';
-                return `<td class="${isWeek?'scp-weekly-sum-col ':''}${diffClass} px-2 py-2 text-center border-l border-bordercolor/40">
+                return `<td class="${isWeek?'scp-weekly-sum-col scp-week-divider-cell ':''}${diffClass} px-2 py-2 text-center border-l border-bordercolor/40">
                     <div class="scp-cab">Cab : ${Math.round(cab).toLocaleString()}</div>
                     <div class="scp-divider"></div>
                     <div class="scp-p">P : ${Math.round(p).toLocaleString()}</div>
@@ -7334,7 +7342,7 @@ function updateLobSubLineVisibility() {
                     if (c.type === 'day') {
                         const i = c.index;
                         if (isSunday(days[i]) || !(totalPlan[i] > 0 || totalRequired[i] > 0)) {
-                            return `<td class="scp-no-production border-l border-bordercolor/40"></td>`;
+                            return `<td class="scp-no-production scp-compact-noorder border-l border-bordercolor/40"></td>`;
                         }
                     }
 
@@ -9800,6 +9808,89 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 #tableSummaryCapacityPlanActual .scp-total-uph-row td{
     border-bottom-color:rgba(56,189,248,.65) !important;
+}
+</style>
+
+
+<style id="compact-noorder-week-divider-final">
+/* Daily dates with no order: visibly narrower */
+#tableSummaryCapacityPlanActual th.scp-noorder-head{
+    min-width:38px !important;
+    width:38px !important;
+    max-width:38px !important;
+    padding-left:3px !important;
+    padding-right:3px !important;
+    font-size:8px !important;
+    color:#64748b !important;
+}
+#tableSummaryCapacityPlanActual td.scp-compact-noorder{
+    min-width:38px !important;
+    width:38px !important;
+    max-width:38px !important;
+    padding:0 !important;
+    background:#111827 !important;
+}
+
+/* Wxx = compact solid-white week divider */
+#tableSummaryCapacityPlanActual th.scp-week-divider{
+    min-width:54px !important;
+    width:54px !important;
+    max-width:54px !important;
+    padding:4px 2px !important;
+    background:#ffffff !important;
+    color:#0f172a !important;
+    border-left:3px solid #ffffff !important;
+    border-right:3px solid #ffffff !important;
+    font-size:8px !important;
+    font-weight:900 !important;
+}
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell{
+    min-width:54px !important;
+    width:54px !important;
+    max-width:54px !important;
+    padding:5px 2px !important;
+    background:#ffffff !important;
+    color:#0f172a !important;
+    border-left:3px solid #ffffff !important;
+    border-right:3px solid #ffffff !important;
+}
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell .scp-cab{
+    color:#0369a1 !important;
+    font-size:8px !important;
+}
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell .scp-divider{
+    background:#94a3b8 !important;
+    margin:3px 3px !important;
+}
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell .scp-p,
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell .scp-a{
+    color:#0f172a !important;
+    font-size:8px !important;
+}
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell.scp-positive .scp-diff{
+    display:inline-block;
+    margin-top:3px;
+    padding:1px 3px;
+    border-radius:3px;
+    background:rgba(34,197,94,.18) !important;
+    color:#15803d !important;
+    font-size:8px !important;
+}
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell.scp-negative .scp-diff{
+    display:inline-block;
+    margin-top:3px;
+    padding:1px 3px;
+    border-radius:3px;
+    background:rgba(239,68,68,.18) !important;
+    color:#b91c1c !important;
+    font-size:8px !important;
+}
+/* Override earlier weekly red/green full-cell fills: Wxx itself remains opaque white */
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell.scp-positive,
+#tableSummaryCapacityPlanActual td.scp-week-divider-cell.scp-negative{
+    background:#ffffff !important;
+    border-left:3px solid #ffffff !important;
+    border-right:3px solid #ffffff !important;
 }
 </style>
 
