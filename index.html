@@ -7547,14 +7547,13 @@ function updateLobSubLineVisibility() {
         function getDailyWeeklySummaryColumns(days) {
             const cols = [];
             let weekIndexes = [];
-            let currentWeek = null;
+            let weekNo = null;
 
             const flushWeek = () => {
                 if (!weekIndexes.length) return;
-                const weekNo = currentWeek || getIsoWeekNumberForSummary(days[weekIndexes[0]]);
                 cols.push({
                     type:'week',
-                    label:`SUM W${weekNo}`,
+                    label:`SUM W${weekNo || ''}`,
                     indexes:[...weekIndexes]
                 });
                 weekIndexes = [];
@@ -7562,24 +7561,26 @@ function updateLobSubLineVisibility() {
 
             days.forEach((day, i) => {
                 const d = parseForecastDate(day);
+
+                // If a date cannot be parsed, keep it as a normal daily column.
                 if (!d) {
-                    flushWeek();
-                    cols.push({type:'day',label:String(day),index:i});
+                    cols.push({type:'day', label:String(day), index:i});
                     return;
                 }
 
-                const weekNo = getIsoWeekNumberForSummary(day);
-                if (currentWeek !== null && weekNo !== currentWeek) flushWeek();
-                currentWeek = weekNo;
+                const thisWeek = getIsoWeekNumberForSummary(day);
 
-                // Sunday is not shown as a daily production column.
-                // It closes the current Mon-Sun week and the SUM column is inserted here.
-                if (d.getDay() === 0) {
+                // Start/continue one weekly bucket. Do NOT SUM after every day.
+                if (weekNo === null) weekNo = thisWeek;
+
+                // If the imported range crosses into a new ISO week without an
+                // explicit Sunday column, close the previous week once.
+                if (thisWeek !== weekNo && weekIndexes.length) {
                     flushWeek();
-                    currentWeek = null;
-                    return;
+                    weekNo = thisWeek;
                 }
 
+                // Keep every date visible, including Sunday.
                 cols.push({
                     type:'day',
                     label:`${d.getMonth()+1}/${d.getDate()}`,
@@ -7587,13 +7588,15 @@ function updateLobSubLineVisibility() {
                 });
                 weekIndexes.push(i);
 
-                // If imported data ends on Saturday, close the week immediately.
-                if (d.getDay() === 6) {
+                // Weekly SUM appears only after Sunday.
+                if (d.getDay() === 0) {
                     flushWeek();
-                    currentWeek = null;
+                    weekNo = null;
                 }
             });
 
+            // If the imported data ends before Sunday, show one SUM for the
+            // remaining partial week at the end (not after each day).
             flushWeek();
             return cols;
         }
@@ -7630,7 +7633,6 @@ function updateLobSubLineVisibility() {
                     const item=doorMap.get(doorName);
                     item.models.add(modelName);
                     days.forEach((day,i)=>{
-                        if (isSunday(day)) return;
                         item.orders[i] += Math.max(0,Number(model?.orders?.[i])||0);
                     });
                 });
@@ -7673,7 +7675,7 @@ function updateLobSubLineVisibility() {
                 </tr>`;
             }).join(''):`<tr><td colspan="${columns.length+2}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
 
-            const dailyTotals=days.map((day,i)=>isSunday(day)?0:rows.reduce((sum,r)=>sum+Number(r.rawOrders[i]||0),0));
+            const dailyTotals=days.map((day,i)=>rows.reduce((sum,r)=>sum+Number(r.rawOrders[i]||0),0));
             const grandTotal=dailyTotals.reduce((a,b)=>a+b,0);
             foot.innerHTML=`<tr>
                 <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 text-cyan-200 font-black text-[11px]">TOTAL ORDER</td>
