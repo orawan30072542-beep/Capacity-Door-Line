@@ -9746,5 +9746,62 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 </style>
 
+
+<style id="summary-capacity-weekly-color-only-theme">
+/* Daily cells: neutral dashboard background regardless of +/- */
+#tableSummaryCapacityPlanActual td.scp-positive:not(.scp-weekly-sum-col),
+#tableSummaryCapacityPlanActual td.scp-negative:not(.scp-weekly-sum-col){
+    background:rgba(15,23,42,.52) !important;
+}
+#tableSummaryCapacityPlanActual td.scp-positive:not(.scp-weekly-sum-col) .scp-diff{
+    color:#86efac !important;
+}
+#tableSummaryCapacityPlanActual td.scp-negative:not(.scp-weekly-sum-col) .scp-diff{
+    color:#fca5a5 !important;
+}
+
+/* Weekly SUM: use restrained transparent status colors that fit the navy dashboard */
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-positive{
+    background:linear-gradient(rgba(34,197,94,.16),rgba(34,197,94,.16)),#0f2f3a !important;
+    border-left:2px solid rgba(74,222,128,.65) !important;
+    border-right:2px solid rgba(74,222,128,.65) !important;
+}
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-negative{
+    background:linear-gradient(rgba(239,68,68,.18),rgba(239,68,68,.18)),#2b1b2b !important;
+    border-left:2px solid rgba(248,113,113,.65) !important;
+    border-right:2px solid rgba(248,113,113,.65) !important;
+}
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-positive .scp-diff{
+    color:#86efac !important;
+}
+#tableSummaryCapacityPlanActual td.scp-weekly-sum-col.scp-negative .scp-diff{
+    color:#fca5a5 !important;
+}
+
+/* Weekly header stays in the same navy/cyan family */
+#tableSummaryCapacityPlanActual thead .scp-weekly-sum-col{
+    background:#0c4a6e !important;
+    color:#e0f2fe !important;
+    border-left:2px solid #38bdf8 !important;
+    border-right:2px solid #38bdf8 !important;
+}
+
+/* Combined Back/Bottom total styling aligned with dashboard theme */
+#tableSummaryCapacityPlanActual .scp-total-line-label{
+    background:#0b2538 !important;
+    color:#67e8f9 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-type-cell{
+    background:#123047 !important;
+    color:#e2e8f0 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td{
+    border-top-color:rgba(56,189,248,.55) !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-uph-row td{
+    border-bottom-color:rgba(56,189,248,.65) !important;
+}
+</style>
+
 </body>
 </html
