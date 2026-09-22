@@ -12010,5 +12010,71 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 })();
 </script>
 
+
+<script id="bottom-plate-summary-visibility-definitive-final">
+(function(){
+    const TARGET_ID='summaryCapacityMachineWeldingBottomPlate';
+
+    function currentStation(){
+        // The hidden select is the authoritative station value.
+        const sel=document.getElementById('manpowerLineSelect');
+        if(sel && sel.value) return String(sel.value).trim();
+
+        // Fallback to active station button.
+        const btn=document.querySelector('#manpowerLineButtons button.active, #manpowerLineButtons button[aria-pressed="true"]');
+        if(btn){
+            return String(btn.dataset.station || btn.dataset.value || btn.textContent || '').trim();
+        }
+        return '';
+    }
+
+    function applyVisibility(){
+        const card=document.getElementById(TARGET_ID);
+        if(!card) return;
+        const station=currentStation();
+
+        // EXACT RULE:
+        // Bottom Plate = show
+        // Door A / Door B / Door C / Door Glass / Back Plate = hide
+        card.hidden = station !== 'Bottom Plate';
+        card.style.setProperty('display', station === 'Bottom Plate' ? 'block' : 'none', 'important');
+    }
+
+    // Apply after every station change.
+    document.addEventListener('click',e=>{
+        if(e.target.closest('#manpowerLineButtons button')){
+            requestAnimationFrame(applyVisibility);
+            setTimeout(applyVisibility,30);
+        }
+    });
+    document.addEventListener('change',e=>{
+        if(e.target?.id==='manpowerLineSelect'){
+            requestAnimationFrame(applyVisibility);
+        }
+    });
+
+    // Keep synchronized with existing station switching code.
+    const oldSwitch=window.switchManpowerStation;
+    if(typeof oldSwitch==='function' && !oldSwitch.__bottomPlateVisibilityWrapped){
+        const wrapped=function(){
+            const r=oldSwitch.apply(this,arguments);
+            requestAnimationFrame(applyVisibility);
+            setTimeout(applyVisibility,30);
+            return r;
+        };
+        wrapped.__bottomPlateVisibilityWrapped=true;
+        window.switchManpowerStation=wrapped;
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        applyVisibility();
+        setTimeout(applyVisibility,100);
+        setTimeout(applyVisibility,500);
+    });
+
+    window.applyBottomPlateMachineWeldingSummaryVisibility=applyVisibility;
+})();
+</script>
+
 </body>
 </html
