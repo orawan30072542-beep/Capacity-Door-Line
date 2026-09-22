@@ -1529,6 +1529,14 @@ canvas, option {
         <div class="text-[9px] text-slate-400 mt-0.5">
             Bottom Welding · Daily Order อ้างอิงจาก Master Model · Average Work Time = Σ(Work Time × Order) ÷ Σ(Order)
         </div>
+        <div class="mt-2 flex items-center gap-2 text-[10px]">
+            <label for="bottomWeldingMachineCount" class="text-slate-300 font-semibold">Machine / เครื่องจักร</label>
+            <input id="bottomWeldingMachineCount" type="number" min="0" step="1" value="1"
+                   class="w-20 px-2 py-1 rounded-md bg-slate-950 border border-cyan-500/30 text-white text-center outline-none"
+                   onchange="setBottomWeldingMachineCount(this.value)"
+                   oninput="setBottomWeldingMachineCount(this.value)">
+            <span class="text-slate-500">กรอกจำนวนเครื่องจักร</span>
+        </div>
     </div>
     <div class="overflow-x-auto">
         <table id="tableSummaryCapacityMachineWeldingBottomPlate" class="border-collapse" style="min-width:100%;">
@@ -11830,6 +11838,33 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
    return list;
  }
 
+ const BW_MACHINE_COUNT_KEY='haier_bottom_welding_machine_count_v1';
+
+ function getBottomWeldingMachineCount(){
+   const input=document.getElementById('bottomWeldingMachineCount');
+   const inputVal=Number(input?.value);
+   if(Number.isFinite(inputVal) && inputVal>=0) return inputVal;
+   const saved=Number(localStorage.getItem(BW_MACHINE_COUNT_KEY));
+   return Number.isFinite(saved) && saved>=0 ? saved : 1;
+ }
+
+ window.setBottomWeldingMachineCount=function(value){
+   const n=Math.max(0,Number(value)||0);
+   localStorage.setItem(BW_MACHINE_COUNT_KEY,String(n));
+   const input=document.getElementById('bottomWeldingMachineCount');
+   if(input && Number(input.value)!==n) input.value=String(n);
+   if(typeof window.renderSummaryCapacityMachineWeldingBottomPlate==='function'){
+      window.renderSummaryCapacityMachineWeldingBottomPlate();
+   }
+ };
+
+ function syncBottomWeldingMachineInput(){
+   const input=document.getElementById('bottomWeldingMachineCount');
+   if(!input) return;
+   const saved=Number(localStorage.getItem(BW_MACHINE_COUNT_KEY));
+   input.value=String(Number.isFinite(saved) && saved>=0 ? saved : 1);
+ }
+
  function render(){
    const head=document.getElementById('summaryBottomWeldingDailyHead');
    const body=document.getElementById('summaryBottomWeldingDailyBody');
@@ -11859,6 +11894,12 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
       avgTimes.push(totalOrder>0 ? weighted/totalOrder : 0);
    });
 
+   const machineCount=getBottomWeldingMachineCount();
+   // Capacity / Hour = (3600 / Average Work Time) × 85% × Machine Count
+   const capacities=avgTimes.map((avg,i)=>
+      orders[i]>0 && avg>0 && machineCount>0 ? (3600/avg)*0.85*machineCount : 0
+   );
+
    body.innerHTML=`
      <tr>
        <td class="bw-label">Bottom Welding Order / Day</td>
@@ -11875,6 +11916,10 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
      <tr>
        <td class="bw-label">Average Work Time (s)</td>
        ${avgTimes.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-time':'bw-empty'}">${orders[i]>0&&v>0?fmt(v,2):'—'}</td>`).join('')}
+     </tr>
+     <tr class="bw-capacity-row">
+       <td class="bw-label">Capacity / Hour</td>
+       ${capacities.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[i]>0&&v>0?fmt(v,2):'—'}</td>`).join('')}
      </tr>`;
  }
 
@@ -11891,6 +11936,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
  });
 
  document.addEventListener('DOMContentLoaded',()=>{
+   syncBottomWeldingMachineInput();
    setTimeout(render,150);setTimeout(render,700);setTimeout(render,1500);
  });
 })();
@@ -12386,6 +12432,20 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
  window.applyDailyWeldingSummaryBottomPlateOnly=apply;
 })();
 </script>
+
+
+<style id="bottom-welding-capacity-machine-style">
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row td{
+    background:rgba(8,47,73,.32);
+    font-size:10px;
+    padding-top:7px;
+    padding-bottom:7px;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity{
+    color:#22d3ee;
+    font-weight:800;
+}
+</style>
 
 </body>
 </html
