@@ -12076,5 +12076,67 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 })();
 </script>
 
+
+<script id="manpower-station-switch-definitive-fix">
+(function(){
+    const stations=['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
+
+    function setStation(stationName){
+        if(!stations.includes(stationName)) return;
+
+        // Update the real dashboard state first.
+        currentManpowerStation=stationName;
+
+        const select=document.getElementById('manpowerLineSelect');
+        if(select) select.value=stationName;
+
+        const label=document.getElementById('manpowerStationLabel');
+        if(label) label.textContent=stationName;
+
+        document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn=>{
+            const active=btn.dataset.line===stationName;
+            btn.classList.toggle('active',active);
+            btn.setAttribute('aria-pressed',active?'true':'false');
+        });
+
+        // Render ALL station-dependent content with the newly selected station.
+        if(typeof renderManpowerTable==='function') renderManpowerTable(currentDailyData);
+        if(typeof renderSummaryCapacityPlanActual==='function') renderSummaryCapacityPlanActual(currentDailyData);
+        if(typeof renderSummaryDailyOrderByDoor==='function') renderSummaryDailyOrderByDoor(currentDailyData);
+        if(typeof renderSummaryDailyOrderByModelDoor==='function') renderSummaryDailyOrderByModelDoor(currentDailyData);
+
+        // Bottom Welding summary is visible only on Bottom Plate.
+        const card=document.getElementById('summaryCapacityMachineWeldingBottomPlate');
+        if(card){
+            const show=stationName==='Bottom Plate';
+            card.hidden=!show;
+            card.style.setProperty('display',show?'block':'none','important');
+            if(show && typeof renderSummaryCapacityMachineWeldingBottomPlate==='function'){
+                renderSummaryCapacityMachineWeldingBottomPlate();
+            }
+        }
+    }
+
+    // Replace accumulated wrappers with one authoritative switch function.
+    window.switchManpowerStation=setStation;
+
+    // Also handle clicks directly so old inline/wrapper behavior cannot leave Door A stuck.
+    document.addEventListener('click',function(e){
+        const btn=e.target.closest('#manpowerLineButtons .mp-line-btn');
+        if(!btn) return;
+        const station=btn.dataset.line;
+        if(station){
+            e.preventDefault();
+            setStation(station);
+        }
+    },true);
+
+    document.addEventListener('DOMContentLoaded',function(){
+        const selected=document.getElementById('manpowerLineSelect')?.value || currentManpowerStation || 'Door A';
+        setTimeout(()=>setStation(selected),50);
+    });
+})();
+</script>
+
 </body>
 </html
