@@ -11954,10 +11954,21 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
       });
    }
 
+   // SUM Wxx column status:
+   // positive weekly Difference => whole SUM column green
+   // negative weekly Difference => whole SUM column red
+   // zero/no data => neutral
+   columns.forEach(c=>{
+      if(c.type!=='sum') return;
+      const weeklyDiff=c.indexes.reduce((a,i)=>a+(differences[i]||0),0);
+      const hasData=c.indexes.some(i=>(orders[i]||0)>0 || (flooredCapacities[i]||0)>0);
+      c.sumStatus=!hasData ? 'neutral' : weeklyDiff>0 ? 'positive' : weeklyDiff<0 ? 'negative' : 'neutral';
+   });
+
    head.innerHTML='<tr><th>Bottom Welding</th>'+
       columns.map(c=>c.type==='divider'
          ? '<th class="daily-week-separator"></th>'
-         : `<th class="${c.type==='sum'?'weekly-sum-col':''}">${c.label}</th>`).join('')+
+         : `<th class="${c.type==='sum'?`weekly-sum-col bw-sum-${c.sumStatus||'neutral'}`:''}">${c.label}</th>`).join('')+
       '</tr>';
 
    function orderCell(c){
@@ -11967,16 +11978,16 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
          return `<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`;
       }
       const v=c.indexes.reduce((a,i)=>a+(orders[i]||0),0);
-      return `<td class="weekly-sum-col bw-order bw-week-order-sum-dark">${v>0?fmt(v):'—'}</td>`;
+      return `<td class="weekly-sum-col bw-order bw-week-order-sum-dark bw-sum-${c.sumStatus||'neutral'}">${v>0?fmt(v):'—'}</td>`;
    }
    function capacityCell(c){
       if(c.type==='divider') return '<td class="daily-week-separator"></td>';
       if(c.type==='day'){
          const v=flooredCapacities[c.index]||0;
-         return `<td class="${orders[c.index]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[c.index]>0&&v>0?v.toLocaleString('en-US'):'—'}</td>`;
+         return `<td class="${orders[c.index]>0&&v>0?'bw-order':'bw-empty'}">${orders[c.index]>0&&v>0?v.toLocaleString('en-US'):'—'}</td>`;
       }
       const v=c.indexes.reduce((a,i)=>a+(flooredCapacities[i]||0),0);
-      return `<td class="weekly-sum-col bw-capacity">${v>0?v.toLocaleString('en-US'):'—'}</td>`;
+      return `<td class="weekly-sum-col bw-order bw-sum-${c.sumStatus||'neutral'}">${v>0?v.toLocaleString('en-US'):'—'}</td>`;
    }
    function diffCell(c){
       if(c.type==='divider') return '<td class="daily-week-separator"></td>';
@@ -11989,8 +12000,14 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
          has=c.indexes.some(i=>(orders[i]>0)||(flooredCapacities[i]>0));
       }
       if(!has) return `<td class="${c.type==='sum'?'weekly-sum-col ':''}bw-empty">—</td>`;
-      const cls=v>0?'bw-diff-positive':v<0?'bw-diff-negative':'bw-diff-zero';
-      return `<td class="${c.type==='sum'?'weekly-sum-col ':''}${cls}">${v>0?'+':''}${v.toLocaleString('en-US')}</td>`;
+      const isSum=c.type==='sum';
+      const cls=isSum
+         ? (v>0?'bw-diff-positive':v<0?'bw-diff-negative':'bw-diff-zero')
+         : (v>0?'bw-diff-daily-positive':v<0?'bw-diff-daily-negative':'bw-diff-daily-zero');
+      const display=isSum
+         ? `${v>0?'+':''}${v.toLocaleString('en-US')}`
+         : (v<0 ? `(${Math.abs(v).toLocaleString('en-US')})` : v.toLocaleString('en-US'));
+      return `<td class="${isSum?`weekly-sum-col bw-sum-${c.sumStatus||'neutral'} `:''}${cls}">${display}</td>`;
    }
 
    body.innerHTML=`
@@ -12706,6 +12723,126 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
     width:4px!important;min-width:4px!important;max-width:4px!important;
     padding:0!important;background:#0b1728!important;
     border-left:1px solid #35516d!important;border-right:1px solid #35516d!important;
+}
+</style>
+
+
+<style id="bw-capacity-and-week-status-final">
+/* Capacity / Day daily background = Bottom Welding Order / Day */
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row td:not(.daily-week-separator):not(.weekly-sum-col){
+    background:transparent!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row td.bw-order,
+#tableSummaryCapacityMachineWeldingBottomPlate tbody tr:first-child td.bw-order{
+    background:#0f2740!important;
+    color:#38bdf8!important;
+    font-weight:800!important;
+}
+
+/* SUM Wxx: color the WHOLE column from weekly Difference */
+#tableSummaryCapacityMachineWeldingBottomPlate .weekly-sum-col.bw-sum-positive{
+    background:#14532D!important;
+    background-color:#14532D!important;
+    color:#ffffff!important;
+    border-color:#22c55e!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .weekly-sum-col.bw-sum-negative{
+    background:#7F1D1D!important;
+    background-color:#7F1D1D!important;
+    color:#ffffff!important;
+    border-color:#ef4444!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .weekly-sum-col.bw-sum-neutral{
+    background:#102a44!important;
+    background-color:#102a44!important;
+    color:#ffffff!important;
+}
+</style>
+
+
+
+
+
+<style id="bw-sum-wxx-positive-negative-final">
+/* Positive weekly Difference = green whole SUM Wxx column */
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col.bw-sum-positive,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-sum-positive{
+    background:#14532D!important;
+    background-color:#14532D!important;
+    color:#ffffff!important;
+    border-color:#22c55e!important;
+}
+/* Negative weekly Difference = red whole SUM Wxx column */
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col.bw-sum-negative,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-sum-negative{
+    background:#7F1D1D!important;
+    background-color:#7F1D1D!important;
+    color:#ffffff!important;
+    border-color:#ef4444!important;
+}
+/* Zero/no-data stays neutral */
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col.bw-sum-neutral,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-sum-neutral{
+    background:#102a44!important;
+    background-color:#102a44!important;
+    color:#ffffff!important;
+}
+</style>
+
+
+<style id="bw-daily-difference-text-only-final">
+#tableSummaryCapacityMachineWeldingBottomPlate td.bw-diff-daily-positive{
+    background:transparent!important;
+    background-color:transparent!important;
+    color:#22c55e!important;
+    font-weight:800!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate td.bw-diff-daily-negative{
+    background:transparent!important;
+    background-color:transparent!important;
+    color:#ef4444!important;
+    font-weight:800!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate td.bw-diff-daily-zero{
+    background:transparent!important;
+    background-color:transparent!important;
+    color:#94a3b8!important;
+    font-weight:700!important;
+}
+</style>
+
+
+<style id="bw-sum-wxx-full-column-color-final">
+/* SUM Wxx positive: entire column, including ORDER */
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col.bw-sum-positive,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-sum-positive,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-order.bw-sum-positive,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-capacity.bw-sum-positive,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-diff-positive.bw-sum-positive{
+    background:#14532D!important;
+    background-color:#14532D!important;
+    color:#ffffff!important;
+    border-color:#22c55e!important;
+}
+
+/* SUM Wxx negative: entire column, including ORDER */
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col.bw-sum-negative,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-sum-negative,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-order.bw-sum-negative,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-capacity.bw-sum-negative,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-diff-negative.bw-sum-negative{
+    background:#7F1D1D!important;
+    background-color:#7F1D1D!important;
+    color:#ffffff!important;
+    border-color:#ef4444!important;
+}
+
+/* Neutral SUM Wxx remains dark */
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col.bw-sum-neutral,
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col.bw-sum-neutral{
+    background:#102a44!important;
+    background-color:#102a44!important;
+    color:#ffffff!important;
 }
 </style>
 
