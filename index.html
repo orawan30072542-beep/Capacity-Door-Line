@@ -1347,12 +1347,12 @@ canvas, option {
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                             <span class="text-[10px] text-slate-400 font-semibold">Group Station:</span>
                             <div id="manpowerLineButtons" class="flex flex-wrap gap-1.5">
-                                <button type="button" data-line="Door A" onclick="window.switchManpowerStation('Door A')" class="mp-line-btn">Door A</button>
-                                <button type="button" data-line="Door B" onclick="window.switchManpowerStation('Door B')" class="mp-line-btn">Door B</button>
-                                <button type="button" data-line="Door C" onclick="window.switchManpowerStation('Door C')" class="mp-line-btn">Door C</button>
-                                <button type="button" data-line="Door Glass" onclick="window.switchManpowerStation('Door Glass')" class="mp-line-btn">Door Glass</button>
-                                <button type="button" data-line="Back Plate" onclick="window.switchManpowerStation('Back Plate')" class="mp-line-btn">Back Plate</button>
-                                <button type="button" data-line="Bottom Plate" onclick="window.switchManpowerStation('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
+                                <button type="button" data-line="Door A" onclick="setManpowerStationKPI('Door A')" class="mp-line-btn">Door A</button>
+                                <button type="button" data-line="Door B" onclick="setManpowerStationKPI('Door B')" class="mp-line-btn">Door B</button>
+                                <button type="button" data-line="Door C" onclick="setManpowerStationKPI('Door C')" class="mp-line-btn">Door C</button>
+                                <button type="button" data-line="Door Glass" onclick="setManpowerStationKPI('Door Glass')" class="mp-line-btn">Door Glass</button>
+                                <button type="button" data-line="Back Plate" onclick="setManpowerStationKPI('Back Plate')" class="mp-line-btn">Back Plate</button>
+                                <button type="button" data-line="Bottom Plate" onclick="setManpowerStationKPI('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
                             </div>
                             <select id="manpowerLineSelect" onchange="switchManpowerStation(this.value)" class="hidden">
                                 <option value="Door A">Door A</option><option value="Door B">Door B</option><option value="Door C">Door C</option>
@@ -12218,7 +12218,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<script id="manpower-station-switch-definitive-fix">
+<script id="manpower-station-switch-definitive-fix" type="text/plain">
 (function(){
     const stations=['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
 
@@ -12846,7 +12846,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 }
 </style>
 
-<script id="final-station-kpi-and-bottom-plate-controller">
+<script id="final-station-kpi-and-bottom-plate-controller" type="text/plain">
 (function(){
     const STATIONS=['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
 
@@ -12980,7 +12980,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<script id="kpi-station-door-a-stuck-guard">
+<script id="kpi-station-door-a-stuck-guard" type="text/plain">
 (function(){
     const STATIONS = ['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
 
@@ -13010,6 +13010,78 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
         setTimeout(()=>syncSelectedStation(station), 0);
         setTimeout(()=>syncSelectedStation(station), 100);
     }, true);
+})();
+</script>
+
+
+<script id="single-manpower-kpi-station-controller">
+(function(){
+    const STATIONS = ['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
+
+    function setBottomWelding(station){
+        const card = document.getElementById('summaryCapacityMachineWeldingBottomPlate');
+        if(!card) return;
+        const show = station === 'Bottom Plate';
+        card.hidden = !show;
+        card.dataset.bpVisible = show ? '1' : '0';
+        card.style.setProperty('display', show ? 'block' : 'none', 'important');
+        if(show && typeof renderSummaryCapacityMachineWeldingBottomPlate === 'function'){
+            renderSummaryCapacityMachineWeldingBottomPlate();
+        }
+    }
+
+    window.setManpowerStationKPI = function(station){
+        if(!STATIONS.includes(station)) return;
+
+        // This lexical variable is the state actually read by renderManpowerTable()
+        // and updateMpPlanActualSummary().
+        currentManpowerStation = station;
+        window.currentManpowerStation = station;
+
+        const select = document.getElementById('manpowerLineSelect');
+        if(select) select.value = station;
+
+        const label = document.getElementById('manpowerStationLabel');
+        if(label) label.textContent = station;
+
+        document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn=>{
+            const active = btn.dataset.line === station;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+
+        // Render the manpower table FIRST because it calculates and writes the KPI cards.
+        if(typeof renderManpowerTable === 'function'){
+            renderManpowerTable(currentDailyData);
+        }
+
+        // Then refresh station-dependent summaries using the same selected station.
+        if(typeof renderSummaryCapacityPlanActual === 'function'){
+            renderSummaryCapacityPlanActual(currentDailyData);
+        }
+        if(typeof renderSummaryDailyOrderByDoor === 'function'){
+            renderSummaryDailyOrderByDoor(currentDailyData);
+        }
+        if(typeof renderSummaryDailyOrderByModelDoor === 'function'){
+            renderSummaryDailyOrderByModelDoor(currentDailyData);
+        }
+
+        setBottomWelding(station);
+    };
+
+    // Keep legacy callers compatible, but route all of them to the one controller.
+    window.switchManpowerStation = window.setManpowerStationKPI;
+
+    document.addEventListener('DOMContentLoaded', function(){
+        // Do not force Door A if another station is already selected.
+        const active = document.querySelector('#manpowerLineButtons .mp-line-btn.active');
+        const station =
+            active?.dataset?.line ||
+            document.getElementById('manpowerLineSelect')?.value ||
+            currentManpowerStation ||
+            'Door A';
+        setTimeout(()=>window.setManpowerStationKPI(station), 50);
+    });
 })();
 </script>
 
