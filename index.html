@@ -7619,7 +7619,13 @@ function updateLobSubLineVisibility() {
 
                     days.forEach((day,i) => {
                         if (isSunday(day) || !(linePlan[i] > 0 || lineRequired[i] > 0)) return;
-                        const ratio = linePlan[i] > 0 ? lineRequired[i] / linePlan[i] : 0;
+                        // Actual A must be independent of Short %.
+                        // lineRequired includes Short%, so remove it before deriving routing/qty ratio.
+                        const shortFactorForP = 1 + (Math.max(0, Number(getShortPercent()) || 0) / 100);
+                        const requiredBeforeShort = shortFactorForP > 0
+                            ? lineRequired[i] / shortFactorForP
+                            : lineRequired[i];
+                        const ratio = linePlan[i] > 0 ? requiredBeforeShort / linePlan[i] : 0;
                         const uph = lineLT[i] > 0 && mp > 0
                             ? (3600 / lineLT[i]) * mp * ratio * 0.85
                             : 0;
@@ -12948,6 +12954,21 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
  A = Actual Capacity from CT / Lead Time / Manpower / physical routing ratio ONLY
  A must never be multiplied by Short%.
  Difference = A - P
+*/
+</script>
+
+
+<script id="actual-capacity-short-invariant-final">
+/*
+ INVARIANT:
+   Short % affects P only.
+   Cab = base plan/order
+   P   = base required × (1 + Short%)
+   A   = capacity from Lead Time/CT × Manpower × physical routing ratio
+         (routing ratio must be calculated BEFORE Short%)
+   Difference = A - P
+
+ Back Plate / Bottom Plate TOTAL and individual lines both follow this rule.
 */
 </script>
 
