@@ -1495,8 +1495,50 @@ canvas, option {
                         </div>
                     </div>
 
+                    <!-- Summary Capacity Machine Welding Bottom Plate -->
+                    <div id="summaryCapacityMachineWeldingBottomPlate" class="bg-slate-900/55 border border-cyan-500/20 rounded-xl overflow-hidden mt-3">
+                        <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-cyan-950/30 to-slate-950/20">
+                            <div class="text-sm font-bold text-white">Summary Capacity Machine Welding Bottom Plate</div>
+                            <div class="text-[9px] text-slate-400 mt-0.5">
+                                เฉพาะ Bottom Plate · Machine Welding · Order อ้างอิงจาก Master Model / Daily Plan
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="tableSummaryCapacityMachineWeldingBottomPlate" class="text-left border-collapse" style="min-width:100%;">
+                                <thead>
+                                    <tr class="bg-slate-950/90 border-b border-bordercolor">
+                                        <th class="px-3 py-2">Model</th>
+                                        <th class="px-3 py-2 text-center">Avg Order / Day</th>
+                                        <th class="px-3 py-2 text-center">Max CT (s)</th>
+                                        <th class="px-3 py-2 text-center">Capacity / Hour</th>
+                                        <th class="px-3 py-2 text-center">Capacity / Day</th>
+                                        <th class="px-3 py-2 text-center">Difference</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryCapacityMachineWeldingBottomPlateBody"></tbody>
+                                <tfoot id="summaryCapacityMachineWeldingBottomPlateFoot"></tfoot>
+                            </table>
+                        </div>
+                    </div>
 
-                    <div class="flex flex-wrap gap-2 text-[9px] font-semibold">
+
+                    
+<div id="summaryCapacityMachineWeldingBottomPlate" class="bg-slate-900/55 border border-cyan-500/20 rounded-xl overflow-hidden mt-4 mb-4">
+    <div class="px-4 py-3 border-b border-bordercolor bg-slate-950/40">
+        <div class="text-sm font-bold text-white">Summary Capacity Machine Welding Bottom Plate</div>
+        <div class="text-[9px] text-slate-400 mt-0.5">
+            Bottom Welding · Daily Order อ้างอิงจาก Master Model · Average Work Time = Σ(Work Time × Order) ÷ Σ(Order)
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        <table id="tableSummaryCapacityMachineWeldingBottomPlate" class="border-collapse" style="min-width:100%;">
+            <thead id="summaryBottomWeldingDailyHead"></thead>
+            <tbody id="summaryBottomWeldingDailyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="flex flex-wrap gap-2 text-[9px] font-semibold">
                         <span class="px-2.5 py-1 rounded-lg border border-violet-500/25 bg-violet-950/25 text-violet-300">1 · ORDER PLAN</span>
                         <span class="px-2.5 py-1 rounded-lg border border-emerald-500/25 bg-emerald-950/20 text-emerald-300">2 · CAPACITY</span>
                         <span class="px-2.5 py-1 rounded-lg border border-cyan-500/25 bg-cyan-950/20 text-cyan-300">3 · MANPOWER</span>
@@ -11715,6 +11757,134 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
         migrateLegacyAsMachine();
         setTimeout(()=>{ensureModeUI();ensureWorkProcessModeUI();refreshModeUI();updateWorkModeUI();},100);
     });
+})();
+</script>
+
+
+
+
+
+
+
+
+<style id="bottom-welding-daily-summary-style">
+#tableSummaryCapacityMachineWeldingBottomPlate{width:max-content;min-width:100%;table-layout:auto}
+#tableSummaryCapacityMachineWeldingBottomPlate th{
+ background:#0f2742;color:#dbeafe;font-size:9px;font-weight:800;padding:7px 8px;
+ border:1px solid #334155;white-space:nowrap;text-align:center;min-width:72px
+}
+#tableSummaryCapacityMachineWeldingBottomPlate th:first-child{min-width:180px;text-align:left}
+#tableSummaryCapacityMachineWeldingBottomPlate td{
+ color:#f8fafc;font-size:10px;font-weight:700;padding:8px;border:1px solid rgba(71,85,105,.45);
+ text-align:center;white-space:nowrap
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-label{
+ text-align:left;background:#071426;color:#fff;font-weight:900;position:sticky;left:0;z-index:2
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-order{color:#38bdf8}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-time{color:#fbbf24}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-empty{color:#64748b}
+</style>
+
+<script id="bottom-welding-daily-summary-render">
+(function(){
+ const num=v=>Number.isFinite(Number(v))?Number(v):0;
+ const fmt=(v,d=0)=>num(v).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+
+ function isBottomWeldingModel(model){
+   if(typeof getMasterConfigForModel!=='function') return false;
+   const cfg=getMasterConfigForModel(model)||{};
+   return cfg.bottomSource==='ผลิตเอง' && cfg.welding===true;
+ }
+
+ function getMachineRows(model){
+   if(typeof processDatabase==='undefined') return [];
+   const exact=processDatabase[model+'_Bottom Plate Welding - Machine Welding'];
+   if(Array.isArray(exact)&&exact.length) return exact;
+   const legacy=processDatabase[model+'_Bottom Plate Welding'];
+   return Array.isArray(legacy)?legacy:[];
+ }
+
+ function rowWorkTime(r){
+   // Same work-time basis used previously: WT1 + WT2 + WT3 + Loss / direct CT fallback.
+   const wt=num(r?.wt1??r?.WT1)+num(r?.wt2??r?.WT2)+num(r?.wt3??r?.WT3)+num(r?.loss??r?.Loss);
+   const direct=num(r?.ct??r?.CT??r?.cycleTime);
+   return wt>0?wt:direct;
+ }
+
+ function modelWorkTime(model){
+   const rows=getMachineRows(model);
+   if(!rows.length) return 0;
+   // Machine capacity bottleneck basis: Max CT/Work Time of the model.
+   return rows.reduce((m,r)=>Math.max(m,rowWorkTime(r)),0);
+ }
+
+ function collectModels(){
+   const list=[],seen=new Set();
+   (currentDailyData?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{
+      const name=String(m?.name||'').trim(),key=name.toLowerCase();
+      if(!name||seen.has(key)||!isBottomWeldingModel(name)) return;
+      seen.add(key);
+      list.push({name,orders:Array.isArray(m.orders)?m.orders:[]});
+   }));
+   return list;
+ }
+
+ function render(){
+   const head=document.getElementById('summaryBottomWeldingDailyHead');
+   const body=document.getElementById('summaryBottomWeldingDailyBody');
+   if(!head||!body) return;
+
+   const days=Array.isArray(currentDailyData?.days)?currentDailyData.days:[];
+   const models=collectModels();
+
+   head.innerHTML='<tr><th>Bottom Welding</th>'+
+      days.map(d=>`<th>${String(d||'')}</th>`).join('')+
+      '</tr>';
+
+   const orders=[], avgTimes=[];
+   days.forEach((_,i)=>{
+      let totalOrder=0, weighted=0;
+      models.forEach(m=>{
+         // Daily order comes directly from the model order in Master/Daily Plan.
+         const order=Math.max(0,num(m.orders?.[i]));
+         if(order<=0) return;
+         totalOrder+=order;
+         const workTime=modelWorkTime(m.name);
+         if(workTime>0) weighted += workTime*order;
+      });
+      orders.push(totalOrder);
+      // Previous weighted-average formula:
+      // Σ(Model Work Time × Model Daily Order) / Σ(Model Daily Order)
+      avgTimes.push(totalOrder>0 ? weighted/totalOrder : 0);
+   });
+
+   body.innerHTML=`
+     <tr>
+       <td class="bw-label">Bottom Welding Order / Day</td>
+       ${orders.map(v=>`<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}
+     </tr>
+     <tr>
+       <td class="bw-label">Average Work Time (s)</td>
+       ${avgTimes.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-time':'bw-empty'}">${orders[i]>0&&v>0?fmt(v,2):'—'}</td>`).join('')}
+     </tr>`;
+ }
+
+ window.renderSummaryCapacityMachineWeldingBottomPlate=render;
+
+ // Keep it synced after common data renders.
+ ['renderDailyOrderSummary','renderSummaryDailyOrderByDoor','renderSummaryDailyOrderByModelDoor','renderDashboard']
+ .forEach(name=>{
+   const old=window[name];
+   if(typeof old==='function'&&!old.__bwDailyWrapped){
+      const fn=function(){const r=old.apply(this,arguments);setTimeout(render,0);return r};
+      fn.__bwDailyWrapped=true;window[name]=fn;
+   }
+ });
+
+ document.addEventListener('DOMContentLoaded',()=>{
+   setTimeout(render,150);setTimeout(render,700);setTimeout(render,1500);
+ });
 })();
 </script>
 
