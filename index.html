@@ -12228,5 +12228,164 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 })();
 </script>
 
+
+<style id="remove-legacy-machine-welding-table-bottom-plate-definitive">
+#tableSummaryCapacityMachineWeldingBottomPlate.legacy-machine-summary-remove,
+.legacy-machine-summary-card-remove{
+    display:none !important;
+}
+</style>
+
+<script id="remove-legacy-machine-welding-table-bottom-plate-definitive-runtime">
+(function(){
+ function removeLegacyMachineSummary(){
+   const signature=['Model','Avg Order / Day','Max CT (s)','Capacity / Hour','Capacity / Day','Difference'];
+
+   [...document.querySelectorAll('table')].forEach(table=>{
+      const headers=[...table.querySelectorAll('thead th')].map(x=>(x.textContent||'').replace(/\s+/g,' ').trim());
+      if(headers.length < 6 || !signature.every((x,i)=>headers[i]===x)) return;
+
+      table.classList.add('legacy-machine-summary-remove');
+
+      // Hide only the smallest card containing the legacy title + subtitle.
+      let node=table.parentElement, card=null;
+      for(let i=0;i<6 && node;i++,node=node.parentElement){
+         const txt=(node.textContent||'').replace(/\s+/g,' ').trim();
+         if(
+            txt.includes('Summary Capacity Machine Welding Bottom Plate') &&
+            txt.includes('เฉพาะ Bottom Plate') &&
+            txt.includes('Machine Welding') &&
+            txt.includes('Order อ้างอิงจาก Master Model / Daily Plan')
+         ){
+            card=node;
+            break;
+         }
+      }
+      if(card) card.classList.add('legacy-machine-summary-card-remove');
+   });
+ }
+ window.removeLegacyMachineSummaryBottomPlate=removeLegacyMachineSummary;
+ document.addEventListener('DOMContentLoaded',()=>{
+   removeLegacyMachineSummary();
+   setTimeout(removeLegacyMachineSummary,50);
+   setTimeout(removeLegacyMachineSummary,250);
+   setTimeout(removeLegacyMachineSummary,1000);
+ });
+})();
+</script>
+
+
+<style id="hide-old-machine-title-subtitle-final">
+.old-machine-title-subtitle-hide-final{display:none!important}
+</style>
+<script id="hide-old-machine-title-subtitle-runtime-final">
+(function(){
+ function hideOldMachineTitle(){
+   [...document.querySelectorAll('div,h1,h2,h3,h4,p,span')].forEach(el=>{
+      const txt=(el.textContent||'').replace(/\s+/g,' ').trim();
+
+      // Hide the exact old subtitle line.
+      if(txt==='เฉพาะ Bottom Plate · Machine Welding · Order อ้างอิงจาก Master Model / Daily Plan'){
+         el.classList.add('old-machine-title-subtitle-hide-final');
+         return;
+      }
+
+      // Hide the exact old title only when it belongs to the old/empty legacy block,
+      // not the newer daily summary that has "Bottom Welding · Daily Order..." subtitle.
+      if(txt==='Summary Capacity Machine Welding Bottom Plate'){
+         const parent=el.parentElement;
+         const ptxt=(parent?.textContent||'').replace(/\s+/g,' ').trim();
+         if(ptxt.includes('เฉพาะ Bottom Plate · Machine Welding · Order อ้างอิงจาก Master Model / Daily Plan')){
+            el.classList.add('old-machine-title-subtitle-hide-final');
+         }
+      }
+   });
+ }
+ document.addEventListener('DOMContentLoaded',()=>{
+   hideOldMachineTitle();
+   setTimeout(hideOldMachineTitle,100);
+   setTimeout(hideOldMachineTitle,600);
+ });
+})();
+</script>
+
+
+<script id="daily-welding-summary-bottom-plate-only-definitive">
+(function(){
+ const TITLE='Summary Capacity Machine Welding Bottom Plate';
+ const DAILY_SUB='Bottom Welding · Daily Order อ้างอิงจาก Master Model · Average Work Time = Σ(Work Time × Order) ÷ Σ(Order)';
+
+ function getStation(){
+   const sel=document.getElementById('manpowerLineSelect');
+   if(sel && sel.value) return String(sel.value).trim();
+
+   const active=document.querySelector('#manpowerLineButtons .mp-line-btn.active, #manpowerLineButtons button[aria-pressed="true"]');
+   return String(active?.dataset?.line || active?.dataset?.station || active?.textContent || '').trim();
+ }
+
+ function findDailyCard(){
+   // Identify the NEW daily table specifically by its row labels, not by shared title.
+   const tables=[...document.querySelectorAll('table')];
+   const table=tables.find(t=>{
+      const txt=(t.textContent||'').replace(/\s+/g,' ').trim();
+      return txt.includes('Bottom Welding Order / Day') &&
+             txt.includes('Average Work Time (s)');
+   });
+   if(!table) return null;
+
+   let node=table;
+   for(let i=0;i<7 && node.parentElement;i++){
+      node=node.parentElement;
+      const txt=(node.textContent||'').replace(/\s+/g,' ').trim();
+      if(txt.includes(TITLE) &&
+         (txt.includes('Bottom Welding · Daily Order') || txt.includes('Average Work Time ='))){
+         return node;
+      }
+   }
+   return table;
+ }
+
+ function apply(){
+   const card=findDailyCard();
+   if(!card) return;
+   const show=getStation()==='Bottom Plate';
+   card.hidden=!show;
+   card.style.setProperty('display',show?'block':'none','important');
+ }
+
+ // Update on all station button clicks.
+ document.addEventListener('click',e=>{
+   if(e.target.closest('#manpowerLineButtons button')){
+      setTimeout(apply,0);
+      setTimeout(apply,50);
+   }
+ },true);
+
+ document.addEventListener('change',e=>{
+   if(e.target?.id==='manpowerLineSelect') setTimeout(apply,0);
+ });
+
+ // Wrap the final station switch function without changing its data behavior.
+ const old=window.switchManpowerStation;
+ if(typeof old==='function' && !old.__dailyBottomPlateOnly){
+   const wrapped=function(){
+      const r=old.apply(this,arguments);
+      setTimeout(apply,0);
+      setTimeout(apply,50);
+      return r;
+   };
+   wrapped.__dailyBottomPlateOnly=true;
+   window.switchManpowerStation=wrapped;
+ }
+
+ document.addEventListener('DOMContentLoaded',()=>{
+   setTimeout(apply,100);
+   setTimeout(apply,500);
+   setTimeout(apply,1200);
+ });
+ window.applyDailyWeldingSummaryBottomPlateOnly=apply;
+})();
+</script>
+
 </body>
 </html
