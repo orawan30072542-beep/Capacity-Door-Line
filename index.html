@@ -3027,10 +3027,24 @@ canvas, option {
         function getMasterConfigForModel(modelName) {
             let cfg;
 
-            if (masterModelConfig[modelName]) {
-                cfg = masterModelConfig[modelName];
+            // IMPORTANT:
+            // Daily Plan model names can differ from Master Model by spaces/case.
+            // Exact-key lookup caused unmatched models to fall back to Door A,
+            // so KPI for Door B/C/Glass/Back/Bottom appeared empty or stayed Door A.
+            const rawName = String(modelName || '').trim();
+            const targetName = normalizeModelName(rawName);
+            const compactTargetName = targetName.replace(/[\s_\-]+/g, '');
+            const matchedKey = Object.keys(masterModelConfig || {}).find(key => {
+                const normalizedKey = normalizeModelName(key);
+                return normalizedKey === targetName ||
+                       normalizedKey.replace(/[\s_\-]+/g, '') === compactTargetName;
+            });
+
+            if (matchedKey && masterModelConfig[matchedKey]) {
+                // Clone it: do not mutate the stored Master record while reading KPI data.
+                cfg = { ...masterModelConfig[matchedKey] };
             } else {
-                const isGlass = modelName.toUpperCase().includes('GLASS');
+                const isGlass = rawName.toUpperCase().includes('GLASS');
                 cfg = {
                     doorType: isGlass ? 'Glass' : 'Metal',
                     station: isGlass ? 'Door Glass' : 'Door A',
@@ -8826,7 +8840,7 @@ body.innerHTML=rows.length?rows.map(row=>{
             const overviewTitle = document.querySelector('.mp-overview-title');
             if (overviewTitle) {
                 overviewTitle.dataset.station = stationName;
-                overviewTitle.textContent = `Manpower & Capacity Requirement Overview Actual · ${stationName}`;
+                overviewTitle.textContent = 'Manpower & Capacity Requirement Overview Actual';
             }
 
             // Refresh all other station-dependent summaries from the SAME state.
@@ -8859,7 +8873,7 @@ body.innerHTML=rows.length?rows.map(row=>{
                 const title = document.querySelector('.mp-overview-title');
                 if (title) {
                     title.dataset.station = st;
-                    title.textContent = `Manpower & Capacity Requirement Overview Actual · ${st}`;
+                    title.textContent = 'Manpower & Capacity Requirement Overview Actual';
                 }
             }, 120);
         });
