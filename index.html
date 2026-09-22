@@ -12139,26 +12139,52 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<script id="remove-exact-machine-welding-bottom-plate-table-final">
+<style id="safe-hide-old-machine-welding-summary-final">
+/* Target is marked at runtime; only the exact old table/card is hidden. */
+.machine-welding-old-summary-hide-final{
+    display:none !important;
+}
+</style>
+
+<script id="safe-hide-old-machine-welding-summary-runtime-final">
 (function(){
- function removeExactTable(){
-   document.querySelectorAll('section,div').forEach(el=>{
-      const txt=(el.textContent||'').replace(/\s+/g,' ').trim();
-      if(
-        txt.includes('Summary Capacity Machine Welding Bottom Plate') &&
-        txt.includes('เฉพาะ Bottom Plate') &&
-        txt.includes('Machine Welding') &&
-        txt.includes('Order อ้างอิงจาก Master Model / Daily Plan') &&
-        /Avg Order\s*\/\s*Day|Max CT|Capacity\s*\/\s*Hour|Capacity\s*\/\s*Day/i.test(txt)
-      ){
-        el.remove();
+ function hideOldSummarySafely(){
+   const tables=[...document.querySelectorAll('table')];
+   tables.forEach(table=>{
+      const txt=(table.textContent||'').replace(/\s+/g,' ').trim();
+
+      // Exact OLD table signature only.
+      const oldTable =
+          /Avg Order\s*\/\s*Day/i.test(txt) &&
+          /Max CT/i.test(txt) &&
+          /Capacity\s*\/\s*Hour/i.test(txt) &&
+          /Capacity\s*\/\s*Day/i.test(txt) &&
+          /Difference/i.test(txt);
+
+      if(!oldTable) return;
+
+      // Find the nearest visual card, but NEVER remove anything.
+      let card=table;
+      for(let i=0;i<6 && card.parentElement;i++){
+         const parent=card.parentElement;
+         const ptxt=(parent.textContent||'').replace(/\s+/g,' ').trim();
+         if(
+            ptxt.includes('Summary Capacity Machine Welding Bottom Plate') &&
+            ptxt.includes('เฉพาะ Bottom Plate') &&
+            ptxt.includes('Machine Welding')
+         ){
+            card=parent;
+            break;
+         }
+         card=parent;
       }
+      card.classList.add('machine-welding-old-summary-hide-final');
    });
  }
  document.addEventListener('DOMContentLoaded',()=>{
-   removeExactTable();
-   setTimeout(removeExactTable,100);
-   setTimeout(removeExactTable,600);
+    hideOldSummarySafely();
+    setTimeout(hideOldSummarySafely,100);
+    setTimeout(hideOldSummarySafely,600);
  });
 })();
 </script>
