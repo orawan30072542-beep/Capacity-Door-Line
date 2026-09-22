@@ -12138,5 +12138,30 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 })();
 </script>
 
+
+<script id="remove-exact-machine-welding-bottom-plate-table-final">
+(function(){
+ function removeExactTable(){
+   document.querySelectorAll('section,div').forEach(el=>{
+      const txt=(el.textContent||'').replace(/\s+/g,' ').trim();
+      if(
+        txt.includes('Summary Capacity Machine Welding Bottom Plate') &&
+        txt.includes('เฉพาะ Bottom Plate') &&
+        txt.includes('Machine Welding') &&
+        txt.includes('Order อ้างอิงจาก Master Model / Daily Plan') &&
+        /Avg Order\s*\/\s*Day|Max CT|Capacity\s*\/\s*Hour|Capacity\s*\/\s*Day/i.test(txt)
+      ){
+        el.remove();
+      }
+   });
+ }
+ document.addEventListener('DOMContentLoaded',()=>{
+   removeExactTable();
+   setTimeout(removeExactTable,100);
+   setTimeout(removeExactTable,600);
+ });
+})();
+</script>
+
 </body>
 </html
