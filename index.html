@@ -1403,7 +1403,7 @@ canvas, option {
                             <div class="grid grid-cols-2 gap-2 p-2">
                                 <div class="bg-slate-900/55 border border-bordercolor rounded-lg p-2.5">
                                     <div class="text-[9px] text-slate-400">Plan Order / Day</div>
-                                    <div class="text-[8px] text-slate-500">Total Door Order ÷ จำนวนวันผลิต</div>
+                                    <div class="text-[8px] text-slate-500">Order + Short % ÷ จำนวนวันผลิต</div>
                                     <div class="mp-daily-hourly-row">
                                         <div id="mpPlanOrderDay" class="text-lg text-sky-300 mt-1">0</div>
                                         <div id="mpPlanOrderUPH" class="mp-inline-hourly">0</div>
@@ -7205,6 +7205,10 @@ function updateLobSubLineVisibility() {
         function updateMpPlanActualSummary(planOrderPerDay, planManpower, avgLeadTime) {
             const hours = Math.max(0, parseFloat(document.getElementById('shiftHoursInput')?.value) || 0);
 
+            // PLAN = Order after Short %.  Actual/Capacity is NOT multiplied by Short %.
+            const shortFactorPlan = 1 + (Math.max(0, Number(getShortPercent()) || 0) / 100);
+            const planOrderWithShort = Math.max(0, Number(planOrderPerDay || 0)) * shortFactorPlan;
+
             let actualManpower = 0;
             let actualOutput = 0;
             let actualOutputPerHour = 0;
@@ -7255,9 +7259,9 @@ function updateLobSubLineVisibility() {
                     : '0';
             }
 
-            const performance = planOrderPerDay > 0 ? (actualOutput / planOrderPerDay) * 100 : 0;
+            const performance = planOrderWithShort > 0 ? (actualOutput / planOrderWithShort) * 100 : 0;
             const manpowerDiff = Math.ceil(actualManpower) - Math.ceil(planManpower);
-            const orderDiff = actualOutput - planOrderPerDay;
+            const orderDiff = actualOutput - planOrderWithShort;
 
             const setText = (id, value) => {
                 const el = document.getElementById(id);
@@ -7268,14 +7272,14 @@ function updateLobSubLineVisibility() {
                 return `${n > 0 ? '+' : ''}${n.toLocaleString()}`;
             };
 
-            setText('mpPlanOrderDay', planOrderPerDay > 0 ? Math.round(planOrderPerDay).toLocaleString() : '0');
+            setText('mpPlanOrderDay', planOrderWithShort > 0 ? Math.round(planOrderWithShort).toLocaleString() : '0');
 
             const planWorkingHours = Math.max(
                 0,
                 parseFloat(document.getElementById('shiftHoursInput')?.value) || 0
             );
             const planOrderUPH = planWorkingHours > 0
-                ? planOrderPerDay / planWorkingHours
+                ? planOrderWithShort / planWorkingHours
                 : 0;
             setText(
                 'mpPlanOrderUPH',
@@ -7284,12 +7288,12 @@ function updateLobSubLineVisibility() {
             setText('mpPlanManpower', planManpower > 0 ? Math.ceil(planManpower).toLocaleString() : '0');
             setText('mpOutputAchievement', `${performance.toFixed(1)}%`);
             setText('mpOutputAchievementDetail',
-                `${Math.round(actualOutput).toLocaleString()} / ${Math.round(planOrderPerDay).toLocaleString()}`);
+                `${Math.round(actualOutput).toLocaleString()} / ${Math.round(planOrderWithShort).toLocaleString()}`);
             setText('mpManpowerDiff', signed(manpowerDiff));
             setText('mpManpowerDiffDetail', `${Math.ceil(actualManpower).toLocaleString()} - ${Math.ceil(planManpower).toLocaleString()}`);
             setText('mpOrderDiff', signed(orderDiff));
             setText('mpOrderDiffDetail',
-                `${Math.round(actualOutput).toLocaleString()} - ${Math.round(planOrderPerDay).toLocaleString()}`);
+                `${Math.round(actualOutput).toLocaleString()} - ${Math.round(planOrderWithShort).toLocaleString()}`);
 
             const mpDiffEl = document.getElementById('mpManpowerDiff');
             const orderDiffEl = document.getElementById('mpOrderDiff');
@@ -8791,7 +8795,7 @@ body.innerHTML=rows.length?rows.map(row=>{
             const totalDoorOrderForPlan = Number(totalDoorOrderAllDays || 0);
             const numberOfPlanDays = Math.max(1, Number(effectiveProductionDays || 0));
 
-            // Plan Order / Day = Total Door Order ÷ จำนวนวันผลิต
+            // Plan Order / Day = Order + Short % ÷ จำนวนวันผลิต
             // totalDoorOrderAllDays is exactly the value displayed in the Total Door Order KPI.
             const planOrderPerDay = totalDoorOrderForPlan > 0
                 ? totalDoorOrderForPlan / numberOfPlanDays
