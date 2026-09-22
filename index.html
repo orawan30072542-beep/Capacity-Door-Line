@@ -12189,5 +12189,44 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 })();
 </script>
 
+
+<style id="hide-exact-old-machine-table-card-final">
+.old-machine-welding-card-hidden-final{display:none!important}
+</style>
+<script id="hide-exact-old-machine-table-card-runtime-final">
+(function(){
+ function hideExactOldCard(){
+   document.querySelectorAll('table').forEach(table=>{
+      const headers=[...table.querySelectorAll('thead th')].map(th=>(th.textContent||'').replace(/\s+/g,' ').trim());
+      const signature=['Model','Avg Order / Day','Max CT (s)','Capacity / Hour','Capacity / Day','Difference'];
+      const exact=signature.every((v,i)=>headers[i]===v);
+      if(!exact) return;
+
+      // Walk upward only until the first ancestor containing the exact title/subtitle.
+      let node=table;
+      let target=table;
+      for(let i=0;i<5 && node.parentElement;i++){
+         node=node.parentElement;
+         const txt=(node.textContent||'').replace(/\s+/g,' ').trim();
+         if(txt.includes('Summary Capacity Machine Welding Bottom Plate') &&
+            txt.includes('เฉพาะ Bottom Plate') &&
+            txt.includes('Machine Welding') &&
+            txt.includes('Order อ้างอิงจาก Master Model / Daily Plan')){
+             target=node;
+             break;
+         }
+      }
+      target.classList.add('old-machine-welding-card-hidden-final');
+   });
+ }
+ document.addEventListener('DOMContentLoaded',()=>{
+   hideExactOldCard();
+   setTimeout(hideExactOldCard,50);
+   setTimeout(hideExactOldCard,300);
+   setTimeout(hideExactOldCard,900);
+ });
+})();
+</script>
+
 </body>
 </html
