@@ -11873,15 +11873,19 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
    const days=Array.isArray(currentDailyData?.days)?currentDailyData.days:[];
    const models=collectModels();
 
-   head.innerHTML='<tr><th>Bottom Welding</th>'+
-      days.map(d=>`<th>${String(d||'')}</th>`).join('')+
-      '</tr>';
+   function parseBWDate(raw){
+      const t=String(raw??'').trim();
+      let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(m) return new Date(+m[1],+m[2]-1,+m[3]);
+      m=t.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+      if(m){let y=m[3]?+m[3]:2026;if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+      const d=new Date(t); return isNaN(d)?null:d;
+   }
 
    const orders=[], avgTimes=[];
    days.forEach((_,i)=>{
       let totalOrder=0, weighted=0;
       models.forEach(m=>{
-         // Daily order comes directly from the model order in Master/Daily Plan.
          const order=Math.max(0,num(m.orders?.[i]));
          if(order<=0) return;
          totalOrder+=order;
@@ -11889,39 +11893,88 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
          if(workTime>0) weighted += workTime*order;
       });
       orders.push(totalOrder);
-      // Previous weighted-average formula:
-      // Σ(Model Work Time × Model Daily Order) / Σ(Model Daily Order)
       avgTimes.push(totalOrder>0 ? weighted/totalOrder : 0);
    });
 
    const machineCount=getBottomWeldingMachineCount();
    const workingHours=Math.max(0,Number(document.getElementById('shiftHoursInput')?.value)||0);
-   // Capacity = (3600 / Average Work Time) × 75% × Machine Count × Working Hours
    const capacities=avgTimes.map((avg,i)=>
       orders[i]>0 && avg>0 && machineCount>0 && workingHours>0
          ? (3600/avg)*0.75*machineCount*workingHours
          : 0
    );
-
    const flooredCapacities=capacities.map(v=>Math.floor(Math.max(0,Number(v)||0)));
    const differences=flooredCapacities.map((cap,i)=>cap-Math.floor(Math.max(0,Number(orders[i])||0)));
+
+   // Build columns at SOURCE level:
+   // each Sunday is immediately followed by Wn SUM.
+   // The final incomplete week also gets a SUM column after its last available day.
+   const columns=[];
+   let weekIndexes=[],weekNo=1;
+   days.forEach((d,i)=>{
+      columns.push({type:'day',index:i,label:String(d||'')});
+      weekIndexes.push(i);
+      const dt=parseBWDate(d);
+      const isSunday=dt && dt.getDay()===0;
+      const isLast=i===days.length-1;
+      if(isSunday || isLast){
+         columns.push({type:'sum',indexes:[...weekIndexes],label:`W${String(weekNo).padStart(2,'0')}`});
+         columns.push({type:'divider',label:''});
+         weekIndexes=[];weekNo++;
+      }
+   });
+
+   head.innerHTML='<tr><th>Bottom Welding</th>'+
+      columns.map(c=>c.type==='divider'
+         ? '<th class="bw-week-divider-direct"></th>'
+         : `<th class="${c.type==='sum'?'bw-sum-head-direct':''}">${c.label}</th>`).join('')+
+      '</tr>';
+
+   function orderCell(c){
+      if(c.type==='divider') return '<td class="bw-week-divider-direct"></td>';
+      if(c.type==='day'){
+         const v=orders[c.index]||0;
+         return `<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`;
+      }
+      const v=c.indexes.reduce((a,i)=>a+(orders[i]||0),0);
+      return `<td class="bw-sum-cell-direct bw-order bw-week-order-sum-dark">${v>0?fmt(v):'—'}</td>`;
+   }
+   function capacityCell(c){
+      if(c.type==='divider') return '<td class="bw-week-divider-direct"></td>';
+      if(c.type==='day'){
+         const v=flooredCapacities[c.index]||0;
+         return `<td class="${orders[c.index]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[c.index]>0&&v>0?v.toLocaleString('en-US'):'—'}</td>`;
+      }
+      const v=c.indexes.reduce((a,i)=>a+(flooredCapacities[i]||0),0);
+      return `<td class="bw-sum-cell-direct bw-capacity">${v>0?v.toLocaleString('en-US'):'—'}</td>`;
+   }
+   function diffCell(c){
+      if(c.type==='divider') return '<td class="bw-week-divider-direct"></td>';
+      let v=0,has=false;
+      if(c.type==='day'){
+         v=differences[c.index]||0;
+         has=(orders[c.index]>0)||(flooredCapacities[c.index]>0);
+      }else{
+         v=c.indexes.reduce((a,i)=>a+(differences[i]||0),0);
+         has=c.indexes.some(i=>(orders[i]>0)||(flooredCapacities[i]>0));
+      }
+      if(!has) return `<td class="${c.type==='sum'?'bw-sum-cell-direct ':''}bw-empty">—</td>`;
+      const cls=v>0?'bw-diff-positive':v<0?'bw-diff-negative':'bw-diff-zero';
+      return `<td class="${c.type==='sum'?'bw-sum-cell-direct ':''}${cls}">${v>0?'+':''}${v.toLocaleString('en-US')}</td>`;
+   }
 
    body.innerHTML=`
      <tr>
        <td class="bw-label">Bottom Welding Order / Day</td>
-       ${orders.map(v=>`<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}
+       ${columns.map(orderCell).join('')}
      </tr>
      <tr class="bw-capacity-row">
        <td class="bw-label">Capacity / Day</td>
-       ${flooredCapacities.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[i]>0&&v>0?v.toLocaleString('en-US'):'—'}</td>`).join('')}
+       ${columns.map(capacityCell).join('')}
      </tr>
      <tr class="bw-difference-row">
        <td class="bw-label">Difference</td>
-       ${differences.map((v,i)=>{
-          if(!(orders[i]>0) && !(flooredCapacities[i]>0)) return '<td class="bw-empty">—</td>';
-          const cls=v>0?'bw-diff-positive':v<0?'bw-diff-negative':'bw-diff-zero';
-          return `<td class="${cls}">${v>0?'+':''}${v.toLocaleString('en-US')}</td>`;
-       }).join('')}
+       ${columns.map(diffCell).join('')}
      </tr>`;
  }
 
@@ -12450,14 +12503,14 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </style>
 
 
-<script id="bottom-welding-capacity-weekly-sum-final">
+<script id="bottom-welding-capacity-weekly-sum-final" type="text/plain">
 (function(){
  function val(td){
-   const t=String(td?.textContent||'').replace(/,/g,'').replace('+','').trim();
-   const n=Number(t);return Number.isFinite(n)?n:0;
+   const n=Number(String(td?.textContent||'').replace(/,/g,'').replace('+','').trim());
+   return Number.isFinite(n)?n:0;
  }
- function getDate(raw){
-   if(raw instanceof Date && !isNaN(raw))return new Date(raw);
+ function parseDate(raw){
+   if(raw instanceof Date&&!isNaN(raw))return new Date(raw);
    const t=String(raw??'').trim();
    let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
    if(m)return new Date(+m[1],+m[2]-1,+m[3]);
@@ -12465,21 +12518,20 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
    if(m){let y=m[3]?+m[3]:2026;if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2])}
    const d=new Date(t);return isNaN(d)?null:d;
  }
- function fmt(d){return d?`${d.getDate()}/${d.getMonth()+1}`:''}
- function getDays(){
-   if(window.currentDailyData && Array.isArray(window.currentDailyData.days))return window.currentDailyData.days;
-   const ths=[...document.querySelectorAll('#tableSummaryCapacityMachineWeldingBottomPlate thead th')].slice(1);
-   return ths.map(th=>th.textContent.trim());
+ function getDays(dayCount){
+   if(window.currentDailyData&&Array.isArray(window.currentDailyData.days))
+      return window.currentDailyData.days.slice(0,dayCount);
+   return [...document.querySelectorAll('#tableSummaryCapacityMachineWeldingBottomPlate thead th')]
+      .slice(1,1+dayCount).map(th=>th.textContent.trim());
  }
- function makeGroups(days){
+ function buildGroups(days){
    const groups=[];let cur=[];
    days.forEach((raw,i)=>{
       cur.push(i);
-      const d=getDate(raw);
-      if(d && d.getDay()===0){groups.push(cur);cur=[]}
-      else if(cur.length===7){groups.push(cur);cur=[]}
+      const d=parseDate(raw);
+      if(d&&d.getDay()===0){groups.push(cur);cur=[];} // close exactly on Sunday
    });
-   if(cur.length)groups.push(cur);
+   if(cur.length)groups.push(cur); // final partial week
    return groups;
  }
  function enhance(){
@@ -12488,88 +12540,73 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
    const head=table.querySelector('thead tr'),body=table.querySelector('tbody');
    if(!head||!body)return;
 
-   // Rebuild from the renderer first: remove only our previously injected weekly/total cells.
    table.querySelectorAll('[data-bw-sum-final]').forEach(x=>x.remove());
 
-   const dayCount=head.children.length-1;
-   if(dayCount<=0)return;
-   const rawDays=getDays().slice(0,dayCount);
-   while(rawDays.length<dayCount)rawDays.push('');
-   const groups=makeGroups(rawDays);
-   if(!groups.length)return;
+   const originalHeads=[...head.children].slice(1);
+   const dayCount=originalHeads.length;
+   if(!dayCount)return;
+   const days=getDays(dayCount);
+   const groups=buildGroups(days);
 
-   // Append guaranteed visible weekly summary columns after all daily columns.
+   // Snapshot daily values before inserting columns.
+   const rowData=[...body.querySelectorAll('tr')].map(tr=>({
+      tr,
+      label:(tr.children[0]?.textContent||'').trim(),
+      vals:[...tr.children].slice(1,1+dayCount).map(val)
+   }));
+
+   // Insert each weekly SUM immediately AFTER that week's Sunday
+   // (or after the last available day for an incomplete final week).
+   let added=0;
    groups.forEach((idxs,gi)=>{
-      const first=getDate(rawDays[idxs[0]]),last=getDate(rawDays[idxs[idxs.length-1]]);
+      const lastDayIndex=idxs[idxs.length-1];
+      const insertAt=1+lastDayIndex+1+added;
+
       const th=document.createElement('th');
-      th.setAttribute('data-bw-sum-final','1');
+      th.dataset.bwSumFinal='1';
       th.className='bw-sum-head';
-      th.innerHTML=`W${gi+1} SUM<br><span class="bw-week-range">${fmt(first)} - ${fmt(last)} จ.-อา.</span>`;
-      head.appendChild(th);
-   });
-   const totalTh=document.createElement('th');
-   totalTh.setAttribute('data-bw-sum-final','1');
-   totalTh.className='bw-sum-head bw-total-head';
-   totalTh.textContent='TOTAL';
-   head.appendChild(totalTh);
+      th.textContent=`W${gi+1} SUM`;
+      head.insertBefore(th,head.children[insertAt]||null);
 
-   [...body.querySelectorAll('tr')].forEach(tr=>{
-      const label=(tr.children[0]?.textContent||'').trim();
-      const daily=[...tr.children].slice(1,1+dayCount).map(val);
-
-      groups.forEach(idxs=>{
-         const sum=idxs.reduce((a,i)=>a+(daily[i]||0),0);
+      rowData.forEach(({tr,label,vals})=>{
+         const sum=idxs.reduce((a,i)=>a+(vals[i]||0),0);
          const td=document.createElement('td');
-         td.setAttribute('data-bw-sum-final','1');
+         td.dataset.bwSumFinal='1';
          td.className='bw-sum-cell';
          td.textContent=sum===0?'—':(label==='Difference'&&sum>0?'+':'')+sum.toLocaleString('en-US');
          if(label==='Difference'&&sum!==0)td.classList.add(sum>0?'bw-diff-positive':'bw-diff-negative');
-         tr.appendChild(td);
+         tr.insertBefore(td,tr.children[insertAt]||null);
       });
-
-      const total=daily.reduce((a,b)=>a+b,0);
-      const td=document.createElement('td');
-      td.setAttribute('data-bw-sum-final','1');
-      td.className='bw-sum-cell bw-total-cell';
-      td.textContent=total===0?'—':(label==='Difference'&&total>0?'+':'')+total.toLocaleString('en-US');
-      if(label==='Difference'&&total!==0)td.classList.add(total>0?'bw-diff-positive':'bw-diff-negative');
-      tr.appendChild(td);
+      added++;
    });
  }
  window.enhanceBottomWeldingCapacityWeeklySum=enhance;
-
- // Run after every render cycle and station switch.
- function run(){setTimeout(enhance,30);setTimeout(enhance,180)}
- document.addEventListener('DOMContentLoaded',()=>[300,900,1800,3000].forEach(ms=>setTimeout(enhance,ms)));
+ document.addEventListener('DOMContentLoaded',()=>[250,800,1600,2800].forEach(ms=>setTimeout(enhance,ms)));
  document.addEventListener('click',e=>{
    if(e.target.closest('#manpowerLineButtons button'))setTimeout(enhance,250);
  },true);
  document.addEventListener('input',e=>{
-   if(['bottomWeldingMachineCount','shiftHoursInput'].includes(e.target?.id))run();
+   if(['bottomWeldingMachineCount','shiftHoursInput'].includes(e.target?.id))setTimeout(enhance,120);
  });
  document.addEventListener('change',e=>{
-   if(['bottomWeldingMachineCount','shiftHoursInput'].includes(e.target?.id))run();
+   if(['bottomWeldingMachineCount','shiftHoursInput'].includes(e.target?.id))setTimeout(enhance,120);
  });
 })();
 </script>
 <style id="bottom-welding-capacity-weekly-sum-style-final">
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-head{
- background:#123251!important;color:#7dd3fc!important;font-weight:900!important;white-space:nowrap;
- border-left:2px solid #38bdf8!important;min-width:86px!important
+ background:#123251!important;color:#7dd3fc!important;font-weight:900!important;
+ white-space:nowrap;border-left:2px solid #38bdf8!important;border-right:2px solid #38bdf8!important;
+ min-width:76px!important
 }
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-week-range{font-size:8px;color:#cbd5e1;font-weight:600}
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-cell{
  background:#0b2239!important;color:#fff!important;font-weight:800!important;
- border-left:2px solid #38bdf8!important
-}
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-total-head,
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-total-cell{
- background:#071426!important;color:#f8fafc!important;font-weight:900!important
+ border-left:2px solid #38bdf8!important;border-right:2px solid #38bdf8!important
 }
 </style>
 
 
-<script id="bottom-welding-capacity-sum-render-hook-final">
+<script id="bottom-welding-capacity-sum-render-hook-final" type="text/plain">
 (function(){
  function hook(){
    const fn=window.renderSummaryCapacityMachineWeldingBottomPlate;
@@ -12597,6 +12634,53 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-diff-positive{background:#14532D!important;color:#fff!important;font-weight:800!important}
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-diff-negative{background:#7F1D1D!important;color:#fff!important;font-weight:800!important}
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-diff-zero{color:#fff!important;font-weight:700!important}
+</style>
+
+
+<style id="bw-direct-week-sum-style-final">
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-head-direct{
+  background:#123251!important;color:#7dd3fc!important;font-weight:900!important;
+  border-left:3px solid #38bdf8!important;border-right:3px solid #38bdf8!important;
+  min-width:82px!important
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-cell-direct{
+  background:#0b2239!important;font-weight:900!important;
+  border-left:3px solid #38bdf8!important;border-right:3px solid #38bdf8!important
+}
+</style>
+
+
+<style id="bw-week-10px-divider-final">
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-week-divider-direct{
+    width:10px!important;
+    min-width:10px!important;
+    max-width:10px!important;
+    padding:0!important;
+    border:0!important;
+    background:#020617!important;
+}
+</style>
+
+
+<style id="bw-week-sum-darker-final">
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-head-direct{
+    background:#071426!important;
+    color:#7dd3fc!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-cell-direct{
+    background:#06111f!important;
+    color:#ffffff!important;
+}
+</style>
+
+
+<style id="bw-week-order-sum-dark-final">
+/* Weekly SUM value for Bottom Welding Order / Day only */
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-week-order-sum-dark{
+    background:#020b16!important;
+    color:#ffffff!important;
+    font-weight:900!important;
+}
 </style>
 
 </body>
