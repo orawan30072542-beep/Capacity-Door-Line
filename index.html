@@ -1494,35 +1494,6 @@ canvas, option {
                             </table>
                         </div>
                     </div>
-
-                    <!-- Summary Capacity Machine Welding Bottom Plate -->
-                    <div id="summaryCapacityMachineWeldingBottomPlate" class="bg-slate-900/55 border border-cyan-500/20 rounded-xl overflow-hidden mt-3">
-                        <div class="px-4 py-3 border-b border-bordercolor bg-gradient-to-r from-cyan-950/30 to-slate-950/20">
-                            <div class="text-sm font-bold text-white">Summary Capacity Machine Welding Bottom Plate</div>
-                            <div class="text-[9px] text-slate-400 mt-0.5">
-                                เฉพาะ Bottom Plate · Machine Welding · Order อ้างอิงจาก Master Model / Daily Plan
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table id="tableSummaryCapacityMachineWeldingBottomPlate" class="text-left border-collapse" style="min-width:100%;">
-                                <thead>
-                                    <tr class="bg-slate-950/90 border-b border-bordercolor">
-                                        <th class="px-3 py-2">Model</th>
-                                        <th class="px-3 py-2 text-center">Avg Order / Day</th>
-                                        <th class="px-3 py-2 text-center">Max CT (s)</th>
-                                        <th class="px-3 py-2 text-center">Capacity / Hour</th>
-                                        <th class="px-3 py-2 text-center">Capacity / Day</th>
-                                        <th class="px-3 py-2 text-center">Difference</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="summaryCapacityMachineWeldingBottomPlateBody"></tbody>
-                                <tfoot id="summaryCapacityMachineWeldingBottomPlateFoot"></tfoot>
-                            </table>
-                        </div>
-                    </div>
-
-
-                    
 <div id="summaryCapacityMachineWeldingBottomPlate" class="bg-slate-900/55 border border-cyan-500/20 rounded-xl overflow-hidden mt-4 mb-4">
     <div class="px-4 py-3 border-b border-bordercolor bg-slate-950/40">
         <div class="text-sm font-bold text-white">Summary Capacity Machine Welding Bottom Plate</div>
@@ -12845,6 +12816,113 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
     color:#ffffff!important;
 }
 </style>
+
+
+<style id="final-bottom-welding-bottom-plate-only">
+#summaryCapacityMachineWeldingBottomPlate[data-bp-visible="0"]{
+    display:none!important;
+}
+</style>
+
+<script id="final-station-kpi-and-bottom-plate-controller">
+(function(){
+    const STATIONS=['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
+
+    function setBottomWeldingVisibility(station){
+        const card=document.getElementById('summaryCapacityMachineWeldingBottomPlate');
+        if(!card) return;
+        const show=station==='Bottom Plate';
+        card.dataset.bpVisible=show?'1':'0';
+        card.hidden=!show;
+        card.style.setProperty('display',show?'block':'none','important');
+        if(show && typeof window.renderSummaryCapacityMachineWeldingBottomPlate==='function'){
+            window.renderSummaryCapacityMachineWeldingBottomPlate();
+        }
+    }
+
+    function refreshStationDependentKPI(){
+        // renderManpowerTable is the source renderer for:
+        // Plan / Current / Performance / Difference KPI and manpower overview.
+        if(typeof window.renderManpowerTable==='function'){
+            window.renderManpowerTable(window.currentDailyData || currentDailyData);
+        }else if(typeof renderManpowerTable==='function'){
+            renderManpowerTable(window.currentDailyData || currentDailyData);
+        }
+
+        if(typeof window.renderSummaryCapacityPlanActual==='function'){
+            window.renderSummaryCapacityPlanActual(window.currentDailyData || currentDailyData);
+        }else if(typeof renderSummaryCapacityPlanActual==='function'){
+            renderSummaryCapacityPlanActual(window.currentDailyData || currentDailyData);
+        }
+
+        if(typeof window.renderSummaryDailyOrderByDoor==='function'){
+            window.renderSummaryDailyOrderByDoor(window.currentDailyData || currentDailyData);
+        }else if(typeof renderSummaryDailyOrderByDoor==='function'){
+            renderSummaryDailyOrderByDoor(window.currentDailyData || currentDailyData);
+        }
+
+        if(typeof window.renderSummaryDailyOrderByModelDoor==='function'){
+            window.renderSummaryDailyOrderByModelDoor(window.currentDailyData || currentDailyData);
+        }else if(typeof renderSummaryDailyOrderByModelDoor==='function'){
+            renderSummaryDailyOrderByModelDoor(window.currentDailyData || currentDailyData);
+        }
+    }
+
+    function applyStation(station){
+        if(!STATIONS.includes(station)) return;
+
+        // Update the REAL state used by all KPI calculations.
+        currentManpowerStation=station;
+        window.currentManpowerStation=station;
+
+        const sel=document.getElementById('manpowerLineSelect');
+        if(sel) sel.value=station;
+
+        const label=document.getElementById('manpowerStationLabel');
+        if(label) label.textContent=station;
+
+        document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn=>{
+            const active=btn.dataset.line===station;
+            btn.classList.toggle('active',active);
+            btn.setAttribute('aria-pressed',active?'true':'false');
+        });
+
+        // Hide/show Bottom Welding FIRST, then recalculate every KPI/table.
+        setBottomWeldingVisibility(station);
+        refreshStationDependentKPI();
+
+        // Re-assert visibility after any renderer that may touch the DOM.
+        requestAnimationFrame(()=>setBottomWeldingVisibility(station));
+        setTimeout(()=>setBottomWeldingVisibility(station),50);
+    }
+
+    // Replace all previous accumulated station wrappers with one authoritative function.
+    window.switchManpowerStation=applyStation;
+
+    // Capture the station click before older listeners can leave stale KPI state.
+    document.addEventListener('click',function(e){
+        const btn=e.target.closest('#manpowerLineButtons .mp-line-btn');
+        if(!btn) return;
+        const station=btn.dataset.line;
+        if(!STATIONS.includes(station)) return;
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        applyStation(station);
+    },true);
+
+    document.addEventListener('change',function(e){
+        if(e.target?.id!=='manpowerLineSelect') return;
+        applyStation(e.target.value);
+    },true);
+
+    document.addEventListener('DOMContentLoaded',function(){
+        const selected=document.getElementById('manpowerLineSelect')?.value ||
+                       currentManpowerStation || 'Door A';
+        setTimeout(()=>applyStation(selected),80);
+    });
+})();
+</script>
 
 </body>
 </html
