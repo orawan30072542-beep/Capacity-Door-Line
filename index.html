@@ -1206,6 +1206,47 @@ canvas, option {
 }
 </style>
 
+
+<style id="all-lines-same-total-font-size-final">
+/* Summary Capacity Plan & Acual:
+   Door A/B/C, Door Glass, Back/Bottom Line#1/Line#2
+   use the same text size as Back/Bottom TOTAL rows. */
+#tableSummaryCapacityPlanActual tbody td,
+#tableSummaryCapacityPlanActual tbody th,
+#summaryCapacityPlanActual tbody td,
+#summaryCapacityPlanActual tbody th{
+    font-size:12px !important;
+    line-height:1.22 !important;
+}
+
+/* Cab / P / A and other nested values */
+#tableSummaryCapacityPlanActual tbody td > *,
+#tableSummaryCapacityPlanActual tbody th > *,
+#summaryCapacityPlanActual tbody td > *,
+#summaryCapacityPlanActual tbody th > *{
+    font-size:12px !important;
+    line-height:1.22 !important;
+}
+
+/* Keep line/type labels clear */
+#tableSummaryCapacityPlanActual tbody th:first-child,
+#summaryCapacityPlanActual tbody th:first-child{
+    font-weight:800 !important;
+}
+
+/* TOTAL remains visually stronger by weight/background, not by smaller surrounding text */
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#summaryCapacityPlanActual .scp-total-line-label{
+    font-size:13px !important;
+    font-weight:900 !important;
+}
+#tableSummaryCapacityPlanActual .scp-total-type-cell,
+#summaryCapacityPlanActual .scp-total-type-cell{
+    font-size:12px !important;
+    font-weight:900 !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -11294,6 +11335,66 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
         requestAnimationFrame(darken);
         setTimeout(darken,100);
         setTimeout(darken,400);
+    });
+})();
+</script>
+
+
+<style id="plate-lines-keep-original-font-final">
+/*
+  Final hierarchy:
+  - Other production lines: 12px
+  - Back Plate / Bottom Plate individual Line#1 + Line#2: keep original compact size 10px
+  - TOTAL Line#1 + Line#2: remains emphasized
+*/
+#tableSummaryCapacityPlanActual tr.scp-plate-individual-row td,
+#tableSummaryCapacityPlanActual tr.scp-plate-individual-row th,
+#tableSummaryCapacityPlanActual tr.scp-plate-individual-row td > *,
+#tableSummaryCapacityPlanActual tr.scp-plate-individual-row th > *,
+#summaryCapacityPlanActual tr.scp-plate-individual-row td,
+#summaryCapacityPlanActual tr.scp-plate-individual-row th,
+#summaryCapacityPlanActual tr.scp-plate-individual-row td > *,
+#summaryCapacityPlanActual tr.scp-plate-individual-row th > *{
+    font-size:10px !important;
+}
+</style>
+
+<script id="plate-lines-original-font-runtime-final">
+(function(){
+    function markPlateIndividualRows(){
+        const table=document.getElementById('tableSummaryCapacityPlanActual');
+        if(!table) return;
+        let currentPlate=false;
+        table.querySelectorAll('tbody tr').forEach(tr=>{
+            const txt=(tr.textContent||'').replace(/\s+/g,' ').trim();
+            if(/Back Plate|Bottom Plate/i.test(txt)) currentPlate=true;
+
+            const isTotal=tr.classList.contains('scp-total-2lines-row') ||
+                          tr.classList.contains('scp-total-uph-row') ||
+                          /TOTAL\s*Line#1\s*\+\s*Line#2/i.test(txt);
+
+            const isIndividual=/Line#1|Line#2/i.test(txt) && !isTotal;
+            const isContinuation=currentPlate && !isTotal &&
+                (/\bDay\b|\bUPH\b/i.test(txt) || isIndividual);
+
+            if((isIndividual || isContinuation) && currentPlate){
+                tr.classList.add('scp-plate-individual-row');
+            }
+        });
+    }
+
+    const old=window.renderSummaryCapacityPlanActual;
+    if(typeof old==='function'){
+        window.renderSummaryCapacityPlanActual=function(){
+            const r=old.apply(this,arguments);
+            requestAnimationFrame(markPlateIndividualRows);
+            setTimeout(markPlateIndividualRows,30);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+        requestAnimationFrame(markPlateIndividualRows);
+        setTimeout(markPlateIndividualRows,100);
     });
 })();
 </script>
