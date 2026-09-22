@@ -6587,6 +6587,9 @@ function updateLobSubLineVisibility() {
             const input = document.getElementById('shortPercentInput');
             if (input && Number(input.value) !== pct) input.value = pct;
             renderManpowerTable(currentDailyData);
+            if (typeof renderSummaryCapacityPlanActual === 'function') renderSummaryCapacityPlanActual(currentDailyData);
+            if (typeof renderSummaryDailyOrderByDoor === 'function') renderSummaryDailyOrderByDoor(currentDailyData);
+            if (typeof renderSummaryDailyOrderByModelDoor === 'function') renderSummaryDailyOrderByModelDoor(currentDailyData);
         }
 
         function getEfficiencyPercent() {
@@ -7407,20 +7410,25 @@ function updateLobSubLineVisibility() {
         }
 
         function getSummaryCapacityRequiredOrder(data, station, lineName, dayIndex, hours) {
+            let baseRequired = 0;
+
             if (station === 'Door C') {
                 // Exact physical C-line order from Master Routing × Ratio.
                 const kpi = getManpowerOrderKpisFromDailyPlan(data, 'Door C');
-                return Number(kpi?.dailyDoorCOrder?.[lineName]?.[dayIndex] || 0);
-            }
-
-            if (station === 'Back Plate' || station === 'Bottom Plate') {
+                baseRequired = Number(kpi?.dailyDoorCOrder?.[lineName]?.[dayIndex] || 0);
+            } else if (station === 'Back Plate' || station === 'Bottom Plate') {
                 // Exact TOTAL logic of the daily-order summary for Line#1 / Line#2.
-                return getSummaryCapacityPlanOrder(data, station, lineName, dayIndex);
+                baseRequired = getSummaryCapacityPlanOrder(data, station, lineName, dayIndex);
+            } else {
+                // Exact TOTAL logic used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต".
+                const metrics = getDayCapacityMetrics(data.groups, data.days, dayIndex, station, hours);
+                baseRequired = Number(metrics?.totalQty || 0);
             }
 
-            // Exact TOTAL logic used by "ยอดรวมออเดอร์รายวันที่ต้องผลิต".
-            const metrics = getDayCapacityMetrics(data.groups, data.days, dayIndex, station, hours);
-            return Number(metrics?.totalQty || 0);
+            // P includes the user-entered Short %.
+            // Example: base P 1,000 and Short 20% => P 1,200.
+            const shortRate = Math.max(0, Number(getShortPercent()) || 0) / 100;
+            return baseRequired * (1 + shortRate);
         }
 
 
@@ -8113,7 +8121,8 @@ function updateLobSubLineVisibility() {
                     days.forEach((day,i)=>{
                         const order = Math.max(0,Number(model?.orders?.[i])||0);
                         item.orders[i] += order;
-                        item.production[i] += order * productionRatio;
+                        const shortFactor = 1 + (Math.max(0, Number(getShortPercent()) || 0) / 100);
+                        item.production[i] += order * productionRatio * shortFactor;
                     });
                 });
             });
