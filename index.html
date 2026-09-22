@@ -1739,6 +1739,7 @@ canvas, option {
                                 <div id="partTabContainer" class="flex flex-wrap gap-1">
                                     <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
                                     <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
+                                    <button type="button" onclick="selectPartTab('Bottom Plate Welding')" data-part="Bottom Plate Welding" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate Welding</button>
                                     <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
                                 </div>
                             </div>
@@ -2644,6 +2645,29 @@ canvas, option {
 
         function selectPartTab(partName) {
             selectedPartValue = partName;
+
+            if (partName === 'Bottom Plate Welding' && currentDailyData?.groups) {
+                const candidates = [];
+                currentDailyData.groups.forEach(g => {
+                    (g.models || []).forEach(m => {
+                        const cfg = getMasterConfigForModel(m.name);
+                        if (cfg.bottomSource === 'ผลิตเอง' && cfg.welding === true) {
+                            candidates.push({group:g.productGroup, model:m.name});
+                        }
+                    });
+                });
+                if (candidates.length) {
+                    const keep = candidates.find(x => x.model === selectedModel);
+                    const pick = keep || candidates[0];
+                    selectedProductGroup = pick.group;
+                    selectedModel = pick.model;
+                } else {
+                    selectedProductGroup = '';
+                    selectedModel = '';
+                }
+                renderWorkProcessSelectors();
+            }
+
             document.querySelectorAll('.part-tab-btn').forEach(btn => {
                 if (btn.getAttribute('data-part') === partName) {
                     btn.className = 'part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500';
@@ -2745,7 +2769,31 @@ canvas, option {
 
             if (!currentDailyData || !currentDailyData.groups) return;
 
-            currentDailyData.groups.forEach(g => {
+            const visibleWorkGroups = currentDailyData.groups
+                .map(g => {
+                    if (selectedPartValue !== 'Bottom Plate Welding') return g;
+                    const models = (g.models || []).filter(m => {
+                        const cfg = getMasterConfigForModel(m.name);
+                        return cfg.bottomSource === 'ผลิตเอง' && cfg.welding === true;
+                    });
+                    return {...g, models};
+                })
+                .filter(g => selectedPartValue !== 'Bottom Plate Welding' || (g.models || []).length > 0);
+
+            // Keep selection valid after applying Master Model Welding filter.
+            if (selectedPartValue === 'Bottom Plate Welding' && visibleWorkGroups.length) {
+                if (!visibleWorkGroups.some(g => g.productGroup === selectedProductGroup)) {
+                    selectedProductGroup = visibleWorkGroups[0].productGroup;
+                    selectedModel = visibleWorkGroups[0].models?.[0]?.name || '';
+                } else {
+                    const sg = visibleWorkGroups.find(g => g.productGroup === selectedProductGroup);
+                    if (!sg?.models?.some(m => m.name === selectedModel)) {
+                        selectedModel = sg?.models?.[0]?.name || '';
+                    }
+                }
+            }
+
+            visibleWorkGroups.forEach(g => {
                 let isSelected = (selectedProductGroup === g.productGroup);
                 let btn = document.createElement('button');
                 btn.type = 'button';
@@ -2781,7 +2829,9 @@ canvas, option {
             });
 
             if (modelContainer.children.length === 0) {
-                modelContainer.innerHTML = `<span class="text-[10px] text-slate-400 p-1">กรุณาเลือก Group</span>`;
+                modelContainer.innerHTML = selectedPartValue === 'Bottom Plate Welding'
+                    ? `<span class="text-[10px] text-amber-300 p-1">ไม่พบ Model ที่เปิด Welding ใน Master Model</span>`
+                    : `<span class="text-[10px] text-slate-400 p-1">กรุณาเลือก Group</span>`;
             }
         }
 
@@ -3815,11 +3865,11 @@ function updateLobSubLineVisibility() {
             if (!lineSel) return;
 
             // Open with the process context the user was working on.
-            if (selectedPartValue === 'Back Plate' || selectedPartValue === 'Bottom Plate') {
+            if (selectedPartValue === 'Back Plate' || selectedPartValue === 'Bottom Plate' || selectedPartValue === 'Bottom Plate Welding') {
                 lineSel.value = selectedPartValue;
 
-                // Follow Line#1 / Line#2 from Master Model for the selected model.
-                if (selectedModel && plateLineSel) {
+                // Back/Bottom follow Line#1 / Line#2; Welding is one combined line.
+                if (selectedPartValue !== 'Bottom Plate Welding' && selectedModel && plateLineSel) {
                     const cfg = getMasterConfigForModel(selectedModel);
                     plateLineSel.value = selectedPartValue === 'Back Plate'
                         ? (cfg.backPlateLine || 'Line#1')
