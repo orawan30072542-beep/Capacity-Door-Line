@@ -1347,12 +1347,12 @@ canvas, option {
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                             <span class="text-[10px] text-slate-400 font-semibold">Group Station:</span>
                             <div id="manpowerLineButtons" class="flex flex-wrap gap-1.5">
-                                <button type="button" data-line="Door A" onclick="switchManpowerStation('Door A')" class="mp-line-btn">Door A</button>
-                                <button type="button" data-line="Door B" onclick="switchManpowerStation('Door B')" class="mp-line-btn">Door B</button>
-                                <button type="button" data-line="Door C" onclick="switchManpowerStation('Door C')" class="mp-line-btn">Door C</button>
-                                <button type="button" data-line="Door Glass" onclick="switchManpowerStation('Door Glass')" class="mp-line-btn">Door Glass</button>
-                                <button type="button" data-line="Back Plate" onclick="switchManpowerStation('Back Plate')" class="mp-line-btn">Back Plate</button>
-                                <button type="button" data-line="Bottom Plate" onclick="switchManpowerStation('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
+                                <button type="button" data-line="Door A" onclick="window.switchManpowerStation('Door A')" class="mp-line-btn">Door A</button>
+                                <button type="button" data-line="Door B" onclick="window.switchManpowerStation('Door B')" class="mp-line-btn">Door B</button>
+                                <button type="button" data-line="Door C" onclick="window.switchManpowerStation('Door C')" class="mp-line-btn">Door C</button>
+                                <button type="button" data-line="Door Glass" onclick="window.switchManpowerStation('Door Glass')" class="mp-line-btn">Door Glass</button>
+                                <button type="button" data-line="Back Plate" onclick="window.switchManpowerStation('Back Plate')" class="mp-line-btn">Back Plate</button>
+                                <button type="button" data-line="Bottom Plate" onclick="window.switchManpowerStation('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
                             </div>
                             <select id="manpowerLineSelect" onchange="switchManpowerStation(this.value)" class="hidden">
                                 <option value="Door A">Door A</option><option value="Door B">Door B</option><option value="Door C">Door C</option>
@@ -12919,7 +12919,10 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
     }
 
     // Replace all previous accumulated station wrappers with one authoritative function.
-    window.switchManpowerStation=applyStation;
+    // Both the global identifier and window property must point to the SAME controller;
+    // otherwise older inline handlers can keep rendering Door A.
+    try { switchManpowerStation = applyStation; } catch(_err) {}
+    window.switchManpowerStation = applyStation;
 
     // Capture the station click before older listeners can leave stale KPI state.
     document.addEventListener('click',function(e){
@@ -12939,8 +12942,12 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
     },true);
 
     document.addEventListener('DOMContentLoaded',function(){
-        const selected=document.getElementById('manpowerLineSelect')?.value ||
-                       currentManpowerStation || 'Door A';
+        const activeBtn = document.querySelector('#manpowerLineButtons .mp-line-btn.active, #manpowerLineButtons .mp-line-btn[aria-pressed="true"]');
+        const selected = activeBtn?.dataset?.line ||
+                         window.currentManpowerStation ||
+                         currentManpowerStation ||
+                         document.getElementById('manpowerLineSelect')?.value ||
+                         'Door A';
         setTimeout(()=>applyStation(selected),80);
     });
 })();
@@ -12970,6 +12977,40 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 
  Back Plate / Bottom Plate TOTAL and individual lines both follow this rule.
 */
+</script>
+
+
+<script id="kpi-station-door-a-stuck-guard">
+(function(){
+    const STATIONS = ['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
+
+    function syncSelectedStation(station){
+        if(!STATIONS.includes(station)) return;
+        window.currentManpowerStation = station;
+
+        const sel = document.getElementById('manpowerLineSelect');
+        if(sel && sel.value !== station) sel.value = station;
+
+        const label = document.getElementById('manpowerStationLabel');
+        if(label) label.textContent = station;
+
+        document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn=>{
+            const active = btn.dataset.line === station;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    }
+
+    document.addEventListener('click', function(e){
+        const btn = e.target.closest('#manpowerLineButtons .mp-line-btn');
+        if(!btn) return;
+        const station = btn.dataset.line;
+        if(!STATIONS.includes(station)) return;
+        syncSelectedStation(station);
+        setTimeout(()=>syncSelectedStation(station), 0);
+        setTimeout(()=>syncSelectedStation(station), 100);
+    }, true);
+})();
 </script>
 
 </body>
