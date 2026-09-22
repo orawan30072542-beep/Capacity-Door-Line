@@ -1739,7 +1739,7 @@ canvas, option {
                                 <div id="partTabContainer" class="flex flex-wrap gap-1">
                                     <button type="button" onclick="selectPartTab('Back Plate')" data-part="Back Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-blue-600 text-white shadow border border-blue-500">Back Plate</button>
                                     <button type="button" onclick="selectPartTab('Bottom Plate')" data-part="Bottom Plate" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate</button>
-                                    <button type="button" onclick="selectPartTab('Bottom Plate Welding')" data-part="Bottom Plate Welding" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Plate Welding</button>
+                                    <button type="button" onclick="selectPartTab('Bottom Plate Welding')" data-part="Bottom Plate Welding" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Bottom Welding</button>
                                     <button type="button" onclick="selectPartTab('Gasket')" data-part="Gasket" class="part-tab-btn px-2 py-0.5 rounded text-[10px] font-medium transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-bordercolor">Gasket</button>
                                 </div>
                             </div>
@@ -2039,7 +2039,7 @@ canvas, option {
                                     <option value="Door Glass">Door Glass</option>
                                     <option value="Back Plate">Back Plate</option>
                                     <option value="Bottom Plate">Bottom Plate</option>
-                                    <option value="Bottom Plate Welding">Bottom Plate Welding</option>
+                                    <option value="Bottom Plate Welding">Bottom Welding</option>
                                 </select>
                             </div>
 
@@ -11498,6 +11498,222 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
     }
     document.addEventListener('DOMContentLoaded', function(){
         setTimeout(updateWeldingHint, 50);
+    });
+})();
+</script>
+
+
+<style id="bottom-welding-mode-ui-final">
+#lobBottomWeldingModeWrap{display:none;min-width:230px}
+#lobBottomWeldingModeButtons{display:flex;gap:5px;flex-wrap:wrap}
+#lobBottomWeldingModeButtons button{
+    padding:5px 10px;border-radius:6px;border:1px solid #334155;
+    background:#0f172a;color:#cbd5e1;font-size:10px;font-weight:700;
+}
+#lobBottomWeldingModeButtons button.active{
+    background:#2563eb;border-color:#60a5fa;color:#fff;
+}
+</style>
+
+<script id="bottom-welding-machine-manual-final">
+(function(){
+    const LEGACY_LINE = 'Bottom Plate Welding';
+    const MODE_KEY = 'haier_bottom_welding_mode_v1';
+    const MACHINE = 'Machine Welding';
+    const MANUAL = 'Manual Assembly';
+
+    window.getBottomWeldingMode = function(){
+        return localStorage.getItem(MODE_KEY) || MACHINE;
+    };
+
+    function storagePartName(){
+        return LEGACY_LINE + ' - ' + window.getBottomWeldingMode();
+    }
+
+    function ensureModeUI(){
+        const lineSel=document.getElementById('lobLineSelect');
+        if(!lineSel) return;
+
+        // Keep legacy value for compatibility; only display the shorter requested name.
+        const opt=Array.from(lineSel.options).find(o=>o.value===LEGACY_LINE);
+        if(opt) opt.textContent='Bottom Welding';
+
+        let wrap=document.getElementById('lobBottomWeldingModeWrap');
+        if(!wrap){
+            wrap=document.createElement('div');
+            wrap.id='lobBottomWeldingModeWrap';
+            wrap.className='lob-compact-control-card bg-slate-900/40 border border-bordercolor rounded-lg';
+            wrap.innerHTML=`
+              <label class="block text-[9px] text-slate-400 mb-1">Welding Process</label>
+              <div id="lobBottomWeldingModeButtons">
+                <button type="button" data-mode="${MACHINE}">Machine Welding</button>
+                <button type="button" data-mode="${MANUAL}">Manual Assembly</button>
+              </div>
+              <div class="text-[8px] text-cyan-400 mt-1">Model / Order อ้างอิงจาก Master Model · ไม่แยก Line#1 / Line#2</div>`;
+            const anchor=document.getElementById('lobDoorCLineWrap') || document.getElementById('lobPlateLineWrap');
+            if(anchor?.parentElement) anchor.parentElement.insertBefore(wrap, anchor.nextSibling);
+            wrap.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+                localStorage.setItem(MODE_KEY,b.dataset.mode);
+                refreshModeUI();
+                if(typeof populateLobModelSelect==='function') populateLobModelSelect();
+                if(typeof renderLineBalancePage==='function') renderLineBalancePage();
+            }));
+        }
+        refreshModeUI();
+    }
+
+    function refreshModeUI(){
+        const line=document.getElementById('lobLineSelect')?.value || '';
+        const wrap=document.getElementById('lobBottomWeldingModeWrap');
+        if(!wrap) return;
+        const show=line===LEGACY_LINE;
+        wrap.style.display=show?'block':'none';
+        const mode=window.getBottomWeldingMode();
+        wrap.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+    }
+
+    // Work Process: add two subtype buttons when Bottom Welding is selected.
+    function ensureWorkProcessModeUI(){
+        const partBtn=Array.from(document.querySelectorAll('.part-tab-btn'))
+            .find(b=>b.dataset.part===LEGACY_LINE);
+        if(partBtn) partBtn.textContent='Bottom Welding';
+
+        let box=document.getElementById('bottomWeldingWorkModeWrap');
+        const partContainer=partBtn?.parentElement;
+        if(!box && partContainer){
+            box=document.createElement('div');
+            box.id='bottomWeldingWorkModeWrap';
+            box.className='w-full mt-2 p-2 rounded-lg border border-cyan-500/20 bg-slate-950/35';
+            box.innerHTML=`
+              <div class="text-[9px] text-slate-400 mb-1">Bottom Welding Process</div>
+              <div class="flex gap-1 flex-wrap">
+                <button type="button" data-mode="${MACHINE}" class="bw-work-mode px-2 py-1 rounded text-[9px] border border-slate-600">Machine Welding</button>
+                <button type="button" data-mode="${MANUAL}" class="bw-work-mode px-2 py-1 rounded text-[9px] border border-slate-600">Manual Assembly</button>
+              </div>`;
+            partContainer.appendChild(box);
+            box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+                localStorage.setItem(MODE_KEY,b.dataset.mode);
+                loadSelectedWorkMode();
+            }));
+        }
+        updateWorkModeUI();
+    }
+
+    function updateWorkModeUI(){
+        const box=document.getElementById('bottomWeldingWorkModeWrap');
+        if(!box) return;
+        box.style.display=(window.selectedPartValue===LEGACY_LINE || selectedPartValue===LEGACY_LINE)?'block':'none';
+        const mode=window.getBottomWeldingMode();
+        box.querySelectorAll('button').forEach(b=>{
+            const active=b.dataset.mode===mode;
+            b.classList.toggle('bg-blue-600',active);
+            b.classList.toggle('text-white',active);
+        });
+    }
+
+    function loadSelectedWorkMode(){
+        updateWorkModeUI();
+        // Keep UI part name stable but load/save each subtype in its own DB key.
+        if(typeof selectedModel!=='undefined' && selectedModel){
+            const key=selectedModel+'_'+storagePartName();
+            if(typeof processDatabase!=='undefined'){
+                currentProcessData=JSON.parse(JSON.stringify(processDatabase[key] || []));
+                if(typeof renderProcessTable==='function') renderProcessTable();
+                if(typeof updateProcessChart==='function') updateProcessChart();
+            }
+        }
+        if(typeof renderLineBalancePage==='function') renderLineBalancePage();
+    }
+
+    // Intercept generic Work Process load/save key only for Bottom Welding.
+    if(typeof window.loadProcessData==='function'){
+        const old=window.loadProcessData;
+        window.loadProcessData=function(){
+            if(typeof selectedPartValue!=='undefined' && selectedPartValue===LEGACY_LINE && selectedModel){
+                const key=selectedModel+'_'+storagePartName();
+                currentProcessData=JSON.parse(JSON.stringify(processDatabase[key] || []));
+                if(typeof renderProcessTable==='function') renderProcessTable();
+                if(typeof updateProcessChart==='function') updateProcessChart();
+                updateWorkModeUI();
+                return;
+            }
+            return old.apply(this,arguments);
+        };
+    }
+
+    // LOB data: prefer subtype-specific key, fallback to old unsplit Welding data for Machine Welding.
+    if(typeof window.getLobProcessRows==='function'){
+        const oldRows=window.getLobProcessRows;
+        window.getLobProcessRows=function(lineName,modelName){
+            if(lineName===LEGACY_LINE){
+                const mode=window.getBottomWeldingMode();
+                const specific=modelName+'_'+LEGACY_LINE+' - '+mode;
+                if(typeof processDatabase!=='undefined' && Array.isArray(processDatabase[specific]) && processDatabase[specific].length){
+                    return processDatabase[specific];
+                }
+                if(mode===MACHINE){
+                    const legacy=modelName+'_'+LEGACY_LINE;
+                    if(typeof processDatabase!=='undefined' && Array.isArray(processDatabase[legacy])) return processDatabase[legacy];
+                }
+                return [];
+            }
+            return oldRows.apply(this,arguments);
+        };
+    }
+
+    // Layouts are separate between Machine and Manual, but not by Line#1/Line#2.
+    if(typeof window.getLobLayoutKey==='function'){
+        const oldKey=window.getLobLayoutKey;
+        window.getLobLayoutKey=function(){
+            const line=document.getElementById('lobLineSelect')?.value || '';
+            if(line===LEGACY_LINE){
+                return 'haier_lob_layout_shared_v1_Bottom_Welding_'+
+                    window.getBottomWeldingMode().replace(/\s+/g,'_');
+            }
+            return oldKey.apply(this,arguments);
+        };
+    }
+
+    // Existing unsplit Welding records are treated as Machine Welding, preserving earlier uploaded data.
+    function migrateLegacyAsMachine(){
+        if(typeof processDatabase==='undefined') return;
+        let changed=false;
+        Object.keys(processDatabase).forEach(k=>{
+            if(!k.endsWith('_'+LEGACY_LINE)) return;
+            const nk=k+' - '+MACHINE;
+            if(!Object.prototype.hasOwnProperty.call(processDatabase,nk)){
+                processDatabase[nk]=JSON.parse(JSON.stringify(processDatabase[k]||[]));
+                changed=true;
+            }
+        });
+        if(changed){
+            try{localStorage.setItem('haier_process_db',JSON.stringify(processDatabase));}catch(e){}
+        }
+    }
+
+    const oldLineChange=window.onLobLineChange;
+    if(typeof oldLineChange==='function'){
+        window.onLobLineChange=function(){
+            const r=oldLineChange.apply(this,arguments);
+            ensureModeUI(); refreshModeUI();
+            return r;
+        };
+    }
+
+    const oldSelectPart=window.selectPartTab;
+    if(typeof oldSelectPart==='function'){
+        window.selectPartTab=function(partName){
+            const r=oldSelectPart.apply(this,arguments);
+            ensureWorkProcessModeUI();
+            updateWorkModeUI();
+            if(partName===LEGACY_LINE) loadSelectedWorkMode();
+            return r;
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        migrateLegacyAsMachine();
+        setTimeout(()=>{ensureModeUI();ensureWorkProcessModeUI();refreshModeUI();updateWorkModeUI();},100);
     });
 })();
 </script>
