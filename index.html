@@ -11903,26 +11903,25 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
          : 0
    );
 
+   const flooredCapacities=capacities.map(v=>Math.floor(Math.max(0,Number(v)||0)));
+   const differences=flooredCapacities.map((cap,i)=>cap-Math.floor(Math.max(0,Number(orders[i])||0)));
+
    body.innerHTML=`
      <tr>
        <td class="bw-label">Bottom Welding Order / Day</td>
        ${orders.map(v=>`<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}
      </tr>
-     ${['FUF','TM','BM'].map(family=>{
-       const vals=days.map((_,i)=>models.reduce((sum,m)=>{
-         const name=String(m.name||'').trim().toUpperCase();
-         const match=family==='FUF'?name.startsWith('FUF'):family==='TM'?name.startsWith('TM'):name.startsWith('BM');
-         return sum+(match?Math.max(0,num(m.orders?.[i])):0);
-       },0));
-       return `<tr class="bw-family-row"><td class="bw-label bw-family-label">${family}</td>${vals.map(v=>`<td class="${v>0?'bw-family-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}</tr>`;
-     }).join('')}
-     <tr>
-       <td class="bw-label">Average Work Time (s)</td>
-       ${avgTimes.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-time':'bw-empty'}">${orders[i]>0&&v>0?fmt(v,2):'—'}</td>`).join('')}
-     </tr>
      <tr class="bw-capacity-row">
        <td class="bw-label">Capacity / Day</td>
-       ${capacities.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[i]>0&&v>0?Math.floor(v).toLocaleString('en-US'):'—'}</td>`).join('')}
+       ${flooredCapacities.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[i]>0&&v>0?v.toLocaleString('en-US'):'—'}</td>`).join('')}
+     </tr>
+     <tr class="bw-difference-row">
+       <td class="bw-label">Difference</td>
+       ${differences.map((v,i)=>{
+          if(!(orders[i]>0) && !(flooredCapacities[i]>0)) return '<td class="bw-empty">—</td>';
+          const cls=v>0?'bw-diff-positive':v<0?'bw-diff-negative':'bw-diff-zero';
+          return `<td class="${cls}">${v>0?'+':''}${v.toLocaleString('en-US')}</td>`;
+       }).join('')}
      </tr>`;
  }
 
@@ -12604,91 +12603,17 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<style id="bw-hide-detail-rows-and-diff-style-final">
-#tableSummaryCapacityMachineWeldingBottomPlate tbody tr.bw-hide-detail-final{display:none!important}
+
+
+
+
+
+
+<style id="bw-difference-source-style-final">
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-diff-positive{background:#14532D!important;color:#fff!important;font-weight:800!important}
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-diff-negative{background:#7F1D1D!important;color:#fff!important;font-weight:800!important}
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-diff-zero{color:#fff!important;font-weight:700!important}
 </style>
-<script id="bw-hide-detail-rows-and-add-difference-final">
-(function(){
- function toNum(v){
-   const n=Number(String(v??'').replace(/,/g,'').trim());
-   return Number.isFinite(n)?n:0;
- }
- function fmtIntFloor(v){
-   return Math.floor(Math.max(0,Number(v)||0)).toLocaleString('en-US');
- }
- function apply(){
-   const table=document.getElementById('tableSummaryCapacityMachineWeldingBottomPlate');
-   if(!table)return;
-
-   const rows=[...table.querySelectorAll('tbody tr')];
-   rows.forEach(tr=>{
-      const label=(tr.children[0]?.textContent||'').trim();
-      if(['FUF','TM','BM','Average Work Time (s)'].includes(label)){
-         tr.classList.add('bw-hide-detail-final');
-      }
-   });
-
-   // Capacity / Day: always display integer rounded DOWN.
-   const capRow=rows.find(tr=>(tr.children[0]?.textContent||'').trim()==='Capacity / Day');
-   if(capRow){
-      [...capRow.children].slice(1).forEach(td=>{
-         const n=toNum(td.textContent);
-         td.textContent=n>0?fmtIntFloor(n):'—';
-      });
-   }
-
-   // Difference = Capacity / Day - Bottom Welding Order / Day
-   const orderRow=rows.find(tr=>(tr.children[0]?.textContent||'').trim()==='Bottom Welding Order / Day');
-   let diffRow=rows.find(tr=>(tr.children[0]?.textContent||'').trim()==='Difference');
-   if(orderRow && capRow){
-      if(!diffRow){
-         diffRow=document.createElement('tr');
-         diffRow.innerHTML='<td class="bw-label">Difference</td>';
-         capRow.insertAdjacentElement('afterend',diffRow);
-      }
-      const orderCells=[...orderRow.children].slice(1);
-      const capCells=[...capRow.children].slice(1);
-      diffRow.innerHTML='<td class="bw-label">Difference</td>';
-      const count=Math.min(orderCells.length,capCells.length);
-      for(let i=0;i<count;i++){
-         const order=toNum(orderCells[i].textContent);
-         const cap=toNum(capCells[i].textContent);
-         const td=document.createElement('td');
-         if(!order && !cap){
-            td.textContent='—';
-         }else{
-            const diff=Math.floor(cap)-Math.floor(order);
-            td.textContent=(diff>0?'+':'')+diff.toLocaleString('en-US');
-            td.className=diff>0?'bw-diff-positive':diff<0?'bw-diff-negative':'bw-diff-zero';
-         }
-         diffRow.appendChild(td);
-      }
-   }
- }
- window.applyBottomWeldingCapacityDifferenceFinal=apply;
- document.addEventListener('DOMContentLoaded',()=>{
-   setTimeout(apply,350);setTimeout(apply,950);setTimeout(apply,1800);
- });
- document.addEventListener('input',e=>{
-   if(e.target?.id==='bottomWeldingMachineCount'||e.target?.id==='shiftHoursInput')setTimeout(apply,120);
- });
- document.addEventListener('change',e=>{
-   if(e.target?.id==='bottomWeldingMachineCount'||e.target?.id==='shiftHoursInput')setTimeout(apply,120);
- });
-})();
-</script>
-
-
-<script id="bw-diff-after-sum-hook-final">
-(function(){
- document.addEventListener('DOMContentLoaded',()=>{
-   [450,1100,2000].forEach(ms=>setTimeout(()=>window.applyBottomWeldingCapacityDifferenceFinal?.(),ms));
- });
-})();
-</script>
 
 </body>
 </html
