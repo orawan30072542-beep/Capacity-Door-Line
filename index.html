@@ -1347,12 +1347,12 @@ canvas, option {
                         <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
                             <span class="text-[10px] text-slate-400 font-semibold">Group Station:</span>
                             <div id="manpowerLineButtons" class="flex flex-wrap gap-1.5">
-                                <button type="button" data-line="Door A" onclick="setManpowerStationKPI('Door A')" class="mp-line-btn">Door A</button>
-                                <button type="button" data-line="Door B" onclick="setManpowerStationKPI('Door B')" class="mp-line-btn">Door B</button>
-                                <button type="button" data-line="Door C" onclick="setManpowerStationKPI('Door C')" class="mp-line-btn">Door C</button>
-                                <button type="button" data-line="Door Glass" onclick="setManpowerStationKPI('Door Glass')" class="mp-line-btn">Door Glass</button>
-                                <button type="button" data-line="Back Plate" onclick="setManpowerStationKPI('Back Plate')" class="mp-line-btn">Back Plate</button>
-                                <button type="button" data-line="Bottom Plate" onclick="setManpowerStationKPI('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
+                                <button type="button" data-line="Door A" onclick="switchManpowerStation('Door A')" class="mp-line-btn">Door A</button>
+                                <button type="button" data-line="Door B" onclick="switchManpowerStation('Door B')" class="mp-line-btn">Door B</button>
+                                <button type="button" data-line="Door C" onclick="switchManpowerStation('Door C')" class="mp-line-btn">Door C</button>
+                                <button type="button" data-line="Door Glass" onclick="switchManpowerStation('Door Glass')" class="mp-line-btn">Door Glass</button>
+                                <button type="button" data-line="Back Plate" onclick="switchManpowerStation('Back Plate')" class="mp-line-btn">Back Plate</button>
+                                <button type="button" data-line="Bottom Plate" onclick="switchManpowerStation('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
                             </div>
                             <select id="manpowerLineSelect" onchange="switchManpowerStation(this.value)" class="hidden">
                                 <option value="Door A">Door A</option><option value="Door B">Door B</option><option value="Door C">Door C</option>
@@ -8799,21 +8799,51 @@ body.innerHTML=rows.length?rows.map(row=>{
         }
 
         function switchManpowerStation(stationName) {
-            document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn => {
-                const active = btn.dataset.line === stationName;
-                btn.classList.toggle('active', active);
-                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-            });
+            const validStations = ['Door A', 'Door B', 'Door C', 'Door Glass', 'Back Plate', 'Bottom Plate'];
+            if (!validStations.includes(stationName)) return;
 
+            // IMPORTANT: this is the original lexical state read by
+            // renderManpowerTable() and updateMpPlanActualSummary().
             currentManpowerStation = stationName;
 
             const label = document.getElementById('manpowerStationLabel');
             if (label) label.textContent = stationName;
 
             const select = document.getElementById('manpowerLineSelect');
-            if (select && select.value !== stationName) select.value = stationName;
+            if (select) select.value = stationName;
 
+            document.querySelectorAll('#manpowerLineButtons .mp-line-btn').forEach(btn => {
+                const active = btn.dataset.line === stationName;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
+            // KPI "Manpower & Capacity Requirement Overview Actual"
+            // is calculated inside renderManpowerTable -> updateMpPlanActualSummary.
             renderManpowerTable(currentDailyData);
+
+            // Refresh all other station-dependent summaries from the SAME state.
+            if (typeof renderSummaryCapacityPlanActual === 'function') {
+                renderSummaryCapacityPlanActual(currentDailyData);
+            }
+            if (typeof renderSummaryDailyOrderByDoor === 'function') {
+                renderSummaryDailyOrderByDoor(currentDailyData);
+            }
+            if (typeof renderSummaryDailyOrderByModelDoor === 'function') {
+                renderSummaryDailyOrderByModelDoor(currentDailyData);
+            }
+
+            // Bottom Welding summary: Bottom Plate only.
+            const bw = document.getElementById('summaryCapacityMachineWeldingBottomPlate');
+            if (bw) {
+                const show = stationName === 'Bottom Plate';
+                bw.hidden = !show;
+                bw.dataset.bpVisible = show ? '1' : '0';
+                bw.style.setProperty('display', show ? 'block' : 'none', 'important');
+                if (show && typeof renderSummaryCapacityMachineWeldingBottomPlate === 'function') {
+                    renderSummaryCapacityMachineWeldingBottomPlate();
+                }
+            }
         }
 
         function switchCapacityStation(stationName) {
@@ -13014,7 +13044,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<script id="single-manpower-kpi-station-controller">
+<script id="single-manpower-kpi-station-controller" type="text/plain">
 (function(){
     const STATIONS = ['Door A','Door B','Door C','Door Glass','Back Plate','Bottom Plate'];
 
