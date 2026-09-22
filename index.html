@@ -11864,6 +11864,14 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
        <td class="bw-label">Bottom Welding Order / Day</td>
        ${orders.map(v=>`<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}
      </tr>
+     ${['FUF','TM','BM'].map(family=>{
+       const vals=days.map((_,i)=>models.reduce((sum,m)=>{
+         const name=String(m.name||'').trim().toUpperCase();
+         const match=family==='FUF'?name.startsWith('FUF'):family==='TM'?name.startsWith('TM'):name.startsWith('BM');
+         return sum+(match?Math.max(0,num(m.orders?.[i])):0);
+       },0));
+       return `<tr class="bw-family-row"><td class="bw-label bw-family-label">↳ ${family}</td>${vals.map(v=>`<td class="${v>0?'bw-family-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}</tr>`;
+     }).join('')}
      <tr>
        <td class="bw-label">Average Work Time (s)</td>
        ${avgTimes.map((v,i)=>`<td class="${orders[i]>0&&v>0?'bw-time':'bw-empty'}">${orders[i]>0&&v>0?fmt(v,2):'—'}</td>`).join('')}
@@ -11885,6 +11893,61 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
  document.addEventListener('DOMContentLoaded',()=>{
    setTimeout(render,150);setTimeout(render,700);setTimeout(render,1500);
  });
+})();
+</script>
+
+<style id="bottom-welding-family-order-style">
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-family-row td{background:rgba(15,23,42,.48);font-size:9px;padding-top:5px;padding-bottom:5px}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-family-label{padding-left:24px!important;color:#cbd5e1!important;font-weight:700!important}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-family-order{color:#7dd3fc;font-weight:700}
+</style>
+
+<script id="bottom-welding-summary-bottom-plate-only-final">
+(function(){
+    function enforceBottomPlateOnly(){
+        const card=document.getElementById('summaryCapacityMachineWeldingBottomPlate');
+        if(!card) return;
+
+        // This summary belongs to Bottom Plate only.
+        // Do not display it while another production line is selected.
+        const selected =
+            document.getElementById('manpowerLineSelect')?.value ||
+            document.querySelector('#manpowerLineButtons button.active')?.dataset?.station ||
+            document.querySelector('#manpowerLineButtons button.active')?.textContent?.trim() ||
+            '';
+
+        const isBottomPlate = String(selected).trim() === 'Bottom Plate';
+        card.style.display = isBottomPlate ? '' : 'none';
+    }
+
+    // Update whenever station buttons/select are changed.
+    document.addEventListener('click',function(e){
+        if(e.target.closest('#manpowerLineButtons button')){
+            setTimeout(enforceBottomPlateOnly,0);
+        }
+    });
+    document.addEventListener('change',function(e){
+        if(e.target && e.target.id==='manpowerLineSelect'){
+            setTimeout(enforceBottomPlateOnly,0);
+        }
+    });
+
+    // Wrap station switcher if present.
+    const oldSwitch=window.switchManpowerStation;
+    if(typeof oldSwitch==='function'){
+        window.switchManpowerStation=function(station){
+            const r=oldSwitch.apply(this,arguments);
+            setTimeout(enforceBottomPlateOnly,0);
+            return r;
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        setTimeout(enforceBottomPlateOnly,100);
+        setTimeout(enforceBottomPlateOnly,700);
+    });
+
+    window.enforceBottomWeldingSummaryBottomPlateOnly=enforceBottomPlateOnly;
 })();
 </script>
 
