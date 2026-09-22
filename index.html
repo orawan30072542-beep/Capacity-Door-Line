@@ -7153,7 +7153,10 @@ function updateLobSubLineVisibility() {
                     // Only average actual production days for this physical C-line.
                     if (plan <= 0 && required <= 0) return;
 
-                    const ratio = plan > 0 ? (required / plan) : 0;
+                    // KPI Actual Output / Capacity A is independent of Short %.
+                    const shortFactorForP = 1 + (Math.max(0, Number(getShortPercent()) || 0) / 100);
+                    const requiredBeforeShort = shortFactorForP > 0 ? required / shortFactorForP : required;
+                    const ratio = plan > 0 ? (requiredBeforeShort / plan) : 0;
                     const hourlyCapacity = leadTime > 0 && manpower > 0
                         ? (3600 / leadTime) * manpower * ratio
                         : 0;
@@ -7688,7 +7691,11 @@ function updateLobSubLineVisibility() {
                         actualUPH[i] = 0;
                         return;
                     }
-                    const ratio = plan[i] > 0 ? (required[i] / plan[i]) : 0;
+                    // Actual Capacity (A) must NOT change with Short %.
+                    // Remove Short% from P before deriving the physical routing/qty ratio.
+                    const shortFactorForP = 1 + (Math.max(0, Number(getShortPercent()) || 0) / 100);
+                    const requiredBeforeShort = shortFactorForP > 0 ? required[i] / shortFactorForP : required[i];
+                    const ratio = plan[i] > 0 ? (requiredBeforeShort / plan[i]) : 0;
                     const plateEfficiency = (station === 'Back Plate' || station === 'Bottom Plate') ? 0.85 : 1;
                     const hourlyCapacity = leadTimes[i] > 0 && lineBalanceManpower > 0
                         ? (3600 / leadTimes[i]) * lineBalanceManpower * ratio * plateEfficiency
@@ -12931,6 +12938,17 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
         setTimeout(()=>applyStation(selected),80);
     });
 })();
+</script>
+
+
+<script id="short-percent-p-only-rule-final">
+/*
+ FINAL SHORT % RULE
+ P = Base Required Order × (1 + Short%)
+ A = Actual Capacity from CT / Lead Time / Manpower / physical routing ratio ONLY
+ A must never be multiplied by Short%.
+ Difference = A - P
+*/
 </script>
 
 </body>
