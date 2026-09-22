@@ -11077,5 +11077,104 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 })();
 </script>
 
+
+<style id="week-divider-aligned-final">
+/* Week divider: same color/width in both summary tables */
+:root{
+    --week-divider-color:#26364d;
+    --week-divider-width:8px;
+}
+
+/* Existing separator cells */
+#tableSummaryCapacityPlanActual .scp-week-separator,
+#tableSummaryDailyOrderByDoor .daily-week-separator,
+#summaryDailyOrderByDoor table .daily-week-separator{
+    width:var(--week-divider-width)!important;
+    min-width:var(--week-divider-width)!important;
+    max-width:var(--week-divider-width)!important;
+    padding:0!important;
+    background:var(--week-divider-color)!important;
+    background-color:var(--week-divider-color)!important;
+    background-image:none!important;
+    border:0!important;
+    opacity:1!important;
+}
+
+/* Visual boundary immediately after every SUM Wxx */
+#tableSummaryCapacityPlanActual .week-divider-after,
+#tableSummaryDailyOrderByDoor .week-divider-after,
+#summaryDailyOrderByDoor table .week-divider-after{
+    border-right:8px solid var(--week-divider-color)!important;
+}
+</style>
+
+<script id="week-divider-aligned-runtime-final">
+(function(){
+    const COLOR='#26364d';
+    const WIDTH='8px';
+
+    function applyTable(table){
+        if(!table) return;
+
+        /* Normalize explicit separator columns */
+        table.querySelectorAll('.scp-week-separator,.daily-week-separator').forEach(c=>{
+            c.style.setProperty('width',WIDTH,'important');
+            c.style.setProperty('min-width',WIDTH,'important');
+            c.style.setProperty('max-width',WIDTH,'important');
+            c.style.setProperty('padding','0','important');
+            c.style.setProperty('background',COLOR,'important');
+            c.style.setProperty('background-color',COLOR,'important');
+            c.style.setProperty('background-image','none','important');
+            c.style.setProperty('border','0','important');
+            c.style.setProperty('opacity','1','important');
+        });
+
+        /* Mark SUM Wxx columns and give every row the same dark divider */
+        const rows=[...table.querySelectorAll('tr')];
+        if(!rows.length) return;
+        const headerRows=[...table.querySelectorAll('thead tr')];
+        headerRows.forEach(hr=>{
+            [...hr.children].forEach((cell,idx)=>{
+                const txt=(cell.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
+                if(/^SUM\s*W\d+/.test(txt)){
+                    rows.forEach(r=>{
+                        const target=r.children[idx];
+                        if(target && !target.classList.contains('scp-week-separator') &&
+                           !target.classList.contains('daily-week-separator')){
+                            target.classList.add('week-divider-after');
+                            target.style.setProperty('border-right',WIDTH+' solid '+COLOR,'important');
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    function apply(){
+        applyTable(document.getElementById('tableSummaryCapacityPlanActual'));
+        applyTable(document.getElementById('tableSummaryDailyOrderByDoor'));
+        applyTable(document.querySelector('#summaryDailyOrderByDoor table'));
+    }
+
+    ['renderSummaryCapacityPlanActual','renderSummaryDailyOrderByDoor'].forEach(name=>{
+        const old=window[name];
+        if(typeof old==='function'){
+            window[name]=function(){
+                const r=old.apply(this,arguments);
+                requestAnimationFrame(apply);
+                setTimeout(apply,30);
+                return r;
+            };
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded',()=>{
+        requestAnimationFrame(apply);
+        setTimeout(apply,100);
+        setTimeout(apply,400);
+    });
+})();
+</script>
+
 </body>
 </html
