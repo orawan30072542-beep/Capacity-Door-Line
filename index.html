@@ -1087,6 +1087,125 @@ body.owner-locked #lob-workspace-panel-doorparts .owner-lock-note{display:flex}
 }
 </style>
 
+
+<style id="scp-total-overview-larger-text-final">
+/* =====================================================
+   TOTAL Line#1 + Line#2
+   Stronger visual hierarchy than individual Line#1 / Line#2
+   ===================================================== */
+
+/* TOTAL label */
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#summaryCapacityPlanActual .scp-total-line-label{
+    font-size:13px !important;
+    font-weight:900 !important;
+    line-height:1.25 !important;
+    letter-spacing:.02em !important;
+    color:#ffffff !important;
+}
+
+/* Day / UPH labels inside TOTAL */
+#tableSummaryCapacityPlanActual .scp-total-type-cell,
+#summaryCapacityPlanActual .scp-total-type-cell{
+    font-size:11px !important;
+    font-weight:900 !important;
+    color:#ffffff !important;
+}
+
+/* All summary values in TOTAL rows */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td,
+#tableSummaryCapacityPlanActual .scp-total-uph-row td,
+#summaryCapacityPlanActual .scp-total-2lines-row td,
+#summaryCapacityPlanActual .scp-total-uph-row td{
+    font-size:12px !important;
+    font-weight:800 !important;
+    line-height:1.22 !important;
+}
+
+/* Cab / P / A lines inside TOTAL: larger than Line#1 and Line#2 */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row td > *,
+#tableSummaryCapacityPlanActual .scp-total-uph-row td > *,
+#summaryCapacityPlanActual .scp-total-2lines-row td > *,
+#summaryCapacityPlanActual .scp-total-uph-row td > *{
+    font-size:12px !important;
+    line-height:1.22 !important;
+}
+
+/* Difference remains visually strongest */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row .scp-positive,
+#tableSummaryCapacityPlanActual .scp-total-2lines-row .scp-negative,
+#tableSummaryCapacityPlanActual .scp-total-uph-row .scp-positive,
+#tableSummaryCapacityPlanActual .scp-total-uph-row .scp-negative,
+#summaryCapacityPlanActual .scp-total-2lines-row .scp-positive,
+#summaryCapacityPlanActual .scp-total-2lines-row .scp-negative,
+#summaryCapacityPlanActual .scp-total-uph-row .scp-positive,
+#summaryCapacityPlanActual .scp-total-uph-row .scp-negative{
+    font-size:11px !important;
+    font-weight:900 !important;
+}
+
+/* Individual lines remain compact so TOTAL is clearly different */
+#tableSummaryCapacityPlanActual tbody tr:not(.scp-total-2lines-row):not(.scp-total-uph-row) td,
+#summaryCapacityPlanActual tbody tr:not(.scp-total-2lines-row):not(.scp-total-uph-row) td{
+    font-size:10px !important;
+}
+</style>
+
+
+<style id="scp-total-black-navy-final">
+/* TOTAL Line#1 + Line#2 — deep black navy, solid 100% */
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#tableSummaryCapacityPlanActual .scp-total-type-cell,
+#tableSummaryCapacityPlanActual .scp-total-2lines-row > th,
+#tableSummaryCapacityPlanActual .scp-total-2lines-row > td,
+#tableSummaryCapacityPlanActual .scp-total-uph-row > th,
+#tableSummaryCapacityPlanActual .scp-total-uph-row > td,
+#summaryCapacityPlanActual .scp-total-line-label,
+#summaryCapacityPlanActual .scp-total-type-cell,
+#summaryCapacityPlanActual .scp-total-2lines-row > th,
+#summaryCapacityPlanActual .scp-total-2lines-row > td,
+#summaryCapacityPlanActual .scp-total-uph-row > th,
+#summaryCapacityPlanActual .scp-total-uph-row > td{
+    background:#071426 !important;
+    background-color:#071426 !important;
+    background-image:none !important;
+    opacity:1 !important;
+    box-shadow:none !important;
+}
+
+/* subtle navy border keeps TOTAL visually separated */
+#tableSummaryCapacityPlanActual .scp-total-2lines-row > *,
+#tableSummaryCapacityPlanActual .scp-total-uph-row > *,
+#summaryCapacityPlanActual .scp-total-2lines-row > *,
+#summaryCapacityPlanActual .scp-total-uph-row > *{
+    border-color:#173557 !important;
+}
+
+/* TOTAL text stays clear */
+#tableSummaryCapacityPlanActual .scp-total-line-label,
+#tableSummaryCapacityPlanActual .scp-total-type-cell,
+#summaryCapacityPlanActual .scp-total-line-label,
+#summaryCapacityPlanActual .scp-total-type-cell{
+    color:#f8fafc !important;
+}
+</style>
+
+
+<!-- Global Dashboard Font: Noto Sans Thai -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style id="global-noto-sans-thai-final">
+html, body,
+button, input, select, textarea,
+table, th, td,
+h1, h2, h3, h4, h5, h6,
+div, span, p, label, a,
+canvas, option {
+    font-family: "Noto Sans Thai", sans-serif !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
