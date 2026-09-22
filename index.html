@@ -8822,6 +8822,13 @@ body.innerHTML=rows.length?rows.map(row=>{
             // is calculated inside renderManpowerTable -> updateMpPlanActualSummary.
             renderManpowerTable(currentDailyData);
 
+            // Show which station actually generated this KPI.
+            const overviewTitle = document.querySelector('.mp-overview-title');
+            if (overviewTitle) {
+                overviewTitle.dataset.station = stationName;
+                overviewTitle.textContent = `Manpower & Capacity Requirement Overview Actual · ${stationName}`;
+            }
+
             // Refresh all other station-dependent summaries from the SAME state.
             if (typeof renderSummaryCapacityPlanActual === 'function') {
                 renderSummaryCapacityPlanActual(currentDailyData);
@@ -8845,6 +8852,17 @@ body.innerHTML=rows.length?rows.map(row=>{
                 }
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const st = currentManpowerStation || 'Door A';
+                const title = document.querySelector('.mp-overview-title');
+                if (title) {
+                    title.dataset.station = st;
+                    title.textContent = `Manpower & Capacity Requirement Overview Actual · ${st}`;
+                }
+            }, 120);
+        });
 
         function switchCapacityStation(stationName) {
             currentCapacityStation = stationName;
@@ -12073,7 +12091,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-family-order{color:#7dd3fc;font-weight:700}
 </style>
 
-<script id="bottom-welding-summary-bottom-plate-only-final">
+<script id="bottom-welding-summary-bottom-plate-only-final" type="text/plain">
 (function(){
     function enforceBottomPlateOnly(){
         const card=document.getElementById('summaryCapacityMachineWeldingBottomPlate');
@@ -12182,7 +12200,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<script id="bottom-plate-summary-visibility-definitive-final">
+<script id="bottom-plate-summary-visibility-definitive-final" type="text/plain">
 (function(){
     const TARGET_ID='summaryCapacityMachineWeldingBottomPlate';
 
@@ -12481,7 +12499,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 </script>
 
 
-<script id="daily-welding-summary-bottom-plate-only-definitive">
+<script id="daily-welding-summary-bottom-plate-only-definitive" type="text/plain">
 (function(){
  const TITLE='Summary Capacity Machine Welding Bottom Plate';
  const DAILY_SUB='Bottom Welding · Daily Order อ้างอิงจาก Master Model · Average Work Time = Σ(Work Time × Order) ÷ Σ(Order)';
