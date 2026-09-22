@@ -11870,7 +11870,7 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
          const match=family==='FUF'?name.startsWith('FUF'):family==='TM'?name.startsWith('TM'):name.startsWith('BM');
          return sum+(match?Math.max(0,num(m.orders?.[i])):0);
        },0));
-       return `<tr class="bw-family-row"><td class="bw-label bw-family-label">↳ ${family}</td>${vals.map(v=>`<td class="${v>0?'bw-family-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}</tr>`;
+       return `<tr class="bw-family-row"><td class="bw-label bw-family-label">${family}</td>${vals.map(v=>`<td class="${v>0?'bw-family-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`).join('')}</tr>`;
      }).join('')}
      <tr>
        <td class="bw-label">Average Work Time (s)</td>
