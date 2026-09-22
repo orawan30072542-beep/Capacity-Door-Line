@@ -2038,6 +2038,7 @@ canvas, option {
                                     <option value="Door Glass">Door Glass</option>
                                     <option value="Back Plate">Back Plate</option>
                                     <option value="Bottom Plate">Bottom Plate</option>
+                                    <option value="Bottom Plate Welding">Bottom Plate Welding</option>
                                 </select>
                             </div>
 
@@ -2057,7 +2058,7 @@ canvas, option {
                                     <option value="Line#1">Line#1</option>
                                     <option value="Line#2">Line#2</option>
                                 </select>
-                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิงจาก Master Model · Layout ใช้ร่วมกันทุกรุ่น / ทุก Product Group</div>
+                                <div class="text-[8px] text-slate-500 mt-1">อ้างอิง Line / Order จาก Master Model · Layout ใช้ร่วมกันทุกรุ่น / ทุก Product Group</div>
                             </div>
 
                             <div id="lobDoorCLineWrap" class="lob-compact-control-card hidden bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
@@ -3403,7 +3404,7 @@ canvas, option {
         function modelHasLobProcessData(modelName, lineName) {
             const target = normalizeModelName(modelName);
 
-            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate' || lineName === 'Bottom Plate Welding') {
                 return Object.keys(processDatabase || {}).some(key => {
                     const suffix = `_${lineName}`;
                     if (!key.endsWith(suffix)) return false;
@@ -3761,6 +3762,13 @@ function updateLobSubLineVisibility() {
                        (cfg.bottomLine || 'Line#1') === getSelectedLobPlateLine();
             }
 
+            // Bottom Plate Welding follows the Bottom & Welding setting in Master Model.
+            // Order/model membership comes from Master Model, not from existing Work Process rows.
+            if (lineName === 'Bottom Plate Welding') {
+                return cfg.bottomSource === 'ผลิตเอง' &&
+                       cfg.welding === true;
+            }
+
             // Door C is separated into C-1 / C-2 / C-3.
             // Membership follows the same Assigned Routing shown in Master Model.
             if (lineName === 'Door C') {
@@ -4026,7 +4034,7 @@ function updateLobSubLineVisibility() {
             if (!target) return false;
 
             // Back Plate / Bottom Plate: Work Process DB
-            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate' || lineName === 'Bottom Plate Welding') {
                 const key = Object.keys(processDatabase || {}).find(k => {
                     const suffix = `_${lineName}`;
                     if (!k.endsWith(suffix)) return false;
@@ -4098,10 +4106,16 @@ function updateLobSubLineVisibility() {
             const result = [];
 
             Object.entries(LOB_PRODUCT_GROUP_MAP).forEach(([group, models]) => {
-                const hasValidModel = (models || []).some(model =>
-                    modelMatchesMasterAndWorkProcess(model, lineName) &&
-                    modelMatchesCurrentLobDoorSelection(model, lineName)
-                );
+                const hasValidModel = (models || []).some(model => {
+                    // Bottom Plate Welding is driven by Master Model.
+                    // This intentionally allows the model/group to appear before
+                    // Work Process rows are created, so the owner can add Welding CT.
+                    if (lineName === 'Bottom Plate Welding') {
+                        return modelMatchesLobLine(model, lineName);
+                    }
+                    return modelMatchesMasterAndWorkProcess(model, lineName) &&
+                           modelMatchesCurrentLobDoorSelection(model, lineName);
+                });
 
                 if (hasValidModel) result.push(group);
             });
@@ -4125,8 +4139,10 @@ function updateLobSubLineVisibility() {
                 const selectedModel = mapped.find(name => {
                     const clean = String(name || '').trim();
                     return clean &&
-                           modelMatchesMasterAndWorkProcess(clean, lineName) &&
-                           modelMatchesCurrentLobDoorSelection(clean, lineName);
+                           (lineName === 'Bottom Plate Welding'
+                               ? modelMatchesLobLine(clean, lineName)
+                               : (modelMatchesMasterAndWorkProcess(clean, lineName) &&
+                                  modelMatchesCurrentLobDoorSelection(clean, lineName)));
                 });
 
                 if (!selectedModel) return;
@@ -4298,7 +4314,7 @@ function updateLobSubLineVisibility() {
             };
 
             // Back / Bottom use normal Work Process database.
-            if (lineName === 'Back Plate' || lineName === 'Bottom Plate') {
+            if (lineName === 'Back Plate' || lineName === 'Bottom Plate' || lineName === 'Bottom Plate Welding') {
                 const suffix = `_${lineName}`;
 
                 Object.keys(processDatabase || {}).forEach(key => {
@@ -5379,7 +5395,7 @@ function updateLobSubLineVisibility() {
             const line = document.getElementById('lobLineSelect')?.value || '';
             const model = String(row?.model || document.getElementById('lobDirectModelSelect')?.value || '').trim();
 
-            if (line === 'Back Plate' || line === 'Bottom Plate') {
+            if (line === 'Back Plate' || line === 'Bottom Plate' || line === 'Bottom Plate Welding') {
                 return {
                     db: 'process',
                     key: `${model}_${line}`
@@ -5404,7 +5420,7 @@ function updateLobSubLineVisibility() {
 
             const line = document.getElementById('lobLineSelect')?.value || '';
 
-            if (line === 'Back Plate' || line === 'Bottom Plate') {
+            if (line === 'Back Plate' || line === 'Bottom Plate' || line === 'Bottom Plate Welding') {
                 const key = `${selectedModel}_${line}`;
                 processDatabase[key] = lobDirectEditRows.map(row => ({
                     station: String(row.station || '').trim(),
@@ -5492,7 +5508,11 @@ function updateLobSubLineVisibility() {
                 mapped.forEach(name => {
                     const clean = String(name || '').trim();
                     if (!clean) return;
-                    if (!modelMatchesMasterAndWorkProcess(clean, line)) return;
+                    if (line === 'Bottom Plate Welding') {
+                        if (!modelMatchesLobLine(clean, line)) return;
+                    } else {
+                        if (!modelMatchesMasterAndWorkProcess(clean, line)) return;
+                    }
                     if (line === 'Door C' && !modelMatchesSelectedDoorCType(clean)) return;
                     const key = normalizeModelName(clean);
                     if (seen.has(key)) return;
@@ -5537,7 +5557,7 @@ function updateLobSubLineVisibility() {
 
             lobWpEditorModel = model;
 
-            if (line === 'Back Plate' || line === 'Bottom Plate') {
+            if (line === 'Back Plate' || line === 'Bottom Plate' || line === 'Bottom Plate Welding') {
                 lobWpEditorMode = 'plate';
                 lobWpEditorPart = line;
                 lobWpEditorDoorType = '';
@@ -5647,7 +5667,7 @@ function updateLobSubLineVisibility() {
             }
 
             // For Door line, use the row's exact Door Type/Sub Part.
-            if (line !== 'Back Plate' && line !== 'Bottom Plate') {
+            if (line !== 'Back Plate' && line !== 'Bottom Plate' && line !== 'Bottom Plate Welding') {
                 const parsed = parseLobDoorArea(row.area, row.doorType);
                 lobWpEditorPart = parsed.subPart;
 
@@ -11395,6 +11415,39 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
     document.addEventListener('DOMContentLoaded',()=>{
         requestAnimationFrame(markPlateIndividualRows);
         setTimeout(markPlateIndividualRows,100);
+    });
+})();
+</script>
+
+
+<script id="lob-bottom-plate-welding-master-order">
+(function(){
+    function updateWeldingHint(){
+        const line = document.getElementById('lobLineSelect')?.value || '';
+        const wrap = document.getElementById('lobPlateLineWrap');
+        if(!wrap) return;
+        let hint = wrap.querySelector('.lob-welding-master-hint');
+        if(line === 'Bottom Plate Welding'){
+            if(!hint){
+                hint = document.createElement('div');
+                hint.className = 'lob-welding-master-hint text-[8px] text-cyan-400 mt-1 font-semibold';
+                wrap.appendChild(hint);
+            }
+            hint.textContent = 'Bottom Plate Welding: Model / Order อ้างอิงจาก Master Model (Welding = Yes) · ไม่แยก Line#1 / Line#2';
+        }else if(hint){
+            hint.remove();
+        }
+    }
+    const oldLineChange = window.onLobLineChange;
+    if(typeof oldLineChange === 'function'){
+        window.onLobLineChange = function(){
+            const r = oldLineChange.apply(this, arguments);
+            updateWeldingHint();
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+        setTimeout(updateWeldingHint, 50);
     });
 })();
 </script>
