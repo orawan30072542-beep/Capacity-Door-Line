@@ -11906,50 +11906,80 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
    const flooredCapacities=capacities.map(v=>Math.floor(Math.max(0,Number(v)||0)));
    const differences=flooredCapacities.map((cap,i)=>cap-Math.floor(Math.max(0,Number(orders[i])||0)));
 
-   // Build columns at SOURCE level:
-   // each Sunday is immediately followed by Wn SUM.
-   // The final incomplete week also gets a SUM column after its last available day.
+   // Build weekly columns using the SAME week definition as
+   // Summary Daily Order By Model / Door.
+   const summaryCols=(typeof getDailyWeeklySummaryColumns==='function')
+      ? getDailyWeeklySummaryColumns(days)
+      : null;
+
    const columns=[];
-   let weekIndexes=[],weekNo=1;
-   days.forEach((d,i)=>{
-      columns.push({type:'day',index:i,label:String(d||'')});
-      weekIndexes.push(i);
-      const dt=parseBWDate(d);
-      const isSunday=dt && dt.getDay()===0;
-      const isLast=i===days.length-1;
-      if(isSunday || isLast){
-         columns.push({type:'sum',indexes:[...weekIndexes],label:`W${String(weekNo).padStart(2,'0')}`});
-         columns.push({type:'divider',label:''});
-         weekIndexes=[];weekNo++;
-      }
-   });
+   if(Array.isArray(summaryCols) && summaryCols.length){
+      summaryCols.forEach(col=>{
+         // Existing helper may return daily, weekly SUM, and separator descriptors.
+         const type=String(col?.type||col?.kind||'').toLowerCase();
+         const label=String(col?.label||col?.title||col?.text||'');
+         const indexes=Array.isArray(col?.indexes) ? col.indexes
+                      : Array.isArray(col?.dayIndexes) ? col.dayIndexes
+                      : [];
+
+         if(type.includes('separator')){
+            columns.push({type:'divider',label:''});
+         }else if(type.includes('week') || /SUM\s*W/i.test(label) || /^W\d+/i.test(label)){
+            const weekMatch=label.match(/W\s*(\d+)/i);
+            const weekNo=weekMatch?Number(weekMatch[1]):(columns.filter(x=>x.type==='sum').length+1);
+            columns.push({type:'sum',indexes:[...indexes],label:`SUM W${String(weekNo).padStart(2,'0')}`});
+            columns.push({type:'divider',label:''});
+         }else{
+            const idx=Number.isInteger(col?.dayIndex)?col.dayIndex:
+                      Number.isInteger(col?.index)?col.index:
+                      indexes.length===1?indexes[0]:-1;
+            if(idx>=0) columns.push({type:'day',index:idx,label:String(days[idx]||label||'')});
+         }
+      });
+   }
+
+   // Safe fallback only if the shared helper is unavailable.
+   if(!columns.some(c=>c.type==='day')){
+      columns.length=0;
+      let weekIndexes=[],weekNo=1;
+      days.forEach((d,i)=>{
+         columns.push({type:'day',index:i,label:String(d||'')});
+         weekIndexes.push(i);
+         const dt=parseBWDate(d);
+         if((dt&&dt.getDay()===0)||i===days.length-1){
+            columns.push({type:'sum',indexes:[...weekIndexes],label:`SUM W${String(weekNo).padStart(2,'0')}`});
+            columns.push({type:'divider',label:''});
+            weekIndexes=[];weekNo++;
+         }
+      });
+   }
 
    head.innerHTML='<tr><th>Bottom Welding</th>'+
       columns.map(c=>c.type==='divider'
-         ? '<th class="bw-week-divider-direct"></th>'
-         : `<th class="${c.type==='sum'?'bw-sum-head-direct':''}">${c.label}</th>`).join('')+
+         ? '<th class="daily-week-separator"></th>'
+         : `<th class="${c.type==='sum'?'weekly-sum-col':''}">${c.label}</th>`).join('')+
       '</tr>';
 
    function orderCell(c){
-      if(c.type==='divider') return '<td class="bw-week-divider-direct"></td>';
+      if(c.type==='divider') return '<td class="daily-week-separator"></td>';
       if(c.type==='day'){
          const v=orders[c.index]||0;
          return `<td class="${v>0?'bw-order':'bw-empty'}">${v>0?fmt(v):'—'}</td>`;
       }
       const v=c.indexes.reduce((a,i)=>a+(orders[i]||0),0);
-      return `<td class="bw-sum-cell-direct bw-order bw-week-order-sum-dark">${v>0?fmt(v):'—'}</td>`;
+      return `<td class="weekly-sum-col bw-order bw-week-order-sum-dark">${v>0?fmt(v):'—'}</td>`;
    }
    function capacityCell(c){
-      if(c.type==='divider') return '<td class="bw-week-divider-direct"></td>';
+      if(c.type==='divider') return '<td class="daily-week-separator"></td>';
       if(c.type==='day'){
          const v=flooredCapacities[c.index]||0;
          return `<td class="${orders[c.index]>0&&v>0?'bw-capacity':'bw-empty'}">${orders[c.index]>0&&v>0?v.toLocaleString('en-US'):'—'}</td>`;
       }
       const v=c.indexes.reduce((a,i)=>a+(flooredCapacities[i]||0),0);
-      return `<td class="bw-sum-cell-direct bw-capacity">${v>0?v.toLocaleString('en-US'):'—'}</td>`;
+      return `<td class="weekly-sum-col bw-capacity">${v>0?v.toLocaleString('en-US'):'—'}</td>`;
    }
    function diffCell(c){
-      if(c.type==='divider') return '<td class="bw-week-divider-direct"></td>';
+      if(c.type==='divider') return '<td class="daily-week-separator"></td>';
       let v=0,has=false;
       if(c.type==='day'){
          v=differences[c.index]||0;
@@ -11958,9 +11988,9 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
          v=c.indexes.reduce((a,i)=>a+(differences[i]||0),0);
          has=c.indexes.some(i=>(orders[i]>0)||(flooredCapacities[i]>0));
       }
-      if(!has) return `<td class="${c.type==='sum'?'bw-sum-cell-direct ':''}bw-empty">—</td>`;
+      if(!has) return `<td class="${c.type==='sum'?'weekly-sum-col ':''}bw-empty">—</td>`;
       const cls=v>0?'bw-diff-positive':v<0?'bw-diff-negative':'bw-diff-zero';
-      return `<td class="${c.type==='sum'?'bw-sum-cell-direct ':''}${cls}">${v>0?'+':''}${v.toLocaleString('en-US')}</td>`;
+      return `<td class="${c.type==='sum'?'weekly-sum-col ':''}${cls}">${v>0?'+':''}${v.toLocaleString('en-US')}</td>`;
    }
 
    body.innerHTML=`
@@ -12638,48 +12668,44 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 
 
 <style id="bw-direct-week-sum-style-final">
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-head-direct{
+#tableSummaryCapacityMachineWeldingBottomPlate .weekly-sum-col{
   background:#123251!important;color:#7dd3fc!important;font-weight:900!important;
   border-left:3px solid #38bdf8!important;border-right:3px solid #38bdf8!important;
   min-width:82px!important
 }
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-cell-direct{
+#tableSummaryCapacityMachineWeldingBottomPlate .weekly-sum-col{
   background:#0b2239!important;font-weight:900!important;
   border-left:3px solid #38bdf8!important;border-right:3px solid #38bdf8!important
 }
 </style>
 
 
-<style id="bw-week-10px-divider-final">
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-week-divider-direct{
-    width:10px!important;
-    min-width:10px!important;
-    max-width:10px!important;
-    padding:0!important;
-    border:0!important;
-    background:#020617!important;
-}
-</style>
 
 
-<style id="bw-week-sum-darker-final">
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-head-direct{
-    background:#071426!important;
-    color:#7dd3fc!important;
+
+
+
+
+
+
+
+<style id="bw-match-daily-order-week-style-final">
+#tableSummaryCapacityMachineWeldingBottomPlate th.weekly-sum-col{
+    background:#173553!important;
+    color:#e2e8f0!important;
+    font-weight:800!important;
+    border-right:1px solid #456582!important;
 }
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-sum-cell-direct{
-    background:#06111f!important;
+#tableSummaryCapacityMachineWeldingBottomPlate td.weekly-sum-col{
+    background:#102a44!important;
     color:#ffffff!important;
+    font-weight:800!important;
+    border-right:1px solid #456582!important;
 }
-</style>
-
-
-<style id="bw-week-order-sum-dark-final">
-/* Weekly SUM value for Bottom Welding Order / Day only */
-#tableSummaryCapacityMachineWeldingBottomPlate .bw-week-order-sum-dark{
-    background:#020b16!important;
-    color:#ffffff!important;
-    font-weight:900!important;
+#tableSummaryCapacityMachineWeldingBottomPlate .daily-week-separator{
+    width:4px!important;min-width:4px!important;max-width:4px!important;
+    padding:0!important;background:#0b1728!important;
+    border-left:1px solid #35516d!important;border-right:1px solid #35516d!important;
 }
 </style>
 
