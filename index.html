@@ -1254,6 +1254,35 @@ canvas, option {
 }
 </style>
 
+
+<style id="bottom-welding-solid-background-final">
+/* Bottom Welding summary: opaque/solid backgrounds */
+#summaryCapacityMachineWeldingBottomPlate,
+#summaryCapacityMachineWeldingBottomPlate table,
+#tableSummaryCapacityMachineWeldingBottomPlate {
+    background: #0f172a !important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate thead th {
+    background: #102a46 !important;
+    opacity: 1 !important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate tbody tr,
+#tableSummaryCapacityMachineWeldingBottomPlate tbody td,
+#tableSummaryCapacityMachineWeldingBottomPlate tbody th,
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot tr,
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot td,
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot th {
+    background: #0f172a !important;
+    background-color: #0f172a !important;
+    opacity: 1 !important;
+}
+/* Keep status text colors, but prevent transparent cell backgrounds */
+#tableSummaryCapacityMachineWeldingBottomPlate td:first-child,
+#tableSummaryCapacityMachineWeldingBottomPlate th:first-child {
+    background-color: #0f172a !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1578,10 +1607,7 @@ canvas, option {
                 <!-- 3. CAPACITY จากเวลาการทำงาน -->
                 <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm"> 
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
-                            <h2 class="mp-capacity-header text-base sm:text-lg font-bold text-white tracking-wide">3. Capacity จากเวลาการทำงาน (Work Process)</h2>
-                        </div>
+                        
                         <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
                             <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
                             <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
