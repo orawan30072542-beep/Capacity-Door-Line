@@ -1356,6 +1356,12 @@ canvas, option {
 }
 </style>
 
+<style id="hide-summary-door-column-final">
+#tableSummaryDailyOrderByDoor thead th:first-child,
+#tableSummaryDailyOrderByDoor tbody td:first-child,
+#tableSummaryDailyOrderByDoor tfoot td:first-child,
+#tableSummaryDailyOrderByDoor tfoot th:first-child{display:none!important}
+</style>
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1681,40 +1687,36 @@ canvas, option {
       <p class="text-[10px] text-slate-400 mt-1">แผนคาดการณ์การฉีดโฟมประตูแยกตามวันที่ · แสดงเฉพาะ Door A / Door B / Door C ตาม Group Station ที่เลือก</p>
     </div>
     <div class="flex flex-wrap gap-2 items-end">
-      <label class="text-[9px] text-slate-400">Working Hours
-        <input id="foamWorkingHours" type="number" min="0.1" step="0.5" value="10.5"
-          class="block mt-1 w-24 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
-          oninput="renderDoorFoamInjectionCycle()">
-      </label>
-      <label class="text-[9px] text-slate-400">Foam Cycle Time (sec)
-        <input id="foamCycleSeconds" type="number" min="1" step="1" value="300"
+      <label class="text-[9px] text-slate-400">Pallet / Round
+        <input id="foamPalletPerRound" type="number" min="1" step="1" value="1"
           class="block mt-1 w-28 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
-          oninput="renderDoorFoamInjectionCycle()">
+          oninput="saveDoorFoamPlannerSettings();renderDoorFoamInjectionCycle()">
       </label>
+      <label class="text-[9px] text-slate-400">Output (UPH)
+        <input id="foamOutputUPH" type="number" min="0" step="1" value="100"
+          class="block mt-1 w-28 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+          oninput="saveDoorFoamPlannerSettings();renderDoorFoamInjectionCycle()">
+      </label>
+      <label class="text-[9px] text-slate-400">Efficiency (%)
+        <input id="foamEfficiency" type="number" min="1" max="100" step="1" value="85"
+          class="block mt-1 w-24 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"
+          oninput="saveDoorFoamPlannerSettings();renderDoorFoamInjectionCycle()">
+      </label>
+      <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 min-w-[130px]">
+        <div class="text-[9px] text-slate-400">Round / hr.</div>
+        <div id="foamRoundPerHour" class="text-lg font-bold text-cyan-300">—</div>
+        <div class="text-[8px] text-slate-500">UPH ÷ Pallet × Efficiency</div>
+      </div>
+      <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+        <div class="text-[9px] text-slate-400">Working Hours</div>
+        <div id="foamWorkingHoursDisplay" class="text-lg font-bold text-white">—</div>
+        <div class="text-[8px] text-slate-500">ใช้ค่าจาก “ชั่วโมงทำงาน” ด้านบน</div>
+      </div>
     </div>
   </div>
 
   
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-    <label class="text-[9px] text-slate-400">Pallet / Round
-      <input id="foamPalletPerRound" type="number" min="1" step="1" value="1"
-        class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
-        oninput="renderDoorFoamInjectionCycle()">
-    </label>
-    <label class="text-[9px] text-slate-400">Efficiency (%)
-      <input id="foamEfficiency" type="number" min="1" max="100" step="1" value="85"
-        class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
-        oninput="renderDoorFoamInjectionCycle()">
-    </label>
-    <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-      <div class="text-[9px] text-slate-400">Round / hr.</div>
-      <div id="foamRoundPerHour" class="text-lg font-bold text-cyan-300">—</div>
-    </div>
-    <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-      <div class="text-[9px] text-slate-400">สูตร</div>
-      <div class="text-[9px] text-slate-300 mt-1">ยอดรายชั่วโมง ÷ Pallet/Round × Efficiency</div>
-    </div>
-  </div>
+  
 <div class="overflow-x-auto rounded-xl border border-slate-700/70">
     <table class="w-full text-[9px] min-w-[1500px]">
       <thead id="doorFoamCycleHead" class="bg-slate-950/95 text-slate-200"></thead>
@@ -12479,123 +12481,83 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 
-<script id="door-foam-order-pallet-output-round-final">
+<script id="door-foam-daily-pallet-output-final">
 (function(){
+ const KEY='haier_door_foam_planner_settings_v2';
  const N=v=>Number.isFinite(Number(v))?Number(v):0;
  const E=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  const ST=()=>String(window.currentManpowerStation||(typeof currentManpowerStation!=='undefined'?currentManpowerStation:'')||'Door A');
  const DATA=()=>window.currentDailyData||(typeof currentDailyData!=='undefined'?currentDailyData:null);
- const MASTER=()=>window.masterModelConfig||(typeof masterModelConfig!=='undefined'?masterModelConfig:{});
- const label=(d,i)=>String(d?.label||d?.date||d?.name||d||('Day '+(i+1)));
-
- function models(){
-   const st=ST(), a=[];
-   Object.entries(MASTER()||{}).forEach(([model,cfg])=>{
-     if(String(cfg?.station||'')!==st)return;
-     a.push({model,cfg});
-   });
-   return a;
+ window.saveDoorFoamPlannerSettings=function(){
+   const v={pallet:N(document.getElementById('foamPalletPerRound')?.value)||1,output:N(document.getElementById('foamOutputUPH')?.value)||0,eff:N(document.getElementById('foamEfficiency')?.value)||85};
+   localStorage.setItem(KEY,JSON.stringify(v));
+ };
+ function load(){
+   try{const v=JSON.parse(localStorage.getItem(KEY)||'{}');
+    if(v.pallet>0)document.getElementById('foamPalletPerRound').value=v.pallet;
+    if(v.output>=0&&v.output!==undefined)document.getElementById('foamOutputUPH').value=v.output;
+    if(v.eff>0)document.getElementById('foamEfficiency').value=v.eff;
+   }catch(e){}
  }
- function order(model,i){
-   let t=0; const d=DATA();
+ function doorRows(){
+   const d=DATA(),st=ST(),days=d?.days||[],map=new Map();
    (d?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{
-     if(String(m.name||m.model||'').trim()===String(model).trim()) t+=N((m.orders||[])[i]);
+     const model=String(m?.name||'').trim(); if(!model)return;
+     if(typeof modelBelongsToSelectedSummaryStation==='function'&&!modelBelongsToSelectedSummaryStation(model,st))return;
+     const door=typeof getDailyOrderDoorName==='function'?getDailyOrderDoorName(model):model;
+     if(!door)return;
+     if(!map.has(door))map.set(door,{door,orders:new Array(days.length).fill(0),models:new Set()});
+     const r=map.get(door);r.models.add(model);
+     days.forEach((_,i)=>r.orders[i]+=Math.max(0,N(m?.orders?.[i])));
    }));
-   return t;
+   let rows=[...map.values()].filter(r=>r.orders.some(v=>v>0));
+   if(typeof DAILY_ORDER_DOOR_SORT!=='undefined')rows.sort((a,b)=>{
+     const ai=DAILY_ORDER_DOOR_SORT.indexOf(a.door),bi=DAILY_ORDER_DOOR_SORT.indexOf(b.door);
+     if(ai<0&&bi<0)return a.door.localeCompare(b.door);if(ai<0)return 1;if(bi<0)return-1;return ai-bi;
+   });
+   return rows;
  }
+ function lab(d,i){return String(d?.label||d?.date||d?.name||d||('Day '+(i+1)))}
  window.renderDoorFoamInjectionCycle=function(){
-   const sec=document.getElementById('doorFoamInjectionCyclePlanner'),
-         head=document.getElementById('doorFoamCycleHead'),
-         body=document.getElementById('doorFoamCycleBody'),
-         sum=document.getElementById('doorFoamCycleRoundSummary');
+   const sec=document.getElementById('doorFoamInjectionCyclePlanner'),head=document.getElementById('doorFoamCycleHead'),body=document.getElementById('doorFoamCycleBody'),sum=document.getElementById('doorFoamCycleRoundSummary');
    if(!sec||!head||!body||!sum)return;
-
-   const st=ST();
-   sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';
-   if(sec.style.display==='none')return;
-
-   const d=DATA(), days=Array.isArray(d?.days)?d.days:[], rs=models();
-   const hrs=Math.max(.1,N(document.getElementById('foamWorkingHours')?.value)||10.5);
+   const st=ST();sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';if(sec.style.display==='none')return;
+   const d=DATA(),days=Array.isArray(d?.days)?d.days:[],rows=doorRows();
+   const hours=Math.max(.1,N(document.getElementById('shiftHoursInput')?.value)||8);
    const palletRound=Math.max(1,N(document.getElementById('foamPalletPerRound')?.value)||1);
+   const uph=Math.max(0,N(document.getElementById('foamOutputUPH')?.value)||0);
    const eff=Math.max(.01,Math.min(1,(N(document.getElementById('foamEfficiency')?.value)||85)/100));
+   const roundHr=(uph/palletRound)*eff;
+   const capHr=uph, capDay=capHr*hours;
+   const wh=document.getElementById('foamWorkingHoursDisplay');if(wh)wh.textContent=hours.toFixed(hours%1?1:0)+' hr';
+   const rh=document.getElementById('foamRoundPerHour');if(rh)rh.textContent=roundHr.toFixed(2);
+   const totals=days.map((_,i)=>rows.reduce((a,r)=>a+N(r.orders[i]),0));
 
-   // Door Foam Order uses the same daily model orders that feed Summary Daily Order By Model / Door,
-   // filtered to the selected Door station's Master models.
-   const totals=days.map((_,i)=>rs.reduce((a,r)=>a+order(r.model,i),0));
-   const uph=totals.map(v=>v/hrs);
-
-   // Requested formula: Round/hr = (UPH / Pallet) * Efficiency
-   const roundHr=uph.map(v=>(v/palletRound)*eff);
-   const valid=roundHr.filter(v=>v>0);
-   const top=document.getElementById('foamRoundPerHour');
-   if(top) top.textContent=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2):'—';
-
-   // Each date is one grouped header containing Order / Pallet / Output.
    head.innerHTML=`<tr>
-     <th rowspan="2" class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[190px]">รายการ</th>
-     ${days.map((x,i)=>`<th colspan="3" class="px-3 py-2 text-center min-w-[260px] border-l border-slate-700">${E(label(x,i))}</th>`).join('')}
-   </tr><tr>
-     ${days.map(()=>`<th class="px-2 py-1.5 text-center border-l border-slate-800">Order</th>
-                     <th class="px-2 py-1.5 text-center">Pallet</th>
-                     <th class="px-2 py-1.5 text-center text-cyan-300">Output</th>`).join('')}
-   </tr>`;
+    <th rowspan="2" class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[180px]">รายการ</th>
+    ${days.map((x,i)=>`<th colspan="2" class="px-3 py-2 text-center border-l border-slate-700 text-sky-300">${E(lab(x,i))}</th>`).join('')}
+   </tr><tr>${days.map(()=>`<th class="px-2 py-1.5 text-center border-l border-slate-800 text-amber-300 min-w-[82px]">Pallet</th><th class="px-2 py-1.5 text-center text-cyan-300 min-w-[82px]">Output</th>`).join('')}</tr>`;
 
-   let html=`<tr class="bg-cyan-950/45">
-     <td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>
-     ${totals.map((v,i)=>`<td colspan="3" class="px-3 py-2 text-center font-bold text-white border-l border-slate-800">${Math.round(v).toLocaleString()}</td>`).join('')}
-   </tr>`;
-
-   html+=`<tr class="bg-blue-950/45">
-     <td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง (UPH)</td>
-     ${uph.map(v=>`<td colspan="3" class="px-3 py-2 text-center font-bold text-cyan-300 border-l border-slate-800">${v.toFixed(1)}</td>`).join('')}
-   </tr>`;
-
-   html+=`<tr class="bg-slate-950/80">
-     <td class="sticky left-0 z-20 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td>
-     ${roundHr.map(v=>`<td colspan="3" class="px-3 py-2 text-center font-bold text-amber-300 border-l border-slate-800">${v>0?v.toFixed(2):'—'}</td>`).join('')}
-   </tr>`;
-
-   rs.forEach(r=>{
-     html+=`<tr class="bg-slate-900/55">
-       <td class="sticky left-0 z-20 bg-slate-900 px-3 py-2 font-semibold text-white">${E(r.model)}</td>`+
-       days.map((x,i)=>{
-         const o=order(r.model,i), total=totals[i];
-         if(!o) return `<td class="border-l border-slate-800 text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td><td class="text-center text-slate-600">—</td>`;
-         const ratio=total>0?o/total:0;
-         // Requested pallet allocation: model order / total daily order × Pallet/Round, rounded UP.
-         const pallets=Math.ceil(ratio*palletRound);
-         // Requested Output: Pallet × Round/hr.
-         const output=pallets*roundHr[i];
-         return `<td class="px-2 py-2 text-center border-l border-slate-800 text-white">${Math.round(o).toLocaleString()}</td>
-                 <td class="px-2 py-2 text-center font-bold text-emerald-300">${pallets.toLocaleString()}</td>
-                 <td class="px-2 py-2 text-center font-bold text-cyan-300">${output.toFixed(1)}</td>`;
-       }).join('')+'</tr>';
+   let html=`<tr class="bg-cyan-950/45"><td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>${days.map(()=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-white border-l border-slate-800">${Math.floor(capDay).toLocaleString()}</td>`).join('')}</tr>`;
+   html+=`<tr class="bg-blue-950/45"><td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง</td>${days.map(()=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-cyan-300 border-l border-slate-800">${capHr.toLocaleString()}</td>`).join('')}</tr>`;
+   rows.forEach(r=>{
+    html+=`<tr class="bg-slate-900/55"><td class="sticky left-0 z-20 bg-slate-900 px-3 py-2"><div class="font-semibold text-white">${E(r.door)}</div><div class="text-[8px] text-slate-500">${E([...r.models].join(' + '))}</div></td>`+
+    days.map((_,i)=>{
+      const o=N(r.orders[i]),total=totals[i],share=total>0?o/total:0;
+      const pallets=o>0?Math.ceil(share*palletRound):0;
+      const output=pallets*roundHr;
+      return `<td class="px-2 py-2 text-center border-l border-slate-800">${o?`<div class="font-bold text-amber-300">${pallets}</div><div class="text-[8px] text-slate-500">${(share*100).toFixed(1)}%</div>`:'—'}</td><td class="px-2 py-2 text-center">${o?`<div class="font-bold text-cyan-300">${output.toFixed(1)}</div><div class="text-[8px] text-slate-500">Order ${Math.round(o).toLocaleString()}</div>`:'—'}</td>`;
+    }).join('')+'</tr>';
    });
    body.innerHTML=html;
-   sum.innerHTML='<div class="text-[9px] text-slate-400">Pallet รุ่น = CEILING((Order รุ่น ÷ Order รวมของวัน) × Pallet/Round) · Round/hr. = (UPH ÷ Pallet/Round) × Efficiency · Output = Pallet รุ่น × Round/hr.</div>';
+   sum.innerHTML='<div class="text-[9px] text-slate-400">Pallet รุ่น = CEILING[(Order Door Foam ÷ Order รวมของวัน) × Pallet/Round] · Output รุ่น = Pallet × Round/hr. · Round/hr. = (UPH ÷ Pallet/Round) × Efficiency</div>';
  };
- document.addEventListener('DOMContentLoaded',()=>setTimeout(window.renderDoorFoamInjectionCycle,450));
- const old=window.switchManpowerStation;
- if(typeof old==='function')window.switchManpowerStation=function(){
-   const r=old.apply(this,arguments);setTimeout(window.renderDoorFoamInjectionCycle,0);return r;
- };
+ function refresh(){load();window.renderDoorFoamInjectionCycle()}
+ document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,450));
+ const old=window.switchManpowerStation;if(typeof old==='function')window.switchManpowerStation=function(){const r=old.apply(this,arguments);setTimeout(window.renderDoorFoamInjectionCycle,0);return r};
+ const h=document.getElementById('shiftHoursInput');if(h)h.addEventListener('input',()=>window.renderDoorFoamInjectionCycle());
 })();
 </script>
 
-<script id="hide-daily-door-column-before-date-final">
-(function(){
- function run(){
-   document.querySelectorAll('table').forEach(t=>{
-     const hs=[...t.querySelectorAll('thead th')], i=hs.findIndex(h=>h.textContent.trim().toUpperCase()==='DOOR');
-     if(i<0||i>=hs.length-1)return;
-     const tail=hs.slice(i+1).map(h=>h.textContent).join(' ');
-     if(!/\d{1,2}[\/\-]\d{1,2}|MON|TUE|WED|THU|FRI|SAT|SUN|W\d+/i.test(tail))return;
-     t.querySelectorAll('tr').forEach(tr=>{const c=[...tr.children];if(c[i])c[i].style.setProperty('display','none','important')});
-   });
- }
- document.addEventListener('DOMContentLoaded',()=>setTimeout(run,500));
- const mo=new MutationObserver(run);document.addEventListener('DOMContentLoaded',()=>mo.observe(document.body,{childList:true,subtree:true}));
-})();
-</script>
 </body>
 </html
