@@ -1403,6 +1403,9 @@ canvas, option {
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-y-auto w-full">
 
+<!-- Production Plan Excel input — restored for upload controller -->
+<input id="excelFileInput" type="file" accept=".xlsx,.xls"
+       class="hidden" onchange="previewExcelData(event)">
 <!-- ===== VISIBLE PRODUCTION PLAN EXCEL UPLOAD ===== -->
 <section id="productionPlanExcelUploadTop"
          class="mx-4 mt-4 mb-3 rounded-2xl border border-cyan-500/50 bg-slate-900/90 shadow-lg p-4">
