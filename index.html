@@ -1299,7 +1299,37 @@ canvas, option {
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-y-auto w-full"> 
+        <main class="flex-1 flex flex-col overflow-y-auto w-full">
+
+<!-- ===== VISIBLE PRODUCTION PLAN EXCEL UPLOAD ===== -->
+<section id="productionPlanExcelUploadTop"
+         class="mx-4 mt-4 mb-3 rounded-2xl border border-cyan-500/50 bg-slate-900/90 shadow-lg p-4">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div>
+            <div class="flex items-center gap-2">
+                <div class="w-1.5 h-6 bg-cyan-400 rounded-full"></div>
+                <h2 class="text-sm sm:text-base font-bold text-white">เพิ่มไฟล์ Excel สำหรับแผนผลิต</h2>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1 ml-3">
+                Production Plan · รองรับไฟล์ .xlsx / .xls · ใช้ข้อมูล Order รายวันสำหรับ Dashboard และ Plan + Short %
+            </div>
+            <div id="productionPlanTopFileName" class="text-[10px] text-cyan-300 mt-1 ml-3">
+                ยังไม่ได้เลือกไฟล์แผนผลิต
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openProductionPlanExcelPicker()"
+                    class="bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold px-5 py-2.5 rounded-xl shadow transition">
+                เพิ่มไฟล์ Excel แผนผลิต
+            </button>
+            <button type="button" onclick="saveDashboardData()"
+                    class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold px-5 py-2.5 rounded-xl shadow transition">
+                บันทึกข้อมูล
+            </button>
+        </div>
+    </div>
+</section>
+ 
             
             <!-- Top Header -->
             <header class="bg-cardbg/85 backdrop-blur-md border-b border-bordercolor px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-30 w-full"> 
@@ -12402,6 +12432,27 @@ document.addEventListener('DOMContentLoaded', function(){
         dt.items.add(file);
         input.files = dt.files;
         previewExcelData({ target: input });
+    });
+});
+</script>
+
+
+<script id="production-plan-visible-upload-controller">
+function openProductionPlanExcelPicker(){
+    const input = document.getElementById('excelFileInput');
+    if (!input) {
+        alert('ไม่พบช่องนำเข้า Excel ของแผนผลิต');
+        return;
+    }
+    input.click();
+}
+document.addEventListener('DOMContentLoaded', function(){
+    const input = document.getElementById('excelFileInput');
+    const topName = document.getElementById('productionPlanTopFileName');
+    if (!input || !topName) return;
+    input.addEventListener('change', function(){
+        const file = input.files && input.files[0];
+        topName.textContent = file ? `ไฟล์แผนผลิต: ${file.name}` : 'ยังไม่ได้เลือกไฟล์แผนผลิต';
     });
 });
 </script>
