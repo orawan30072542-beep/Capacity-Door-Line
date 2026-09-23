@@ -1338,6 +1338,24 @@ canvas, option {
 }
 </style>
 
+
+<style id="bw-capacity-solid-definitive-final">
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row .bw-label{
+    position:sticky!important;
+    left:0!important;
+    z-index:60!important;
+    background:#0f172a!important;
+    background-color:#0f172a!important;
+    background-image:none!important;
+    opacity:1!important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row td:not(.bw-label):not(.daily-week-separator):not(.weekly-sum-col){
+    background:#0f2740!important;
+    background-color:#0f2740!important;
+    opacity:1!important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -12239,7 +12257,9 @@ document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(a));setTi
 <style id="bw-capacity-and-week-status-final">
 /* Capacity / Day daily background = Bottom Welding Order / Day */
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row td:not(.daily-week-separator):not(.weekly-sum-col){
-    background:transparent!important;
+    background:#0f2740!important;
+    background-color:#0f2740!important;
+    opacity:1!important;
 }
 #tableSummaryCapacityMachineWeldingBottomPlate .bw-capacity-row td.bw-order,
 #tableSummaryCapacityMachineWeldingBottomPlate tbody tr:first-child td.bw-order{
