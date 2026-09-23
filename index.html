@@ -12485,111 +12485,62 @@ document.addEventListener('DOMContentLoaded', function(){
  const E=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  const ST=()=>String(window.currentManpowerStation||(typeof currentManpowerStation!=='undefined'?currentManpowerStation:'')||'Door A');
  const DATA=()=>window.currentDailyData||(typeof currentDailyData!=='undefined'?currentDailyData:null);
+ const MASTER=()=>window.masterModelConfig||(typeof masterModelConfig!=='undefined'?masterModelConfig:{});
  const label=(d,i)=>String(d?.label||d?.date||d?.name||d||('Day '+(i+1)));
-
- // Use the SAME model inclusion logic as Summary Daily Order By Model / Door.
- function foamModels(){
-   const st=ST(), map=new Map(), d=DATA();
-   (d?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{
-     const model=String(m?.name||m?.model||'').trim();
-     if(!model) return;
-     if(typeof modelBelongsToSelectedSummaryStation==='function' && !modelBelongsToSelectedSummaryStation(model,st)) return;
-     if(typeof getDailyOrderDoorName==='function' && !getDailyOrderDoorName(model)) return;
-     if(!map.has(model)) map.set(model,{model,orders:new Array((d?.days||[]).length).fill(0)});
-     const row=map.get(model);
-     (d?.days||[]).forEach((_,i)=>row.orders[i]+=Math.max(0,N(m?.orders?.[i])));
-   }));
-   return [...map.values()].filter(r=>r.orders.some(v=>v>0));
- }
-
+ function order(model,i){let t=0;const d=DATA();(d?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{if(String(m.name||m.model||'').trim()===String(model).trim())t+=N((m.orders||[])[i])}));return t}
+ function models(){const st=ST(),a=[];Object.entries(MASTER()||{}).forEach(([model,cfg])=>{if(String(cfg?.station||'')!==st)return;a.push({model,cfg})});return a}
  window.renderDoorFoamInjectionCycle=function(){
-  const sec=document.getElementById('doorFoamInjectionCyclePlanner'),
-        head=document.getElementById('doorFoamCycleHead'),
-        body=document.getElementById('doorFoamCycleBody'),
-        sum=document.getElementById('doorFoamCycleRoundSummary');
-  if(!sec||!head||!body||!sum)return;
-
-  const st=ST();
-  sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';
-  if(sec.style.display==='none')return;
-
-  const d=DATA(), days=Array.isArray(d?.days)?d.days:[], rs=foamModels();
+  const sec=document.getElementById('doorFoamInjectionCyclePlanner'),head=document.getElementById('doorFoamCycleHead'),body=document.getElementById('doorFoamCycleBody'),sum=document.getElementById('doorFoamCycleRoundSummary');if(!sec||!head||!body||!sum)return;
+  const st=ST();sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';if(sec.style.display==='none')return;
+  const d=DATA(),days=Array.isArray(d?.days)?d.days:[],rs=models();
   const hrs=Math.max(.1,N(document.getElementById('foamWorkingHours')?.value)||10.5);
-  const palletRound=Math.max(1,Math.ceil(N(document.getElementById('foamPalletPerRound')?.value)||1));
+  const pallet=Math.max(1,N(document.getElementById('foamPalletPerRound')?.value)||1);
   const eff=Math.max(.01,Math.min(1,(N(document.getElementById('foamEfficiency')?.value)||85)/100));
-
-  // TOTAL ORDER is calculated with the same included models as Summary Daily Order By Model / Door.
-  const totalOrder=days.map((_,i)=>rs.reduce((a,r)=>a+N(r.orders[i]),0));
-  const hourly=totalOrder.map(v=>v/hrs);
-  // User formula: hourly order / Pallet per Round × Efficiency
-  const roundHr=hourly.map(v=>(v/palletRound)*eff);
-
+  // Hourly capacity derives from total daily required order / working hours.
+  const totals=days.map((_,i)=>rs.reduce((a,r)=>a+order(r.model,i),0));
+  const hourly=totals.map(v=>v/hrs);
+  // User formula: hourly order / pallet per round * efficiency.
+  const roundHr=hourly.map(v=>(v/pallet)*eff);
+  const avgRound=roundHr.filter(v=>v>0);
   const roundEl=document.getElementById('foamRoundPerHour');
-  const activeRound=roundHr.filter(v=>v>0);
-  if(roundEl) roundEl.textContent=activeRound.length?(activeRound.reduce((a,b)=>a+b,0)/activeRound.length).toFixed(2):'—';
+  if(roundEl)roundEl.textContent=avgRound.length?(avgRound.reduce((a,b)=>a+b,0)/avgRound.length).toFixed(2):'—';
 
-  // Each date is one group with Pallet + Output.
-  head.innerHTML=`<tr>
-    <th rowspan="2" class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[210px]">รายการ</th>
-    ${days.map((x,i)=>`<th colspan="2" class="px-3 py-2 text-center min-w-[190px] border-l border-slate-700">${E(label(x,i))}</th>`).join('')}
-  </tr>
-  <tr>
-    ${days.map(()=>`<th class="px-2 py-1.5 text-center text-amber-300 border-l border-slate-800">Pallet</th>
-                    <th class="px-2 py-1.5 text-center text-cyan-300 border-l border-slate-800">Output</th>`).join('')}
-  </tr>`;
+  head.innerHTML='<tr><th class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[210px]">รายการ</th>'+days.map((x,i)=>`<th class="px-3 py-2 text-center min-w-[180px] border-l border-slate-800">${E(label(x,i))}<div class="grid grid-cols-2 gap-1 mt-1 text-[8px] text-slate-400"><span>Pallet</span><span>Output</span></div></th>`).join('')+'</tr>';
 
-  let html=`<tr class="bg-cyan-950/45">
-    <td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>
-    ${totalOrder.map(v=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-white border-l border-slate-800">${Math.round(v).toLocaleString()}</td>`).join('')}
-  </tr>`;
-
-  html+=`<tr class="bg-blue-950/45">
-    <td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง</td>
-    ${hourly.map(v=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-cyan-300 border-l border-slate-800">${v>0?v.toFixed(1):'—'}</td>`).join('')}
-  </tr>`;
-
-  html+=`<tr class="bg-slate-950/80">
-    <td class="sticky left-0 z-20 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td>
-    ${roundHr.map(v=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-amber-300 border-l border-slate-800">${v>0?v.toFixed(2):'—'}</td>`).join('')}
-  </tr>`;
+  let html=`<tr class="bg-cyan-950/45"><td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>${totals.map(v=>`<td class="px-3 py-2 text-center font-bold text-white border-l border-slate-800">${Math.round(v).toLocaleString()}</td>`).join('')}</tr>`;
+  html+=`<tr class="bg-blue-950/45"><td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง</td>${hourly.map(v=>`<td class="px-3 py-2 text-center font-bold text-cyan-300 border-l border-slate-800">${v.toFixed(1)}</td>`).join('')}</tr>`;
+  html+=`<tr class="bg-slate-950/80"><td class="sticky left-0 z-20 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td>${roundHr.map(v=>`<td class="px-3 py-2 text-center font-bold text-amber-300 border-l border-slate-800">${v>0?v.toFixed(2):'—'}</td>`).join('')}</tr>`;
 
   rs.forEach(r=>{
-    html+=`<tr class="bg-slate-900/55">
-      <td class="sticky left-0 z-20 bg-slate-900 px-3 py-2 font-semibold text-white">${E(r.model)}</td>
-      ${days.map((x,i)=>{
-        const o=N(r.orders[i]), total=totalOrder[i];
-        const share=total>0?o/total:0;
-        // Pallet requirement is always a whole number rounded UP.
-        const pallets=o>0?Math.ceil(share*palletRound):0;
-        // Output = Pallet × Round/hr.
-        const output=pallets*roundHr[i];
-        return `<td class="px-2 py-2 text-center border-l border-slate-800">
-                  ${o?`<div class="font-bold text-amber-300">${pallets.toLocaleString()}</div>
-                       <div class="text-[8px] text-slate-500">${(share*100).toFixed(1)}%</div>`:'<span class="text-slate-600">—</span>'}
-                </td>
-                <td class="px-2 py-2 text-center border-l border-slate-800">
-                  ${o?`<div class="font-bold text-cyan-300">${output.toFixed(2)}</div>
-                       <div class="text-[8px] text-slate-500">Order ${Math.round(o).toLocaleString()}</div>`:'<span class="text-slate-600">—</span>'}
-                </td>`;
-      }).join('')}
-    </tr>`;
+    html+=`<tr class="bg-slate-900/55"><td class="sticky left-0 z-20 bg-slate-900 px-3 py-2 font-semibold text-white">${E(r.model)}</td>`+
+      days.map((x,i)=>{const o=order(r.model,i),total=totals[i];const ratio=total>0?o/total:0;const pallets=Math.ceil(ratio*pallet);const output=Math.floor(pallets*roundHr[i]);return `<td class="px-2 py-2 text-center border-l border-slate-800"><div class="grid grid-cols-2 gap-1 items-center">${o?`<div class="font-bold text-emerald-300">${pallets}</div><div class="font-bold text-cyan-300">${output.toLocaleString()}</div>`:'<div class="text-slate-600">—</div><div class="text-slate-600">—</div>'}</div>${o?`<div class="text-[7px] text-slate-500 mt-1">${Math.round(o).toLocaleString()} / ${Math.round(total).toLocaleString()} = ${(ratio*100).toFixed(1)}%</div>`:''}</td>`}).join('')+'</tr>';
   });
-
   body.innerHTML=html;
-  sum.innerHTML=`<div class="text-[9px] text-slate-400">
-    Order Door Foam ใช้การรวมรุ่นตามเงื่อนไขเดียวกับ Summary Daily Order By Model / Door ·
-    Pallet = CEILING((Order รุ่น ÷ Order รวมของวัน) × Pallet/Round) ·
-    Output = Pallet × Round/hr.
-  </div>`;
+  sum.innerHTML='<div class="text-[9px] text-slate-400">Order Door Foam ใช้ยอดรายวันของรุ่นเดียวกับ Summary Daily Order By Model / Door · Pallet = CEILING((Order รุ่น ÷ Order รวมของวัน) × Pallet/Round) · Output = FLOOR(Pallet × Round/hr.)</div>';
  };
-
  document.addEventListener('DOMContentLoaded',()=>setTimeout(window.renderDoorFoamInjectionCycle,450));
- const old=window.switchManpowerStation;
- if(typeof old==='function')window.switchManpowerStation=function(){
-   const r=old.apply(this,arguments);
-   setTimeout(window.renderDoorFoamInjectionCycle,0);
-   return r;
- };
+ const old=window.switchManpowerStation;if(typeof old==='function')window.switchManpowerStation=function(){const r=old.apply(this,arguments);setTimeout(window.renderDoorFoamInjectionCycle,0);return r};
+})();
+</script>
+
+
+<script id="hide-door-column-before-date-final">
+(function(){
+ function apply(){
+  document.querySelectorAll('table').forEach(table=>{
+   const hs=[...table.querySelectorAll('thead th')];
+   const idx=hs.findIndex(h=>h.textContent.trim().toUpperCase()==='DOOR');
+   if(idx<0 || idx===hs.length-1) return;
+   const after=hs.slice(idx+1).map(h=>h.textContent.trim()).join(' ');
+   if(!(/\d{1,2}[\/\-]\d{1,2}|MON|TUE|WED|THU|FRI|SAT|SUN|W\d+/i.test(after))) return;
+   table.querySelectorAll('tr').forEach(tr=>{
+    const cells=[...tr.children];
+    if(cells[idx]) cells[idx].style.setProperty('display','none','important');
+   });
+  });
+ }
+ document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,400));
+ new MutationObserver(apply).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
 
