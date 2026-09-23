@@ -1483,7 +1483,22 @@ canvas, option {
                                  |  |  | 
                             </p>
                         </div>
-                        
+                        <div class="flex flex-wrap items-center gap-2 bg-slate-900/70 border border-bordercolor rounded-xl px-3 py-2">
+                            <span class="text-[10px] text-slate-400 font-semibold">Group Station:</span>
+                            <div id="manpowerLineButtons" class="flex flex-wrap gap-1.5">
+                                <button type="button" data-line="Door A" onclick="switchManpowerStation('Door A')" class="mp-line-btn">Door A</button>
+                                <button type="button" data-line="Door B" onclick="switchManpowerStation('Door B')" class="mp-line-btn">Door B</button>
+                                <button type="button" data-line="Door C" onclick="switchManpowerStation('Door C')" class="mp-line-btn">Door C</button>
+                                <button type="button" data-line="Door Glass" onclick="switchManpowerStation('Door Glass')" class="mp-line-btn">Door Glass</button>
+                                <button type="button" data-line="Back Plate" onclick="switchManpowerStation('Back Plate')" class="mp-line-btn">Back Plate</button>
+                                <button type="button" data-line="Bottom Plate" onclick="switchManpowerStation('Bottom Plate')" class="mp-line-btn">Bottom Plate</button>
+                            </div>
+                            <select id="manpowerLineSelect" onchange="switchManpowerStation(this.value)" class="hidden">
+                                <option value="Door A">Door A</option><option value="Door B">Door B</option><option value="Door C">Door C</option>
+                                <option value="Door Glass">Door Glass</option><option value="Back Plate">Back Plate</option><option value="Bottom Plate">Bottom Plate</option>
+                            </select>
+                            <span id="manpowerStationLabel" class="hidden">Door A</span>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -1663,31 +1678,7 @@ canvas, option {
                 
 
                 <!-- 3. CAPACITY จากเวลาการทำงาน -->
-                <section id="capacity-section" class="bg-cardbg p-6 rounded-2xl border border-bordercolor space-y-4 shadow-sm"> 
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        
-                        <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-bordercolor">
-                            <span class="text-xs text-slate-300 font-medium px-2">Group Station:</span>
-                            <button onclick="switchCapacityStation('Door A')" id="cap-btn-door-a" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-blue-600 text-white shadow">Door A</button>
-                            <button onclick="switchCapacityStation('Door B')" id="cap-btn-door-b" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door B</button>
-                            <button onclick="switchCapacityStation('Door C')" id="cap-btn-door-c" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door C</button>
-                            <button onclick="switchCapacityStation('Door Glass')" id="cap-btn-door-glass" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Door Glass</button>
-                            <button onclick="switchCapacityStation('Back Plate')" id="cap-btn-back-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Back Plate</button>
-                            <button onclick="switchCapacityStation('Bottom Plate')" id="cap-btn-bottom-plate" class="cap-station-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">Bottom Plate</button>
-                        </div>
-                    </div>
-                    
-                    
-
-                    <div class="bg-slate-900/60 p-3 rounded-xl border border-bordercolor">
-                        <div id="capacityGroupVisibility" class="hidden flex-wrap items-center gap-2 bg-slate-900/50 border border-bordercolor/60 rounded-xl px-3 py-2">
-                            <span class="text-[10px] font-semibold text-slate-400 mr-1">Hide / Unhide:</span>
-                            <div id="capacityGroupVisibilityButtons" class="flex flex-wrap gap-1.5"></div>
-                        </div>
-
-                        
-                    </div>
-                </section>
+                
 
 
             </div>
