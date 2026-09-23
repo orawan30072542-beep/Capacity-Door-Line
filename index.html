@@ -1691,7 +1691,28 @@ canvas, option {
     </div>
   </div>
 
-  <div class="overflow-x-auto rounded-xl border border-slate-700/70">
+  
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+    <label class="text-[9px] text-slate-400">Pallet / Round
+      <input id="foamPalletPerRound" type="number" min="1" step="1" value="1"
+        class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
+        oninput="renderDoorFoamInjectionCycle()">
+    </label>
+    <label class="text-[9px] text-slate-400">Efficiency (%)
+      <input id="foamEfficiency" type="number" min="1" max="100" step="1" value="85"
+        class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
+        oninput="renderDoorFoamInjectionCycle()">
+    </label>
+    <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+      <div class="text-[9px] text-slate-400">Round / hr.</div>
+      <div id="foamRoundPerHour" class="text-lg font-bold text-cyan-300">—</div>
+    </div>
+    <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+      <div class="text-[9px] text-slate-400">สูตร</div>
+      <div class="text-[9px] text-slate-300 mt-1">ยอดรายชั่วโมง ÷ Pallet/Round × Efficiency</div>
+    </div>
+  </div>
+<div class="overflow-x-auto rounded-xl border border-slate-700/70">
     <table class="w-full text-[9px] min-w-[1500px]">
       <thead id="doorFoamCycleHead" class="bg-slate-950/95 text-slate-200"></thead>
       <tbody id="doorFoamCycleBody" class="divide-y divide-slate-800"></tbody>
@@ -12455,7 +12476,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 
-<script id="door-foam-injection-cycle-planner-by-date-final">
+<script id="door-foam-pallet-round-capacity-final">
 (function(){
  const N=v=>Number.isFinite(Number(v))?Number(v):0;
  const E=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -12464,15 +12485,35 @@ document.addEventListener('DOMContentLoaded', function(){
  const MASTER=()=>window.masterModelConfig||(typeof masterModelConfig!=='undefined'?masterModelConfig:{});
  const label=(d,i)=>String(d?.label||d?.date||d?.name||d||('Day '+(i+1)));
  function order(model,i){let t=0;const d=DATA();(d?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{if(String(m.name||m.model||'').trim()===String(model).trim())t+=N((m.orders||[])[i])}));return t}
- function models(){const st=ST(),a=[];Object.entries(MASTER()||{}).forEach(([model,cfg])=>{if(String(cfg?.station||'')!==st)return;let ts=Array.isArray(cfg.doorTypes)?cfg.doorTypes:(cfg.doorType?[cfg.doorType]:[]);if(!ts.length&&Array.isArray(cfg.routing))ts=cfg.routing.map(r=>r.doorType||r.type).filter(Boolean);if(!ts.length)ts=['Door'];[...new Set(ts)].forEach(type=>a.push({model,type,cfg}))});return a}
- function molds(r){const c=r.cfg||{},b=c.foamMoldQtyByType||c.moldQtyByType||{};return Math.max(1,Math.floor(N(b[r.type]??c.foamMoldQty??c.moldQty??1)))}
+ function models(){const st=ST(),a=[];Object.entries(MASTER()||{}).forEach(([model,cfg])=>{if(String(cfg?.station||'')!==st)return;a.push({model,cfg})});return a}
  window.renderDoorFoamInjectionCycle=function(){
   const sec=document.getElementById('doorFoamInjectionCyclePlanner'),head=document.getElementById('doorFoamCycleHead'),body=document.getElementById('doorFoamCycleBody'),sum=document.getElementById('doorFoamCycleRoundSummary');if(!sec||!head||!body||!sum)return;
   const st=ST();sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';if(sec.style.display==='none')return;
-  const d=DATA(),days=Array.isArray(d?.days)?d.days:[],rs=models(),hrs=Math.max(.1,N(document.getElementById('foamWorkingHours')?.value)||10.5),ct=Math.max(1,N(document.getElementById('foamCycleSeconds')?.value)||300),avail=Math.floor(hrs*3600/ct);
-  head.innerHTML='<tr><th class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[150px]">Model</th><th class="sticky left-[150px] z-30 bg-slate-950 px-3 py-2 text-left min-w-[80px]">Door Type</th><th class="px-2 py-2 text-right">Mold</th>'+days.map((x,i)=>`<th class="px-3 py-2 text-center min-w-[150px] border-l border-slate-800">${E(label(x,i))}<div class="text-[8px] text-cyan-400">Order · Cycle · Capacity</div></th>`).join('')+'</tr>';
-  body.innerHTML=rs.map(r=>{const mq=molds(r),cap=avail*mq;return `<tr class="bg-slate-900/55"><td class="sticky left-0 z-20 bg-slate-900 px-3 py-2 font-semibold text-white">${E(r.model)}</td><td class="sticky left-[150px] z-20 bg-slate-900 px-3 py-2 text-cyan-300">${E(r.type)}</td><td class="px-2 py-2 text-right text-amber-300 font-bold">${mq}</td>`+days.map((x,i)=>{const o=order(r.model,i),req=o?Math.ceil(o/mq):0,diff=cap-o;return `<td class="px-3 py-2 text-center border-l border-slate-800">${o?`<div class="text-white font-semibold">${Math.round(o).toLocaleString()} pcs</div><div class="text-[8px] text-slate-400">${req.toLocaleString()} cycles</div><div class="text-[8px] text-cyan-300">Cap ${cap.toLocaleString()}</div><div class="text-[8px] ${diff>=0?'text-emerald-400':'text-red-400'}">${diff>=0?'Remain ':'Short '}${Math.abs(diff).toLocaleString()}</div>`:'<span class="text-slate-600">—</span>'}</td>`}).join('')+'</tr>'}).join('')||`<tr><td colspan="${3+days.length}" class="p-8 text-center text-slate-500">ยังไม่มีข้อมูลรุ่นสำหรับ ${E(st)}</td></tr>`;
-  sum.innerHTML=days.map((x,i)=>{const active=rs.filter(r=>order(r.model,i)>0);if(!active.length)return'';return `<div class="mb-3 rounded-xl border border-slate-700 bg-slate-950/45 p-3"><div class="text-[10px] font-bold text-white mb-2">${E(label(x,i))} · Injection Round Plan</div><div class="flex flex-wrap gap-2">`+active.map((r,j)=>{const o=order(r.model,i),mq=molds(r);return `<div class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 min-w-[170px]"><div class="text-[8px] text-cyan-400">ROUND ${j+1}</div><div class="text-[10px] font-bold text-white">${E(r.model)} · ${E(r.type)}</div><div class="text-[8px] text-slate-400">${mq} Mold · ${Math.ceil(o/mq)} cycles · ${Math.round(o).toLocaleString()} pcs</div></div>`}).join('')+'</div></div>'}).join('')||'<div class="text-[10px] text-slate-500">ยังไม่มี Order สำหรับจัดรอบการฉีดโฟม</div>';
+  const d=DATA(),days=Array.isArray(d?.days)?d.days:[],rs=models();
+  const hrs=Math.max(.1,N(document.getElementById('foamWorkingHours')?.value)||10.5);
+  const pallet=Math.max(1,N(document.getElementById('foamPalletPerRound')?.value)||1);
+  const eff=Math.max(.01,Math.min(1,(N(document.getElementById('foamEfficiency')?.value)||85)/100));
+  // Hourly capacity derives from total daily required order / working hours.
+  const totals=days.map((_,i)=>rs.reduce((a,r)=>a+order(r.model,i),0));
+  const hourly=totals.map(v=>v/hrs);
+  // User formula: hourly order / pallet per round * efficiency.
+  const roundHr=hourly.map(v=>(v/pallet)*eff);
+  const avgRound=roundHr.filter(v=>v>0);
+  const roundEl=document.getElementById('foamRoundPerHour');
+  if(roundEl)roundEl.textContent=avgRound.length?(avgRound.reduce((a,b)=>a+b,0)/avgRound.length).toFixed(2):'—';
+
+  head.innerHTML='<tr><th class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[210px]">รายการ</th>'+days.map((x,i)=>`<th class="px-3 py-2 text-center min-w-[135px] border-l border-slate-800">${E(label(x,i))}</th>`).join('')+'</tr>';
+
+  let html=`<tr class="bg-cyan-950/45"><td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>${totals.map(v=>`<td class="px-3 py-2 text-center font-bold text-white border-l border-slate-800">${Math.round(v).toLocaleString()}</td>`).join('')}</tr>`;
+  html+=`<tr class="bg-blue-950/45"><td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง</td>${hourly.map(v=>`<td class="px-3 py-2 text-center font-bold text-cyan-300 border-l border-slate-800">${v.toFixed(1)}</td>`).join('')}</tr>`;
+  html+=`<tr class="bg-slate-950/80"><td class="sticky left-0 z-20 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td>${roundHr.map(v=>`<td class="px-3 py-2 text-center font-bold text-amber-300 border-l border-slate-800">${v>0?v.toFixed(2):'—'}</td>`).join('')}</tr>`;
+
+  rs.forEach(r=>{
+    html+=`<tr class="bg-slate-900/55"><td class="sticky left-0 z-20 bg-slate-900 px-3 py-2 font-semibold text-white">${E(r.model)}</td>`+
+      days.map((x,i)=>{const o=order(r.model,i),total=totals[i];const ratio=total>0?o/total:0;const pallets=ratio*pallet;return `<td class="px-3 py-2 text-center border-l border-slate-800">${o?`<div class="font-bold text-emerald-300">${pallets.toFixed(2)} Pallet</div><div class="text-[8px] text-slate-400">${Math.round(o).toLocaleString()} / ${Math.round(total).toLocaleString()} = ${(ratio*100).toFixed(1)}%</div>`:'<span class="text-slate-600">—</span>'}</td>`}).join('')+'</tr>';
+  });
+  body.innerHTML=html;
+  sum.innerHTML='<div class="text-[9px] text-slate-400">จำนวน Pallet ของแต่ละรุ่น = (Order รุ่น ÷ Order รวมของวัน) × Pallet/Round · Round/hr. = Capacity รายชั่วโมง ÷ Pallet/Round × Efficiency</div>';
  };
  document.addEventListener('DOMContentLoaded',()=>setTimeout(window.renderDoorFoamInjectionCycle,450));
  const old=window.switchManpowerStation;if(typeof old==='function')window.switchManpowerStation=function(){const r=old.apply(this,arguments);setTimeout(window.renderDoorFoamInjectionCycle,0);return r};
