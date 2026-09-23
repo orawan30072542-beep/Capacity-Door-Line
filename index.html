@@ -1283,6 +1283,61 @@ canvas, option {
 }
 </style>
 
+
+<style id="bottom-welding-solid-sticky-final">
+/* Bottom Welding: same solid background + freeze the label column */
+#summaryCapacityMachineWeldingBottomPlate {
+    background-color:#0f172a !important;
+    isolation:isolate;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate {
+    border-collapse:separate !important;
+    border-spacing:0 !important;
+    background-color:#0f172a !important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate tr,
+#tableSummaryCapacityMachineWeldingBottomPlate th,
+#tableSummaryCapacityMachineWeldingBottomPlate td {
+    opacity:1 !important;
+    background-image:none !important;
+}
+
+/* Freeze first column so Bottom Welding / Order / Capacity / Difference stay fixed */
+#tableSummaryCapacityMachineWeldingBottomPlate th:first-child,
+#tableSummaryCapacityMachineWeldingBottomPlate td:first-child {
+    position:sticky !important;
+    left:0 !important;
+    z-index:30 !important;
+    min-width:170px !important;
+    width:170px !important;
+    max-width:170px !important;
+    background:#0f172a !important;
+    background-color:#0f172a !important;
+    box-shadow:1px 0 0 #334155 !important;
+}
+
+/* Header uses the same opaque family, never transparent */
+#tableSummaryCapacityMachineWeldingBottomPlate thead th:first-child {
+    z-index:40 !important;
+    background:#0f172a !important;
+}
+#tableSummaryCapacityMachineWeldingBottomPlate tbody th:first-child,
+#tableSummaryCapacityMachineWeldingBottomPlate tbody td:first-child,
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot th:first-child,
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot td:first-child {
+    background:#0f172a !important;
+}
+
+/* Ensure scrolling data cells are opaque too */
+#tableSummaryCapacityMachineWeldingBottomPlate thead th:not(:first-child),
+#tableSummaryCapacityMachineWeldingBottomPlate tbody td:not(:first-child),
+#tableSummaryCapacityMachineWeldingBottomPlate tbody th:not(:first-child),
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot td:not(:first-child),
+#tableSummaryCapacityMachineWeldingBottomPlate tfoot th:not(:first-child) {
+    background-color:#0f172a;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
