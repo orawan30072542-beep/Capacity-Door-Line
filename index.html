@@ -8842,14 +8842,14 @@ body.innerHTML=rows.length?rows.map(row=>{
                 ? totalDoorOrderForPlan / numberOfPlanDays
                 : 0;
 
-            // Plan Manpower = average required manpower across production days.
-            // Use the same daily manpower totals already calculated for the table.
+            // Plan Manpower = MAXIMUM required manpower among active production days.
+            // User requirement: show the highest manpower requirement, not the average.
             const manpowerProductionDays = dailyMpTotals.filter((v, i) =>
                 !isSunday(days[i]) && Number(v || 0) > 0
             );
             const avgPlanManpower = manpowerProductionDays.length > 0
-                ? manpowerProductionDays.reduce((sum, v) => sum + Number(v || 0), 0) / manpowerProductionDays.length
-                : (activeDays > 0 ? totalDailyManpower / activeDays : 0);
+                ? Math.max(...manpowerProductionDays.map(v => Number(v || 0)))
+                : Math.max(0, Number(peakManpower || 0));
 
             // Summary uses the highest Lead Time from all active production rows.
             const summaryAvgLeadTime = summaryMaxLeadTime;
