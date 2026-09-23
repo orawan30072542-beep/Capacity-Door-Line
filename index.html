@@ -1678,7 +1678,7 @@ canvas, option {
   <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 mb-4">
     <div>
       <h3 class="text-sm sm:text-base font-bold text-white">Door Foam Injection Cycle</h3>
-      <p class="text-[10px] text-slate-400 mt-1">แผนคาดการณ์การฉีดโฟมประตูแยกตามวันที่ · แสดงเฉพาะ Door A / Door B / Door C ตาม Group Station ที่เลือก</p>
+      <p class="text-[10px] text-slate-400 mt-1">แผนคาดการณ์การฉีดโฟมประตูแยกตามวันที่ · แสดงเฉพาะ Door A / Door B / Door C ตาม Group Station ที่เลือก · ตั้งค่าแต่ละไลน์แยกกัน</p>
     </div>
     <div class="flex flex-wrap gap-2 items-end">
       <label class="text-[9px] text-slate-400">Working Hours
@@ -1696,23 +1696,19 @@ canvas, option {
 
   
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-    <div><div class="text-[9px] text-slate-400">Pallet / Round (แยกแต่ละ Line)</div><div class="grid grid-cols-3 gap-1 mt-1">
-<label class="text-[8px] text-slate-500">Door A<input id="foamPalletPerRoundA" type="number" min="1" step="1" value="1" class="block w-full bg-slate-950 border border-slate-700 rounded px-1 py-2 text-white" oninput="saveFoamPalletSetting('Door A',this.value);renderDoorFoamInjectionCycle()"></label>
-<label class="text-[8px] text-slate-500">Door B<input id="foamPalletPerRoundB" type="number" min="1" step="1" value="1" class="block w-full bg-slate-950 border border-slate-700 rounded px-1 py-2 text-white" oninput="saveFoamPalletSetting('Door B',this.value);renderDoorFoamInjectionCycle()"></label>
-<label class="text-[8px] text-slate-500">Door C<input id="foamPalletPerRoundC" type="number" min="1" step="1" value="1" class="block w-full bg-slate-950 border border-slate-700 rounded px-1 py-2 text-white" oninput="saveFoamPalletSetting('Door C',this.value);renderDoorFoamInjectionCycle()"></label>
-</div></div>
-    <label class="text-[9px] text-slate-400">Efficiency (%)
-      <input id="foamEfficiency" type="number" min="1" max="100" step="1" value="85"
-        class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
-        oninput="renderDoorFoamInjectionCycle()">
-    </label>
-    <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-      <div class="text-[9px] text-slate-400">Round / hr.</div>
-      <div id="foamRoundPerHour" class="text-lg font-bold text-cyan-300">—</div>
-    </div>
-    <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-      <div class="text-[9px] text-slate-400">สูตร</div>
-      <div class="text-[9px] text-slate-300 mt-1">ยอดรายชั่วโมง ÷ Pallet/Round × Efficiency</div>
+    <div class="md:col-span-4 grid grid-cols-1 gap-3">
+      <div data-foam-line="Door A" class="rounded-lg border border-slate-700 bg-slate-950 p-3"><div class="text-xs font-bold text-cyan-300 mb-2">Door A</div><div class="grid grid-cols-2 gap-2">
+        <label class="text-[9px] text-slate-400">Pallet / Round Target<input id="foamPalletPerRoundA" type="number" min="1" step="1" value="1" class="block mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-white" oninput="saveFoamSetting('Door A','pallet',this.value);renderDoorFoamInjectionCycle()"></label>
+        <label class="text-[9px] text-slate-400">Round / hr.<input id="foamRoundPerHourA" type="number" min="0" step="0.01" value="1" class="block mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-white" oninput="saveFoamSetting('Door A','round',this.value);renderDoorFoamInjectionCycle()"></label>
+      </div></div>
+      <div data-foam-line="Door B" class="rounded-lg border border-slate-700 bg-slate-950 p-3"><div class="text-xs font-bold text-cyan-300 mb-2">Door B</div><div class="grid grid-cols-2 gap-2">
+        <label class="text-[9px] text-slate-400">Pallet / Round Target<input id="foamPalletPerRoundB" type="number" min="1" step="1" value="1" class="block mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-white" oninput="saveFoamSetting('Door B','pallet',this.value);renderDoorFoamInjectionCycle()"></label>
+        <label class="text-[9px] text-slate-400">Round / hr.<input id="foamRoundPerHourB" type="number" min="0" step="0.01" value="1" class="block mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-white" oninput="saveFoamSetting('Door B','round',this.value);renderDoorFoamInjectionCycle()"></label>
+      </div></div>
+      <div data-foam-line="Door C" class="rounded-lg border border-slate-700 bg-slate-950 p-3"><div class="text-xs font-bold text-cyan-300 mb-2">Door C</div><div class="grid grid-cols-2 gap-2">
+        <label class="text-[9px] text-slate-400">Pallet / Round Target<input id="foamPalletPerRoundC" type="number" min="1" step="1" value="1" class="block mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-white" oninput="saveFoamSetting('Door C','pallet',this.value);renderDoorFoamInjectionCycle()"></label>
+        <label class="text-[9px] text-slate-400">Round / hr.<input id="foamRoundPerHourC" type="number" min="0" step="0.01" value="1" class="block mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-white" oninput="saveFoamSetting('Door C','round',this.value);renderDoorFoamInjectionCycle()"></label>
+      </div></div>
     </div>
   </div>
 <div class="overflow-x-auto rounded-xl border border-slate-700/70">
@@ -12488,16 +12484,17 @@ const mst=()=>window.masterModelConfig||(typeof masterModelConfig!=='undefined'?
 const norm=v=>String(v??'').trim().toLowerCase().replace(/\s+/g,' ');
 function cfg(name){let m=mst();return m[name]||Object.entries(m).find(([k])=>norm(k)===norm(name))?.[1]||{}}
 function rows(){let a=[],seen=new Set(),D=dat(),S=st();(D?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{let name=String(m.name||m.model||'').trim();if(!name||seen.has(norm(name))||String(cfg(name).station||'')!==S)return;seen.add(norm(name));a.push({name,orders:m.orders||[]})}));return a}
-function iid(S){return S==='Door B'?'foamPalletPerRoundB':S==='Door C'?'foamPalletPerRoundC':'foamPalletPerRoundA'}
-window.saveFoamPalletSetting=(S,v)=>localStorage.setItem('haier_foam_pallet_'+S.replace(' ','_'),Math.max(1,n(v)||1));
-function load(){['Door A','Door B','Door C'].forEach(S=>{let e=document.getElementById(iid(S)),v=n(localStorage.getItem('haier_foam_pallet_'+S.replace(' ','_')));if(e&&v>0&&document.activeElement!==e)e.value=v})}
+function iid(S,type){return 'foam'+(type==='round'?'RoundPerHour':'PalletPerRound')+S.slice(-1)}
+window.saveFoamSetting=(S,type,v)=>{if(!['Door A','Door B','Door C'].includes(S)||!['pallet','round'].includes(type))return;let x=Number(v);if(Number.isFinite(x)&&x>=0)localStorage.setItem('haier_foam_'+type+'_'+S.replace(' ','_'),String(x))};
+window.saveFoamPalletSetting=(S,v)=>window.saveFoamSetting(S,'pallet',v);
+function load(){['Door A','Door B','Door C'].forEach(S=>['pallet','round'].forEach(type=>{let e=document.getElementById(iid(S,type)),v=localStorage.getItem('haier_foam_'+type+'_'+S.replace(' ','_'));if(type==='pallet'&&v===null)v=localStorage.getItem('haier_foam_pallet_'+S.replace(' ','_'));if(e&&v!==null&&document.activeElement!==e)e.value=v}))}
 window.renderDoorFoamInjectionCycle=function(){
  let sec=document.getElementById('doorFoamInjectionCyclePlanner'),head=document.getElementById('doorFoamCycleHead'),body=document.getElementById('doorFoamCycleBody'),note=document.getElementById('doorFoamCycleRoundSummary');if(!sec||!head||!body)return;
- let S=st();sec.style.display=['Door A','Door B','Door C'].includes(S)?'block':'none';if(sec.style.display==='none')return;load();
- let D=dat(),days=Array.isArray(D?.days)?D.days:[],R=rows(),hrs=Math.max(.1,n(document.getElementById('foamWorkingHours')?.value)||10.5),ppr=Math.max(1,n(document.getElementById(iid(S))?.value)||1),eff=Math.max(.01,Math.min(1,(n(document.getElementById('foamEfficiency')?.value)||85)/100));
+ let S=st();sec.style.display=['Door A','Door B','Door C'].includes(S)?'block':'none';if(sec.style.display==='none')return;load();sec.querySelectorAll('[data-foam-line]').forEach(card=>{card.hidden=card.dataset.foamLine!==S;card.style.display=card.hidden?'none':''});
+ let D=dat(),days=Array.isArray(D?.days)?D.days:[],R=rows(),hrs=Math.max(.1,n(document.getElementById('foamWorkingHours')?.value)||10.5),ppr=Math.max(1,n(document.getElementById(iid(S,'pallet'))?.value)||1),rph=Math.max(0,n(document.getElementById(iid(S,'round'))?.value));
  let totals=days.map((_,i)=>R.reduce((a,r)=>a+n(r.orders[i]),0)); // same model daily orders basis as Summary Daily Order
- let uph=totals.map(x=>x/hrs), round=uph.map(x=>(x/ppr)*eff), capH=round.map(x=>x*ppr),capD=capH.map(x=>x*hrs);
- let re=document.getElementById('foamRoundPerHour'),rv=round.filter(x=>x>0);if(re)re.textContent=rv.length?(rv.reduce((a,b)=>a+b,0)/rv.length).toFixed(2):'—';
+ let round=totals.map(()=>rph), capH=round.map(x=>x*ppr),capD=capH.map(x=>x*hrs);
+ 
  let lab=(d,i)=>String(d?.label||d?.date||d?.name||d||('Day '+(i+1)));
  head.innerHTML='<tr><th rowspan="2" class="sticky left-0 bg-slate-950 px-3 py-2 text-left min-w-[210px]">รายการ</th>'+days.map((d,i)=>`<th colspan="2" class="border-l border-slate-700 px-2 py-2 text-center">${esc(lab(d,i))}</th>`).join('')+'</tr><tr>'+days.map(()=>'<th class="border-l border-slate-800 px-2 py-1">Pallet</th><th class="px-2 py-1 text-cyan-300">Output</th>').join('')+'</tr>';
  let h=`<tr><td class="sticky left-0 bg-cyan-950 px-3 py-2 font-bold">Capacity รวมรายวัน</td>${capD.map(x=>`<td colspan="2" class="text-center border-l border-slate-800">${Math.floor(x).toLocaleString()}</td>`).join('')}</tr>`;
@@ -12505,7 +12502,7 @@ window.renderDoorFoamInjectionCycle=function(){
  h+=`<tr><td class="sticky left-0 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td>${round.map(x=>`<td colspan="2" class="text-center border-l border-slate-800 text-amber-300">${x?x.toFixed(2):'—'}</td>`).join('')}</tr>`;
  h+=`<tr><td class="sticky left-0 bg-slate-950 px-3 py-2 font-bold text-purple-300">Door Foam Order</td>${totals.map(x=>`<td colspan="2" class="text-center border-l border-slate-800 text-purple-300">${Math.round(x).toLocaleString()}</td>`).join('')}</tr>`;
  R.forEach(r=>{h+=`<tr><td class="sticky left-0 bg-slate-900 px-3 py-2 font-semibold">${esc(r.name)}</td>`+days.map((_,i)=>{let o=n(r.orders[i]),share=totals[i]?o/totals[i]:0,p=o?Math.ceil(share*ppr):0,output=p*round[i];return `<td class="text-center border-l border-slate-800">${o?`<b class="text-emerald-300">${p}</b><div class="text-[8px] text-slate-500">${(share*100).toFixed(1)}%</div>`:'—'}</td><td class="text-center">${o?`<b class="text-cyan-300">${output.toFixed(2)}</b><div class="text-[8px] text-slate-500">${Math.round(o)} order</div>`:'—'}</td>`}).join('')+'</tr>'});body.innerHTML=h;
- if(note)note.innerHTML='<div class="text-[9px] text-slate-400">Pallet = CEILING((Order รุ่น ÷ Order รวมของวัน) × Pallet/Round) · Round/hr. = (UPH ÷ Pallet/Round) × Efficiency · Output = Pallet × Round/hr. · Door A/B/C ใช้ Pallet/Round แยกกัน</div>';
+ if(note)note.innerHTML='<div class="text-[9px] text-slate-400">Pallet = CEILING((Order รุ่น ÷ Order รวมของวัน) × Pallet/Round) · Round/hr. กรอกแยกตาม Door A/B/C · Output = Pallet × Round/hr. · Capacity = Pallet/Round Target × Round/hr. × ชั่วโมงทำงาน</div>';
 };
 document.addEventListener('DOMContentLoaded',()=>setTimeout(renderDoorFoamInjectionCycle,450));
 let old=window.switchManpowerStation;if(typeof old==='function')window.switchManpowerStation=function(){let r=old.apply(this,arguments);setTimeout(renderDoorFoamInjectionCycle,0);return r};
