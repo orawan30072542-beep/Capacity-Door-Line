@@ -1722,6 +1722,10 @@ canvas, option {
       <div class="text-[8px] text-slate-500">ค่าถูกแยกบันทึก Door A / B / C</div>
     </div>
   </div>
+  <div class="mb-3 rounded-lg border border-slate-700 bg-slate-950/55 px-3 py-2 text-[9px] text-slate-300">
+    <span class="font-bold text-amber-300">Output Rule:</span>
+    Output/hr = Pallet รุ่น × Round/hr × Jig/Pallet · Pallet รุ่นปัดขึ้นเป็นจำนวนเต็ม · Order Door Foam รวมตามกลุ่มเดียวกับ Summary Daily Order By Model / Door
+  </div>
   <div class="overflow-x-auto rounded-xl border border-slate-700/70">
     <table class="w-full text-[9px] min-w-[1500px]">
       <thead id="doorFoamCycleHead" class="bg-slate-950/95 text-slate-200"></thead>
@@ -12529,6 +12533,46 @@ document.addEventListener('DOMContentLoaded', function(){
    return [...map.values()].filter(r=>r.orders.some(v=>v>0)).map(r=>({...r,models:[...r.models]}));
  }
 
+ /* Pallet/Jig master for Door Foam Output.
+    Output/hr = Pallet allocated x Round/hr x Jig/Pallet.
+    Common tooling notes are descriptive; Jig multiplier follows the model family rules supplied by user. */
+ function foamJigInfo(model){
+   const raw=String(model||'').trim();
+   const u=raw.toUpperCase().replace(/\s+/g,' ');
+   let jig=1, common='';
+
+   if(/^159/.test(u)){ jig=2; }
+   else if(/^199/.test(u)){ jig=1; }
+   else if(u.includes('TM545')){ jig=2; }
+   else if(u.includes('G3 ECO 320') || u.includes('G3 ECO 350')){ jig=2; }
+   else if(u==='T DOOR' || u.includes('TD US')){ jig=2; }
+   else if(u.includes('T DOOR H METAL WD')){ jig=2; common='FR/RL/FL Common: T DOOR H Metal'; }
+   else if(u.includes('T DOOR H METAL')){ jig=2; }
+   else if(u.includes('T DOOR H GLASS WD')){ jig=2; common='FR/RL/FL Common: T DOOR H Glass'; }
+   else if(u.includes('T DOOR H GLASS')){ jig=2; }
+   else if(u.includes('T DOOR 520 U1') || u.includes('T DOOR 520 WD')){ jig=2; common='FR/FL Common: T DOOR H Glass · RL Common: T DOOR 520'; }
+   else if(u.includes('T DOOR 520')){ jig=2; common='FR/FL Common: T DOOR H Glass'; }
+   else if(u.includes('SBS 550') || u.includes('SBS 620')){ jig=1; common='SBS tooling uses Common groups by RR/FR family'; }
+   else if(/^BM23 DND/.test(u) || /^BM29 DND/.test(u)){ jig=4; common='RR/FB/VEG Common: BM23/BM23 Café/BM29/BM29 Café'; }
+   else if(/^BM23/.test(u) || /^BM29/.test(u)){ jig=4; }
+   else if(u.includes('BM T-DOOR 23') || u.includes('BM T-DOOR 28')){ jig=4; }
+   else if(/^TM[- ]?14/.test(u) || /^TM[- ]?10/.test(u) || /^TM[- ]?12/.test(u) || /^TM[- ]?19/.test(u) || /^TM[- ]?21/.test(u)){ jig=2; }
+   else if(/^FUF14/.test(u)){ jig=1; common=u.includes('FUF14 Q')?'':'FR Common: FUF14 D/L/S'; }
+   else if(/^FUF18/.test(u) || /^FUF22/.test(u)){ jig=1; common=(u.includes(' Q'))?'FR Common: FUF18 Q/FUF22 Q':'FR Common: FUF18 D/L/S + FUF22 D/L/S'; }
+   return {jig,common};
+ }
+ function foamRowJigInfo(row,dayIndex){
+   const active=(row.models||[]).filter(m=>{
+     const d=DATA(); let q=0;
+     (d?.groups||[]).forEach(g=>(g.models||[]).forEach(x=>{if(String(x?.name||x?.model||'').trim()===String(m).trim())q+=Math.max(0,N((x.orders||[])[dayIndex]));}));
+     return q>0;
+   });
+   const list=(active.length?active:(row.models||[])).map(m=>foamJigInfo(m));
+   const jig=list.length?Math.max(...list.map(x=>x.jig)):1;
+   const commons=[...new Set(list.map(x=>x.common).filter(Boolean))];
+   return {jig,common:commons.join(' · ')};
+ }
+
  window.renderDoorFoamInjectionCycle=function(){
    const sec=document.getElementById('doorFoamInjectionCyclePlanner'),head=document.getElementById('doorFoamCycleHead'),body=document.getElementById('doorFoamCycleBody'),sum=document.getElementById('doorFoamCycleRoundSummary');
    if(!sec||!head||!body||!sum)return;
@@ -12561,15 +12605,16 @@ document.addEventListener('DOMContentLoaded', function(){
          if(!(o>0)||!(total>0))return `<td class="border-l border-slate-800 text-center text-slate-600">—</td><td class="border-l border-slate-800 text-center text-slate-600">—</td>`;
          const ratio=o/total;
          const pal=Math.ceil(ratio*pallet);
-         const output=pal*roundHr;
-         return `<td class="px-2 py-2 text-center border-l border-slate-800"><div class="font-bold text-emerald-300">${pal}</div><div class="text-[8px] text-slate-500">${(ratio*100).toFixed(1)}%</div></td><td class="px-2 py-2 text-center border-l border-slate-800"><div class="font-bold text-cyan-300">${output.toFixed(1)}</div><div class="text-[8px] text-slate-500">pcs/hr</div></td>`;
+         const ji=foamRowJigInfo(r,i);
+         const output=pal*roundHr*ji.jig;
+         return `<td class="px-2 py-2 text-center border-l border-slate-800"><div class="font-bold text-emerald-300">${pal}</div><div class="text-[8px] text-slate-500">${(ratio*100).toFixed(1)}%</div></td><td class="px-2 py-2 text-center border-l border-slate-800"><div class="font-bold text-cyan-300">${output.toFixed(1)}</div><div class="text-[8px] text-amber-300">${ji.jig} Jig/Pallet</div>${ji.common?`<div class="text-[7px] text-slate-500 mt-0.5">${E(ji.common)}</div>`:''}<div class="text-[8px] text-slate-500">pcs/hr</div></td>`;
        }).join('')+'</tr>';
    });
    body.innerHTML=html;
    sum.innerHTML=`<div class="text-[9px] text-slate-400">
      Order Door Foam รวมตามกลุ่มเดียวกับ Summary Daily Order By Model / Door ·
      Pallet รุ่น = CEILING((Order รุ่น ÷ Order รวมวัน) × Pallet/Round) ·
-     Round/hr = (Target UPH ÷ Pallet/Round) × Efficiency · Output = Pallet รุ่น × Round/hr
+     Round/hr = (UPH ÷ Pallet/Round) × Efficiency · Output = Pallet รุ่น × Round/hr × Jig/Pallet
    </div>`;
  };
 
