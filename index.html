@@ -8248,10 +8248,6 @@ body.innerHTML=rows.length?rows.map(row=>{
                 const total=row.rawOrders.reduce((a,b)=>a+Number(b||0),0);
                 const totalProduction=row.rawProduction.reduce((a,b)=>a+Number(b||0),0);
                 return `<tr>
-                    <td class="px-3 py-2.5 sticky left-0 z-20 bg-slate-900/95 border-r border-bordercolor">
-                        <div class="text-cyan-300 font-black text-[11px]">${row.door}</div>
-                        <div class="text-slate-500 text-[8px] mt-0.5 leading-tight">${row.models.join(' + ')}</div>
-                    </td>
                     ${columns.map(c=>{
                         const value=c.type==='week'
                             ? c.indexes.reduce((sum,i)=>sum+Number(row.rawOrders[i]||0),0)
@@ -8279,17 +8275,13 @@ body.innerHTML=rows.length?rows.map(row=>{
                         <div class="plan-value"><span>P :</span> ${Math.round(totalProduction).toLocaleString()}</div>
                     </td>
                 </tr>`;
-            }).join(''):`<tr><td colspan="${columns.length+2}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
+            }).join(''):`<tr><td colspan="${columns.length+1}" class="px-4 py-6 text-center text-slate-500">ไม่มี Order ของกลุ่ม Door สำหรับไลน์ที่เลือก</td></tr>`;
 
             const dailyTotals=days.map((day,i)=>rows.reduce((sum,r)=>sum+Number(r.rawOrders[i]||0),0));
             const dailyProductionTotals=days.map((day,i)=>rows.reduce((sum,r)=>sum+Number(r.rawProduction[i]||0),0));
             const grandTotal=dailyTotals.reduce((a,b)=>a+b,0);
             const grandProductionTotal=dailyProductionTotals.reduce((a,b)=>a+b,0);
             foot.innerHTML=`<tr>
-                <td class="px-3 py-2.5 sticky left-0 z-20 bg-cyan-950 font-black">
-                    <div class="text-cyan-200 text-[11px]">TOTAL ORDER</div>
-                    <div class="production-ratio-label">P:</div>
-                </td>
                 ${columns.map(c=>{
                     const value=c.type==='week'
                         ? c.indexes.reduce((sum,i)=>sum+Number(dailyTotals[i]||0),0)
