@@ -1356,6 +1356,16 @@ canvas, option {
 }
 </style>
 
+
+<style id="summary-daily-hide-door-column-final">
+#tableSummaryDailyOrderByDoor thead th:first-child,
+#tableSummaryDailyOrderByDoor tbody td:first-child,
+#tableSummaryDailyOrderByDoor tfoot td:first-child,
+#tableSummaryDailyOrderByDoor tfoot th:first-child{
+  display:none !important;
+}
+</style>
+
 </head>
 <body class="bg-darkbg text-slate-100 antialiased"> 
 
@@ -1695,38 +1705,27 @@ canvas, option {
   </div>
 
   
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
     <label class="text-[9px] text-slate-400">Pallet / Round
       <input id="foamPalletPerRound" type="number" min="1" step="1" value="1"
         class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
-        oninput="saveFoamLineSettings();renderDoorFoamInjectionCycle()">
-    </label>
-    <label class="text-[9px] text-slate-400">Target Capacity (UPH)
-      <input id="foamTargetCapacityUPH" type="number" min="0" step="1" value="0"
-        class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
-        oninput="saveFoamLineSettings();renderDoorFoamInjectionCycle()">
+        oninput="renderDoorFoamInjectionCycle()">
     </label>
     <label class="text-[9px] text-slate-400">Efficiency (%)
       <input id="foamEfficiency" type="number" min="1" max="100" step="1" value="85"
         class="block mt-1 w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white"
-        oninput="saveFoamLineSettings();renderDoorFoamInjectionCycle()">
+        oninput="renderDoorFoamInjectionCycle()">
     </label>
     <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
       <div class="text-[9px] text-slate-400">Round / hr.</div>
       <div id="foamRoundPerHour" class="text-lg font-bold text-cyan-300">—</div>
-      <div class="text-[8px] text-slate-500">(UPH ÷ Pallet) × Efficiency</div>
     </div>
     <div class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
-      <div class="text-[9px] text-slate-400">Current Line</div>
-      <div id="foamCurrentLineSetting" class="text-lg font-bold text-amber-300">Door A</div>
-      <div class="text-[8px] text-slate-500">ค่าถูกแยกบันทึก Door A / B / C</div>
+      <div class="text-[9px] text-slate-400">สูตร</div>
+      <div class="text-[9px] text-slate-300 mt-1">ยอดรายชั่วโมง ÷ Pallet/Round × Efficiency</div>
     </div>
   </div>
-  <div class="mb-3 rounded-lg border border-slate-700 bg-slate-950/55 px-3 py-2 text-[9px] text-slate-300">
-    <span class="font-bold text-amber-300">Output Rule:</span>
-    Output/hr = Pallet รุ่น × Round/hr × Jig/Pallet · Pallet รุ่นปัดขึ้นเป็นจำนวนเต็ม · Order Door Foam รวมตามกลุ่มเดียวกับ Summary Daily Order By Model / Door
-  </div>
-  <div class="overflow-x-auto rounded-xl border border-slate-700/70">
+<div class="overflow-x-auto rounded-xl border border-slate-700/70">
     <table class="w-full text-[9px] min-w-[1500px]">
       <thead id="doorFoamCycleHead" class="bg-slate-950/95 text-slate-200"></thead>
       <tbody id="doorFoamCycleBody" class="divide-y divide-slate-800"></tbody>
@@ -12490,161 +12489,127 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 
-<script id="door-foam-target-capacity-abc-output-final">
+<script id="door-foam-daily-pallet-output-final">
 (function(){
  const N=v=>Number.isFinite(Number(v))?Number(v):0;
  const E=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  const ST=()=>String(window.currentManpowerStation||(typeof currentManpowerStation!=='undefined'?currentManpowerStation:'')||'Door A');
  const DATA=()=>window.currentDailyData||(typeof currentDailyData!=='undefined'?currentDailyData:null);
- const label=(d,i)=>String(d?.label||d?.date||d?.name||d||('Day '+(i+1)));
- const key=st=>'haier_foam_cycle_setting_'+String(st).replace(/\s+/g,'_');
+ const dayLabel=(d,i)=>String(d?.label||d?.date||d?.name||d||('Day '+(i+1)));
 
- function setting(st){
-   try{return Object.assign({pallet:1,uph:0,eff:85},JSON.parse(localStorage.getItem(key(st))||'{}'))}
-   catch(e){return {pallet:1,uph:0,eff:85}}
- }
- window.saveFoamLineSettings=function(){
-   const st=ST(); if(!['Door A','Door B','Door C'].includes(st))return;
-   localStorage.setItem(key(st),JSON.stringify({
-     pallet:Math.max(1,N(document.getElementById('foamPalletPerRound')?.value)||1),
-     uph:Math.max(0,N(document.getElementById('foamTargetCapacityUPH')?.value)||0),
-     eff:Math.max(1,Math.min(100,N(document.getElementById('foamEfficiency')?.value)||85))
-   }));
- };
- function loadSetting(){
-   const st=ST(),x=setting(st);
-   const p=document.getElementById('foamPalletPerRound'),u=document.getElementById('foamTargetCapacityUPH'),e=document.getElementById('foamEfficiency'),l=document.getElementById('foamCurrentLineSetting');
-   if(p)p.value=x.pallet;if(u)u.value=x.uph;if(e)e.value=x.eff;if(l)l.textContent=st;
- }
-
- /* Same grouping source/logic as Summary Daily Order By Model / Door:
-    station membership + getDailyOrderDoorName() aggregation. */
- function doorRows(days){
-   const st=ST(),map=new Map(),d=DATA();
+ function collectDoorRows(){
+   const st=ST(), d=DATA(), days=Array.isArray(d?.days)?d.days:[], map=new Map();
    (d?.groups||[]).forEach(g=>(g.models||[]).forEach(m=>{
-     const model=String(m?.name||m?.model||'').trim(); if(!model)return;
-     if(typeof modelBelongsToSelectedSummaryStation==='function' && !modelBelongsToSelectedSummaryStation(model,st))return;
-     const door=typeof getDailyOrderDoorName==='function'?getDailyOrderDoorName(model):model;
-     if(!door)return;
-     if(!map.has(door))map.set(door,{door,models:new Set(),orders:new Array(days.length).fill(0)});
-     const r=map.get(door);r.models.add(model);
-     days.forEach((_,i)=>r.orders[i]+=Math.max(0,N((m.orders||[])[i])));
+      const model=String(m?.name||'').trim();
+      if(!model) return;
+      if(typeof modelBelongsToSelectedSummaryStation==='function' && !modelBelongsToSelectedSummaryStation(model,st)) return;
+      const door=(typeof getDailyOrderDoorName==='function')?getDailyOrderDoorName(model):model;
+      if(!door) return;
+      if(!map.has(door)) map.set(door,{door,models:new Set(),orders:new Array(days.length).fill(0)});
+      const row=map.get(door); row.models.add(model);
+      days.forEach((_,i)=>row.orders[i]+=Math.max(0,N(m?.orders?.[i])));
    }));
-   return [...map.values()].filter(r=>r.orders.some(v=>v>0)).map(r=>({...r,models:[...r.models]}));
- }
-
- /* Pallet/Jig master for Door Foam Output.
-    Output/hr = Pallet allocated x Round/hr x Jig/Pallet.
-    Common tooling notes are descriptive; Jig multiplier follows the model family rules supplied by user. */
- function foamJigInfo(model){
-   const raw=String(model||'').trim();
-   const u=raw.toUpperCase().replace(/\s+/g,' ');
-   let jig=1, common='';
-
-   if(/^159/.test(u)){ jig=2; }
-   else if(/^199/.test(u)){ jig=1; }
-   else if(u.includes('TM545')){ jig=2; }
-   else if(u.includes('G3 ECO 320') || u.includes('G3 ECO 350')){ jig=2; }
-   else if(u==='T DOOR' || u.includes('TD US')){ jig=2; }
-   else if(u.includes('T DOOR H METAL WD')){ jig=2; common='FR/RL/FL Common: T DOOR H Metal'; }
-   else if(u.includes('T DOOR H METAL')){ jig=2; }
-   else if(u.includes('T DOOR H GLASS WD')){ jig=2; common='FR/RL/FL Common: T DOOR H Glass'; }
-   else if(u.includes('T DOOR H GLASS')){ jig=2; }
-   else if(u.includes('T DOOR 520 U1') || u.includes('T DOOR 520 WD')){ jig=2; common='FR/FL Common: T DOOR H Glass · RL Common: T DOOR 520'; }
-   else if(u.includes('T DOOR 520')){ jig=2; common='FR/FL Common: T DOOR H Glass'; }
-   else if(u.includes('SBS 550') || u.includes('SBS 620')){ jig=1; common='SBS tooling uses Common groups by RR/FR family'; }
-   else if(/^BM23 DND/.test(u) || /^BM29 DND/.test(u)){ jig=4; common='RR/FB/VEG Common: BM23/BM23 Café/BM29/BM29 Café'; }
-   else if(/^BM23/.test(u) || /^BM29/.test(u)){ jig=4; }
-   else if(u.includes('BM T-DOOR 23') || u.includes('BM T-DOOR 28')){ jig=4; }
-   else if(/^TM[- ]?14/.test(u) || /^TM[- ]?10/.test(u) || /^TM[- ]?12/.test(u) || /^TM[- ]?19/.test(u) || /^TM[- ]?21/.test(u)){ jig=2; }
-   else if(/^FUF14/.test(u)){ jig=1; common=u.includes('FUF14 Q')?'':'FR Common: FUF14 D/L/S'; }
-   else if(/^FUF18/.test(u) || /^FUF22/.test(u)){ jig=1; common=(u.includes(' Q'))?'FR Common: FUF18 Q/FUF22 Q':'FR Common: FUF18 D/L/S + FUF22 D/L/S'; }
-   return {jig,common};
- }
- function foamRowJigInfo(row,dayIndex){
-   const active=(row.models||[]).filter(m=>{
-     const d=DATA(); let q=0;
-     (d?.groups||[]).forEach(g=>(g.models||[]).forEach(x=>{if(String(x?.name||x?.model||'').trim()===String(m).trim())q+=Math.max(0,N((x.orders||[])[dayIndex]));}));
-     return q>0;
+   const sort=(typeof DAILY_ORDER_DOOR_SORT!=='undefined')?DAILY_ORDER_DOOR_SORT:[];
+   return [...map.values()].filter(r=>r.orders.some(v=>v>0)).sort((x,y)=>{
+      const a=sort.indexOf(x.door),b=sort.indexOf(y.door);
+      if(a>=0||b>=0){if(a<0)return 1;if(b<0)return -1;return a-b}
+      return x.door.localeCompare(y.door);
    });
-   const list=(active.length?active:(row.models||[])).map(m=>foamJigInfo(m));
-   const jig=list.length?Math.max(...list.map(x=>x.jig)):1;
-   const commons=[...new Set(list.map(x=>x.common).filter(Boolean))];
-   return {jig,common:commons.join(' · ')};
+ }
+
+ function foamLabel(row){
+   // User requested this combined Foam family name.
+   if(row.door==='FUF18&22 (D,S,L)') return 'FR Common';
+   return row.door;
  }
 
  window.renderDoorFoamInjectionCycle=function(){
-   const sec=document.getElementById('doorFoamInjectionCyclePlanner'),head=document.getElementById('doorFoamCycleHead'),body=document.getElementById('doorFoamCycleBody'),sum=document.getElementById('doorFoamCycleRoundSummary');
-   if(!sec||!head||!body||!sum)return;
-   const st=ST();sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';if(sec.style.display==='none')return;
-   loadSetting();
-   const d=DATA(),days=Array.isArray(d?.days)?d.days:[],rows=doorRows(days);
+   const sec=document.getElementById('doorFoamInjectionCyclePlanner'),
+         head=document.getElementById('doorFoamCycleHead'),
+         body=document.getElementById('doorFoamCycleBody'),
+         note=document.getElementById('doorFoamCycleRoundSummary');
+   if(!sec||!head||!body||!note)return;
+
+   const st=ST();
+   sec.style.display=['Door A','Door B','Door C'].includes(st)?'block':'none';
+   if(sec.style.display==='none')return;
+
+   const d=DATA(), days=Array.isArray(d?.days)?d.days:[], rows=collectDoorRows();
    const hrs=Math.max(.1,N(document.getElementById('foamWorkingHours')?.value)||10.5);
-   const x=setting(st),pallet=Math.max(1,N(x.pallet)||1),uph=Math.max(0,N(x.uph)||0),eff=Math.max(.01,Math.min(1,N(x.eff)/100));
-   const roundHr=(uph/pallet)*eff;
-   const capHr=uph*eff;
-   const capDay=capHr*hrs;
-   const roundEl=document.getElementById('foamRoundPerHour');if(roundEl)roundEl.textContent=roundHr>0?roundHr.toFixed(2):'—';
+   const palletRound=Math.max(1,N(document.getElementById('foamPalletPerRound')?.value)||1);
+   const eff=Math.max(.01,Math.min(1,(N(document.getElementById('foamEfficiency')?.value)||85)/100));
 
-   const totals=days.map((_,i)=>rows.reduce((a,r)=>a+N(r.orders[i]),0));
+   // Order Door Foam = same grouped Order logic as Summary Daily Order By Model / Door.
+   const totalOrder=days.map((_,i)=>rows.reduce((sum,r)=>sum+N(r.orders[i]),0));
 
+   // UPH = total Door Foam order / working hours.
+   const uph=totalOrder.map(v=>v>0?v/hrs:0);
+
+   // Requested formula: Round/hr = (UPH / Pallet per Round) × Efficiency.
+   const roundHr=uph.map(v=>(v/palletRound)*eff);
+
+   // Capacity/hour = Round/hr × Pallet/Round; Capacity/day = Capacity/hour × working hours.
+   const capHr=roundHr.map(v=>Math.floor(Math.max(0,v*palletRound)));
+   const capDay=capHr.map(v=>Math.floor(Math.max(0,v*hrs)));
+
+   const activeRounds=roundHr.filter(v=>v>0);
+   const roundEl=document.getElementById('foamRoundPerHour');
+   if(roundEl) roundEl.textContent=activeRounds.length
+      ? (activeRounds.reduce((a,b)=>a+b,0)/activeRounds.length).toFixed(2)
+      : '—';
+
+   // Each date is one visual group with Pallet + Output.
    head.innerHTML=`<tr>
-     <th rowspan="2" class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[210px]">Door Foam</th>
-     ${days.map((x,i)=>`<th colspan="2" class="px-3 py-2 text-center min-w-[190px] border-l border-slate-700 text-sky-300">${E(label(x,i))}</th>`).join('')}
+      <th rowspan="2" class="sticky left-0 z-30 bg-slate-950 px-3 py-2 text-left min-w-[180px]">รายการ</th>
+      ${days.map((x,i)=>`<th colspan="2" class="px-3 py-2 text-center border-l border-slate-700 bg-slate-950 text-sky-300">${E(dayLabel(x,i))}</th>`).join('')}
    </tr><tr>
-     ${days.map(()=>`<th class="px-2 py-1.5 text-center border-l border-slate-800 text-emerald-300">Pallet</th><th class="px-2 py-1.5 text-center border-l border-slate-800 text-cyan-300">Output</th>`).join('')}
+      ${days.map(()=>`<th class="px-2 py-1.5 text-center border-l border-slate-800 bg-slate-950 text-emerald-300">Pallet</th>
+                      <th class="px-2 py-1.5 text-center bg-slate-950 text-cyan-300">Output</th>`).join('')}
    </tr>`;
 
-   let html=`<tr class="bg-cyan-950/45"><td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>${days.map(()=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-white border-l border-slate-800">${capDay>0?Math.floor(capDay).toLocaleString():'—'}</td>`).join('')}</tr>`;
-   html+=`<tr class="bg-blue-950/45"><td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง</td>${days.map(()=>`<td colspan="2" class="px-3 py-2 text-center font-bold text-cyan-300 border-l border-slate-800">${capHr>0?capHr.toFixed(1):'—'}</td>`).join('')}</tr>`;
+   function pairCells(values, cls='text-white'){
+      return values.map(v=>`<td colspan="2" class="px-3 py-2 text-center border-l border-slate-800 font-bold ${cls}">${Number(v).toLocaleString()}</td>`).join('');
+   }
+
+   let html=`<tr class="bg-cyan-950/45">
+      <td class="sticky left-0 z-20 bg-cyan-950 px-3 py-2 font-bold text-cyan-200">Capacity รวมรายวัน</td>
+      ${pairCells(capDay,'text-white')}
+   </tr>`;
+   html+=`<tr class="bg-blue-950/45">
+      <td class="sticky left-0 z-20 bg-blue-950 px-3 py-2 font-bold text-blue-200">Capacity รายชั่วโมง</td>
+      ${pairCells(capHr,'text-cyan-300')}
+   </tr>`;
+   html+=`<tr class="bg-slate-950/80">
+      <td class="sticky left-0 z-20 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td>
+      ${roundHr.map(v=>`<td colspan="2" class="px-3 py-2 text-center border-l border-slate-800 font-bold text-amber-300">${v>0?v.toFixed(2):'—'}</td>`).join('')}
+   </tr>`;
 
    rows.forEach(r=>{
-     html+=`<tr class="bg-slate-900/55"><td class="sticky left-0 z-20 bg-slate-900 px-3 py-2"><div class="font-semibold text-white">${E(r.door)}</div><div class="text-[8px] text-slate-500">${E(r.models.join(' + '))}</div></td>`+
-       days.map((x,i)=>{
-         const o=N(r.orders[i]),total=N(totals[i]);
-         if(!(o>0)||!(total>0))return `<td class="border-l border-slate-800 text-center text-slate-600">—</td><td class="border-l border-slate-800 text-center text-slate-600">—</td>`;
-         const ratio=o/total;
-         const pal=Math.ceil(ratio*pallet);
-         const ji=foamRowJigInfo(r,i);
-         const output=pal*roundHr*ji.jig;
-         return `<td class="px-2 py-2 text-center border-l border-slate-800"><div class="font-bold text-emerald-300">${pal}</div><div class="text-[8px] text-slate-500">${(ratio*100).toFixed(1)}%</div></td><td class="px-2 py-2 text-center border-l border-slate-800"><div class="font-bold text-cyan-300">${output.toFixed(1)}</div><div class="text-[8px] text-amber-300">${ji.jig} Jig/Pallet</div>${ji.common?`<div class="text-[7px] text-slate-500 mt-0.5">${E(ji.common)}</div>`:''}<div class="text-[8px] text-slate-500">pcs/hr</div></td>`;
-       }).join('')+'</tr>';
+      html+=`<tr class="bg-slate-900/55">
+        <td class="sticky left-0 z-20 bg-slate-900 px-3 py-2 font-semibold text-white">${E(foamLabel(r))}</td>`+
+        days.map((_,i)=>{
+          const o=N(r.orders[i]), total=N(totalOrder[i]);
+          if(!(o>0)||!(total>0)) return `<td class="px-2 py-2 text-center border-l border-slate-800 text-slate-600">—</td><td class="px-2 py-2 text-center text-slate-600">—</td>`;
+          // Requested Pallet share formula, rounded UP to whole pallet.
+          const palletQty=Math.ceil((o/total)*palletRound);
+          // Requested Output = Pallet × Round/hr, rounded DOWN to whole pcs.
+          const output=Math.floor(palletQty*roundHr[i]);
+          return `<td class="px-2 py-2 text-center border-l border-slate-800 font-bold text-emerald-300">${palletQty}</td>
+                  <td class="px-2 py-2 text-center font-bold text-cyan-300">${output.toLocaleString()}</td>`;
+        }).join('')+
+      `</tr>`;
    });
+
    body.innerHTML=html;
-   sum.innerHTML=`<div class="text-[9px] text-slate-400">
-     Order Door Foam รวมตามกลุ่มเดียวกับ Summary Daily Order By Model / Door ·
-     Pallet รุ่น = CEILING((Order รุ่น ÷ Order รวมวัน) × Pallet/Round) ·
-     Round/hr = (UPH ÷ Pallet/Round) × Efficiency · Output = Pallet รุ่น × Round/hr × Jig/Pallet
-   </div>`;
+   // Remove pcs/hr/model-composition helper text from this area.
+   note.innerHTML=`<div class="text-[9px] text-slate-400">Pallet = CEILING((Order รุ่น ÷ Order รวมของวัน) × Pallet/Round) · Round/hr = (UPH ÷ Pallet/Round) × Efficiency · Output = FLOOR(Pallet × Round/hr)</div>`;
  };
 
  document.addEventListener('DOMContentLoaded',()=>setTimeout(window.renderDoorFoamInjectionCycle,450));
  const old=window.switchManpowerStation;
- if(typeof old==='function')window.switchManpowerStation=function(){
-   const r=old.apply(this,arguments);setTimeout(window.renderDoorFoamInjectionCycle,0);return r;
+ if(typeof old==='function') window.switchManpowerStation=function(){
+   const r=old.apply(this,arguments); setTimeout(window.renderDoorFoamInjectionCycle,0); return r;
  };
-})();
-</script>
-
-
-<script id="hide-door-column-before-dates-final">
-(function(){
- function apply(){
-  document.querySelectorAll('table').forEach(table=>{
-   const hs=[...table.querySelectorAll('thead th')];
-   const i=hs.findIndex(x=>x.textContent.trim().toUpperCase()==='DOOR');
-   if(i<0 || i>=hs.length-1) return;
-   const rest=hs.slice(i+1).map(x=>x.textContent.trim()).join(' ');
-   if(!(/\d{1,2}[\/\-]\d{1,2}|MON|TUE|WED|THU|FRI|SAT|SUN|W\d+/i.test(rest))) return;
-   table.querySelectorAll('tr').forEach(tr=>{
-    const c=[...tr.children];
-    if(c[i]) c[i].style.setProperty('display','none','important');
-   });
-  });
- }
- document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,350));
- const obs=new MutationObserver(apply);
- document.addEventListener('DOMContentLoaded',()=>obs.observe(document.body,{childList:true,subtree:true}));
 })();
 </script>
 
