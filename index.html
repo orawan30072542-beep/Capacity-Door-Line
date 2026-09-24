@@ -12488,13 +12488,19 @@ document.addEventListener('DOMContentLoaded', function(){
 #doorFoamCycleBody tr.foam-tdh-second { border-top: 0 !important; }
 #doorFoamCycleBody tr.foam-tdh-second td { border-top: 1px dashed rgba(148,163,184,.42); }
 #doorFoamCycleBody tr.foam-tdh-first td { border-bottom: 0 !important; }
-/* Keep every model, pallet label, and daily value on the same left alignment. */
-#doorFoamInjectionCyclePlanner table th,
-#doorFoamInjectionCyclePlanner table td,
-#doorFoamInjectionCyclePlanner table td div,
-#doorFoamInjectionCyclePlanner table td span { text-align: left !important; }
-#doorFoamInjectionCyclePlanner table th,
-#doorFoamInjectionCyclePlanner table td { padding-left: 10px !important; }
+/* Model and pallet labels stay left; all dated columns are centered. */
+#doorFoamInjectionCyclePlanner table th.sticky,
+#doorFoamInjectionCyclePlanner table td.sticky,
+#doorFoamInjectionCyclePlanner table td.sticky div,
+#doorFoamInjectionCyclePlanner table td.sticky span { text-align: left !important; }
+#doorFoamInjectionCyclePlanner table th:not(.sticky),
+#doorFoamInjectionCyclePlanner table td:not(.sticky),
+#doorFoamInjectionCyclePlanner table td:not(.sticky) div,
+#doorFoamInjectionCyclePlanner table td:not(.sticky) span { text-align: center !important; }
+#doorFoamInjectionCyclePlanner table th:not(.sticky),
+#doorFoamInjectionCyclePlanner table td:not(.sticky) { padding-left: 4px !important; padding-right: 4px !important; }
+#doorFoamInjectionCyclePlanner table th.sticky,
+#doorFoamInjectionCyclePlanner table td.sticky { padding-left: 10px !important; }
 
 </style>
 <script id="door-foam-final-calculation">
