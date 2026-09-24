@@ -12488,6 +12488,14 @@ document.addEventListener('DOMContentLoaded', function(){
 #doorFoamCycleBody tr.foam-tdh-second { border-top: 0 !important; }
 #doorFoamCycleBody tr.foam-tdh-second td { border-top: 1px dashed rgba(148,163,184,.42); }
 #doorFoamCycleBody tr.foam-tdh-first td { border-bottom: 0 !important; }
+/* Keep every model, pallet label, and daily value on the same left alignment. */
+#doorFoamInjectionCyclePlanner table th,
+#doorFoamInjectionCyclePlanner table td,
+#doorFoamInjectionCyclePlanner table td div,
+#doorFoamInjectionCyclePlanner table td span { text-align: left !important; }
+#doorFoamInjectionCyclePlanner table th,
+#doorFoamInjectionCyclePlanner table td { padding-left: 10px !important; }
+
 </style>
 <script id="door-foam-final-calculation">
 (function(){
