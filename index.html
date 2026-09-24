@@ -12542,9 +12542,23 @@ window.renderDoorFoamInjectionCycle=function(){
   return labels?labels.map((label,index)=>({...r,palletLabel:label,orders:r.ratioOrders.map(v=>v/labels.length),pair:true,pairFirst:index===0})):[r];
  });
  let totals=days.map((_,i)=>displayRows.reduce((a,r)=>a+n(r.orders[i]),0));
- let palletTotals=days.map((_,i)=>displayRows.reduce((sum,row)=>{
-  const order=n(row.orders[i]);return sum+(order>0&&totals[i]>0?Math.ceil(order/totals[i]*ppr):0);
- },0));
+ // Allocate whole pallets by largest remainder so daily totals never exceed the entered limit.
+ const palletLimit=Math.max(0,Math.floor(ppr));
+ let allocations=days.map((_,i)=>{
+  const counts=displayRows.map(()=>0);
+  if(!(totals[i]>0)||!palletLimit)return counts;
+  const fractions=displayRows.map((row,index)=>{
+   const order=Math.max(0,n(row.orders[i]));
+   const exact=order/totals[i]*palletLimit;
+   counts[index]=Math.floor(exact);
+   return {index,remainder:exact-counts[index],order};
+  });
+  let remaining=palletLimit-counts.reduce((sum,x)=>sum+x,0);
+  fractions.filter(x=>x.order>0).sort((a,b)=>b.remainder-a.remainder||b.order-a.order||a.index-b.index)
+   .slice(0,remaining).forEach(x=>counts[x.index]++);
+  return counts;
+ });
+ let palletTotals=allocations.map(counts=>counts.reduce((sum,x)=>sum+x,0));
  let hourlyOrderTotals=days.map((_,i)=>displayRows.reduce((sum,row)=>sum+(n(row.orders[i])>0?Math.ceil(n(row.orders[i])/hrs):0),0));
  let shortFactor=1+Math.max(0,Number(getShortPercent())||0)/100,round=totals.map(()=>rph),capD=days.map((_,i)=>R.reduce((sum,row)=>sum+row.ratioOrders[i],0)*shortFactor),capH=capD.map(x=>x/hrs);
  
@@ -12554,8 +12568,8 @@ window.renderDoorFoamInjectionCycle=function(){
  h+=`<tr><td class="sticky left-0 bg-blue-950 px-3 py-2 font-bold">Capacity รายชั่วโมง</td><td class="sticky left-[210px] bg-blue-950 text-center">—</td>${capH.map(x=>`<td colspan="2" class="text-center border-l border-slate-800">${Math.ceil(x).toLocaleString()}</td>`).join('')}</tr>`;
  h+=`<tr><td class="sticky left-0 bg-slate-950 px-3 py-2 font-bold text-amber-300">Round / hr.</td><td class="sticky left-[210px] bg-slate-950 text-center">—</td>${round.map(x=>`<td colspan="2" class="text-center border-l border-slate-800 text-amber-300">${x?x.toFixed(2):'—'}</td>`).join('')}</tr>`;
  h+=`<tr><td class="sticky left-0 bg-slate-950 px-3 py-2 font-bold text-purple-300">Door Foam Order / hr.</td><td class="sticky left-[210px] bg-slate-950 text-center">—</td>${days.map((_,i)=>`<td class="text-center border-l border-slate-800 text-emerald-300"><span class="text-[8px] text-slate-400">Pallet </span>${palletTotals[i].toLocaleString()}</td><td class="text-center text-purple-300"><span class="text-[8px] text-slate-400">Order </span>${hourlyOrderTotals[i].toLocaleString()}</td>`).join('')}</tr>`;
- displayRows.forEach(r=>{h+=`<tr${r.pair?` class="foam-tdh-pair ${r.pairFirst?'foam-tdh-first':'foam-tdh-second'}"`:''}>${!r.pair||r.pairFirst?`<td ${r.pair?'rowspan="2"':''} class="sticky left-0 bg-slate-900 px-3 py-2 font-semibold align-middle ${r.pair?'border-b border-slate-600':''}"><div class="${r.pair?'text-center':''}">${esc(r.name)}</div><div class="text-[8px] text-slate-400 font-normal ${r.pair?'text-center':''}">${esc(r.models.join(' + '))}</div></td>`:''}<td class="sticky left-[210px] bg-slate-900 text-center font-bold ${r.pair?'text-sky-300':'text-emerald-300'} ${r.pair?'border-b border-slate-700':''}">${r.pair?esc(r.palletLabel):(ppr?ppr.toLocaleString():'—')}</td>`+days.map((_,i)=>{let o=n(r.orders[i]),share=totals[i]?o/totals[i]:0,p=o?Math.ceil(share*ppr):0,output=p*round[i];return `<td class="text-center border-l border-slate-800">${o?`<b class="text-emerald-300">${p}</b><div class="text-[8px] text-slate-500">${(share*100).toFixed(1)}%</div>`:'—'}</td><td class="text-center">${o?`<b class="text-cyan-300">${Math.floor(output).toLocaleString()}</b><div class="text-[8px] text-slate-500">P: ${Math.ceil(o/hrs).toLocaleString()}</div>`:'—'}</td>`}).join('')+'</tr>'});body.innerHTML=h;
- if(note)note.innerHTML='<div class="text-[9px] text-slate-400">Pallet รวม = SUM(Pallet ของแต่ละแถว) · Order/hr. รวม = SUM(P: ของแต่ละแถว) · Pallet แต่ละแถว = CEILING((Order แถว ÷ Order รวมของวัน) × Pallet/Round) · Round/hr. = Target (Units/hr.) ÷ Pallet Total (Units/round) × Efficiency · Output/hr. = FLOOR(Pallet × Round/hr.) · P: = CEILING(Order รายวัน ÷ Working Hours) · Capacity (DAY) = Σ(Order รายวันของแต่ละ Model × Ratio ของ Model) × (1 + Short %) · Capacity/hr. = CEILING(Capacity (DAY) ÷ Working Hours) · TD H และ TD US: RR,FR กับ RL,FL · SBS: FR กับ RR · Order แต่ละแถว = Order × Ratio ÷ 2</div>';
+ displayRows.forEach((r,rowIndex)=>{h+=`<tr${r.pair?` class="foam-tdh-pair ${r.pairFirst?'foam-tdh-first':'foam-tdh-second'}"`:''}>${!r.pair||r.pairFirst?`<td ${r.pair?'rowspan="2"':''} class="sticky left-0 bg-slate-900 px-3 py-2 font-semibold align-middle ${r.pair?'border-b border-slate-600':''}"><div class="${r.pair?'text-center':''}">${esc(r.name)}</div><div class="text-[8px] text-slate-400 font-normal ${r.pair?'text-center':''}">${esc(r.models.join(' + '))}</div></td>`:''}<td class="sticky left-[210px] bg-slate-900 text-center font-bold ${r.pair?'text-sky-300':'text-emerald-300'} ${r.pair?'border-b border-slate-700':''}">${r.pair?esc(r.palletLabel):(ppr?ppr.toLocaleString():'—')}</td>`+days.map((_,i)=>{let o=n(r.orders[i]),share=totals[i]?o/totals[i]:0,p=allocations[i][rowIndex],output=p*round[i];return `<td class="text-center border-l border-slate-800">${o?`<b class="text-emerald-300">${p}</b><div class="text-[8px] text-slate-500">${(share*100).toFixed(1)}%</div>`:'—'}</td><td class="text-center">${o?`<b class="text-cyan-300">${Math.floor(output).toLocaleString()}</b><div class="text-[8px] text-slate-500">P: ${Math.ceil(o/hrs).toLocaleString()}</div>`:'—'}</td>`}).join('')+'</tr>'});body.innerHTML=h;
+ if(note)note.innerHTML='<div class="text-[9px] text-slate-400">Pallet รวม = SUM(Pallet ของแต่ละแถว) · Order/hr. รวม = SUM(P: ของแต่ละแถว) · Pallet แต่ละแถว = แบ่งจำนวนเต็มตามสัดส่วน Order และเศษมากสุด · SUM(Pallet) ≤ Pallet Total ที่กรอก · Round/hr. = Target (Units/hr.) ÷ Pallet Total (Units/round) × Efficiency · Output/hr. = FLOOR(Pallet × Round/hr.) · P: = CEILING(Order รายวัน ÷ Working Hours) · Capacity (DAY) = Σ(Order รายวันของแต่ละ Model × Ratio ของ Model) × (1 + Short %) · Capacity/hr. = CEILING(Capacity (DAY) ÷ Working Hours) · TD H และ TD US: RR,FR กับ RL,FL · SBS: FR กับ RR · Order แต่ละแถว = Order × Ratio ÷ 2</div>';
 };
 document.addEventListener('DOMContentLoaded',()=>{['Door A','Door B','Door C'].forEach(updateFoamRound);setTimeout(renderDoorFoamInjectionCycle,450)});
 let old=window.switchManpowerStation;if(typeof old==='function')window.switchManpowerStation=function(){let r=old.apply(this,arguments);setTimeout(renderDoorFoamInjectionCycle,0);return r};
